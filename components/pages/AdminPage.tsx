@@ -19,10 +19,20 @@ import { cn } from "@/lib/utils";
 
 type AdminTab = "organizations" | "reviews";
 
-export function AdminPage() {
-  const [authenticated, setAuthenticated] = useState(false);
-  const [configured, setConfigured] = useState(true);
-  const [canVerify, setCanVerify] = useState(false);
+type AdminPageProps = {
+  initialAuthenticated?: boolean;
+  initialConfigured?: boolean;
+  initialCanVerify?: boolean;
+};
+
+export function AdminPage({
+  initialAuthenticated = false,
+  initialConfigured = true,
+  initialCanVerify = false,
+}: AdminPageProps) {
+  const [authenticated, setAuthenticated] = useState(initialAuthenticated);
+  const [configured, setConfigured] = useState(initialConfigured);
+  const [canVerify, setCanVerify] = useState(initialCanVerify);
   const [checkingSession, setCheckingSession] = useState(true);
   const [password, setPassword] = useState("");
   const [loginError, setLoginError] = useState<string | null>(null);
