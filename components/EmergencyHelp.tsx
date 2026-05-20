@@ -2,9 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { Loader2, MapPin, Phone, X } from "lucide-react";
-import { DEFAULT_LOCATION } from "@/lib/constants";
-import { fetchOrganizations } from "@/lib/data";
-import { getEmergency247Organizations } from "@/lib/emergency";
+import { DEFAULT_LOCATION, NEARBY_RADIUS_METERS } from "@/lib/constants";
 import { useLanguage } from "@/lib/i18n/LanguageProvider";
 import { getPhoneTelUrl } from "@/lib/org";
 import type { Organization, UserLocation } from "@/lib/types";
@@ -24,8 +22,14 @@ export function EmergencyHelp() {
     setErrorMessage(null);
 
     try {
-      const catalog = await fetchOrganizations(location);
-      const emergency = getEmergency247Organizations(catalog, location);
+      const params = new URLSearchParams({
+        lat: String(location.lat),
+        lng: String(location.lng),
+        radius: String(NEARBY_RADIUS_METERS),
+      });
+      const res = await fetch(`/api/emergency?${params}`);
+      if (!res.ok) throw new Error("Emergency fetch failed");
+      const emergency = (await res.json()) as Organization[];
       setOrganizations(emergency);
       setState("ready");
     } catch (err) {

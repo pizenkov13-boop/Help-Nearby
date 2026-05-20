@@ -1,6 +1,9 @@
 import { supabase } from "@/lib/supabase";
 import type { Review } from "@/lib/types";
 
+const REVIEW_COLUMNS =
+  "id, name, country, message, rating, approved, created_at";
+
 export interface SubmitReviewInput {
   name: string;
   country: string;
@@ -8,19 +11,23 @@ export interface SubmitReviewInput {
   rating: number;
 }
 
-export async function fetchReviews(): Promise<Review[]> {
+export async function fetchApprovedReviews(): Promise<Review[]> {
   const { data, error } = await supabase
     .from("reviews")
-    .select("id, name, country, message, rating, created_at")
+    .select(REVIEW_COLUMNS)
+    .eq("approved", true)
     .order("created_at", { ascending: false });
 
   if (error) {
-    console.error("[fetchReviews]", error.message);
+    console.error("[fetchApprovedReviews]", error.message);
     return [];
   }
 
   return (data as Review[]) ?? [];
 }
+
+/** @deprecated Use fetchApprovedReviews */
+export const fetchReviews = fetchApprovedReviews;
 
 export async function submitReview(
   input: SubmitReviewInput,
@@ -40,8 +47,8 @@ export async function submitReview(
 
   const { data, error } = await supabase
     .from("reviews")
-    .insert({ name, country, message, rating })
-    .select("id, name, country, message, rating, created_at")
+    .insert({ name, country, message, rating, approved: false })
+    .select(REVIEW_COLUMNS)
     .single();
 
   if (error) {

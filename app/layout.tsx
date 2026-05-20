@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import localFont from "next/font/local";
 import { ServiceWorkerRegister } from "@/components/ServiceWorkerRegister";
 import { AppProviders } from "@/components/providers/AppProviders";
+import { SuspendedPostHogPageView } from "@/components/providers/PostHogPageView";
 import "leaflet/dist/leaflet.css";
 import "./globals.css";
 import { cn } from "@/lib/utils";
@@ -50,7 +51,10 @@ export default function RootLayout({
         />
       </head>
       <body className="min-h-screen bg-gray-50 text-gray-900 antialiased transition-colors duration-300 dark:bg-gray-900 dark:text-gray-100">
-        <AppProviders>{children}</AppProviders>
+        <AppProviders>
+          <SuspendedPostHogPageView />
+          {children}
+        </AppProviders>
         <ServiceWorkerRegister />
       </body>
     </html>

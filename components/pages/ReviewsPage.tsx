@@ -73,7 +73,6 @@ export function ReviewsPage() {
         return;
       }
 
-      setReviews((prev) => [data as Review, ...prev]);
       setSubmitted(true);
       setName("");
       setCountry("");

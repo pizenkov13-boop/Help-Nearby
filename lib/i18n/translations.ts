@@ -191,7 +191,8 @@ const en: Record<TranslationKey, string> = {
   reviewsFormRating: "Rating",
   reviewsFormMessage: "Your feedback or suggestion",
   reviewsFormSubmit: "Submit feedback",
-  reviewsFormSuccess: "Thank you! Your feedback has been received.",
+  reviewsFormSuccess:
+    "Thank you! Your review was submitted and will appear after approval.",
   reviewsFormRequired: "Please enter your name, country, and message.",
   reviewsListTitle: "Community feedback",
   reviewsListEmpty: "No reviews yet. Be the first to share your experience.",

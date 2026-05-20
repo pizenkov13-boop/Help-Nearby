@@ -60,6 +60,7 @@ export interface Review {
   country: string;
   message: string;
   rating: number;
+  approved: boolean;
   created_at: string;
 }
 

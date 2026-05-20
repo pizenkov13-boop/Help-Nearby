@@ -1,12 +1,12 @@
 import { NextResponse } from "next/server";
-import { fetchReviews, submitReview } from "@/lib/reviews";
+import { fetchApprovedReviews, submitReview } from "@/lib/reviews";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
 export async function GET() {
   try {
-    const reviews = await fetchReviews();
+    const reviews = await fetchApprovedReviews();
     return NextResponse.json(reviews);
   } catch (error) {
     console.error("[api/reviews GET]", error);
