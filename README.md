@@ -10,7 +10,7 @@
 
 **Help Nearby** is a free, open-source platform that connects people in crisis with local assistance organizations worldwide — food banks, shelters, medical aid, clothing donations, and volunteer opportunities.
 
-The project was built by a **15-year-old developer from Finland** with a simple goal: make it fast and easy for anyone, on any device, to find trusted help close to where they are.
+The project was built by a 15-year-old developer from Russia with a simple goal: make it fast and easy for anyone, on any device, to find trusted help close to where they are.
 
 Whether someone is facing hunger, homelessness, or an emergency, Help Nearby turns scattered information into one clear map and list — in their own language.
 
