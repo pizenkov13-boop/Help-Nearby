@@ -6,12 +6,18 @@ import {
   Loader2,
   LogOut,
   MapPin,
+  MessageSquare,
   Shield,
+  Star,
+  Trash2,
 } from "lucide-react";
 import type { DbOrganization } from "@/lib/data";
 import { CATEGORIES, CATEGORY_CONFIG } from "@/lib/categories";
-import type { Category } from "@/lib/types";
+import { countryToFlag } from "@/lib/countryFlags";
+import type { Category, Review } from "@/lib/types";
 import { cn } from "@/lib/utils";
+
+type AdminTab = "organizations" | "reviews";
 
 export function AdminPage() {
   const [authenticated, setAuthenticated] = useState(false);
@@ -21,11 +27,18 @@ export function AdminPage() {
   const [password, setPassword] = useState("");
   const [loginError, setLoginError] = useState<string | null>(null);
   const [loggingIn, setLoggingIn] = useState(false);
+  const [activeTab, setActiveTab] = useState<AdminTab>("organizations");
 
   const [organizations, setOrganizations] = useState<DbOrganization[]>([]);
   const [loadingOrgs, setLoadingOrgs] = useState(false);
+  const [reviews, setReviews] = useState<Review[]>([]);
+  const [loadingReviews, setLoadingReviews] = useState(false);
   const [loadError, setLoadError] = useState<string | null>(null);
   const [verifyingId, setVerifyingId] = useState<number | null>(null);
+  const [approvingReviewId, setApprovingReviewId] = useState<number | null>(
+    null,
+  );
+  const [deletingReviewId, setDeletingReviewId] = useState<number | null>(null);
 
   const checkSession = useCallback(async () => {
     setCheckingSession(true);
@@ -65,15 +78,39 @@ export function AdminPage() {
     }
   }, []);
 
+  const loadReviews = useCallback(async () => {
+    setLoadingReviews(true);
+    setLoadError(null);
+    try {
+      const res = await fetch("/api/admin/reviews");
+      if (res.status === 401) {
+        setAuthenticated(false);
+        return;
+      }
+      if (!res.ok) {
+        const data = (await res.json()) as { error?: string };
+        throw new Error(data.error ?? "Failed to load");
+      }
+      const data = (await res.json()) as Review[];
+      setReviews(data);
+    } catch (err) {
+      setLoadError(
+        err instanceof Error ? err.message : "Could not load pending reviews.",
+      );
+    } finally {
+      setLoadingReviews(false);
+    }
+  }, []);
+
   useEffect(() => {
     void checkSession();
   }, [checkSession]);
 
   useEffect(() => {
-    if (authenticated) {
-      void loadOrganizations();
-    }
-  }, [authenticated, loadOrganizations]);
+    if (!authenticated) return;
+    void loadOrganizations();
+    void loadReviews();
+  }, [authenticated, loadOrganizations, loadReviews]);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -97,6 +134,7 @@ export function AdminPage() {
       setAuthenticated(true);
       await checkSession();
       await loadOrganizations();
+      await loadReviews();
     } catch {
       setLoginError("Login failed. Please try again.");
     } finally {
@@ -108,6 +146,7 @@ export function AdminPage() {
     await fetch("/api/admin/logout", { method: "POST" });
     setAuthenticated(false);
     setOrganizations([]);
+    setReviews([]);
   };
 
   const handleVerify = async (id: number) => {
@@ -142,6 +181,72 @@ export function AdminPage() {
     }
   };
 
+  const handleApproveReview = async (id: number) => {
+    if (!canVerify) {
+      setLoadError(
+        "Add SUPABASE_SERVICE_ROLE_KEY to .env.local to moderate reviews.",
+      );
+      return;
+    }
+
+    setApprovingReviewId(id);
+    setLoadError(null);
+
+    try {
+      const res = await fetch("/api/admin/reviews/approve", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id }),
+      });
+
+      const data = (await res.json()) as { error?: string };
+      if (!res.ok) {
+        setLoadError(data.error ?? "Approval failed.");
+        return;
+      }
+
+      setReviews((prev) => prev.filter((r) => r.id !== id));
+    } catch {
+      setLoadError("Approval failed.");
+    } finally {
+      setApprovingReviewId(null);
+    }
+  };
+
+  const handleDeleteReview = async (id: number) => {
+    if (!canVerify) {
+      setLoadError(
+        "Add SUPABASE_SERVICE_ROLE_KEY to .env.local to delete reviews.",
+      );
+      return;
+    }
+
+    if (!window.confirm("Delete this review permanently?")) return;
+
+    setDeletingReviewId(id);
+    setLoadError(null);
+
+    try {
+      const res = await fetch("/api/admin/reviews/delete", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id }),
+      });
+
+      const data = (await res.json()) as { error?: string };
+      if (!res.ok) {
+        setLoadError(data.error ?? "Delete failed.");
+        return;
+      }
+
+      setReviews((prev) => prev.filter((r) => r.id !== id));
+    } catch {
+      setLoadError("Delete failed.");
+    } finally {
+      setDeletingReviewId(null);
+    }
+  };
+
   if (checkingSession) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-gray-900">
@@ -158,7 +263,7 @@ export function AdminPage() {
             <Shield className="h-8 w-8" />
             <div>
               <h1 className="text-xl font-bold text-white">Admin</h1>
-              <p className="text-sm text-gray-400">Help Nearby verification</p>
+              <p className="text-sm text-gray-400">Help Nearby moderation</p>
             </div>
           </div>
 
@@ -203,19 +308,19 @@ export function AdminPage() {
     );
   }
 
+  const isLoading =
+    activeTab === "organizations" ? loadingOrgs : loadingReviews;
+
   return (
     <div className="min-h-screen bg-gray-900 text-gray-100">
       <header className="border-b border-gray-800 bg-gray-900/90 px-4 py-4 sm:px-6">
-        <div className="mx-auto flex max-w-4xl items-center justify-between gap-4">
+        <div className="mx-auto flex max-w-4xl flex-wrap items-center justify-between gap-4">
           <div className="flex items-center gap-3">
             <Shield className="h-7 w-7 text-blue-400" />
             <div>
-              <h1 className="text-lg font-bold text-white">
-                Pending verifications
-              </h1>
+              <h1 className="text-lg font-bold text-white">Admin moderation</h1>
               <p className="text-sm text-gray-400">
-                {organizations.length} organization
-                {organizations.length === 1 ? "" : "s"} awaiting review
+                {organizations.length} orgs · {reviews.length} reviews pending
               </p>
             </div>
           </div>
@@ -228,13 +333,40 @@ export function AdminPage() {
             Log out
           </button>
         </div>
+
+        <div className="mx-auto mt-4 flex max-w-4xl gap-2">
+          <button
+            type="button"
+            onClick={() => setActiveTab("organizations")}
+            className={cn(
+              "rounded-lg px-4 py-2 text-sm font-medium transition-colors",
+              activeTab === "organizations"
+                ? "bg-blue-600 text-white"
+                : "text-gray-400 hover:bg-gray-800 hover:text-white",
+            )}
+          >
+            Organizations ({organizations.length})
+          </button>
+          <button
+            type="button"
+            onClick={() => setActiveTab("reviews")}
+            className={cn(
+              "rounded-lg px-4 py-2 text-sm font-medium transition-colors",
+              activeTab === "reviews"
+                ? "bg-blue-600 text-white"
+                : "text-gray-400 hover:bg-gray-800 hover:text-white",
+            )}
+          >
+            Reviews ({reviews.length})
+          </button>
+        </div>
       </header>
 
       <main className="mx-auto max-w-4xl px-4 py-8 sm:px-6">
         {!canVerify && (
           <p className="mb-6 rounded-lg border border-amber-500/30 bg-amber-500/10 px-4 py-3 text-sm text-amber-300">
-            Add SUPABASE_SERVICE_ROLE_KEY to .env.local to verify organizations.
-            You can still review submissions below.
+            Add SUPABASE_SERVICE_ROLE_KEY to .env.local to approve organizations
+            and moderate reviews.
           </p>
         )}
 
@@ -244,80 +376,155 @@ export function AdminPage() {
           </p>
         )}
 
-        {loadingOrgs ? (
+        {isLoading ? (
           <div className="flex justify-center py-16">
             <Loader2 className="h-8 w-8 animate-spin text-blue-400" />
           </div>
-        ) : organizations.length === 0 ? (
+        ) : activeTab === "organizations" ? (
+          organizations.length === 0 ? (
+            <p className="rounded-xl border border-dashed border-gray-700 px-6 py-16 text-center text-gray-400">
+              No unverified organizations.
+            </p>
+          ) : (
+            <ul className="flex flex-col gap-4">
+              {organizations.map((org) => {
+                const category = (org.category?.[0] ?? "food") as Category;
+                const cfg = CATEGORY_CONFIG[category] ?? CATEGORY_CONFIG.food;
+
+                return (
+                  <li
+                    key={org.id}
+                    className="rounded-xl border border-gray-800 bg-gray-800/50 p-5"
+                  >
+                    <div className="mb-3 flex flex-wrap items-start justify-between gap-3">
+                      <div>
+                        <h2 className="text-lg font-semibold text-white">
+                          {org.name}
+                        </h2>
+                        <p className="mt-1 text-sm text-gray-400">
+                          {[org.city, org.country].filter(Boolean).join(", ")}
+                        </p>
+                      </div>
+                      <span
+                        className={cn(
+                          "inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-medium",
+                          cfg.bg,
+                          cfg.color,
+                        )}
+                      >
+                        {cfg.icon}{" "}
+                        {CATEGORIES.includes(category) ? category : "food"}
+                      </span>
+                    </div>
+
+                    {org.address && (
+                      <p className="mb-2 flex items-start gap-2 text-sm text-gray-400">
+                        <MapPin className="mt-0.5 h-4 w-4 shrink-0" />
+                        {org.address}
+                      </p>
+                    )}
+
+                    {org.phone && (
+                      <p className="mb-2 text-sm text-gray-400">{org.phone}</p>
+                    )}
+
+                    {org.description && (
+                      <p className="mb-4 text-sm leading-relaxed text-gray-500">
+                        {org.description}
+                      </p>
+                    )}
+
+                    <button
+                      type="button"
+                      onClick={() => handleVerify(org.id)}
+                      disabled={verifyingId === org.id || !canVerify}
+                      className="inline-flex items-center gap-2 rounded-lg bg-emerald-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-emerald-500 disabled:cursor-not-allowed disabled:opacity-60"
+                    >
+                      {verifyingId === org.id ? (
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                      ) : (
+                        <BadgeCheck className="h-4 w-4" />
+                      )}
+                      Verify
+                    </button>
+                  </li>
+                );
+              })}
+            </ul>
+          )
+        ) : reviews.length === 0 ? (
           <p className="rounded-xl border border-dashed border-gray-700 px-6 py-16 text-center text-gray-400">
-            No unverified organizations. New submissions from the form will
-            appear here.
+            No pending reviews.
           </p>
         ) : (
           <ul className="flex flex-col gap-4">
-            {organizations.map((org) => {
-              const category = (org.category?.[0] ?? "food") as Category;
-              const cfg = CATEGORY_CONFIG[category] ?? CATEGORY_CONFIG.food;
-
-              return (
-                <li
-                  key={org.id}
-                  className="rounded-xl border border-gray-800 bg-gray-800/50 p-5"
-                >
-                  <div className="mb-3 flex flex-wrap items-start justify-between gap-3">
-                    <div>
-                      <h2 className="text-lg font-semibold text-white">
-                        {org.name}
-                      </h2>
-                      <p className="mt-1 text-sm text-gray-400">
-                        {[org.city, org.country].filter(Boolean).join(", ")}
-                      </p>
-                    </div>
-                    <span
-                      className={cn(
-                        "inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-medium",
-                        cfg.bg,
-                        cfg.color,
-                      )}
-                    >
-                      {cfg.icon}{" "}
-                      {CATEGORIES.includes(category) ? category : "food"}
+            {reviews.map((review) => (
+              <li
+                key={review.id}
+                className="rounded-xl border border-gray-800 bg-gray-800/50 p-5"
+              >
+                <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
+                  <div className="flex items-center gap-2">
+                    <MessageSquare className="h-4 w-4 text-blue-400" />
+                    <span className="font-semibold text-white">
+                      {review.name}
+                    </span>
+                    <span className="text-lg" aria-hidden>
+                      {countryToFlag(review.country)}
+                    </span>
+                    <span className="text-sm text-gray-500">
+                      {review.country}
                     </span>
                   </div>
+                  <div className="flex gap-0.5">
+                    {[1, 2, 3, 4, 5].map((n) => (
+                      <Star
+                        key={n}
+                        className={cn(
+                          "h-4 w-4",
+                          n <= review.rating
+                            ? "fill-amber-400 text-amber-400"
+                            : "text-gray-600",
+                        )}
+                      />
+                    ))}
+                  </div>
+                </div>
 
-                  {org.address && (
-                    <p className="mb-2 flex items-start gap-2 text-sm text-gray-400">
-                      <MapPin className="mt-0.5 h-4 w-4 shrink-0" />
-                      {org.address}
-                    </p>
-                  )}
+                <p className="mb-4 text-sm leading-relaxed text-gray-300">
+                  {review.message}
+                </p>
 
-                  {org.phone && (
-                    <p className="mb-2 text-sm text-gray-400">{org.phone}</p>
-                  )}
-
-                  {org.description && (
-                    <p className="mb-4 text-sm leading-relaxed text-gray-500">
-                      {org.description}
-                    </p>
-                  )}
-
+                <div className="flex flex-wrap gap-2">
                   <button
                     type="button"
-                    onClick={() => handleVerify(org.id)}
-                    disabled={verifyingId === org.id || !canVerify}
-                    className="inline-flex items-center gap-2 rounded-lg bg-emerald-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-emerald-500 disabled:cursor-not-allowed disabled:opacity-60"
+                    onClick={() => handleApproveReview(review.id)}
+                    disabled={approvingReviewId === review.id || !canVerify}
+                    className="inline-flex items-center gap-2 rounded-lg bg-emerald-600 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-500 disabled:opacity-60"
                   >
-                    {verifyingId === org.id ? (
+                    {approvingReviewId === review.id ? (
                       <Loader2 className="h-4 w-4 animate-spin" />
                     ) : (
                       <BadgeCheck className="h-4 w-4" />
                     )}
-                    Verify
+                    Approve
                   </button>
-                </li>
-              );
-            })}
+                  <button
+                    type="button"
+                    onClick={() => handleDeleteReview(review.id)}
+                    disabled={deletingReviewId === review.id || !canVerify}
+                    className="inline-flex items-center gap-2 rounded-lg border border-red-500/40 bg-red-500/10 px-4 py-2 text-sm font-semibold text-red-300 hover:bg-red-500/20 disabled:opacity-60"
+                  >
+                    {deletingReviewId === review.id ? (
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                    ) : (
+                      <Trash2 className="h-4 w-4" />
+                    )}
+                    Delete
+                  </button>
+                </div>
+              </li>
+            ))}
           </ul>
         )}
       </main>

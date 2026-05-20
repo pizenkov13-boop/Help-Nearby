@@ -19,6 +19,23 @@ interface OverpassResponse {
   elements?: OverpassElement[];
 }
 
+function buildEmergencyOverpassQuery(lat: number, lng: number, radius: number): string {
+  const around = `(around:${radius},${lat},${lng})`;
+  return `
+[out:json][timeout:60];
+(
+  nwr["amenity"="hospital"]${around};
+  nwr["amenity"="pharmacy"]${around};
+  nwr["amenity"="clinic"]${around};
+  nwr["amenity"="doctors"]${around};
+  nwr["emergency"="ambulance_station"]${around};
+  nwr["amenity"="fire_station"]${around};
+  nwr["amenity"="police"]${around};
+);
+out center tags;
+`.trim();
+}
+
 function buildOverpassQuery(lat: number, lng: number, radius: number): string {
   const around = `(around:${radius},${lat},${lng})`;
   return `
@@ -90,6 +107,15 @@ function buildAddress(tags: Record<string, string>): string {
   return parts.join(", ");
 }
 
+function buildHoursRaw(tags: Record<string, string>): string {
+  const parts = [
+    tags.opening_hours,
+    tags.emergency ? `emergency:${tags.emergency}` : "",
+    tags.amenity ? `amenity:${tags.amenity}` : "",
+  ].filter(Boolean);
+  return parts.join(" ");
+}
+
 function mapElementToOrganization(
   el: OverpassElement,
   userLocation: UserLocation,
@@ -139,10 +165,50 @@ function mapElementToOrganization(
       tags.operator ??
       [tags.amenity, tags.social_facility].filter(Boolean).join(" · "),
     hours: {},
-    hoursRaw: tags.opening_hours ?? "",
+    hoursRaw: buildHoursRaw(tags),
     openNow: false,
     verified: false,
   };
+}
+
+export async function fetchEmergencyOverpassOrganizations(
+  lat: number,
+  lng: number,
+  radius = NEARBY_RADIUS_METERS,
+): Promise<Organization[]> {
+  const userLocation: UserLocation = { lat, lng };
+  const query = buildEmergencyOverpassQuery(lat, lng, radius);
+
+  const response = await fetch(OVERPASS_URL, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/x-www-form-urlencoded",
+      Accept: "application/json",
+      "User-Agent": OVERPASS_USER_AGENT,
+    },
+    body: `data=${encodeURIComponent(query)}`,
+  });
+
+  if (!response.ok) {
+    throw new Error(`Overpass API error: ${response.status}`);
+  }
+
+  const data = (await response.json()) as OverpassResponse;
+  const elements = data.elements ?? [];
+
+  const seen = new Set<string>();
+  const organizations: Organization[] = [];
+
+  for (const el of elements) {
+    const org = mapElementToOrganization(el, userLocation);
+    if (!org) continue;
+    const key = `${org.lat.toFixed(5)}:${org.lng.toFixed(5)}:${org.name}`;
+    if (seen.has(key)) continue;
+    seen.add(key);
+    organizations.push(org);
+  }
+
+  return organizations;
 }
 
 export async function fetchNearbyOrganizations(
