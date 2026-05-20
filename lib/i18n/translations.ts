@@ -18,12 +18,18 @@ export type TranslationKey =
   | "heroTitle"
   | "heroSubtitle"
   | "heroCta"
+  | "impactCounter"
   | "filtersTitle"
   | "filterCountry"
   | "filterCountryAll"
   | "filterCategory"
   | "filterCategoryAll"
   | "filterOpenNow"
+  | "searchPlaceholder"
+  | "searchClear"
+  | "searchNoResultsFor"
+  | "liteModeNotice"
+  | "switchToFullVersion"
   | "categoryFood"
   | "categoryShelter"
   | "categoryMedical"
@@ -67,12 +73,15 @@ export type TranslationKey =
   | "reviewsTitle"
   | "reviewsSubtitle"
   | "reviewsFormName"
-  | "reviewsFormEmail"
+  | "reviewsFormCountry"
   | "reviewsFormRating"
   | "reviewsFormMessage"
   | "reviewsFormSubmit"
   | "reviewsFormSuccess"
   | "reviewsFormRequired"
+  | "reviewsListTitle"
+  | "reviewsListEmpty"
+  | "reviewsLoading"
   | "callNow"
   | "share"
   | "copied"
@@ -93,7 +102,19 @@ export type TranslationKey =
   | "routeWalkTime"
   | "routeDriveTime"
   | "routeTransitTime"
-  | "routeTransitNote";
+  | "routeTransitNote"
+  | "emergencyHelp"
+  | "emergencyTitle"
+  | "emergencySubtitle"
+  | "emergencyLocating"
+  | "emergencyLoading"
+  | "emergencyNoResults"
+  | "emergencyCall"
+  | "emergencyClose"
+  | "emergencyLocationDenied"
+  | "emergencyLoadError"
+  | "emergencyRetry"
+  | "emergencyNoPhone";
 
 const en: Record<TranslationKey, string> = {
   brand: "Help Nearby",
@@ -104,12 +125,18 @@ const en: Record<TranslationKey, string> = {
   heroSubtitle:
     "Discover food banks, shelters, medical aid, clothing donations, and volunteer opportunities in your area.",
   heroCta: "Find Help Near You",
+  impactCounter: "{count} people found help today",
   filtersTitle: "Filters",
   filterCountry: "Country",
   filterCountryAll: "All countries",
   filterCategory: "Category",
   filterCategoryAll: "All categories",
   filterOpenNow: "Open now",
+  searchPlaceholder: "Search by name, city or address...",
+  searchClear: "Clear search",
+  searchNoResultsFor: '0 results for "{query}"',
+  liteModeNotice: "Lite mode active — optimized for slow connection",
+  switchToFullVersion: "Switch to full version",
   categoryFood: "Food",
   categoryShelter: "Shelter",
   categoryMedical: "Medical",
@@ -160,12 +187,15 @@ const en: Record<TranslationKey, string> = {
   reviewsTitle: "Reviews & Suggestions",
   reviewsSubtitle: "Share your experience or ideas to improve Help Nearby.",
   reviewsFormName: "Your name",
-  reviewsFormEmail: "Email (optional)",
+  reviewsFormCountry: "Your country",
   reviewsFormRating: "Rating",
   reviewsFormMessage: "Your feedback or suggestion",
   reviewsFormSubmit: "Submit feedback",
   reviewsFormSuccess: "Thank you! Your feedback has been received.",
-  reviewsFormRequired: "Please enter your name and message.",
+  reviewsFormRequired: "Please enter your name, country, and message.",
+  reviewsListTitle: "Community feedback",
+  reviewsListEmpty: "No reviews yet. Be the first to share your experience.",
+  reviewsLoading: "Loading reviews…",
   callNow: "Call Now",
   share: "Share",
   copied: "Copied!",
@@ -187,6 +217,20 @@ const en: Record<TranslationKey, string> = {
   routeDriveTime: "Driving time",
   routeTransitTime: "Est. time",
   routeTransitNote: "Transit uses driving estimate (OSRM does not support public transit).",
+  emergencyHelp: "Emergency Help",
+  emergencyTitle: "24/7 Emergency Help",
+  emergencySubtitle: "Open now — nearest help first. Call immediately if you are in crisis.",
+  emergencyLocating: "Finding your location…",
+  emergencyLoading: "Loading 24/7 help nearby…",
+  emergencyNoResults:
+    "No 24/7 organizations found near you. Try the full map or call your local emergency number.",
+  emergencyCall: "Call now",
+  emergencyClose: "Close",
+  emergencyLocationDenied:
+    "Location access is required to find the nearest 24/7 help. Please allow location and try again.",
+  emergencyLoadError: "Could not load help listings. Please try again.",
+  emergencyRetry: "Try again",
+  emergencyNoPhone: "No phone listed — visit in person if possible.",
 };
 
 const ru: Record<TranslationKey, string> = {
@@ -199,12 +243,17 @@ const ru: Record<TranslationKey, string> = {
   heroSubtitle:
     "Найдите продовольственные банки, приюты, медицинскую помощь, одежду и волонтёрские возможности в вашем районе.",
   heroCta: "Найти помощь рядом",
+  impactCounter: "{count} человек получили помощь сегодня",
   filtersTitle: "Фильтры",
   filterCountry: "Страна",
   filterCountryAll: "Все страны",
   filterCategory: "Категория",
   filterCategoryAll: "Все категории",
   filterOpenNow: "Открыто сейчас",
+  searchPlaceholder: "Поиск по названию, городу или адресу...",
+  searchClear: "Очистить поиск",
+  searchNoResultsFor: '0 результатов по запросу «{query}»',
+  liteModeNotice: "Лёгкий режим — оптимизирован для медленного интернета",
   categoryFood: "Еда",
   categoryShelter: "Приют",
   categoryMedical: "Медицина",
@@ -215,12 +264,28 @@ const ru: Record<TranslationKey, string> = {
   openNow: "Открыто",
   closed: "Закрыто",
   getDirections: "Маршрут",
+  callNow: "Позвонить",
   mapTitle: "Карта рядом",
   chatTitle: "ИИ-помощник",
   chatPlaceholder: "Спросите о помощи рядом…",
   chatSend: "Отправить",
   chatWelcome: "Привет! Я помогу найти помощь рядом.",
   chatHint: "Спросите о еде, приюте, медицине и другом.",
+  emergencyHelp: "Экстренная помощь",
+  emergencyTitle: "Круглосуточная помощь 24/7",
+  emergencySubtitle:
+    "Открыто сейчас — ближайшая помощь первой. Звоните немедленно, если вы в кризисе.",
+  emergencyLocating: "Определяем ваше местоположение…",
+  emergencyLoading: "Загрузка помощи 24/7 рядом…",
+  emergencyNoResults:
+    "Рядом нет организаций 24/7. Откройте карту или позвоните по местному номеру экстренной помощи.",
+  emergencyCall: "Позвонить",
+  emergencyClose: "Закрыть",
+  emergencyLocationDenied:
+    "Нужен доступ к геолокации, чтобы найти ближайшую помощь 24/7. Разрешите доступ и повторите.",
+  emergencyLoadError: "Не удалось загрузить список. Попробуйте снова.",
+  emergencyRetry: "Повторить",
+  emergencyNoPhone: "Телефон не указан — обратитесь лично, если возможно.",
 };
 
 const es: Record<TranslationKey, string> = {
@@ -233,12 +298,17 @@ const es: Record<TranslationKey, string> = {
   heroSubtitle:
     "Descubre bancos de alimentos, refugios, ayuda médica, ropa y oportunidades de voluntariado en tu zona.",
   heroCta: "Encuentra ayuda cerca",
+  impactCounter: "{count} personas encontraron ayuda hoy",
   filtersTitle: "Filtros",
   filterCountry: "País",
   filterCountryAll: "Todos los países",
   filterCategory: "Categoría",
   filterCategoryAll: "Todas las categorías",
   filterOpenNow: "Abierto ahora",
+  searchPlaceholder: "Buscar por nombre, ciudad o dirección...",
+  searchClear: "Borrar búsqueda",
+  searchNoResultsFor: '0 resultados para "{query}"',
+  liteModeNotice: "Modo lite activo — optimizado para conexión lenta",
   categoryFood: "Comida",
   categoryShelter: "Refugio",
   categoryMedical: "Médico",
@@ -249,12 +319,28 @@ const es: Record<TranslationKey, string> = {
   openNow: "Abierto",
   closed: "Cerrado",
   getDirections: "Cómo llegar",
+  callNow: "Llamar ahora",
   mapTitle: "Mapa cercano",
   chatTitle: "Asistente IA",
   chatPlaceholder: "Pregunta sobre ayuda cercana…",
   chatSend: "Enviar",
   chatWelcome: "¡Hola! Puedo ayudarte a encontrar asistencia cercana.",
   chatHint: "Pregúntame sobre comida, refugio, ayuda médica y más.",
+  emergencyHelp: "Ayuda de emergencia",
+  emergencyTitle: "Ayuda de emergencia 24/7",
+  emergencySubtitle:
+    "Abierto ahora — la ayuda más cercana primero. Llama de inmediato si estás en crisis.",
+  emergencyLocating: "Buscando tu ubicación…",
+  emergencyLoading: "Cargando ayuda 24/7 cercana…",
+  emergencyNoResults:
+    "No hay organizaciones 24/7 cerca. Usa el mapa completo o llama al número de emergencia local.",
+  emergencyCall: "Llamar ahora",
+  emergencyClose: "Cerrar",
+  emergencyLocationDenied:
+    "Se necesita tu ubicación para encontrar ayuda 24/7 cercana. Permite el acceso e inténtalo de nuevo.",
+  emergencyLoadError: "No se pudo cargar la lista. Inténtalo de nuevo.",
+  emergencyRetry: "Reintentar",
+  emergencyNoPhone: "Sin teléfono — acude en persona si es posible.",
 };
 
 const fr: Record<TranslationKey, string> = {
@@ -267,12 +353,17 @@ const fr: Record<TranslationKey, string> = {
   heroSubtitle:
     "Découvrez les banques alimentaires, refuges, aide médicale, vêtements et bénévolat près de chez vous.",
   heroCta: "Trouver de l'aide",
+  impactCounter: "{count} personnes ont trouvé de l'aide aujourd'hui",
   filtersTitle: "Filtres",
   filterCountry: "Pays",
   filterCountryAll: "Tous les pays",
   filterCategory: "Catégorie",
   filterCategoryAll: "Toutes les catégories",
   filterOpenNow: "Ouvert maintenant",
+  searchPlaceholder: "Rechercher par nom, ville ou adresse...",
+  searchClear: "Effacer la recherche",
+  searchNoResultsFor: '0 résultat pour « {query} »',
+  liteModeNotice: "Mode lite actif — optimisé pour connexion lente",
   categoryFood: "Nourriture",
   categoryShelter: "Abri",
   categoryMedical: "Médical",
@@ -283,12 +374,28 @@ const fr: Record<TranslationKey, string> = {
   openNow: "Ouvert",
   closed: "Fermé",
   getDirections: "Itinéraire",
+  callNow: "Appeler",
   mapTitle: "Carte à proximité",
   chatTitle: "Assistant IA",
   chatPlaceholder: "Demandez de l'aide à proximité…",
   chatSend: "Envoyer",
   chatWelcome: "Bonjour ! Je peux vous aider à trouver de l'aide.",
   chatHint: "Demandez-moi nourriture, abri, aide médicale, etc.",
+  emergencyHelp: "Aide d'urgence",
+  emergencyTitle: "Aide d'urgence 24h/24",
+  emergencySubtitle:
+    "Ouvert maintenant — l'aide la plus proche en premier. Appelez immédiatement en cas de crise.",
+  emergencyLocating: "Localisation en cours…",
+  emergencyLoading: "Chargement de l'aide 24h/24 à proximité…",
+  emergencyNoResults:
+    "Aucune organisation 24h/24 à proximité. Utilisez la carte complète ou le numéro d'urgence local.",
+  emergencyCall: "Appeler",
+  emergencyClose: "Fermer",
+  emergencyLocationDenied:
+    "La localisation est requise pour trouver l'aide 24h/24 la plus proche. Autorisez-la et réessayez.",
+  emergencyLoadError: "Impossible de charger la liste. Réessayez.",
+  emergencyRetry: "Réessayer",
+  emergencyNoPhone: "Pas de téléphone — rendez-vous sur place si possible.",
 };
 
 const de: Record<TranslationKey, string> = {
@@ -301,12 +408,17 @@ const de: Record<TranslationKey, string> = {
   heroSubtitle:
     "Entdecken Sie Tafeln, Unterkünfte, medizinische Hilfe, Kleidung und Freiwilligenarbeit in Ihrer Nähe.",
   heroCta: "Hilfe in der Nähe finden",
+  impactCounter: "{count} Menschen haben heute Hilfe gefunden",
   filtersTitle: "Filter",
   filterCountry: "Land",
   filterCountryAll: "Alle Länder",
   filterCategory: "Kategorie",
   filterCategoryAll: "Alle Kategorien",
   filterOpenNow: "Jetzt geöffnet",
+  searchPlaceholder: "Suche nach Name, Stadt oder Adresse...",
+  searchClear: "Suche löschen",
+  searchNoResultsFor: '0 Ergebnisse für "{query}"',
+  liteModeNotice: "Lite-Modus aktiv — für langsame Verbindungen optimiert",
   categoryFood: "Essen",
   categoryShelter: "Unterkunft",
   categoryMedical: "Medizin",
@@ -317,12 +429,28 @@ const de: Record<TranslationKey, string> = {
   openNow: "Geöffnet",
   closed: "Geschlossen",
   getDirections: "Route",
+  callNow: "Jetzt anrufen",
   mapTitle: "Karte in der Nähe",
   chatTitle: "KI-Assistent",
   chatPlaceholder: "Fragen Sie nach Hilfe in der Nähe…",
   chatSend: "Senden",
   chatWelcome: "Hallo! Ich helfe Ihnen, Hilfe in der Nähe zu finden.",
   chatHint: "Fragen Sie nach Essen, Unterkunft, medizinischer Hilfe usw.",
+  emergencyHelp: "Notfallhilfe",
+  emergencyTitle: "24/7 Notfallhilfe",
+  emergencySubtitle:
+    "Jetzt geöffnet — nächste Hilfe zuerst. Rufen Sie sofort an, wenn Sie in einer Krise sind.",
+  emergencyLocating: "Standort wird ermittelt…",
+  emergencyLoading: "24/7-Hilfe in der Nähe wird geladen…",
+  emergencyNoResults:
+    "Keine 24/7-Organisationen in der Nähe. Nutzen Sie die Karte oder die örtliche Notrufnummer.",
+  emergencyCall: "Jetzt anrufen",
+  emergencyClose: "Schließen",
+  emergencyLocationDenied:
+    "Standortzugriff ist nötig, um die nächste 24/7-Hilfe zu finden. Bitte erlauben und erneut versuchen.",
+  emergencyLoadError: "Liste konnte nicht geladen werden. Bitte erneut versuchen.",
+  emergencyRetry: "Erneut versuchen",
+  emergencyNoPhone: "Keine Telefonnummer — besuchen Sie vor Ort, wenn möglich.",
 };
 
 const zh: Record<TranslationKey, string> = {
@@ -334,12 +462,17 @@ const zh: Record<TranslationKey, string> = {
   heroTitle: "在附近寻找帮助",
   heroSubtitle: "发现您附近的食物银行、庇护所、医疗援助、衣物捐赠和志愿者机会。",
   heroCta: "在附近寻找帮助",
+  impactCounter: "今天已有 {count} 人获得帮助",
   filtersTitle: "筛选",
   filterCountry: "国家",
   filterCountryAll: "所有国家",
   filterCategory: "类别",
   filterCategoryAll: "所有类别",
   filterOpenNow: "现在营业",
+  searchPlaceholder: "按名称、城市或地址搜索...",
+  searchClear: "清除搜索",
+  searchNoResultsFor: "0 个与「{query}」匹配的结果",
+  liteModeNotice: "轻量模式已启用 — 针对慢速网络优化",
   categoryFood: "食物",
   categoryShelter: "庇护所",
   categoryMedical: "医疗",
@@ -350,12 +483,25 @@ const zh: Record<TranslationKey, string> = {
   openNow: "营业中",
   closed: "已关闭",
   getDirections: "获取路线",
+  callNow: "立即拨打",
   mapTitle: "附近地图",
   chatTitle: "AI 助手",
   chatPlaceholder: "询问附近的帮助…",
   chatSend: "发送",
   chatWelcome: "您好！我可以帮您找到附近的援助。",
   chatHint: "询问食物、庇护所、医疗援助等。",
+  emergencyHelp: "紧急求助",
+  emergencyTitle: "24/7 紧急援助",
+  emergencySubtitle: "正在开放 — 优先显示最近援助。如遇危机请立即致电。",
+  emergencyLocating: "正在获取您的位置…",
+  emergencyLoading: "正在加载附近 24/7 援助…",
+  emergencyNoResults: "附近未找到 24/7 组织。请使用完整地图或拨打当地急救电话。",
+  emergencyCall: "立即拨打",
+  emergencyClose: "关闭",
+  emergencyLocationDenied: "需要位置权限以查找最近的 24/7 援助。请允许后重试。",
+  emergencyLoadError: "无法加载列表，请重试。",
+  emergencyRetry: "重试",
+  emergencyNoPhone: "未提供电话 — 如可能请亲自前往。",
 };
 
 const ar: Record<TranslationKey, string> = {
@@ -368,12 +514,17 @@ const ar: Record<TranslationKey, string> = {
   heroSubtitle:
     "اكتشف بنوك الطعام والملاجئ والمساعدة الطبية والملابس وفرص التطوع في منطقتك.",
   heroCta: "اعثر على المساعدة",
+  impactCounter: "{count} شخصاً وجدوا مساعدة اليوم",
   filtersTitle: "الفلاتر",
   filterCountry: "البلد",
   filterCountryAll: "جميع البلدان",
   filterCategory: "الفئة",
   filterCategoryAll: "جميع الفئات",
   filterOpenNow: "مفتوح الآن",
+  searchPlaceholder: "ابحث بالاسم أو المدينة أو العنوان...",
+  searchClear: "مسح البحث",
+  searchNoResultsFor: '0 نتائج لـ "{query}"',
+  liteModeNotice: "الوضع الخفيف مفعّل — مُحسَّن للاتصال البطيء",
   categoryFood: "طعام",
   categoryShelter: "مأوى",
   categoryMedical: "طبي",
@@ -384,12 +535,28 @@ const ar: Record<TranslationKey, string> = {
   openNow: "مفتوح",
   closed: "مغلق",
   getDirections: "الاتجاهات",
+  callNow: "اتصل الآن",
   mapTitle: "خريطة قريبة",
   chatTitle: "مساعد الذكاء الاصطناعي",
   chatPlaceholder: "اسأل عن المساعدة القريبة…",
   chatSend: "إرسال",
   chatWelcome: "مرحباً! يمكنني مساعدتك في إيجاد المساعدة القريبة.",
   chatHint: "اسألني عن الطعام والمأوى والمساعدة الطبية والمزيد.",
+  emergencyHelp: "مساعدة طارئة",
+  emergencyTitle: "مساعدة طارئة على مدار الساعة",
+  emergencySubtitle:
+    "مفتوح الآن — الأقرب أولاً. اتصل فوراً إذا كنت في أزمة.",
+  emergencyLocating: "جاري تحديد موقعك…",
+  emergencyLoading: "جاري تحميل المساعدة على مدار الساعة القريبة…",
+  emergencyNoResults:
+    "لا توجد منظمات على مدار الساعة بالقرب منك. استخدم الخريطة الكاملة أو رقم الطوارئ المحلي.",
+  emergencyCall: "اتصل الآن",
+  emergencyClose: "إغلاق",
+  emergencyLocationDenied:
+    "يلزم الوصول إلى الموقع للعثور على أقرب مساعدة. اسمح بالموقع وحاول مرة أخرى.",
+  emergencyLoadError: "تعذر تحميل القائمة. حاول مرة أخرى.",
+  emergencyRetry: "إعادة المحاولة",
+  emergencyNoPhone: "لا يوجد هاتف — زُر المكان شخصياً إن أمكن.",
 };
 
 export const translations: Record<LanguageCode, Record<TranslationKey, string>> =
@@ -402,3 +569,22 @@ export const translations: Record<LanguageCode, Record<TranslationKey, string>> 
     zh,
     ar,
   };
+
+export function formatSearchNoResults(
+  language: LanguageCode,
+  query: string,
+): string {
+  const template =
+    translations[language].searchNoResultsFor ??
+    translations.en.searchNoResultsFor;
+  return template.replace("{query}", query);
+}
+
+export function formatImpactCounter(
+  language: LanguageCode,
+  count: number,
+): string {
+  const template =
+    translations[language].impactCounter ?? translations.en.impactCounter;
+  return template.replace("{count}", String(count));
+}

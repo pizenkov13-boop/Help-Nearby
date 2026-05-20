@@ -1,6 +1,7 @@
 "use client";
 
 import { ChatWidget } from "@/components/ChatWidget";
+import { EmergencyHelp } from "@/components/EmergencyHelp";
 import { Header } from "@/components/Header";
 import { useLanguage } from "@/lib/i18n/LanguageProvider";
 import { SiteFooter } from "./SiteFooter";
@@ -15,7 +16,8 @@ export function SiteLayout({ children }: SiteLayoutProps) {
   return (
     <div dir={dir} className="flex min-h-screen flex-col bg-gray-50 transition-colors duration-300 dark:bg-gray-900">
       <Header />
-      <main className="flex-1">{children}</main>
+      <EmergencyHelp />
+      <main className="flex-1 pt-14 sm:pt-16">{children}</main>
       <SiteFooter />
       <ChatWidget />
     </div>

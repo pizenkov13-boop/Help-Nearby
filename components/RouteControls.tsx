@@ -1,6 +1,6 @@
 ﻿"use client";
 
-import { Bus, Car, Footprints, Loader2, X } from "lucide-react";
+import { Car, Footprints, Loader2, X } from "lucide-react";
 import { useLanguage } from "@/lib/i18n/LanguageProvider";
 import type { RouteData, RoutingMode } from "@/lib/routing";
 import type { Organization } from "@/lib/types";
@@ -9,11 +9,10 @@ import { cn } from "@/lib/utils";
 const MODES: {
   mode: RoutingMode;
   icon: typeof Car;
-  labelKey: "routeDriving" | "routeWalking" | "routeTransit";
+  labelKey: "routeDriving" | "routeWalking";
 }[] = [
   { mode: "walking", icon: Footprints, labelKey: "routeWalking" },
   { mode: "driving", icon: Car, labelKey: "routeDriving" },
-  { mode: "transit", icon: Bus, labelKey: "routeTransit" },
 ];
 
 interface RouteControlsProps {
@@ -38,11 +37,7 @@ export function RouteControls({
   const { t } = useLanguage();
 
   const timeLabel =
-    routeMode === "walking"
-      ? t("routeWalkTime")
-      : routeMode === "transit"
-        ? t("routeTransitTime")
-        : t("routeDriveTime");
+    routeMode === "walking" ? t("routeWalkTime") : t("routeDriveTime");
 
   return (
     <div className="pointer-events-none absolute inset-x-0 top-3 z-[1000] flex justify-center px-3">
@@ -101,31 +96,38 @@ export function RouteControls({
         )}
 
         {route && !loading && !error && (
-          <div className="flex items-center justify-center gap-4 border-t border-gray-700/60 pt-3 text-center">
-            <div>
-              <p className="text-lg font-bold text-blue-400">
-                {route.distanceKm} km
-              </p>
-              <p className="text-xs text-gray-500">{t("routeDistance")}</p>
+          <>
+            <div className="flex items-center justify-center gap-4 border-t border-gray-700/60 pt-3 text-center">
+              <div>
+                <p className="text-lg font-bold text-blue-400">
+                  {route.distanceKm} km
+                </p>
+                <p className="text-xs text-gray-500">{t("routeDistance")}</p>
+              </div>
+              <div className="h-8 w-px bg-gray-700" />
+              <div>
+                <p className="text-lg font-bold text-blue-400">
+                  {route.durationMinutes} min
+                </p>
+                <p className="text-xs text-gray-500">{timeLabel}</p>
+              </div>
             </div>
-            <div className="h-8 w-px bg-gray-700" />
-            <div>
-              <p className="text-lg font-bold text-blue-400">
-                {route.durationMinutes} min
-              </p>
-              <p className="text-xs text-gray-500">{timeLabel}</p>
-            </div>
-          </div>
-        )}
 
-        {routeMode === "transit" && route && !loading && (
-          <p className="mt-2 text-center text-[10px] text-gray-500">
-            {t("routeTransitNote")}
-          </p>
+            {route.steps.length > 0 && (
+              <ol className="mt-3 max-h-36 space-y-1.5 overflow-y-auto border-t border-gray-700/60 pt-3 text-xs text-gray-300">
+                {route.steps.map((step, i) => (
+                  <li key={i} className="flex gap-2">
+                    <span className="shrink-0 font-medium text-blue-400">
+                      {i + 1}.
+                    </span>
+                    <span>{step.instruction}</span>
+                  </li>
+                ))}
+              </ol>
+            )}
+          </>
         )}
       </div>
     </div>
   );
 }
-
-

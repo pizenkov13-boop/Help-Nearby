@@ -1,7 +1,8 @@
 "use client";
 
-import { useEffect, useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
+  Circle,
   MapContainer,
   Marker,
   Polyline,
@@ -12,7 +13,9 @@ import {
 import L from "leaflet";
 import { RouteControls } from "@/components/RouteControls";
 import type { RouteData, RoutingMode } from "@/lib/routing";
+import { resolveOrganizationsForMap } from "@/lib/resolveOrganizationCoordinates";
 import type { Organization, UserLocation } from "@/lib/types";
+import type { TrackedUserLocation } from "@/lib/geolocation";
 import { CATEGORY_CONFIG } from "@/lib/categories";
 
 const DefaultIcon = L.icon({
@@ -31,17 +34,17 @@ L.Marker.prototype.options.icon = DefaultIcon;
 const userLocationIcon = L.divIcon({
   className: "user-location-marker",
   html:
-    '<div class="user-marker-pulse"></div><div class="user-marker-inner"></div>',
-  iconSize: [32, 32],
-  iconAnchor: [16, 16],
+    '<div class="user-marker-pulse"></div><div class="user-marker-pulse user-marker-pulse-delay"></div><div class="user-marker-inner"></div>',
+  iconSize: [48, 48],
+  iconAnchor: [24, 24],
 });
 
 function createCategoryIcon(color: string, verified = false) {
   const verifiedRing = verified
-    ? "box-shadow:0 0 0 3px #007bff, 0 2px 8px rgba(0,0,0,0.4);"
+    ? "box-shadow:0 0 0 3px #10b981, 0 2px 8px rgba(0,0,0,0.4);"
     : "box-shadow:0 2px 8px rgba(0,0,0,0.4);";
   const badge = verified
-    ? `<span style="position:absolute;top:-4px;right:-4px;background:#007bff;color:white;font-size:10px;width:14px;height:14px;border-radius:50%;display:flex;align-items:center;justify-content:center;border:1px solid white;">✓</span>`
+    ? `<span style="position:absolute;top:-4px;right:-4px;background:#10b981;color:white;font-size:10px;width:14px;height:14px;border-radius:50%;display:flex;align-items:center;justify-content:center;border:1px solid white;">✓</span>`
     : "";
   return L.divIcon({
     className: "custom-marker",
@@ -61,8 +64,8 @@ const categoryColors: Record<string, string> = {
 
 const ROUTE_STYLE = {
   color: "#007bff",
-  weight: 4,
-  opacity: 0.9,
+  weight: 5,
+  opacity: 0.92,
   lineCap: "round" as const,
   lineJoin: "round" as const,
 };
@@ -71,17 +74,23 @@ function MapViewport({
   organizations,
   userLocation,
   route,
+  destination,
 }: {
   organizations: Organization[];
   userLocation: UserLocation;
   route: RouteData | null;
+  destination: Organization | null;
 }) {
   const map = useMap();
 
   useEffect(() => {
     if (route?.coordinates.length) {
       const bounds = L.latLngBounds(route.coordinates);
-      map.fitBounds(bounds, { padding: [80, 80], maxZoom: 15 });
+      bounds.extend([userLocation.lat, userLocation.lng]);
+      if (destination) {
+        bounds.extend([destination.lat, destination.lng]);
+      }
+      map.fitBounds(bounds, { padding: [72, 72], maxZoom: 16 });
       return;
     }
 
@@ -91,13 +100,13 @@ function MapViewport({
     ];
 
     if (points.length === 1) {
-      map.setView([userLocation.lat, userLocation.lng], 13);
+      map.setView([userLocation.lat, userLocation.lng], 15);
       return;
     }
 
     const bounds = L.latLngBounds(points);
     map.fitBounds(bounds, { padding: [48, 48], maxZoom: 14 });
-  }, [organizations, userLocation, map, route]);
+  }, [organizations, userLocation, map, route, destination]);
 
   return null;
 }
@@ -113,17 +122,51 @@ function FlyToSelected({
 
   useEffect(() => {
     if (selected && !hasRoute) {
-      map.flyTo([selected.lat, selected.lng], 14, { duration: 0.8 });
+      map.flyTo([selected.lat, selected.lng], 15, { duration: 0.8 });
     }
   }, [selected, map, hasRoute]);
 
   return null;
 }
 
+function UserLocationLayer({
+  userLocation,
+  yourLocationLabel,
+}: {
+  userLocation: TrackedUserLocation;
+  yourLocationLabel: string;
+}) {
+  const position: [number, number] = [userLocation.lat, userLocation.lng];
+  const accuracy = userLocation.accuracy;
+
+  return (
+    <>
+      {accuracy != null && accuracy > 0 && accuracy < 500 && (
+        <Circle
+          center={position}
+          radius={accuracy}
+          pathOptions={{
+            color: "#007bff",
+            fillColor: "#007bff",
+            fillOpacity: 0.12,
+            weight: 1,
+            opacity: 0.35,
+          }}
+        />
+      )}
+      <Marker position={position} icon={userLocationIcon} zIndexOffset={1000}>
+        <Popup>
+          <div className="text-sm font-medium">{yourLocationLabel}</div>
+        </Popup>
+      </Marker>
+    </>
+  );
+}
+
 interface MapViewProps {
   organizations: Organization[];
   selected?: Organization | null;
-  userLocation: UserLocation;
+  userLocation: TrackedUserLocation;
   yourLocationLabel: string;
   route: RouteData | null;
   routeDestination: Organization | null;
@@ -147,16 +190,48 @@ export default function MapView({
   onRouteModeChange,
   onClearRoute,
 }: MapViewProps) {
+  const [mapOrganizations, setMapOrganizations] = useState<Organization[]>(
+    organizations,
+  );
+  const [geocoding, setGeocoding] = useState(false);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    async function resolve() {
+      setGeocoding(true);
+      const resolved = await resolveOrganizationsForMap(organizations);
+      if (!cancelled) {
+        setMapOrganizations(resolved);
+        setGeocoding(false);
+      }
+    }
+
+    void resolve();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [organizations]);
+
+  const destinationOnMap = useMemo(() => {
+    if (!routeDestination) return null;
+    return (
+      mapOrganizations.find((o) => o.id === routeDestination.id) ??
+      routeDestination
+    );
+  }, [mapOrganizations, routeDestination]);
+
   const center = useMemo<[number, number]>(
     () => [userLocation.lat, userLocation.lng],
-    [userLocation],
+    [userLocation.lat, userLocation.lng],
   );
 
   return (
     <div className="relative h-full w-full">
       <MapContainer
         center={center}
-        zoom={13}
+        zoom={14}
         scrollWheelZoom
         className="z-0 h-full w-full rounded-xl"
       >
@@ -165,9 +240,10 @@ export default function MapView({
           url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
         />
         <MapViewport
-          organizations={organizations}
+          organizations={mapOrganizations}
           userLocation={userLocation}
           route={route}
+          destination={destinationOnMap}
         />
         <FlyToSelected
           selected={selected}
@@ -178,17 +254,12 @@ export default function MapView({
           <Polyline positions={route.coordinates} pathOptions={ROUTE_STYLE} />
         )}
 
-        <Marker
-          position={[userLocation.lat, userLocation.lng]}
-          icon={userLocationIcon}
-          zIndexOffset={1000}
-        >
-          <Popup>
-            <div className="text-sm font-medium">{yourLocationLabel}</div>
-          </Popup>
-        </Marker>
+        <UserLocationLayer
+          userLocation={userLocation}
+          yourLocationLabel={yourLocationLabel}
+        />
 
-        {organizations.map((org) => (
+        {mapOrganizations.map((org) => (
           <Marker
             key={org.id}
             position={[org.lat, org.lng]}
@@ -201,17 +272,42 @@ export default function MapView({
               <div className="text-sm">
                 <strong>{org.name}</strong>
                 {org.verified && (
-                  <span className="ml-1 text-blue-400">✓</span>
+                  <span className="ml-1 text-emerald-400">✓</span>
                 )}
                 <br />
                 <span>
                   {CATEGORY_CONFIG[org.category].icon} {org.category}
                 </span>
+                {org.address && (
+                  <>
+                    <br />
+                    <span className="text-xs text-gray-400">{org.address}</span>
+                  </>
+                )}
               </div>
             </Popup>
           </Marker>
         ))}
       </MapContainer>
+
+      {geocoding && (
+        <div className="pointer-events-none absolute bottom-3 left-3 z-[1000] rounded-lg bg-gray-900/90 px-3 py-1.5 text-xs text-gray-300">
+          Refining marker locations…
+        </div>
+      )}
+
+      {route && !routeLoading && !routeError && (
+        <div className="pointer-events-none absolute inset-x-0 bottom-3 z-[1000] flex justify-center px-3">
+          <div className="rounded-xl border border-blue-500/40 bg-gray-900/95 px-4 py-2.5 text-center shadow-lg backdrop-blur-sm">
+            <p className="text-sm font-bold text-blue-400">
+              {route.distanceKm} km · {route.durationMinutes} min
+            </p>
+            <p className="text-[10px] uppercase tracking-wide text-gray-500">
+              {routeMode === "walking" ? "Walking" : "Driving"} · OSRM
+            </p>
+          </div>
+        </div>
+      )}
 
       {routeDestination && (
         <RouteControls

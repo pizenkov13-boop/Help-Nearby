@@ -1,17 +1,23 @@
 import type { UserLocation } from "@/lib/types";
 
-export type RoutingMode = "driving" | "walking" | "transit";
+export type RoutingMode = "driving" | "walking";
+
+export interface RouteStep {
+  instruction: string;
+  distanceM: number;
+  durationS: number;
+}
 
 export interface RouteData {
   coordinates: [number, number][];
   distanceKm: number;
   durationMinutes: number;
   mode: RoutingMode;
+  steps: RouteStep[];
 }
 
 export function getOsrmProfile(mode: RoutingMode): string {
-  if (mode === "walking") return "foot";
-  return "driving";
+  return mode === "walking" ? "foot" : "driving";
 }
 
 export async function fetchRoute(

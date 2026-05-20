@@ -166,6 +166,11 @@
   z-index: 1;
 }
 
+.user-location-marker .user-marker-pulse-delay {
+  animation-delay: 1s;
+  background: rgba(0, 123, 255, 0.25);
+}
+
 .user-location-marker .user-marker-pulse::after {
   content: "";
   position: absolute;

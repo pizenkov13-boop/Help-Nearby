@@ -1,15 +1,12 @@
-/** Forward geocode an address to coordinates via OpenStreetMap Nominatim. */
-export async function forwardGeocode(
-  address: string,
-  city: string,
-  country: string,
+/** Forward geocode a free-text address via OpenStreetMap Nominatim. */
+export async function forwardGeocodeQuery(
+  query: string,
 ): Promise<{ lat: number; lng: number } | null> {
-  const query = [address, city, country].filter(Boolean).join(", ");
   if (!query.trim()) return null;
 
   try {
     const url = new URL("https://nominatim.openstreetmap.org/search");
-    url.searchParams.set("q", query);
+    url.searchParams.set("q", query.trim());
     url.searchParams.set("format", "json");
     url.searchParams.set("limit", "1");
 
@@ -33,11 +30,26 @@ export async function forwardGeocode(
   }
 }
 
-/** Reverse geocode coordinates to a country name via OpenStreetMap Nominatim. */
+/** Forward geocode an address to coordinates via OpenStreetMap Nominatim. */
+export async function forwardGeocode(
+  address: string,
+  city: string,
+  country: string,
+): Promise<{ lat: number; lng: number } | null> {
+  const query = [address, city, country].filter(Boolean).join(", ");
+  return forwardGeocodeQuery(query);
+}
+
+export interface ReverseGeocodeResult {
+  country: string;
+  countryCode: string | null;
+}
+
+/** Reverse geocode coordinates to country name and ISO code via Nominatim. */
 export async function reverseGeocodeCountry(
   lat: number,
   lng: number,
-): Promise<string | null> {
+): Promise<ReverseGeocodeResult | null> {
   try {
     const url = new URL("https://nominatim.openstreetmap.org/reverse");
     url.searchParams.set("lat", String(lat));
@@ -51,10 +63,16 @@ export async function reverseGeocodeCountry(
     if (!response.ok) return null;
 
     const data = (await response.json()) as {
-      address?: { country?: string };
+      address?: { country?: string; country_code?: string };
     };
 
-    return data.address?.country ?? null;
+    const country = data.address?.country;
+    if (!country) return null;
+
+    return {
+      country,
+      countryCode: data.address?.country_code?.toUpperCase() ?? null,
+    };
   } catch {
     return null;
   }

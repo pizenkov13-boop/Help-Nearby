@@ -1,0 +1,49 @@
+import { NextResponse } from "next/server";
+import {
+  getTodayImpactCount,
+  trackImpactClick,
+  type ImpactAction,
+} from "@/lib/impact";
+
+export const runtime = "nodejs";
+export const dynamic = "force-dynamic";
+
+function isImpactAction(value: unknown): value is ImpactAction {
+  return value === "call" || value === "directions";
+}
+
+export async function GET() {
+  try {
+    const count = await getTodayImpactCount();
+    return NextResponse.json({ count });
+  } catch (error) {
+    console.error("[api/impact GET]", error);
+    return NextResponse.json({ count: 0 });
+  }
+}
+
+export async function POST(request: Request) {
+  try {
+    const body = (await request.json()) as Record<string, unknown>;
+    const orgId = String(body.orgId ?? "").trim();
+    const action = body.action;
+
+    if (!orgId || !isImpactAction(action)) {
+      return NextResponse.json(
+        { error: "orgId and action (call|directions) are required." },
+        { status: 400 },
+      );
+    }
+
+    await trackImpactClick(orgId, action);
+    const count = await getTodayImpactCount();
+
+    return NextResponse.json({ ok: true, count });
+  } catch (error) {
+    console.error("[api/impact POST]", error);
+    return NextResponse.json(
+      { error: "Failed to record impact click." },
+      { status: 500 },
+    );
+  }
+}
