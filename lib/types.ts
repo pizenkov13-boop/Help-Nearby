@@ -30,6 +30,7 @@ export interface Organization {
   category: Category;
   categories: Category[];
   country: string;
+  city: string;
   lat: number;
   lng: number;
   distance: string;
@@ -40,6 +41,8 @@ export interface Organization {
   website: string;
   description: string;
   hours: WeeklyHours;
+  /** Original hours field from database (for 24/7 text detection). */
+  hoursRaw: string;
   openNow: boolean;
   verified: boolean;
 }
@@ -48,6 +51,16 @@ export interface FilterState {
   country: string;
   category: Category | "all";
   openNow: boolean;
+  searchQuery: string;
+}
+
+export interface Review {
+  id: number;
+  name: string;
+  country: string;
+  message: string;
+  rating: number;
+  created_at: string;
 }
 
 export interface UserLocation {

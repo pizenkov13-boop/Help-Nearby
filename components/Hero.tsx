@@ -1,16 +1,18 @@
 "use client";
 
-import { Loader2, MapPin, Sparkles } from "lucide-react";
+import { Heart, Loader2, MapPin, Sparkles } from "lucide-react";
 import { useLanguage } from "@/lib/i18n/LanguageProvider";
+import { formatImpactCounter } from "@/lib/i18n/translations";
 import { cn } from "@/lib/utils";
 
 interface HeroProps {
   onFindHelp: () => void;
   isLocating: boolean;
+  impactCount: number | null;
 }
 
-export function Hero({ onFindHelp, isLocating }: HeroProps) {
-  const { t } = useLanguage();
+export function Hero({ onFindHelp, isLocating, impactCount }: HeroProps) {
+  const { t, language } = useLanguage();
 
   return (
     <section
@@ -26,6 +28,13 @@ export function Hero({ onFindHelp, isLocating }: HeroProps) {
           <Sparkles className="h-4 w-4 text-emerald-400" />
           <span>{t("brand")}</span>
         </div>
+
+        {impactCount !== null && (
+          <p className="animate-fade-in mb-5 inline-flex items-center gap-2 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-4 py-2 text-sm font-semibold text-emerald-600 dark:text-emerald-400">
+            <Heart className="h-4 w-4 fill-emerald-500/30 text-emerald-500" />
+            {formatImpactCounter(language, impactCount)}
+          </p>
+        )}
 
         <h1 className="animate-fade-in-up text-4xl font-extrabold tracking-tight sm:text-5xl md:text-6xl">
           <span className="text-gradient-hero">{t("heroTitle")}</span>

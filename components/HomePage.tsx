@@ -5,21 +5,36 @@ import { useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { DEFAULT_LOCATION, NEARBY_RADIUS_METERS } from "@/lib/constants";
 import { fetchOrganizations, fetchCountries } from "@/lib/data";
+import { filterOrganizations } from "@/lib/filterOrganizations";
+import {
+  watchUserLocation,
+  type TrackedUserLocation,
+} from "@/lib/geolocation";
 import { reverseGeocodeCountry } from "@/lib/geocode";
+import { resolveOrganizationCoordinates } from "@/lib/resolveOrganizationCoordinates";
+import {
+  detectSlowConnectionFromNetwork,
+  getStoredViewMode,
+  isSlowInternetCountry,
+  setStoredViewMode,
+  shouldUseLiteMode,
+  subscribeToNetworkChanges,
+  type ViewModePreference,
+} from "@/lib/liteMode";
 import { mergeOrganizations } from "@/lib/mergeOrganizations";
-import { isOrganizationOpen } from "@/lib/org";
 import {
   fetchRoute,
   type RouteData,
   type RoutingMode,
 } from "@/lib/routing";
-import type { FilterState, Organization, UserLocation } from "@/lib/types";
+import type { FilterState, Organization } from "@/lib/types";
 import { useLanguage } from "@/lib/i18n/LanguageProvider";
 import { SiteLayout } from "@/components/layout/SiteLayout";
 import { cn } from "@/lib/utils";
 import { Filters } from "./Filters";
 import { Hero } from "./Hero";
 import { OrganizationList } from "./OrganizationList";
+import { SearchBar } from "./SearchBar";
 import { AboutSection } from "./home/AboutSection";
 import { CitiesSection } from "./home/CitiesSection";
 import { HowItWorksSection } from "./home/HowItWorksSection";
@@ -40,28 +55,8 @@ const defaultFilters: FilterState = {
   country: "all",
   category: "all",
   openNow: false,
+  searchQuery: "",
 };
-
-function filterOrganizations(
-  orgs: Organization[],
-  filters: FilterState,
-): Organization[] {
-  return orgs.filter((org) => {
-    if (filters.country !== "all" && org.country !== filters.country) {
-      return false;
-    }
-    if (
-      filters.category !== "all" &&
-      !org.categories.includes(filters.category)
-    ) {
-      return false;
-    }
-    if (filters.openNow && !isOrganizationOpen(org)) {
-      return false;
-    }
-    return true;
-  });
-}
 
 export function HomePage() {
   const { t } = useLanguage();
@@ -70,7 +65,9 @@ export function HomePage() {
   const [filters, setFilters] = useState<FilterState>(defaultFilters);
   const [selected, setSelected] = useState<Organization | null>(null);
   const [mapExpanded, setMapExpanded] = useState(false);
-  const [userLocation, setUserLocation] = useState<UserLocation | null>(null);
+  const [userLocation, setUserLocation] = useState<TrackedUserLocation | null>(
+    null,
+  );
   const [usingDefaultLocation, setUsingDefaultLocation] = useState(false);
   const [isLocating, setIsLocating] = useState(false);
   const [allOrganizations, setAllOrganizations] = useState<Organization[]>([]);
@@ -84,8 +81,78 @@ export function HomePage() {
   const [routeMode, setRouteMode] = useState<RoutingMode>("walking");
   const [routeLoading, setRouteLoading] = useState(false);
   const [routeError, setRouteError] = useState<string | null>(null);
+  const [liteRecommended, setLiteRecommended] = useState(false);
+  const [viewPreference, setViewPreference] = useState<ViewModePreference | null>(
+    null,
+  );
+  const [liteDetectionDone, setLiteDetectionDone] = useState(false);
   const shouldScrollRef = useRef(false);
   const findTriggeredRef = useRef(false);
+  const liteAutoOpenedRef = useRef(false);
+  const [impactCount, setImpactCount] = useState<number | null>(null);
+
+  const liteModeActive = shouldUseLiteMode(liteRecommended, viewPreference);
+  const canRoute = Boolean(userLocation && !usingDefaultLocation);
+
+  useEffect(() => {
+    setViewPreference(getStoredViewMode());
+  }, []);
+
+  const refreshImpactCount = useCallback(async () => {
+    try {
+      const res = await fetch("/api/impact");
+      if (!res.ok) return;
+      const data = (await res.json()) as { count?: number };
+      setImpactCount(data.count ?? 0);
+    } catch (error) {
+      console.error("[HomePage] impact count failed:", error);
+    }
+  }, []);
+
+  useEffect(() => {
+    void refreshImpactCount();
+  }, [refreshImpactCount]);
+
+  const handleImpactRecorded = useCallback(() => {
+    setImpactCount((prev) => (prev ?? 0) + 1);
+    void refreshImpactCount();
+  }, [refreshImpactCount]);
+
+  useEffect(() => {
+    const networkSlow = detectSlowConnectionFromNetwork();
+
+    if (networkSlow !== null) {
+      setLiteRecommended(networkSlow);
+      setLiteDetectionDone(true);
+
+      return subscribeToNetworkChanges((slow) => {
+        setLiteRecommended(slow);
+      });
+    }
+
+    if (!navigator.geolocation) {
+      setLiteDetectionDone(true);
+      return;
+    }
+
+    navigator.geolocation.getCurrentPosition(
+      async (position) => {
+        const geo = await reverseGeocodeCountry(
+          position.coords.latitude,
+          position.coords.longitude,
+        );
+        if (
+          geo &&
+          isSlowInternetCountry(geo.country, geo.countryCode)
+        ) {
+          setLiteRecommended(true);
+        }
+        setLiteDetectionDone(true);
+      },
+      () => setLiteDetectionDone(true),
+      { enableHighAccuracy: false, timeout: 8000, maximumAge: 86400000 },
+    );
+  }, []);
 
   useEffect(() => {
     let cancelled = false;
@@ -99,7 +166,7 @@ export function HomePage() {
         ]);
         if (cancelled) return;
         setCountryOptions(countries);
-        setAllOrganizations(orgs.map((org) => ({ ...org, verified: true })));
+        setAllOrganizations(orgs);
       } catch (error) {
         console.error("[HomePage] Supabase catalog load failed:", error);
       } finally {
@@ -115,7 +182,7 @@ export function HomePage() {
   }, []);
 
   useEffect(() => {
-    if (!userLocation) return;
+    if (liteModeActive || !userLocation) return;
 
     let cancelled = false;
 
@@ -126,18 +193,16 @@ export function HomePage() {
       setOrgsLoading(true);
       setOverpassLoading(true);
 
-      const country = await reverseGeocodeCountry(location.lat, location.lng);
+      const geo = await reverseGeocodeCountry(location.lat, location.lng);
 
-      const verified = (
-        await fetchOrganizations(location, {
-          country: country ?? undefined,
-          radiusMeters: NEARBY_RADIUS_METERS,
-        })
-      ).map((org) => ({ ...org, verified: true }));
+      const catalog = await fetchOrganizations(location, {
+        country: geo?.country ?? undefined,
+        radiusMeters: NEARBY_RADIUS_METERS,
+      });
 
       if (cancelled) return;
 
-      setAllOrganizations(verified);
+      setAllOrganizations(catalog);
       setOrgsLoading(false);
 
       try {
@@ -151,7 +216,7 @@ export function HomePage() {
         const nearby = (await res.json()) as Organization[];
         if (cancelled) return;
 
-        setAllOrganizations(mergeOrganizations(verified, nearby));
+        setAllOrganizations(mergeOrganizations(catalog, nearby));
       } catch (error) {
         console.error("[HomePage] Overpass load failed:", error);
       } finally {
@@ -164,12 +229,18 @@ export function HomePage() {
     return () => {
       cancelled = true;
     };
-  }, [userLocation]);
+  }, [userLocation, liteModeActive]);
 
   const filtered = useMemo(
     () => filterOrganizations(allOrganizations, filters),
     [allOrganizations, filters],
   );
+
+  useEffect(() => {
+    if (selected && !filtered.some((org) => org.id === selected.id)) {
+      setSelected(null);
+    }
+  }, [filtered, selected]);
 
   const scrollToMapTop = useCallback(() => {
     const el = mapSectionRef.current;
@@ -187,9 +258,20 @@ export function HomePage() {
   }, []);
 
   const handleGetDirections = useCallback(
-    (org: Organization) => {
-      setSelected(org);
-      setRouteDestination(org);
+    async (org: Organization) => {
+      const resolved = await resolveOrganizationCoordinates(org);
+
+      if (liteModeActive) {
+        window.open(
+          `https://www.google.com/maps/dir/?api=1&destination=${resolved.lat},${resolved.lng}`,
+          "_blank",
+          "noopener,noreferrer",
+        );
+        return;
+      }
+
+      setSelected(resolved);
+      setRouteDestination(resolved);
       setRouteError(null);
       shouldScrollRef.current = true;
       if (!mapExpanded) {
@@ -198,11 +280,51 @@ export function HomePage() {
         scrollToMapTop();
       }
     },
-    [mapExpanded, scrollToMapTop],
+    [liteModeActive, mapExpanded, scrollToMapTop],
   );
 
+  const handleSwitchToFullVersion = useCallback(() => {
+    setStoredViewMode("full");
+    setViewPreference("full");
+
+    if (!navigator.geolocation) return;
+
+    setIsLocating(true);
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        setUserLocation({
+          lat: position.coords.latitude,
+          lng: position.coords.longitude,
+          accuracy: position.coords.accuracy,
+        });
+        setUsingDefaultLocation(false);
+        setIsLocating(false);
+      },
+      () => setIsLocating(false),
+      { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 },
+    );
+  }, []);
+
+  const userLocationRef = useRef(userLocation);
+  userLocationRef.current = userLocation;
+
   useEffect(() => {
-    if (!routeDestination || !userLocation) {
+    if (!mapExpanded || liteModeActive || usingDefaultLocation) return;
+
+    return watchUserLocation((location) => {
+      setUserLocation(location);
+      setUsingDefaultLocation(false);
+    });
+  }, [mapExpanded, liteModeActive, usingDefaultLocation]);
+
+  useEffect(() => {
+    if (liteModeActive || !routeDestination) {
+      setRoute(null);
+      return;
+    }
+
+    const from = userLocationRef.current;
+    if (!from) {
       setRoute(null);
       return;
     }
@@ -214,7 +336,7 @@ export function HomePage() {
       setRouteError(null);
 
       try {
-        const data = await fetchRoute(userLocation!, routeDestination!, routeMode);
+        const data = await fetchRoute(from!, routeDestination!, routeMode);
         if (cancelled) return;
         setRoute(data);
       } catch (error) {
@@ -233,7 +355,7 @@ export function HomePage() {
     return () => {
       cancelled = true;
     };
-  }, [routeDestination, userLocation, routeMode]);
+  }, [routeDestination, routeMode, liteModeActive, canRoute]);
 
   useEffect(() => {
     if (!mapExpanded || !shouldScrollRef.current) return;
@@ -247,7 +369,7 @@ export function HomePage() {
   }, [mapExpanded, scrollToMapTop]);
 
   const openMapAccordion = useCallback(
-    (location: UserLocation, isDefault: boolean) => {
+    (location: TrackedUserLocation, isDefault: boolean) => {
       setUserLocation(location);
       setUsingDefaultLocation(isDefault);
       setMapExpanded(true);
@@ -265,6 +387,11 @@ export function HomePage() {
 
     setIsLocating(true);
 
+    if (liteModeActive) {
+      openMapAccordion(DEFAULT_LOCATION, true);
+      return;
+    }
+
     if (!navigator.geolocation) {
       openMapAccordion(DEFAULT_LOCATION, true);
       return;
@@ -276,6 +403,7 @@ export function HomePage() {
           {
             lat: position.coords.latitude,
             lng: position.coords.longitude,
+            accuracy: position.coords.accuracy,
           },
           false,
         );
@@ -285,7 +413,23 @@ export function HomePage() {
       },
       { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 },
     );
-  }, [mapExpanded, userLocation, openMapAccordion, scrollToMapTop]);
+  }, [mapExpanded, userLocation, openMapAccordion, scrollToMapTop, liteModeActive]);
+
+  useEffect(() => {
+    if (
+      !liteModeActive ||
+      !liteDetectionDone ||
+      orgsLoading ||
+      mapExpanded ||
+      liteAutoOpenedRef.current
+    ) {
+      return;
+    }
+    liteAutoOpenedRef.current = true;
+    setUserLocation(DEFAULT_LOCATION);
+    setUsingDefaultLocation(true);
+    setMapExpanded(true);
+  }, [liteModeActive, liteDetectionDone, orgsLoading, mapExpanded]);
 
   useEffect(() => {
     if (
@@ -299,63 +443,105 @@ export function HomePage() {
     handleFindHelp();
   }, [searchParams, mapExpanded, handleFindHelp]);
 
+  const updateSearchQuery = useCallback((searchQuery: string) => {
+    setFilters((prev) => ({ ...prev, searchQuery }));
+  }, []);
+
   return (
     <SiteLayout>
-      <Hero onFindHelp={handleFindHelp} isLocating={isLocating} />
+      <Hero
+        onFindHelp={handleFindHelp}
+        isLocating={isLocating}
+        impactCount={impactCount}
+      />
 
       <div
         id="map-section"
         ref={mapSectionRef}
         className={cn(
           "overflow-hidden transition-[max-height] ease-in-out",
-          mapExpanded && userLocation ? "max-h-[1400px]" : "max-h-0",
+          mapExpanded ? "max-h-[2400px]" : "max-h-0",
         )}
         style={{ transitionDuration: `${ACCORDION_DURATION_MS}ms` }}
         aria-hidden={!mapExpanded}
       >
-        {userLocation && (
+        {(userLocation || liteModeActive) && (
           <section className="border-t border-gray-200 bg-gray-50 px-4 py-10 transition-colors duration-300 dark:border-gray-800 dark:bg-gray-900 sm:px-6 lg:px-8">
             <div className="mx-auto max-w-7xl">
               <div className="mb-6 flex flex-wrap items-center gap-3">
                 <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
                   {t("mapTitle")}
                 </h2>
-                {usingDefaultLocation && (
+                {liteModeActive && (
+                  <span className="rounded-full border border-emerald-500/30 bg-emerald-500/10 px-3 py-1 text-xs text-emerald-400">
+                    {t("liteModeNotice")}
+                  </span>
+                )}
+                {usingDefaultLocation && !liteModeActive && (
                   <span className="rounded-full border border-amber-500/30 bg-amber-500/10 px-3 py-1 text-xs text-amber-400">
                     {t("defaultLocationNotice")}
                   </span>
                 )}
-                {overpassLoading && (
+                {overpassLoading && !liteModeActive && (
                   <span className="rounded-full border border-blue-500/30 bg-blue-500/10 px-3 py-1 text-xs text-blue-400">
                     {t("loadingNearby")}
                   </span>
                 )}
               </div>
 
-              <div className="grid gap-6 lg:grid-cols-[260px_1fr_340px]">
-                <Filters
-                  filters={filters}
-                  onChange={setFilters}
-                  countryOptions={countryOptions}
-                />
-
-                <div className="h-[400px] overflow-hidden rounded-xl border border-gray-200 shadow-lg dark:border-gray-800 lg:h-[520px]">
-                  <MapView
-                    organizations={filtered}
-                    selected={selected}
-                    userLocation={userLocation}
-                    yourLocationLabel={t("yourLocation")}
-                    route={route}
-                    routeDestination={routeDestination}
-                    routeMode={routeMode}
-                    routeLoading={routeLoading}
-                    routeError={routeError}
-                    onRouteModeChange={setRouteMode}
-                    onClearRoute={handleClearRoute}
+              <div
+                className={cn(
+                  "grid gap-6",
+                  liteModeActive
+                    ? "lg:grid-cols-[280px_1fr]"
+                    : "lg:grid-cols-[260px_1fr_340px]",
+                )}
+              >
+                <div>
+                  <SearchBar
+                    value={filters.searchQuery}
+                    onChange={updateSearchQuery}
                   />
+                  <Filters
+                    filters={filters}
+                    onChange={setFilters}
+                    countryOptions={countryOptions}
+                  />
+                  {liteModeActive && (
+                    <button
+                      type="button"
+                      onClick={handleSwitchToFullVersion}
+                      className="mt-4 w-full rounded-lg border border-blue-500/40 bg-blue-500/10 px-4 py-2.5 text-sm font-medium text-blue-300 transition-colors hover:bg-blue-500/20"
+                    >
+                      {t("switchToFullVersion")}
+                    </button>
+                  )}
                 </div>
 
-                <div className="flex max-h-[520px] flex-col overflow-hidden rounded-xl border border-gray-200 bg-white/80 dark:border-gray-800 dark:bg-gray-800/30 lg:max-h-[520px]">
+                {!liteModeActive && userLocation && (
+                  <div className="h-[400px] overflow-hidden rounded-xl border border-gray-200 shadow-lg dark:border-gray-800 lg:h-[520px]">
+                    <MapView
+                      organizations={filtered}
+                      selected={selected}
+                      userLocation={userLocation}
+                      yourLocationLabel={t("yourLocation")}
+                      route={route}
+                      routeDestination={routeDestination}
+                      routeMode={routeMode}
+                      routeLoading={routeLoading}
+                      routeError={routeError}
+                      onRouteModeChange={setRouteMode}
+                      onClearRoute={handleClearRoute}
+                    />
+                  </div>
+                )}
+
+                <div
+                  className={cn(
+                    "flex flex-col overflow-hidden rounded-xl border border-gray-200 bg-white/80 dark:border-gray-800 dark:bg-gray-800/30",
+                    liteModeActive ? "min-h-[320px]" : "max-h-[520px] lg:max-h-[520px]",
+                  )}
+                >
                   <div className="flex-1 overflow-y-auto p-4">
                     {orgsLoading && allOrganizations.length === 0 ? (
                       <p className="text-center text-sm text-gray-500">
@@ -364,9 +550,11 @@ export function HomePage() {
                     ) : (
                       <OrganizationList
                         organizations={filtered}
+                        searchQuery={filters.searchQuery}
                         selectedId={selected?.id}
                         onSelect={setSelected}
                         onGetDirections={handleGetDirections}
+                        onImpactRecorded={handleImpactRecorded}
                       />
                     )}
                   </div>

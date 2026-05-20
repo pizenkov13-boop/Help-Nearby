@@ -67,6 +67,7 @@ export function mapDbOrganization(
     category: categories[0],
     categories,
     country: row.country ?? "",
+    city: row.city ?? "",
     lat,
     lng,
     distance: "",
@@ -77,6 +78,7 @@ export function mapDbOrganization(
     website: row.website ?? "",
     description: row.description ?? "",
     hours,
+    hoursRaw: row.hours ?? "",
     openNow: false,
     verified: Boolean(row.verified),
   };

@@ -1,13 +1,25 @@
 import { NextResponse } from "next/server";
-import { getOsrmProfile, type RoutingMode } from "@/lib/routing";
+import { getOsrmProfile, type RouteStep, type RoutingMode } from "@/lib/routing";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
-const OSRM_BASE = "http://router.project-osrm.org/route/v1";
+const OSRM_BASE = "https://router.project-osrm.org/route/v1";
 
 function isRoutingMode(value: string | null): value is RoutingMode {
-  return value === "driving" || value === "walking" || value === "transit";
+  return value === "driving" || value === "walking";
+}
+
+interface OsrmManeuver {
+  type?: string;
+  modifier?: string;
+}
+
+interface OsrmStep {
+  name?: string;
+  distance: number;
+  duration: number;
+  maneuver: OsrmManeuver;
 }
 
 interface OsrmRouteResponse {
@@ -18,8 +30,40 @@ interface OsrmRouteResponse {
     geometry: {
       coordinates: [number, number][];
     };
+    legs?: { steps?: OsrmStep[] }[];
   }[];
   message?: string;
+}
+
+function formatManeuver(step: OsrmStep): string {
+  const road = step.name?.trim() || "the road";
+  const { type, modifier } = step.maneuver;
+
+  if (type === "depart") return `Head ${modifier ? modifier.replace(/_/g, " ") + " on " : ""}${road}`;
+  if (type === "arrive") return `Arrive at ${road}`;
+  if (type === "roundabout" || type === "rotary") {
+    return `Take the roundabout onto ${road}`;
+  }
+  if (modifier) {
+    const dir = modifier.replace(/_/g, " ");
+    return `${dir.charAt(0).toUpperCase() + dir.slice(1)} onto ${road}`;
+  }
+  if (type) {
+    return `${type.charAt(0).toUpperCase() + type.slice(1)} onto ${road}`;
+  }
+  return `Continue on ${road}`;
+}
+
+function parseSteps(legs: { steps?: OsrmStep[] }[] | undefined): RouteStep[] {
+  if (!legs?.length) return [];
+
+  return legs.flatMap((leg) =>
+    (leg.steps ?? []).map((step) => ({
+      instruction: formatManeuver(step),
+      distanceM: Math.round(step.distance),
+      durationS: Math.round(step.duration),
+    })),
+  );
 }
 
 export async function GET(request: Request) {
@@ -45,7 +89,7 @@ export async function GET(request: Request) {
 
   const profile = getOsrmProfile(mode);
   const coords = `${fromLng},${fromLat};${toLng},${toLat}`;
-  const url = `${OSRM_BASE}/${profile}/${coords}?overview=full&geometries=geojson`;
+  const url = `${OSRM_BASE}/${profile}/${coords}?overview=full&geometries=geojson&steps=true`;
 
   try {
     const response = await fetch(url, {
@@ -78,6 +122,7 @@ export async function GET(request: Request) {
       distanceKm: Math.round((route.distance / 1000) * 10) / 10,
       durationMinutes: Math.max(1, Math.round(route.duration / 60)),
       mode,
+      steps: parseSteps(route.legs),
     });
   } catch (error) {
     console.error("[api/route]", error);

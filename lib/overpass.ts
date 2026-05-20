@@ -116,6 +116,11 @@ function mapElementToOrganization(
     category,
     categories: [category],
     country: tags["addr:country"] ?? "",
+    city:
+      tags["addr:city"] ??
+      tags["addr:town"] ??
+      tags["addr:village"] ??
+      "",
     lat: coords.lat,
     lng: coords.lng,
     distance: formatDistanceMiles(
@@ -134,6 +139,7 @@ function mapElementToOrganization(
       tags.operator ??
       [tags.amenity, tags.social_facility].filter(Boolean).join(" · "),
     hours: {},
+    hoursRaw: tags.opening_hours ?? "",
     openNow: false,
     verified: false,
   };

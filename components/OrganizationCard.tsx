@@ -10,6 +10,7 @@ import {
 } from "lucide-react";
 import { CATEGORY_CONFIG } from "@/lib/categories";
 import { useLanguage } from "@/lib/i18n/LanguageProvider";
+import { recordImpactClick } from "@/lib/impact";
 import {
   getDirectionsUrl,
   getPhoneTelUrl,
@@ -22,6 +23,7 @@ interface OrganizationCardProps {
   org: Organization;
   onSelect?: (org: Organization) => void;
   onGetDirections?: (org: Organization) => void;
+  onImpactRecorded?: () => void;
   selected?: boolean;
 }
 
@@ -29,6 +31,7 @@ export function OrganizationCard({
   org,
   onSelect,
   onGetDirections,
+  onImpactRecorded,
   selected,
 }: OrganizationCardProps) {
   const { t } = useLanguage();
@@ -37,6 +40,17 @@ export function OrganizationCard({
   const directionsUrl = getDirectionsUrl(org);
   const telUrl = getPhoneTelUrl(org.phone);
   const hasPhone = Boolean(org.phone?.trim());
+
+  const handleCallClick = () => {
+    recordImpactClick(org.id, "call");
+    onImpactRecorded?.();
+  };
+
+  const handleDirectionsClick = () => {
+    recordImpactClick(org.id, "directions");
+    onImpactRecorded?.();
+    onGetDirections?.(org);
+  };
 
   const cardBody = (
     <>
@@ -53,7 +67,7 @@ export function OrganizationCard({
               {cfg.icon} {org.category}
             </span>
             {org.verified && (
-              <span className="inline-flex items-center gap-0.5 rounded-full bg-blue-500/20 px-2 py-0.5 text-xs font-semibold text-blue-400">
+              <span className="inline-flex items-center gap-0.5 rounded-full bg-emerald-500/20 px-2 py-0.5 text-xs font-semibold text-emerald-400 ring-1 ring-emerald-500/30">
                 ✓ {t("verified")}
               </span>
             )}
@@ -132,22 +146,30 @@ export function OrganizationCard({
         {hasPhone && (
           <a
             href={telUrl}
-            className="inline-flex flex-1 items-center justify-center gap-2 rounded-lg bg-gradient-to-r from-emerald-500 to-emerald-600 px-4 py-2.5 text-sm font-semibold text-white transition-all hover:from-emerald-400 hover:to-emerald-500"
+            onClick={handleCallClick}
+            className="group/call relative inline-flex flex-1 items-center justify-center gap-2 rounded-lg bg-emerald-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm shadow-emerald-600/25 transition-all hover:bg-emerald-500 active:bg-emerald-700"
+            aria-label={`${t("callNow")}: ${org.phone}`}
           >
-            <Phone className="h-4 w-4" />
+            <span
+              role="tooltip"
+              className="pointer-events-none absolute bottom-full left-1/2 z-10 mb-2 hidden -translate-x-1/2 whitespace-nowrap rounded-lg border border-emerald-500/30 bg-gray-950 px-3 py-1.5 text-xs font-medium text-emerald-300 opacity-0 shadow-xl transition-opacity group-hover/call:opacity-100 md:block"
+            >
+              {org.phone}
+            </span>
+            <Phone className="h-4 w-4 shrink-0" aria-hidden />
             {t("callNow")}
           </a>
         )}
         {onGetDirections ? (
           <button
             type="button"
-            onClick={() => onGetDirections(org)}
+            onClick={handleDirectionsClick}
             className={cn(
               "inline-flex flex-1 items-center justify-center gap-2 rounded-lg bg-gradient-to-r from-blue-600/80 to-emerald-600/80 px-4 py-2.5 text-sm font-medium text-white transition-all hover:from-blue-500 hover:to-emerald-500",
               !hasPhone && "w-full",
             )}
           >
-            <Navigation className="h-4 w-4" />
+            <Navigation className="h-4 w-4 shrink-0" aria-hidden />
             {t("getDirections")}
           </button>
         ) : (
@@ -155,12 +177,16 @@ export function OrganizationCard({
             href={directionsUrl}
             target="_blank"
             rel="noopener noreferrer"
+            onClick={() => {
+              recordImpactClick(org.id, "directions");
+              onImpactRecorded?.();
+            }}
             className={cn(
               "inline-flex flex-1 items-center justify-center gap-2 rounded-lg bg-gradient-to-r from-blue-600/80 to-emerald-600/80 px-4 py-2.5 text-sm font-medium text-white transition-all hover:from-blue-500 hover:to-emerald-500",
               !hasPhone && "w-full",
             )}
           >
-            <Navigation className="h-4 w-4" />
+            <Navigation className="h-4 w-4 shrink-0" aria-hidden />
             {t("getDirections")}
           </a>
         )}
