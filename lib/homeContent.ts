@@ -10,78 +10,45 @@ export interface CityInNeed {
 
 export const CITIES_IN_NEED: CityInNeed[] = [
   {
-    city: "Detroit",
-    country: "USA",
+    city: "Khartoum",
+    country: "Sudan 🇸🇩",
     urgency: "CRISIS",
-    issue: "Food insecurity & housing instability",
-    problem:
-      "Thousands lack access to daily meals and emergency shelter, with long waitlists at food banks and warming centers.",
+    issue: "Armed conflict, displacement",
+    problem: "Millions without food and medical access",
   },
   {
-    city: "Vancouver",
-    country: "Canada",
-    urgency: "HIGH NEED",
-    issue: "Homelessness & opioid crisis",
-    problem:
-      "Rising street homelessness and limited harm-reduction services leave many without shelter or medical support.",
-  },
-  {
-    city: "Marseille",
-    country: "France",
-    urgency: "MEDIUM NEED",
-    issue: "Youth unemployment & migrant support",
-    problem:
-      "Young adults and newly arrived families struggle to find food aid, language services, and job training programs.",
-  },
-  {
-    city: "Glasgow",
-    country: "UK",
-    urgency: "HIGH NEED",
-    issue: "Fuel poverty & food banks under strain",
-    problem:
-      "Winter energy costs push families to choose between heating and eating, overwhelming local charity networks.",
-  },
-  {
-    city: "Los Angeles",
-    country: "USA",
+    city: "Sanaa",
+    country: "Yemen 🇾🇪",
     urgency: "CRISIS",
-    issue: "Unhoused population & mental health gaps",
-    problem:
-      "One of the largest unhoused populations in the U.S. with critical shortages of beds, clinics, and outreach teams.",
+    issue: "Civil war, famine",
+    problem: "Worst humanitarian crisis in the world",
   },
   {
-    city: "Toronto",
-    country: "Canada",
+    city: "Kabul",
+    country: "Afghanistan 🇦🇫",
+    urgency: "CRISIS",
+    issue: "Extreme poverty",
+    problem: "28 million people need aid",
+  },
+  {
+    city: "Gaza",
+    country: "Palestine 🇵🇸",
+    urgency: "CRISIS",
+    issue: "Armed conflict",
+    problem: "Severe shortage of food, water, medical care",
+  },
+  {
+    city: "Kinshasa",
+    country: "DRC 🇨🇩",
     urgency: "HIGH NEED",
-    issue: "Affordable housing & newcomer services",
-    problem:
-      "Record rent prices and refugee arrivals strain shelters, settlement agencies, and community food programs.",
+    issue: "Conflict, extreme poverty",
+    problem: "Millions displaced",
+  },
+  {
+    city: "Port-au-Prince",
+    country: "Haiti 🇭🇹",
+    urgency: "CRISIS",
+    issue: "Gang violence",
+    problem: "Food insecurity affects millions",
   },
 ];
-
-export const HOME_STATS = [
-  { value: "260", label: "Cities Covered" },
-  { value: "50", label: "Countries" },
-  { value: "304", label: "Organizations" },
-] as const;
-
-export const HOW_IT_WORKS_STEPS = [
-  {
-    step: 1,
-    title: "Find Your Location",
-    description:
-      "Allow location access or browse by city to see assistance available near you on an interactive map.",
-  },
-  {
-    step: 2,
-    title: "Browse Organizations",
-    description:
-      "Filter by category — food, shelter, medical, clothing, and volunteer — to find services that match your needs.",
-  },
-  {
-    step: 3,
-    title: "Get Help",
-    description:
-      "View contact details, hours, and directions. Reach out directly or get guided support through our AI assistant.",
-  },
-] as const;

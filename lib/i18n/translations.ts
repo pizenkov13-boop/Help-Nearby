@@ -18,6 +18,13 @@ export type TranslationKey =
   | "heroTitle"
   | "heroSubtitle"
   | "heroCta"
+  | "howItWorksTitle"
+  | "howItWorksStep1Title"
+  | "howItWorksStep1Description"
+  | "howItWorksStep2Title"
+  | "howItWorksStep2Description"
+  | "howItWorksStep3Title"
+  | "howItWorksStep3Description"
   | "impactCounter"
   | "filtersTitle"
   | "filterCountry"
@@ -123,8 +130,18 @@ const en: Record<TranslationKey, string> = {
   navAbout: "About",
   heroTitle: "Find Help Near You",
   heroSubtitle:
-    "Discover food banks, shelters, medical aid, clothing donations, and volunteer opportunities in your area.",
-  heroCta: "Find Help Near You",
+    "Instant access to free food, shelter, and medical care — anywhere in the world. No barriers, no sign-up, no cost.",
+  heroCta: "Find Help Near Me",
+  howItWorksTitle: "How It Works",
+  howItWorksStep1Title: "Share Your Location",
+  howItWorksStep1Description:
+    "Allow location access or simply type your city — we'll find help near you instantly.",
+  howItWorksStep2Title: "Discover Organizations",
+  howItWorksStep2Description:
+    "Browse verified food banks, shelters, clinics and more — filtered by distance and category.",
+  howItWorksStep3Title: "Get Help Now",
+  howItWorksStep3Description:
+    "Call directly with one tap or get turn-by-turn directions. No account needed.",
   impactCounter: "{count} people found help today",
   filtersTitle: "Filters",
   filterCountry: "Country",
@@ -185,7 +202,8 @@ const en: Record<TranslationKey, string> = {
   whyStoryText:
     "Whether someone needs a warm meal, a safe place to sleep, or medical care, Help Nearby exists so no one has to navigate crisis alone.",
   reviewsTitle: "Reviews & Suggestions",
-  reviewsSubtitle: "Share your experience or ideas to improve Help Nearby.",
+  reviewsSubtitle:
+    "Share your experience or suggest improvements to help us serve people better.",
   reviewsFormName: "Your name",
   reviewsFormCountry: "Your country",
   reviewsFormRating: "Rating",
@@ -240,10 +258,20 @@ const ru: Record<TranslationKey, string> = {
   navHome: "Главная",
   navMap: "Карта",
   navAbout: "О нас",
-  heroTitle: "Найдите помощь рядом",
+  heroTitle: "Найдите помощь рядом с вами",
   heroSubtitle:
-    "Найдите продовольственные банки, приюты, медицинскую помощь, одежду и волонтёрские возможности в вашем районе.",
-  heroCta: "Найти помощь рядом",
+    "Мгновенный доступ к бесплатной еде, жилью и медицинской помощи — в любой точке мира. Без барьеров, без регистрации, бесплатно.",
+  heroCta: "Найти помощь рядом со мной",
+  howItWorksTitle: "Как это работает",
+  howItWorksStep1Title: "Укажите своё местоположение",
+  howItWorksStep1Description:
+    "Разрешите доступ к геолокации или введите город — мы мгновенно найдём помощь рядом с вами.",
+  howItWorksStep2Title: "Найдите организации",
+  howItWorksStep2Description:
+    "Просматривайте проверенные продовольственные банки, приюты, клиники и другие службы — с фильтрацией по расстоянию и категории.",
+  howItWorksStep3Title: "Получите помощь сейчас",
+  howItWorksStep3Description:
+    "Позвоните одним касанием или постройте маршрут. Регистрация не требуется.",
   impactCounter: "{count} человек получили помощь сегодня",
   filtersTitle: "Фильтры",
   filterCountry: "Страна",
@@ -297,8 +325,18 @@ const es: Record<TranslationKey, string> = {
   navAbout: "Acerca de",
   heroTitle: "Encuentra ayuda cerca de ti",
   heroSubtitle:
-    "Descubre bancos de alimentos, refugios, ayuda médica, ropa y oportunidades de voluntariado en tu zona.",
-  heroCta: "Encuentra ayuda cerca",
+    "Acceso instantáneo a comida, refugio y atención médica gratuitas — en cualquier parte del mundo. Sin barreras, sin registro, sin costo.",
+  heroCta: "Encontrar ayuda cerca de mí",
+  howItWorksTitle: "Cómo funciona",
+  howItWorksStep1Title: "Comparte tu ubicación",
+  howItWorksStep1Description:
+    "Permite el acceso a la ubicación o escribe tu ciudad — encontraremos ayuda cerca de ti al instante.",
+  howItWorksStep2Title: "Descubre organizaciones",
+  howItWorksStep2Description:
+    "Explora bancos de alimentos, refugios, clínicas verificados y más — filtrados por distancia y categoría.",
+  howItWorksStep3Title: "Obtén ayuda ahora",
+  howItWorksStep3Description:
+    "Llama con un solo toque u obtén indicaciones paso a paso. No necesitas cuenta.",
   impactCounter: "{count} personas encontraron ayuda hoy",
   filtersTitle: "Filtros",
   filterCountry: "País",
@@ -352,8 +390,18 @@ const fr: Record<TranslationKey, string> = {
   navAbout: "À propos",
   heroTitle: "Trouvez de l'aide près de vous",
   heroSubtitle:
-    "Découvrez les banques alimentaires, refuges, aide médicale, vêtements et bénévolat près de chez vous.",
-  heroCta: "Trouver de l'aide",
+    "Accès instantané à la nourriture, l'hébergement et les soins médicaux gratuits — partout dans le monde. Sans barrières, sans inscription, sans frais.",
+  heroCta: "Trouver de l'aide près de moi",
+  howItWorksTitle: "Comment ça marche",
+  howItWorksStep1Title: "Partagez votre position",
+  howItWorksStep1Description:
+    "Autorisez l'accès à la localisation ou saisissez votre ville — nous trouverons de l'aide près de vous instantanément.",
+  howItWorksStep2Title: "Découvrez des organisations",
+  howItWorksStep2Description:
+    "Parcourez des banques alimentaires, refuges, cliniques vérifiés et plus — filtrés par distance et catégorie.",
+  howItWorksStep3Title: "Obtenez de l'aide maintenant",
+  howItWorksStep3Description:
+    "Appelez en un clic ou obtenez un itinéraire détaillé. Aucun compte requis.",
   impactCounter: "{count} personnes ont trouvé de l'aide aujourd'hui",
   filtersTitle: "Filtres",
   filterCountry: "Pays",
@@ -407,8 +455,18 @@ const de: Record<TranslationKey, string> = {
   navAbout: "Über uns",
   heroTitle: "Hilfe in Ihrer Nähe finden",
   heroSubtitle:
-    "Entdecken Sie Tafeln, Unterkünfte, medizinische Hilfe, Kleidung und Freiwilligenarbeit in Ihrer Nähe.",
-  heroCta: "Hilfe in der Nähe finden",
+    "Sofortiger Zugang zu kostenloser Verpflegung, Unterkunft und medizinischer Versorgung — weltweit. Keine Hürden, keine Anmeldung, keine Kosten.",
+  heroCta: "Hilfe in meiner Nähe finden",
+  howItWorksTitle: "So funktioniert es",
+  howItWorksStep1Title: "Standort teilen",
+  howItWorksStep1Description:
+    "Erlauben Sie den Standortzugriff oder geben Sie Ihre Stadt ein — wir finden sofort Hilfe in Ihrer Nähe.",
+  howItWorksStep2Title: "Organisationen entdecken",
+  howItWorksStep2Description:
+    "Durchsuchen Sie verifizierte Tafeln, Unterkünfte, Kliniken und mehr — gefiltert nach Entfernung und Kategorie.",
+  howItWorksStep3Title: "Jetzt Hilfe erhalten",
+  howItWorksStep3Description:
+    "Rufen Sie mit einem Tipp an oder erhalten Sie eine Schritt-für-Schritt-Route. Kein Konto erforderlich.",
   impactCounter: "{count} Menschen haben heute Hilfe gefunden",
   filtersTitle: "Filter",
   filterCountry: "Land",
@@ -460,9 +518,20 @@ const zh: Record<TranslationKey, string> = {
   navHome: "首页",
   navMap: "地图",
   navAbout: "关于",
-  heroTitle: "在附近寻找帮助",
-  heroSubtitle: "发现您附近的食物银行、庇护所、医疗援助、衣物捐赠和志愿者机会。",
-  heroCta: "在附近寻找帮助",
+  heroTitle: "在您附近寻找帮助",
+  heroSubtitle:
+    "随时随地即时获取免费食物、住所和医疗援助。无门槛、无需注册、完全免费。",
+  heroCta: "在我附近寻找帮助",
+  howItWorksTitle: "使用方法",
+  howItWorksStep1Title: "分享您的位置",
+  howItWorksStep1Description:
+    "允许定位或输入城市——我们将立即为您找到附近的帮助。",
+  howItWorksStep2Title: "发现组织",
+  howItWorksStep2Description:
+    "浏览经核实的食物银行、庇护所、诊所等——按距离和类别筛选。",
+  howItWorksStep3Title: "立即获得帮助",
+  howItWorksStep3Description:
+    "一键致电或获取逐步导航。无需注册账户。",
   impactCounter: "今天已有 {count} 人获得帮助",
   filtersTitle: "筛选",
   filterCountry: "国家",
@@ -513,8 +582,18 @@ const ar: Record<TranslationKey, string> = {
   navAbout: "حول",
   heroTitle: "اعثر على المساعدة بالقرب منك",
   heroSubtitle:
-    "اكتشف بنوك الطعام والملاجئ والمساعدة الطبية والملابس وفرص التطوع في منطقتك.",
-  heroCta: "اعثر على المساعدة",
+    "وصول فوري إلى الطعام والمأوى والرعاية الطبية المجانية — في أي مكان في العالم. بلا عوائق، بلا تسجيل، بلا تكلفة.",
+  heroCta: "اعثر على المساعدة بالقرب مني",
+  howItWorksTitle: "كيف يعمل",
+  howItWorksStep1Title: "شارك موقعك",
+  howItWorksStep1Description:
+    "اسمح بالوصول إلى الموقع أو اكتب مدينتك — سنجد المساعدة بالقرب منك فوراً.",
+  howItWorksStep2Title: "اكتشف المنظمات",
+  howItWorksStep2Description:
+    "تصفّح بنوك الطعام والملاجئ والعيادات المعتمدة والمزيد — مُصفّاة حسب المسافة والفئة.",
+  howItWorksStep3Title: "احصل على المساعدة الآن",
+  howItWorksStep3Description:
+    "اتصل بنقرة واحدة أو احصل على اتجاهات خطوة بخطوة. لا حاجة لحساب.",
   impactCounter: "{count} شخصاً وجدوا مساعدة اليوم",
   filtersTitle: "الفلاتر",
   filterCountry: "البلد",

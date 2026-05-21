@@ -1,24 +1,37 @@
 "use client";
 
-import { Heart, MapPin, Search } from "lucide-react";
+import Link from "next/link";
+import { Globe, Heart, MapPin, Search, Shield } from "lucide-react";
 import { SiteLayout } from "@/components/layout/SiteLayout";
-
-const ABOUT_STATS = [
-  { value: "304", label: "Organizations Ready to Help" },
-  { value: "260", label: "Cities Covered Worldwide" },
-  { value: "50", label: "Countries Connected" },
-] as const;
 
 const HOW_IT_WORKS_CARDS = [
   {
     icon: Search,
     title: "Search & Discover",
-    text: "Enter your location and find nearby assistance organizations filtered by category and your specific needs.",
+    text: "Enter your location and find nearby organizations filtered by category and your specific needs.",
   },
   {
     icon: MapPin,
     title: "Get Help",
-    text: "Connect with verified organizations that can provide the support you need.",
+    text: "Call directly or get directions to verified organizations instantly.",
+  },
+] as const;
+
+const VALUES_CARDS = [
+  {
+    icon: Heart,
+    title: "Accessibility",
+    text: "Help should be easy to find, free, and available to everyone.",
+  },
+  {
+    icon: Shield,
+    title: "Dignity",
+    text: "Everyone deserves help with respect and compassion.",
+  },
+  {
+    icon: Globe,
+    title: "Global Reach",
+    text: "No matter where you are, help is near you.",
   },
 ] as const;
 
@@ -40,8 +53,8 @@ function AboutHero() {
         </h1>
 
         <p className="mx-auto mt-6 max-w-2xl text-lg text-gray-600 dark:text-gray-400 sm:text-xl">
-          A platform that makes finding and accessing local assistance organizations
-          easy and transparent
+          A platform that makes finding free assistance fast, transparent, and
+          accessible to everyone.
         </p>
       </div>
 
@@ -73,9 +86,10 @@ export function AboutPage() {
             Our Story
           </h2>
           <p className="mt-6 text-center text-lg leading-relaxed text-gray-600 dark:text-gray-400">
-            Help Nearby was created to bridge the gap between people in need and the
-            organizations ready to help. We believe that everyone deserves easy access
-            to support services in their community.
+            Help Nearby was created to bridge the gap between people in crisis and
+            the organizations ready to help. We believe everyone deserves easy
+            access to food, shelter, and medical care — regardless of language,
+            device, or internet speed.
           </p>
         </div>
       </section>
@@ -83,7 +97,7 @@ export function AboutPage() {
       <section className="border-t border-gray-200 bg-white px-4 py-14 transition-colors duration-300 dark:border-gray-800 dark:bg-gray-900/50 sm:px-6 sm:py-16 lg:px-8">
         <div className="mx-auto max-w-5xl">
           <h2 className="text-center text-3xl font-bold text-gray-900 dark:text-white sm:text-4xl">
-            How the Site Works
+            How It Works
           </h2>
 
           <div className="mt-10 grid gap-6 sm:grid-cols-2">
@@ -110,26 +124,37 @@ export function AboutPage() {
       <section className="border-t border-gray-200 bg-gray-50 px-4 py-14 transition-colors duration-300 dark:border-gray-800 dark:bg-gray-900 sm:px-6 sm:py-16 lg:px-8">
         <div className="mx-auto max-w-5xl">
           <h2 className="text-center text-3xl font-bold text-gray-900 dark:text-white sm:text-4xl">
-            Why This Matters
+            Our Values
           </h2>
 
-          <div className="mt-10 grid grid-cols-1 gap-8 sm:grid-cols-3">
-            {ABOUT_STATS.map((stat) => (
-              <div key={stat.label} className="text-center">
-                <p className="text-4xl font-extrabold text-gradient-hero sm:text-5xl">
-                  {stat.value}
+          <div className="mt-10 grid grid-cols-1 gap-6 sm:grid-cols-3">
+            {VALUES_CARDS.map(({ icon: Icon, title, text }) => (
+              <article
+                key={title}
+                className="rounded-xl border border-gray-200 bg-white p-6 text-center dark:border-gray-800 dark:bg-gray-800/50"
+              >
+                <span className="mx-auto mb-4 inline-flex rounded-lg bg-gradient-to-br from-blue-500/20 to-emerald-500/20 p-3">
+                  <Icon className="h-6 w-6 text-emerald-500 dark:text-emerald-400" />
+                </span>
+                <h3 className="mb-2 text-lg font-semibold text-gray-900 dark:text-white">
+                  {title}
+                </h3>
+                <p className="text-sm leading-relaxed text-gray-600 dark:text-gray-400">
+                  {text}
                 </p>
-                <p className="mt-2 text-sm font-medium text-gray-600 dark:text-gray-400 sm:text-base">
-                  {stat.label}
-                </p>
-              </div>
+              </article>
             ))}
           </div>
 
-          <p className="mx-auto mt-10 max-w-3xl text-center text-lg leading-relaxed text-gray-600 dark:text-gray-400">
-            Access to help can change lives. We&apos;re removing barriers between people
-            in need and the organizations ready to serve them.
-          </p>
+          <div className="mt-12 text-center">
+            <Link
+              href="/"
+              className="inline-flex items-center gap-2 rounded-xl bg-gradient-cta px-8 py-4 text-lg font-semibold text-white shadow-lg shadow-blue-500/25 transition-all hover:scale-105 hover:shadow-xl hover:shadow-emerald-500/25"
+            >
+              <MapPin className="h-5 w-5" />
+              Explore Organizations
+            </Link>
+          </div>
         </div>
       </section>
     </SiteLayout>
