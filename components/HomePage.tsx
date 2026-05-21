@@ -35,10 +35,8 @@ import { Filters } from "./Filters";
 import { Hero } from "./Hero";
 import { OrganizationList } from "./OrganizationList";
 import { SearchBar } from "./SearchBar";
-import { AboutSection } from "./home/AboutSection";
 import { CitiesSection } from "./home/CitiesSection";
 import { HowItWorksSection } from "./home/HowItWorksSection";
-import { StatsBar } from "./home/StatsBar";
 
 const ACCORDION_DURATION_MS = 500;
 
@@ -565,9 +563,7 @@ export function HomePage() {
         )}
       </div>
 
-      <AboutSection />
       <CitiesSection />
-      <StatsBar />
       <HowItWorksSection />
     </SiteLayout>
   );

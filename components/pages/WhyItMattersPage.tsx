@@ -20,15 +20,15 @@ const CRISIS_STATS = [
 const PROBLEM_CARDS = [
   {
     title: "Hard to Find",
-    text: "People in crisis don't know where to turn. Resources are scattered, and information is hard to find.",
+    text: "People in crisis don't know where to turn. Resources are scattered and information is hard to find.",
   },
   {
     title: "No Transparency",
-    text: "No reviews, no opening hours, no real-time information. People waste time going to closed locations.",
+    text: "No operating hours, no real-time info. People waste time going to closed locations.",
   },
   {
     title: "No Connection",
-    text: "Organizations and people in need are disconnected, making it harder to provide effective help.",
+    text: "Organizations and people in need are disconnected, making effective help harder to reach.",
   },
 ] as const;
 
@@ -36,17 +36,17 @@ const SOLUTION_CARDS = [
   {
     icon: Building2,
     title: "All in One Place",
-    text: "We gather all local assistance organizations in one easy-to-use map interface.",
+    text: "Every local assistance organization in one easy-to-use map interface.",
   },
   {
     icon: Clock,
     title: "Real-Time Info",
-    text: "See which places are open now, read reviews, get directions, and contact organizations instantly.",
+    text: "See what's open now, get directions, call instantly.",
   },
   {
     icon: Users,
-    title: "Connected Community",
-    text: "We bridge the gap between people in need and organizations ready to help.",
+    title: "Works Everywhere",
+    text: "7 languages, offline mode, optimized for 2G networks in crisis zones.",
   },
 ] as const;
 
@@ -68,7 +68,7 @@ function WhyHero() {
         </h1>
 
         <p className="mx-auto mt-6 max-w-2xl text-lg text-gray-600 dark:text-gray-400 sm:text-xl">
-          No one should be left without help
+          No one should face crisis alone — anywhere in the world.
         </p>
       </div>
 
