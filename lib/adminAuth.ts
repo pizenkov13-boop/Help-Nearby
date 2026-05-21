@@ -1,6 +1,6 @@
 import { createHash, timingSafeEqual } from "crypto";
 import { cookies } from "next/headers";
-import { ensureEnvLoaded } from "@/lib/env";
+import { ensureEnvLoaded } from "@/lib/env.server";
 
 export const ADMIN_COOKIE_NAME = "hn_admin";
 

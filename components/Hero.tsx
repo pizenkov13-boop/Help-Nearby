@@ -1,6 +1,6 @@
 "use client";
 
-import { Heart, Loader2, MapPin, Sparkles } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import { useLanguage } from "@/lib/i18n/LanguageProvider";
 import { formatImpactCounter } from "@/lib/i18n/translations";
 import { cn } from "@/lib/utils";
@@ -15,52 +15,79 @@ export function Hero({ onFindHelp, isLocating, impactCount }: HeroProps) {
   const { t, language } = useLanguage();
 
   return (
-    <section
-      id="hero"
-      className="relative overflow-hidden bg-gray-50 px-4 py-16 transition-colors duration-300 dark:bg-gray-900 sm:px-6 sm:py-24 lg:px-8"
-    >
-      <div className="pointer-events-none absolute inset-0 bg-gradient-hero" />
-      <div className="pointer-events-none absolute -left-32 top-0 h-64 w-64 rounded-full bg-blue-500/20 blur-3xl" />
-      <div className="pointer-events-none absolute -right-32 bottom-0 h-64 w-64 rounded-full bg-emerald-500/20 blur-3xl" />
+    <section className="hero" id="hero">
+      <div
+        className="hero-bg"
+        style={{ backgroundImage: "url(/images/hero.jpg)" }}
+      />
+      <div className="hero-overlay" />
+      <div className="hero-grad" />
 
-      <div className="relative mx-auto max-w-4xl text-center">
-        <div className="animate-fade-in mb-4 inline-flex items-center gap-2 rounded-full border border-gray-300 bg-white/80 px-4 py-1.5 text-sm text-gray-600 dark:border-gray-700 dark:bg-gray-800/60 dark:text-gray-300">
-          <Sparkles className="h-4 w-4 text-emerald-400" />
-          <span>{t("brand")}</span>
-        </div>
+      <div className="hero-inner">
+        <div className="hero-content">
+          {impactCount !== null && (
+            <div className="hero-live">
+              <span className="pulse" />
+              {formatImpactCounter(language, impactCount)}
+            </div>
+          )}
 
-        {impactCount !== null && (
-          <p className="animate-fade-in mb-5 inline-flex items-center gap-2 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-4 py-2 text-sm font-semibold text-emerald-600 dark:text-emerald-400">
-            <Heart className="h-4 w-4 fill-emerald-500/30 text-emerald-500" />
-            {formatImpactCounter(language, impactCount)}
-          </p>
-        )}
-
-        <h1 className="animate-fade-in-up text-4xl font-extrabold tracking-tight sm:text-5xl md:text-6xl">
-          <span className="text-gradient-hero">{t("heroTitle")}</span>
-        </h1>
-
-        <p className="animate-fade-in-delay-1 mx-auto mt-6 max-w-2xl text-lg text-gray-600 dark:text-gray-400 sm:text-xl">
-          {t("heroSubtitle")}
-        </p>
-
-        <div className="animate-fade-in-delay-2 mt-10 flex flex-col items-center justify-center gap-3">
-          <button
-            type="button"
-            onClick={onFindHelp}
-            disabled={isLocating}
-            className={cn(
-              "group inline-flex items-center gap-2 rounded-xl bg-gradient-cta px-8 py-4 text-lg font-semibold text-white shadow-lg shadow-blue-500/25 transition-all hover:scale-105 hover:shadow-xl hover:shadow-emerald-500/25 disabled:cursor-wait disabled:opacity-80 disabled:hover:scale-100",
-            )}
-          >
-            {isLocating ? (
-              <Loader2 className="h-5 w-5 animate-spin" />
+          <h1>
+            {language === "en" ? (
+              <>
+                Find help <span className="grad">near you</span>
+              </>
             ) : (
-              <MapPin className="h-5 w-5 transition-transform group-hover:scale-110" />
+              t("heroTitle")
             )}
-            {isLocating ? t("locating") : t("heroCta")}
-          </button>
+          </h1>
+
+          <p className="lead">{t("heroSubtitle")}</p>
+
+          <div className="cta-row">
+            <button
+              type="button"
+              className={cn("cta")}
+              onClick={onFindHelp}
+              disabled={isLocating}
+            >
+              {isLocating ? (
+                <>
+                  <Loader2
+                    className="inline-block animate-spin"
+                    style={{ width: 18, height: 18 }}
+                  />
+                  {t("locating")}
+                </>
+              ) : (
+                <>
+                  {t("heroCta")}
+                  <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2.6"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    aria-hidden
+                  >
+                    <line x1="5" y1="12" x2="19" y2="12" />
+                    <polyline points="12 5 19 12 12 19" />
+                  </svg>
+                </>
+              )}
+            </button>
+          </div>
         </div>
+      </div>
+
+      <div className="wave">
+        <svg viewBox="0 0 1440 120" preserveAspectRatio="none" aria-hidden>
+          <path
+            fill="currentColor"
+            d="M0,64L48,69.3C96,75,192,85,288,90.7C384,96,480,96,576,90.7C672,85,768,75,864,69.3C960,64,1056,64,1152,69.3C1248,75,1344,85,1392,90.7L1440,96L1440,120L1392,120C1344,120,1248,120,1152,120C1056,120,960,120,864,120C768,120,672,120,576,120C480,120,384,120,288,120C192,120,96,120,48,120L0,120Z"
+          />
+        </svg>
       </div>
     </section>
   );

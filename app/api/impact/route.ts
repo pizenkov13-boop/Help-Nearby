@@ -1,9 +1,10 @@
 import { NextResponse } from "next/server";
+import { ensureEnvLoaded } from "@/lib/env.server";
 import {
   getTodayImpactCount,
   trackImpactClick,
   type ImpactAction,
-} from "@/lib/impact";
+} from "@/lib/impact.server";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -13,6 +14,7 @@ function isImpactAction(value: unknown): value is ImpactAction {
 }
 
 export async function GET() {
+  ensureEnvLoaded();
   try {
     const count = await getTodayImpactCount();
     return NextResponse.json({ count });
@@ -41,9 +43,6 @@ export async function POST(request: Request) {
     return NextResponse.json({ ok: true, count });
   } catch (error) {
     console.error("[api/impact POST]", error);
-    return NextResponse.json(
-      { error: "Failed to record impact click." },
-      { status: 500 },
-    );
+    return NextResponse.json({ ok: true, count: 0 });
   }
 }

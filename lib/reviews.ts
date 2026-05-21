@@ -1,4 +1,4 @@
-import { supabase } from "@/lib/supabase";
+import { getSupabase, isSupabaseFetchError } from "@/lib/supabase";
 import type { Review } from "@/lib/types";
 
 const REVIEW_COLUMNS =
@@ -12,18 +12,30 @@ export interface SubmitReviewInput {
 }
 
 export async function fetchApprovedReviews(): Promise<Review[]> {
-  const { data, error } = await supabase
-    .from("reviews")
-    .select(REVIEW_COLUMNS)
-    .eq("approved", true)
-    .order("created_at", { ascending: false });
+  const supabase = getSupabase();
+  if (!supabase) return [];
 
-  if (error) {
-    console.error("[fetchApprovedReviews]", error.message);
+  try {
+    const { data, error } = await supabase
+      .from("reviews")
+      .select(REVIEW_COLUMNS)
+      .eq("approved", true)
+      .order("created_at", { ascending: false });
+
+    if (error) {
+      console.error("[fetchApprovedReviews]", error.message);
+      return [];
+    }
+
+    return (data as Review[]) ?? [];
+  } catch (error) {
+    if (isSupabaseFetchError(error)) {
+      console.warn("[fetchApprovedReviews] Supabase unreachable — empty list");
+    } else {
+      console.error("[fetchApprovedReviews]", error);
+    }
     return [];
   }
-
-  return (data as Review[]) ?? [];
 }
 
 /** @deprecated Use fetchApprovedReviews */
@@ -32,6 +44,14 @@ export const fetchReviews = fetchApprovedReviews;
 export async function submitReview(
   input: SubmitReviewInput,
 ): Promise<{ ok: true; review: Review } | { ok: false; error: string }> {
+  const supabase = getSupabase();
+  if (!supabase) {
+    return {
+      ok: false,
+      error: "Reviews are temporarily unavailable. Please try again later.",
+    };
+  }
+
   const name = input.name.trim();
   const country = input.country.trim();
   const message = input.message.trim();
@@ -45,16 +65,27 @@ export async function submitReview(
     return { ok: false, error: "Rating must be between 1 and 5." };
   }
 
-  const { data, error } = await supabase
-    .from("reviews")
-    .insert({ name, country, message, rating, approved: false })
-    .select(REVIEW_COLUMNS)
-    .single();
+  try {
+    const { data, error } = await supabase
+      .from("reviews")
+      .insert({ name, country, message, rating, approved: false })
+      .select(REVIEW_COLUMNS)
+      .single();
 
-  if (error) {
-    console.error("[submitReview]", error.message);
+    if (error) {
+      console.error("[submitReview]", error.message);
+      return { ok: false, error: "Could not save your review. Please try again." };
+    }
+
+    return { ok: true, review: data as Review };
+  } catch (error) {
+    if (isSupabaseFetchError(error)) {
+      return {
+        ok: false,
+        error: "Reviews are temporarily unavailable. Please try again later.",
+      };
+    }
+    console.error("[submitReview]", error);
     return { ok: false, error: "Could not save your review. Please try again." };
   }
-
-  return { ok: true, review: data as Review };
 }

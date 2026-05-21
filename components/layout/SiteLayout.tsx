@@ -2,7 +2,7 @@
 
 import { ChatWidget } from "@/components/ChatWidget";
 import { EmergencyHelp } from "@/components/EmergencyHelp";
-import { Header } from "@/components/Header";
+import { Header } from "@/components/layout/Header";
 import { useLanguage } from "@/lib/i18n/LanguageProvider";
 import { SiteFooter } from "./SiteFooter";
 
@@ -14,10 +14,13 @@ export function SiteLayout({ children }: SiteLayoutProps) {
   const { dir } = useLanguage();
 
   return (
-    <div dir={dir} className="flex min-h-screen flex-col bg-gray-50 transition-colors duration-300 dark:bg-gray-900">
+    <div
+      dir={dir}
+      className="flex min-h-screen flex-col bg-[#0a0f1f] bg-surface text-slate-100"
+    >
       <Header />
       <EmergencyHelp />
-      <main className="flex-1 pt-14 sm:pt-16">{children}</main>
+      <main className="flex-1">{children}</main>
       <SiteFooter />
       <ChatWidget />
     </div>

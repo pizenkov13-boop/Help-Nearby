@@ -1,7 +1,7 @@
 import { CATEGORIES } from "@/lib/categories";
 import { NEARBY_RADIUS_METERS } from "@/lib/constants";
 import { distanceMiles, formatDistanceMiles } from "@/lib/geo";
-import { supabase } from "@/lib/supabase";
+import { getSupabase, isSupabaseFetchError } from "@/lib/supabase";
 import type { Category, Organization, UserLocation, WeeklyHours } from "./types";
 
 export interface DbOrganization {
@@ -109,20 +109,32 @@ function filterByRadius(
 }
 
 async function queryOrganizations(country?: string): Promise<DbOrganization[]> {
-  let query = supabase.from("organizations").select("*").order("name");
+  const supabase = getSupabase();
+  if (!supabase) return [];
 
-  if (country) {
-    query = query.eq("country", country);
-  }
+  try {
+    let query = supabase.from("organizations").select("*").order("name");
 
-  const { data, error } = await query;
+    if (country) {
+      query = query.eq("country", country);
+    }
 
-  if (error) {
-    console.error("[fetchOrganizations]", error.message);
+    const { data, error } = await query;
+
+    if (error) {
+      console.error("[fetchOrganizations]", error.message);
+      return [];
+    }
+
+    return (data as DbOrganization[]) ?? [];
+  } catch (error) {
+    if (isSupabaseFetchError(error)) {
+      console.warn("[fetchOrganizations] Supabase unreachable — using empty catalog");
+    } else {
+      console.error("[fetchOrganizations]", error);
+    }
     return [];
   }
-
-  return (data as DbOrganization[]) ?? [];
 }
 
 export async function fetchOrganizations(
@@ -150,40 +162,64 @@ export async function fetchOrganizationBySlug(
   slug: string,
   userLocation?: UserLocation | null,
 ): Promise<Organization | null> {
-  const { data, error } = await supabase
-    .from("organizations")
-    .select("*")
-    .eq("slug", slug)
-    .maybeSingle();
+  const supabase = getSupabase();
+  if (!supabase) return null;
 
-  if (error) {
-    console.error("[fetchOrganizationBySlug]", error.message);
+  try {
+    const { data, error } = await supabase
+      .from("organizations")
+      .select("*")
+      .eq("slug", slug)
+      .maybeSingle();
+
+    if (error) {
+      console.error("[fetchOrganizationBySlug]", error.message);
+      return null;
+    }
+
+    if (!data) return null;
+
+    return mapDbOrganization(data as DbOrganization, userLocation);
+  } catch (error) {
+    if (isSupabaseFetchError(error)) {
+      console.warn("[fetchOrganizationBySlug] Supabase unreachable");
+    } else {
+      console.error("[fetchOrganizationBySlug]", error);
+    }
     return null;
   }
-
-  if (!data) return null;
-
-  return mapDbOrganization(data as DbOrganization, userLocation);
 }
 
 export async function fetchCountries(): Promise<string[]> {
-  const { data, error } = await supabase
-    .from("organizations")
-    .select("country")
-    .not("country", "is", null);
+  const supabase = getSupabase();
+  if (!supabase) return [];
 
-  if (error) {
-    console.error("[fetchCountries]", error.message);
+  try {
+    const { data, error } = await supabase
+      .from("organizations")
+      .select("country")
+      .not("country", "is", null);
+
+    if (error) {
+      console.error("[fetchCountries]", error.message);
+      return [];
+    }
+
+    return Array.from(
+      new Set(
+        (data as { country: string }[])
+          .map((row) => row.country)
+          .filter(Boolean),
+      ),
+    ).sort();
+  } catch (error) {
+    if (isSupabaseFetchError(error)) {
+      console.warn("[fetchCountries] Supabase unreachable — using empty list");
+    } else {
+      console.error("[fetchCountries]", error);
+    }
     return [];
   }
-
-  return Array.from(
-    new Set(
-      (data as { country: string }[])
-        .map((row) => row.country)
-        .filter(Boolean),
-    ),
-  ).sort();
 }
 
 /** @deprecated Use fetchCountries() */

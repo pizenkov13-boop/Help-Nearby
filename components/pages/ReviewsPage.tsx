@@ -91,16 +91,19 @@ export function ReviewsPage() {
     <SiteLayout>
       <PageHero title={t("reviewsTitle")} subtitle={t("reviewsSubtitle")} />
 
-      <section className="mx-auto max-w-xl px-4 py-12 sm:px-6 lg:px-8">
-        <div className="rounded-2xl border border-gray-800 bg-gray-800/40 p-6 shadow-lg sm:p-8">
-          <div className="mb-6 flex items-center gap-2 text-emerald-400">
+      <section className="page-section">
+        <div className="container" style={{ maxWidth: "36rem" }}>
+        <div className="reviews-form-card">
+          <div className="mb-6 flex items-center gap-2" style={{ color: "#34d399" }}>
             <MessageSquare className="h-5 w-5" />
-            <span className="font-medium text-white">{t("reviewsTitle")}</span>
+            <span className="font-medium" style={{ color: "#fff" }}>
+              {t("reviewsTitle")}
+            </span>
           </div>
 
           {submitted && (
             <p
-              className="mb-5 rounded-lg border border-emerald-500/30 bg-emerald-500/10 px-4 py-3 text-center text-emerald-400"
+              className="mb-5 rounded-brand border border-brand-emerald/30 bg-brand-emerald/10 px-4 py-3 text-center text-brand-emerald"
               role="status"
             >
               {t("reviewsFormSuccess")}
@@ -115,40 +118,28 @@ export function ReviewsPage() {
             )}
 
             <div>
-              <label
-                htmlFor="review-name"
-                className="mb-1.5 block text-sm font-medium text-gray-300"
-              >
-                {t("reviewsFormName")}
-              </label>
+              <label htmlFor="review-name">{t("reviewsFormName")}</label>
               <input
                 id="review-name"
                 type="text"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                className="w-full rounded-lg border border-gray-700 bg-gray-900 px-3 py-2 text-gray-100 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
               />
             </div>
 
             <div>
-              <label
-                htmlFor="review-country"
-                className="mb-1.5 block text-sm font-medium text-gray-300"
-              >
-                {t("reviewsFormCountry")}
-              </label>
+              <label htmlFor="review-country">{t("reviewsFormCountry")}</label>
               <input
                 id="review-country"
                 type="text"
                 value={country}
                 onChange={(e) => setCountry(e.target.value)}
                 placeholder="e.g. Sudan, Yemen, Haiti"
-                className="w-full rounded-lg border border-gray-700 bg-gray-900 px-3 py-2 text-gray-100 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
               />
             </div>
 
             <div>
-              <span className="mb-2 block text-sm font-medium text-gray-300">
+              <span className="mb-2 block text-sm font-medium" style={{ color: "var(--text-muted)" }}>
                 {t("reviewsFormRating")}
               </span>
               <div className="flex gap-1">
@@ -157,7 +148,7 @@ export function ReviewsPage() {
                     key={n}
                     type="button"
                     onClick={() => setRating(n)}
-                    className="rounded p-1 transition-colors hover:bg-gray-700"
+                    className="rounded p-1 transition-colors hover:bg-white/10"
                     aria-label={`${n} stars`}
                   >
                     <Star
@@ -174,25 +165,20 @@ export function ReviewsPage() {
             </div>
 
             <div>
-              <label
-                htmlFor="review-message"
-                className="mb-1.5 block text-sm font-medium text-gray-300"
-              >
-                {t("reviewsFormMessage")}
-              </label>
+              <label htmlFor="review-message">{t("reviewsFormMessage")}</label>
               <textarea
                 id="review-message"
                 rows={5}
                 value={message}
                 onChange={(e) => setMessage(e.target.value)}
-                className="w-full resize-y rounded-lg border border-gray-700 bg-gray-900 px-3 py-2 text-gray-100 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
               />
             </div>
 
             <button
               type="submit"
               disabled={submitting}
-              className="w-full rounded-xl bg-gradient-cta py-3 font-semibold text-white shadow-lg transition-all hover:opacity-95 disabled:cursor-wait disabled:opacity-70"
+              className="cta"
+              style={{ width: "100%" }}
             >
               {submitting ? t("reviewsLoading") : t("reviewsFormSubmit")}
             </button>
@@ -200,16 +186,24 @@ export function ReviewsPage() {
         </div>
 
         <div className="mt-12">
-          <h2 className="mb-6 text-xl font-bold text-white">
+          <h2 className="section-title" style={{ fontSize: "1.25rem", marginBottom: "1.5rem" }}>
             {t("reviewsListTitle")}
           </h2>
 
           {loadingReviews ? (
-            <p className="text-center text-sm text-gray-500">
+            <p className="text-center text-sm" style={{ color: "var(--text-fade)" }}>
               {t("reviewsLoading")}
             </p>
           ) : reviews.length === 0 ? (
-            <p className="rounded-xl border border-dashed border-gray-700 px-6 py-12 text-center text-gray-400">
+            <p
+              className="text-center"
+              style={{
+                border: "1px dashed var(--border-soft)",
+                borderRadius: "var(--radius)",
+                padding: "3rem 1.5rem",
+                color: "var(--text-dim)",
+              }}
+            >
               {t("reviewsListEmpty")}
             </p>
           ) : (
@@ -219,6 +213,7 @@ export function ReviewsPage() {
               ))}
             </div>
           )}
+        </div>
         </div>
       </section>
     </SiteLayout>

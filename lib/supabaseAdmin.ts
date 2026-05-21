@@ -1,10 +1,11 @@
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
-import { ensureEnvLoaded } from "@/lib/env";
+import { getSupabasePublicEnv } from "@/lib/env";
+import { ensureEnvLoaded } from "@/lib/env.server";
 
 export function getSupabaseAdmin(): SupabaseClient | null {
   ensureEnvLoaded();
 
-  const url = process.env.NEXT_PUBLIC_SUPABASE_URL?.trim();
+  const { url } = getSupabasePublicEnv();
   const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY?.trim();
 
   if (!url || !serviceKey) {

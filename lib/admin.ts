@@ -1,24 +1,36 @@
 import type { DbOrganization } from "@/lib/data";
 import { getSupabaseAdmin } from "@/lib/supabaseAdmin";
-import { supabase } from "@/lib/supabase";
+import { getSupabase, isSupabaseFetchError } from "@/lib/supabase";
 import type { Review } from "@/lib/types";
 
 const REVIEW_COLUMNS =
   "id, name, country, message, rating, approved, created_at";
 
 export async function fetchUnverifiedOrganizations(): Promise<DbOrganization[]> {
-  const { data, error } = await supabase
-    .from("organizations")
-    .select("*")
-    .eq("verified", false)
-    .order("created_at", { ascending: false });
+  const supabase = getSupabase();
+  if (!supabase) return [];
 
-  if (error) {
-    console.error("[fetchUnverifiedOrganizations]", error.message);
-    throw new Error(error.message);
+  try {
+    const { data, error } = await supabase
+      .from("organizations")
+      .select("*")
+      .eq("verified", false)
+      .order("created_at", { ascending: false });
+
+    if (error) {
+      console.error("[fetchUnverifiedOrganizations]", error.message);
+      return [];
+    }
+
+    return (data as DbOrganization[]) ?? [];
+  } catch (error) {
+    if (isSupabaseFetchError(error)) {
+      console.warn("[fetchUnverifiedOrganizations] Supabase unreachable");
+      return [];
+    }
+    console.error("[fetchUnverifiedOrganizations]", error);
+    return [];
   }
-
-  return (data as DbOrganization[]) ?? [];
 }
 
 export async function verifyOrganizationById(

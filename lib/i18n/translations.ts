@@ -175,7 +175,7 @@ const en: Record<TranslationKey, string> = {
   yourLocation: "You are here",
   defaultLocationNotice: "Showing default location",
   navWhy: "Why It Matters",
-  navReviews: "Reviews",
+  navReviews: "Reviews & Suggestions",
   aboutTitle: "About Us",
   aboutSubtitle: "Connecting people with life-saving resources in their community.",
   aboutMissionTitle: "Our Mission",

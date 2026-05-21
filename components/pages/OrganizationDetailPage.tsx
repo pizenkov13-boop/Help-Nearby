@@ -21,7 +21,7 @@ import {
   getDirectionsUrl,
   getPhoneTelUrl,
   isOrganizationOpen,
-} from "@/lib/org";
+} from "@/lib/orgUtils";
 import type { Organization } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
