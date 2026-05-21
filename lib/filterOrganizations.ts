@@ -1,4 +1,4 @@
-import { isOrganizationOpen } from "@/lib/org";
+import { isOrganizationOpen } from "@/lib/orgUtils";
 import type { FilterState, Organization } from "@/lib/types";
 
 export function filterOrganizations(

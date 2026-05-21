@@ -27,7 +27,7 @@ export function Filters({ filters, onChange, countryOptions }: FiltersProps) {
   };
 
   return (
-    <aside className="rounded-xl border border-gray-800 bg-gray-800/50 p-4 shadow-lg backdrop-blur-sm lg:sticky lg:top-20">
+    <aside className="rounded-brand border border-white/10 bg-surface-card/90 p-4 shadow-lg backdrop-blur-sm lg:sticky lg:top-20">
       <div className="mb-4 flex items-center gap-2 text-white">
         <Filter className="h-5 w-5 text-blue-400" />
         <h2 className="font-semibold">{t("filtersTitle")}</h2>

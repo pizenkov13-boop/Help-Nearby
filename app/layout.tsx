@@ -1,16 +1,25 @@
 import type { Metadata, Viewport } from "next";
-import localFont from "next/font/local";
+import { DM_Sans, Newsreader } from "next/font/google";
+import { AnalyticsLoader } from "@/components/providers/AnalyticsLoader";
 import { ServiceWorkerRegister } from "@/components/ServiceWorkerRegister";
 import { AppProviders } from "@/components/providers/AppProviders";
-import { SuspendedPostHogPageView } from "@/components/providers/PostHogPageView";
-import "leaflet/dist/leaflet.css";
 import "./globals.css";
 import { cn } from "@/lib/utils";
 
-const geistSans = localFont({
-  src: "./fonts/GeistVF.woff",
-  variable: "--font-sans",
-  weight: "100 900",
+const dmSans = DM_Sans({
+  subsets: ["latin", "latin-ext"],
+  variable: "--font-dm-sans",
+  weight: ["400", "500", "600", "700", "800"],
+  display: "swap",
+});
+
+const newsreader = Newsreader({
+  subsets: ["latin"],
+  variable: "--font-newsreader",
+  weight: ["400", "500", "600", "700"],
+  style: ["normal", "italic"],
+  display: "swap",
+  adjustFontFallback: false,
 });
 
 export const metadata: Metadata = {
@@ -21,7 +30,7 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: "#007bff",
+  themeColor: "#0a0f1f",
 };
 
 export default function RootLayout({
@@ -30,7 +39,15 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" suppressHydrationWarning className={cn("font-sans", geistSans.variable)}>
+    <html
+      lang="en"
+      suppressHydrationWarning
+      className={cn(
+        "dark font-sans bg-[#0a0f1f] text-slate-100",
+        dmSans.variable,
+        newsreader.variable,
+      )}
+    >
       <head>
         <link rel="manifest" href="/manifest.json" />
         <link
@@ -50,11 +67,12 @@ export default function RootLayout({
           content="black-translucent"
         />
       </head>
-      <body className="min-h-screen bg-gray-50 text-gray-900 antialiased transition-colors duration-300 dark:bg-gray-900 dark:text-gray-100">
-        <AppProviders>
-          <SuspendedPostHogPageView />
-          {children}
-        </AppProviders>
+      <body
+        suppressHydrationWarning
+        className="min-h-screen bg-[#0a0f1f] bg-surface font-sans text-slate-100 antialiased"
+      >
+        <AppProviders>{children}</AppProviders>
+        <AnalyticsLoader />
         <ServiceWorkerRegister />
       </body>
     </html>

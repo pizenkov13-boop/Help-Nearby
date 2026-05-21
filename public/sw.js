@@ -1,4 +1,4 @@
-const CACHE_NAME = "help-nearby-v2";
+const CACHE_NAME = "help-nearby-v4";
 const OFFLINE_URL = "/offline.html";
 
 const PRECACHE_URLS = [
@@ -72,6 +72,14 @@ self.addEventListener("fetch", (event) => {
     return;
   }
 
+  if (
+    url.pathname.startsWith("/_next/static/") &&
+    url.pathname.endsWith(".css")
+  ) {
+    event.respondWith(networkFirstAsset(request));
+    return;
+  }
+
   if (url.pathname.startsWith("/_next/static/")) {
     event.respondWith(cacheFirst(request));
     return;
@@ -112,6 +120,22 @@ async function networkFirstNavigation(request) {
       status: 503,
       headers: { "Content-Type": "text/plain" },
     });
+  }
+}
+
+async function networkFirstAsset(request) {
+  const cache = await caches.open(CACHE_NAME);
+
+  try {
+    const response = await fetch(request);
+    if (response.ok) {
+      cache.put(request, response.clone());
+    }
+    return response;
+  } catch {
+    const cached = await cache.match(request);
+    if (cached) return cached;
+    return new Response("", { status: 503 });
   }
 }
 

@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { WhyItMattersPage } from "@/components/pages/WhyItMattersPage";
+import { WhyItMattersContent } from "@/components/pages/WhyItMattersContent";
 
 export const metadata: Metadata = {
   title: "Why It Matters — Help Nearby",
@@ -7,6 +7,6 @@ export const metadata: Metadata = {
     "Why quick access to nearby help resources changes lives in crisis.",
 };
 
-export default function WhyItMatters() {
-  return <WhyItMattersPage />;
+export default function WhyItMattersPage() {
+  return <WhyItMattersContent />;
 }

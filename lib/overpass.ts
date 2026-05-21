@@ -1,6 +1,6 @@
 import { NEARBY_RADIUS_METERS } from "@/lib/constants";
 import { formatDistanceMiles } from "@/lib/geo";
-import { slugify } from "@/lib/org";
+import { slugify } from "@/lib/orgUtils";
 import type { Category, Organization, UserLocation } from "@/lib/types";
 
 const OVERPASS_URL = "https://overpass-api.de/api/interpreter";

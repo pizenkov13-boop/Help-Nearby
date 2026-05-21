@@ -10,12 +10,12 @@ import {
 } from "lucide-react";
 import { CATEGORY_CONFIG } from "@/lib/categories";
 import { useLanguage } from "@/lib/i18n/LanguageProvider";
-import { recordImpactClick } from "@/lib/impact";
+import { recordImpactClick } from "@/lib/impact.client";
 import {
   getDirectionsUrl,
   getPhoneTelUrl,
   isOrganizationOpen,
-} from "@/lib/org";
+} from "@/lib/orgUtils";
 import type { Organization } from "@/lib/types";
 import { cn } from "@/lib/utils";
 

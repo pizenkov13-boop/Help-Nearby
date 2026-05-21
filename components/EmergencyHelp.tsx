@@ -4,9 +4,9 @@ import { useCallback, useEffect, useState } from "react";
 import { Loader2, MapPin, Phone, X } from "lucide-react";
 import { DEFAULT_LOCATION, NEARBY_RADIUS_METERS } from "@/lib/constants";
 import { useLanguage } from "@/lib/i18n/LanguageProvider";
-import { getPhoneTelUrl } from "@/lib/org";
+import { getPhoneTelUrl } from "@/lib/orgUtils";
 import type { Organization, UserLocation } from "@/lib/types";
-import { cn } from "@/lib/utils";
+import { EMERGENCY_OPEN_EVENT } from "@/lib/emergencyEvents";
 
 type EmergencyState = "idle" | "locating" | "loading" | "ready" | "error";
 
@@ -70,6 +70,13 @@ export function EmergencyHelp() {
     requestLocationAndLoad();
   }, [requestLocationAndLoad]);
 
+  useEffect(() => {
+    const onExternalOpen = () => handleOpen();
+    window.addEventListener(EMERGENCY_OPEN_EVENT, onExternalOpen);
+    return () =>
+      window.removeEventListener(EMERGENCY_OPEN_EVENT, onExternalOpen);
+  }, [handleOpen]);
+
   const handleClose = useCallback(() => {
     setOpen(false);
     setState("idle");
@@ -97,25 +104,6 @@ export function EmergencyHelp() {
 
   return (
     <>
-      <button
-        type="button"
-        onClick={handleOpen}
-        className={cn(
-          "fixed left-1/2 z-[60] -translate-x-1/2",
-          "top-[3.75rem] sm:top-[4rem]",
-          "flex items-center gap-2 rounded-full px-4 py-2.5 sm:px-5 sm:py-3",
-          "bg-red-600 text-sm font-bold text-white shadow-lg shadow-red-600/40",
-          "ring-2 ring-red-400/50 transition-all hover:bg-red-500 hover:shadow-red-500/50",
-          "focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-300",
-          open && "pointer-events-none opacity-0",
-        )}
-        aria-haspopup="dialog"
-        aria-expanded={open}
-      >
-        <span aria-hidden>🆘</span>
-        <span>{t("emergencyHelp")}</span>
-      </button>
-
       {open && (
         <div
           className="fixed inset-0 z-[70] flex items-start justify-center bg-black/70 p-4 pt-20 sm:items-center sm:pt-4"

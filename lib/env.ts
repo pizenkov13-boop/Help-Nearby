@@ -1,16 +1,11 @@
-import { loadEnvConfig } from "@next/env";
+/** Client-safe env accessors (NEXT_PUBLIC_* are inlined at build time). */
 
-let envLoaded = false;
-
-/** Ensures .env.local is loaded (needed in some dev/API route contexts). */
-export function ensureEnvLoaded() {
-  if (envLoaded) return;
-  loadEnvConfig(process.cwd());
-  envLoaded = true;
-}
-
-export function getGroqApiKey(): string | undefined {
-  ensureEnvLoaded();
-  const key = process.env.GROQ_API_KEY?.trim();
-  return key && key.length > 0 ? key : undefined;
+export function getSupabasePublicEnv(): {
+  url: string;
+  key: string;
+} {
+  return {
+    url: process.env.NEXT_PUBLIC_SUPABASE_URL?.trim() ?? "",
+    key: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY?.trim() ?? "",
+  };
 }

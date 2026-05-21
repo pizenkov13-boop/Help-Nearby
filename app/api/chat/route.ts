@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { getGroqApiKey } from "@/lib/env";
+import { getGroqApiKey } from "@/lib/env.server";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";

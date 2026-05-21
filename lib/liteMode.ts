@@ -169,10 +169,10 @@ export function setStoredViewMode(mode: ViewModePreference): void {
 }
 
 export function shouldUseLiteMode(
-  autoLiteRecommended: boolean,
+  detectedSlowCountry: boolean,
   preference: ViewModePreference | null,
 ): boolean {
   if (preference === "full") return false;
   if (preference === "lite") return true;
-  return autoLiteRecommended;
+  return detectedSlowCountry;
 }

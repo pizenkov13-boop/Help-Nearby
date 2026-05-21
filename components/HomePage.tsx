@@ -1,6 +1,5 @@
 "use client";
 
-import dynamic from "next/dynamic";
 import { useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { DEFAULT_LOCATION, NEARBY_RADIUS_METERS } from "@/lib/constants";
@@ -35,19 +34,11 @@ import { Filters } from "./Filters";
 import { Hero } from "./Hero";
 import { OrganizationList } from "./OrganizationList";
 import { SearchBar } from "./SearchBar";
+import { HowItWorks } from "./HowItWorks";
 import { CitiesSection } from "./home/CitiesSection";
-import { HowItWorksSection } from "./home/HowItWorksSection";
+import { MapView } from "@/components/map/MapViewDynamic";
 
 const ACCORDION_DURATION_MS = 500;
-
-const MapView = dynamic(() => import("./MapView"), {
-  ssr: false,
-  loading: () => (
-    <div className="flex h-[400px] min-h-[400px] items-center justify-center text-gray-500 lg:h-[520px]">
-      Loading map…
-    </div>
-  ),
-});
 
 const defaultFilters: FilterState = {
   country: "all",
@@ -79,17 +70,18 @@ export function HomePage() {
   const [routeMode, setRouteMode] = useState<RoutingMode>("walking");
   const [routeLoading, setRouteLoading] = useState(false);
   const [routeError, setRouteError] = useState<string | null>(null);
-  const [liteRecommended, setLiteRecommended] = useState(false);
+  const [detectedSlowCountry, setDetectedSlowCountry] =
+    useState<boolean>(false);
   const [viewPreference, setViewPreference] = useState<ViewModePreference | null>(
     null,
   );
   const [liteDetectionDone, setLiteDetectionDone] = useState(false);
+  const [impactCount, setImpactCount] = useState<number | null>(null);
   const shouldScrollRef = useRef(false);
   const findTriggeredRef = useRef(false);
   const liteAutoOpenedRef = useRef(false);
-  const [impactCount, setImpactCount] = useState<number | null>(null);
 
-  const liteModeActive = shouldUseLiteMode(liteRecommended, viewPreference);
+  const liteModeActive = shouldUseLiteMode(detectedSlowCountry, viewPreference);
   const canRoute = Boolean(userLocation && !usingDefaultLocation);
 
   useEffect(() => {
@@ -120,11 +112,11 @@ export function HomePage() {
     const networkSlow = detectSlowConnectionFromNetwork();
 
     if (networkSlow !== null) {
-      setLiteRecommended(networkSlow);
+      setDetectedSlowCountry(networkSlow);
       setLiteDetectionDone(true);
 
       return subscribeToNetworkChanges((slow) => {
-        setLiteRecommended(slow);
+        setDetectedSlowCountry(slow);
       });
     }
 
@@ -143,7 +135,7 @@ export function HomePage() {
           geo &&
           isSlowInternetCountry(geo.country, geo.countryCode)
         ) {
-          setLiteRecommended(true);
+          setDetectedSlowCountry(true);
         }
         setLiteDetectionDone(true);
       },
@@ -464,27 +456,27 @@ export function HomePage() {
         aria-hidden={!mapExpanded}
       >
         {(userLocation || liteModeActive) && (
-          <section className="border-t border-gray-200 bg-gray-50 px-4 py-10 transition-colors duration-300 dark:border-gray-800 dark:bg-gray-900 sm:px-6 lg:px-8">
-            <div className="mx-auto max-w-7xl">
+          <section className="map-panel">
+            <div className="container">
               <div className="mb-6 flex flex-wrap items-center gap-3">
-                <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
+                <h2>
                   {t("mapTitle")}
+                  {liteModeActive && (
+                    <span className="map-badge emerald">
+                      {t("liteModeNotice")}
+                    </span>
+                  )}
+                  {usingDefaultLocation && !liteModeActive && (
+                    <span className="map-badge amber">
+                      {t("defaultLocationNotice")}
+                    </span>
+                  )}
+                  {overpassLoading && !liteModeActive && (
+                    <span className="map-badge blue">
+                      {t("loadingNearby")}
+                    </span>
+                  )}
                 </h2>
-                {liteModeActive && (
-                  <span className="rounded-full border border-emerald-500/30 bg-emerald-500/10 px-3 py-1 text-xs text-emerald-400">
-                    {t("liteModeNotice")}
-                  </span>
-                )}
-                {usingDefaultLocation && !liteModeActive && (
-                  <span className="rounded-full border border-amber-500/30 bg-amber-500/10 px-3 py-1 text-xs text-amber-400">
-                    {t("defaultLocationNotice")}
-                  </span>
-                )}
-                {overpassLoading && !liteModeActive && (
-                  <span className="rounded-full border border-blue-500/30 bg-blue-500/10 px-3 py-1 text-xs text-blue-400">
-                    {t("loadingNearby")}
-                  </span>
-                )}
               </div>
 
               <div
@@ -517,7 +509,7 @@ export function HomePage() {
                 </div>
 
                 {!liteModeActive && userLocation && (
-                  <div className="h-[400px] overflow-hidden rounded-xl border border-gray-200 shadow-lg dark:border-gray-800 lg:h-[520px]">
+                  <div className="h-[400px] overflow-hidden rounded-brand border border-white/10 shadow-lg lg:h-[520px]">
                     <MapView
                       organizations={filtered}
                       selected={selected}
@@ -536,7 +528,7 @@ export function HomePage() {
 
                 <div
                   className={cn(
-                    "flex flex-col overflow-hidden rounded-xl border border-gray-200 bg-white/80 dark:border-gray-800 dark:bg-gray-800/30",
+                    "flex flex-col overflow-hidden rounded-brand border border-white/10 bg-surface/80",
                     liteModeActive ? "min-h-[320px]" : "max-h-[520px] lg:max-h-[520px]",
                   )}
                 >
@@ -563,8 +555,8 @@ export function HomePage() {
         )}
       </div>
 
+      <HowItWorks />
       <CitiesSection />
-      <HowItWorksSection />
     </SiteLayout>
   );
 }
