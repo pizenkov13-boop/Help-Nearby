@@ -1,19 +1,20 @@
+import { forwardGeocodeQuery } from "@/lib/geocode";
+import {
+  buildNominatimQuery,
+  organizationHasGeocodableAddress,
+} from "@/lib/nominatimGeocode";
 import type { Organization } from "@/lib/types";
 
 const geocodeCache = new Map<string, { lat: number; lng: number }>();
 
 function cacheKey(org: Organization): string {
-  return `${org.id}:${org.address}:${org.city}:${org.country}`;
-}
-
-function buildGeocodeQuery(org: Organization): string {
-  return [org.address, org.city, org.country].filter(Boolean).join(", ").trim();
+  return buildNominatimQuery(org);
 }
 
 async function geocodeOrganization(
   org: Organization,
 ): Promise<{ lat: number; lng: number } | null> {
-  const query = buildGeocodeQuery(org);
+  const query = buildNominatimQuery(org);
   if (!query) return null;
 
   const key = cacheKey(org);
@@ -39,35 +40,43 @@ async function geocodeOrganization(
     geocodeCache.set(key, coords);
     return coords;
   } catch {
-    return null;
+    const direct = await forwardGeocodeQuery(query);
+    if (direct) {
+      geocodeCache.set(key, direct);
+    }
+    return direct;
   }
 }
 
 const delay = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
-/** Resolve a single organization's map position via Nominatim (falls back to stored lat/lng). */
+/** Resolve map position via Nominatim address search (preferred over stored lat/lng). */
 export async function resolveOrganizationCoordinates(
   org: Organization,
 ): Promise<Organization> {
+  if (!organizationHasGeocodableAddress(org)) {
+    return org;
+  }
+
   const coords = await geocodeOrganization(org);
   if (!coords) return org;
   return { ...org, lat: coords.lat, lng: coords.lng };
 }
 
-/** Resolve positions for map markers (rate-limited for Nominatim). */
+/** Refine marker positions from addresses (Nominatim, rate-limited). */
 export async function resolveOrganizationsForMap(
   orgs: Organization[],
-  maxGeocode = 25,
+  maxGeocode = 40,
 ): Promise<Organization[]> {
   const results: Organization[] = [];
   let geocoded = 0;
 
   for (const org of orgs) {
-    if (geocoded < maxGeocode && buildGeocodeQuery(org)) {
+    if (organizationHasGeocodableAddress(org) && geocoded < maxGeocode) {
       const resolved = await resolveOrganizationCoordinates(org);
       results.push(resolved);
       geocoded += 1;
-      if (geocoded < maxGeocode) {
+      if (geocoded < maxGeocode && geocoded < orgs.length) {
         await delay(1100);
       }
     } else {
