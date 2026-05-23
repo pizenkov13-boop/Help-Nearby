@@ -5,6 +5,7 @@ import { useLanguage } from "@/lib/i18n/LanguageProvider";
 import { formatSearchNoResults } from "@/lib/i18n/translations";
 import type { Organization } from "@/lib/types";
 import { OrganizationCard } from "./OrganizationCard";
+import { OrganizationListSkeleton } from "./OrganizationCardSkeleton";
 
 interface OrganizationListProps {
   organizations: Organization[];
@@ -15,6 +16,7 @@ interface OrganizationListProps {
   onSelect: (org: Organization) => void;
   onGetDirections?: (org: Organization) => void;
   onImpactRecorded?: () => void;
+  isLoading?: boolean;
 }
 
 export function OrganizationList({
@@ -25,6 +27,7 @@ export function OrganizationList({
   onSelect,
   onGetDirections,
   onImpactRecorded,
+  isLoading = false,
 }: OrganizationListProps) {
   const { t, language } = useLanguage();
   const trimmedSearch = searchQuery.trim();
@@ -37,7 +40,9 @@ export function OrganizationList({
         {t("resultsCount")}
       </p>
 
-      {organizations.length === 0 ? (
+      {isLoading && organizations.length === 0 ? (
+        <OrganizationListSkeleton count={4} />
+      ) : organizations.length === 0 ? (
         <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-gray-700 bg-gray-800/30 px-6 py-16 text-center">
           <Building2 className="mb-3 h-12 w-12 text-gray-600" />
           <p className="text-gray-400">

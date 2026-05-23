@@ -23,6 +23,7 @@ import {
   fetchRoute,
   type RouteData,
 } from "@/lib/routing";
+import { readNearbyCache, writeNearbyCache } from "@/lib/nearbyCache";
 import { searchNearbyWithSmartRadius } from "@/lib/nearbySearch";
 import {
   getTierIndex,
@@ -89,6 +90,7 @@ export function HomePage() {
   const [nearestFallbackKm, setNearestFallbackKm] = useState<number | null>(
     null,
   );
+  const [verifiedOnlyNotice, setVerifiedOnlyNotice] = useState(false);
   const shouldScrollRef = useRef(false);
   const findTriggeredRef = useRef(false);
   const liteAutoOpenedRef = useRef(false);
@@ -154,39 +156,104 @@ export function HomePage() {
     );
   }, []);
 
+  const applySearchResult = useCallback(
+    (
+      organizations: Organization[],
+      meta: {
+        activeRadiusMeters: number;
+        mode: SearchRadiusMode;
+        canExpand: boolean;
+        farthestKm: number | null;
+      },
+    ) => {
+      setAllOrganizations(organizations);
+      setSearchRadiusMeters(meta.activeRadiusMeters);
+      setSearchMode(meta.mode);
+      setCanExpandSearch(meta.canExpand);
+      setNearestFallbackKm(meta.farthestKm);
+    },
+    [],
+  );
+
   const runNearbySearch = useCallback(
     async (options?: { startTierIndex?: number; autoExpand?: boolean }) => {
       const location = userLocation;
       if (!location) return;
 
-      setOrgsLoading(true);
+      const cached = readNearbyCache(
+        location.lat,
+        location.lng,
+        liteModeActive,
+      );
+      const hadCachedResults = Boolean(cached);
+      if (cached) {
+        applySearchResult(cached.organizations, {
+          activeRadiusMeters: cached.searchRadiusMeters ?? 0,
+          mode: cached.searchMode,
+          canExpand: cached.canExpand,
+          farthestKm: cached.nearestFallbackKm,
+        });
+      }
+
+      setOrgsLoading(!hadCachedResults);
       setSourcesLoading(true);
+      setVerifiedOnlyNotice(false);
 
       try {
         const geo = await reverseGeocodeCountry(location.lat, location.lng);
-        const result = await searchNearbyWithSmartRadius(location, {
-          liteMode: liteModeActive,
-          country: geo?.country ?? undefined,
-          countryCode: geo?.countryCode ?? null,
-          startTierIndex: options?.startTierIndex,
-          autoExpand: options?.autoExpand,
-        });
+        const result = await searchNearbyWithSmartRadius(
+          location,
+          {
+            liteMode: liteModeActive,
+            country: geo?.country ?? undefined,
+            countryCode: geo?.countryCode ?? null,
+            startTierIndex: options?.startTierIndex,
+            autoExpand: options?.autoExpand,
+          },
+          {
+            onOrganizationsUpdate: (organizations) => {
+              setAllOrganizations(organizations);
+              if (organizations.length > 0) {
+                setOrgsLoading(false);
+              }
+            },
+            onExternalTimeout: () => {
+              setVerifiedOnlyNotice(true);
+            },
+          },
+        );
 
-        setAllOrganizations(result.organizations);
-        setSearchRadiusMeters(result.activeRadiusMeters);
-        setSearchMode(result.mode);
-        setCanExpandSearch(result.canExpand);
-        setNearestFallbackKm(result.farthestKm);
+        applySearchResult(result.organizations, {
+          activeRadiusMeters: result.activeRadiusMeters,
+          mode: result.mode,
+          canExpand: result.canExpand,
+          farthestKm: result.farthestKm,
+        });
+        setVerifiedOnlyNotice(result.externalTimedOut);
+
+        writeNearbyCache({
+          timestamp: Date.now(),
+          lat: location.lat,
+          lng: location.lng,
+          liteMode: liteModeActive,
+          organizations: result.organizations,
+          searchRadiusMeters: result.activeRadiusMeters,
+          searchMode: result.mode,
+          canExpand: result.canExpand,
+          nearestFallbackKm: result.farthestKm,
+        });
       } catch (error) {
         console.error("[HomePage] Smart radius search failed:", error);
-        setAllOrganizations([]);
+        if (!hadCachedResults) {
+          setAllOrganizations([]);
+        }
         setCanExpandSearch(false);
       } finally {
         setOrgsLoading(false);
         setSourcesLoading(false);
       }
     },
-    [userLocation, liteModeActive],
+    [userLocation, liteModeActive, applySearchResult],
   );
 
   useEffect(() => {
@@ -468,6 +535,11 @@ export function HomePage() {
                         {t("loadingNearby")}
                       </span>
                     )}
+                    {verifiedOnlyNotice && (
+                      <span className="map-badge amber">
+                        {t("verifiedOnlyNotice")}
+                      </span>
+                    )}
                   </h2>
                 </div>
 
@@ -545,29 +617,24 @@ export function HomePage() {
                   )}
                 >
                   <div className="flex-1 overflow-y-auto p-4">
-                    {orgsLoading && allOrganizations.length === 0 ? (
-                      <p className="text-center text-sm text-gray-500">
-                        Loading organizations…
-                      </p>
-                    ) : (
-                      <OrganizationList
-                        organizations={filtered}
-                        searchQuery={filters.searchQuery}
-                        emptyMessage={
-                          !orgsLoading &&
-                          allOrganizations.length === 0 &&
-                          !filters.searchQuery.trim() &&
-                          filters.category === "all" &&
-                          !filters.openNow
-                            ? t("noVerifiedNearby")
-                            : undefined
-                        }
-                        selectedId={selected?.id}
-                        onSelect={setSelected}
-                        onGetDirections={handleGetDirections}
-                        onImpactRecorded={handleImpactRecorded}
-                      />
-                    )}
+                    <OrganizationList
+                      organizations={filtered}
+                      isLoading={orgsLoading && filtered.length === 0}
+                      searchQuery={filters.searchQuery}
+                      emptyMessage={
+                        !orgsLoading &&
+                        allOrganizations.length === 0 &&
+                        !filters.searchQuery.trim() &&
+                        filters.category === "all" &&
+                        !filters.openNow
+                          ? t("noVerifiedNearby")
+                          : undefined
+                      }
+                      selectedId={selected?.id}
+                      onSelect={setSelected}
+                      onGetDirections={handleGetDirections}
+                      onImpactRecorded={handleImpactRecorded}
+                    />
                   </div>
                 </div>
               </div>
