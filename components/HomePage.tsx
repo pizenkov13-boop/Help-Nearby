@@ -67,7 +67,7 @@ export function HomePage() {
   const [isLocating, setIsLocating] = useState(false);
   const [allOrganizations, setAllOrganizations] = useState<Organization[]>([]);
   const [orgsLoading, setOrgsLoading] = useState(true);
-  const [overpassLoading, setOverpassLoading] = useState(false);
+  const [sourcesLoading, setSourcesLoading] = useState(false);
   const [routeDestination, setRouteDestination] = useState<Organization | null>(
     null,
   );
@@ -160,13 +160,14 @@ export function HomePage() {
       if (!location) return;
 
       setOrgsLoading(true);
-      setOverpassLoading(true);
+      setSourcesLoading(true);
 
       try {
         const geo = await reverseGeocodeCountry(location.lat, location.lng);
         const result = await searchNearbyWithSmartRadius(location, {
           liteMode: liteModeActive,
           country: geo?.country ?? undefined,
+          countryCode: geo?.countryCode ?? null,
           startTierIndex: options?.startTierIndex,
           autoExpand: options?.autoExpand,
         });
@@ -182,7 +183,7 @@ export function HomePage() {
         setCanExpandSearch(false);
       } finally {
         setOrgsLoading(false);
-        setOverpassLoading(false);
+        setSourcesLoading(false);
       }
     },
     [userLocation, liteModeActive],
@@ -462,7 +463,7 @@ export function HomePage() {
                         {t("defaultLocationNotice")}
                       </span>
                     )}
-                    {overpassLoading && (
+                    {sourcesLoading && (
                       <span className="map-badge blue">
                         {t("loadingNearby")}
                       </span>
@@ -487,7 +488,7 @@ export function HomePage() {
                       <button
                         type="button"
                         onClick={handleExpandSearch}
-                        disabled={overpassLoading}
+                        disabled={sourcesLoading}
                         className="rounded-full border border-blue-500/40 bg-blue-500/10 px-3 py-1 text-xs font-semibold text-blue-300 transition-colors hover:bg-blue-500/20 disabled:opacity-50"
                       >
                         {t("searchExpand")}
@@ -552,6 +553,15 @@ export function HomePage() {
                       <OrganizationList
                         organizations={filtered}
                         searchQuery={filters.searchQuery}
+                        emptyMessage={
+                          !orgsLoading &&
+                          allOrganizations.length === 0 &&
+                          !filters.searchQuery.trim() &&
+                          filters.category === "all" &&
+                          !filters.openNow
+                            ? t("noVerifiedNearby")
+                            : undefined
+                        }
                         selectedId={selected?.id}
                         onSelect={setSelected}
                         onGetDirections={handleGetDirections}

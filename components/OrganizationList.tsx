@@ -9,6 +9,8 @@ import { OrganizationCard } from "./OrganizationCard";
 interface OrganizationListProps {
   organizations: Organization[];
   searchQuery?: string;
+  /** Shown when the list is empty and no search query is active. */
+  emptyMessage?: string;
   selectedId?: string;
   onSelect: (org: Organization) => void;
   onGetDirections?: (org: Organization) => void;
@@ -18,6 +20,7 @@ interface OrganizationListProps {
 export function OrganizationList({
   organizations,
   searchQuery = "",
+  emptyMessage,
   selectedId,
   onSelect,
   onGetDirections,
@@ -40,7 +43,7 @@ export function OrganizationList({
           <p className="text-gray-400">
             {hasSearch
               ? formatSearchNoResults(language, trimmedSearch)
-              : t("noResults")}
+              : (emptyMessage ?? t("noResults"))}
           </p>
         </div>
       ) : (

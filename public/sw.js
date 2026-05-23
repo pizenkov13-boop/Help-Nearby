@@ -43,9 +43,10 @@ function isSupabaseRequest(url) {
   return url.hostname.includes("supabase.co");
 }
 
-function isOverpassRequest(url) {
+function isExternalDataRequest(url) {
   return (
-    url.hostname.includes("overpass-api.de") ||
+    url.hostname.includes("humdata.org") ||
+    url.hostname.includes("humanitarianoutcomes.org") ||
     url.hostname.includes("openstreetmap.org")
   );
 }
@@ -58,7 +59,7 @@ self.addEventListener("fetch", (event) => {
   const url = new URL(request.url);
 
   if (url.origin !== self.location.origin) {
-    if (isSupabaseRequest(url) || isOverpassRequest(url)) {
+    if (isSupabaseRequest(url) || isExternalDataRequest(url)) {
       return;
     }
   }

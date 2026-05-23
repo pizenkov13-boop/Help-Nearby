@@ -67,7 +67,7 @@ export function getEmergency247Organizations(
   );
 }
 
-/** Merge Supabase + Overpass emergency results; Supabase wins near-duplicates. */
+/** Merge Supabase + HDX/GDHO emergency results; Supabase wins near-duplicates. */
 export function mergeEmergencyOrganizations(
   primary: Organization[],
   secondary: Organization[],
