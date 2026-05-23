@@ -3,15 +3,15 @@ import type { Organization } from "@/lib/types";
 
 const DUPLICATE_RADIUS_MILES = 0.05;
 
-/** Merge verified (Supabase) and Overpass results; verified entries win duplicates. */
+/** Merge Supabase catalog and HDX/GDHO verified sources; catalog wins duplicates. */
 export function mergeOrganizations(
-  verified: Organization[],
-  overpass: Organization[],
+  catalog: Organization[],
+  externalVerified: Organization[],
 ): Organization[] {
-  const merged = [...verified];
+  const merged = [...catalog];
 
-  for (const org of overpass) {
-    const isDuplicate = verified.some(
+  for (const org of externalVerified) {
+    const isDuplicate = catalog.some(
       (v) =>
         distanceMiles(v.lat, v.lng, org.lat, org.lng) < DUPLICATE_RADIUS_MILES,
     );

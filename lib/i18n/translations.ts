@@ -99,6 +99,7 @@ export type TranslationKey =
   | "chatTyping"
   | "verified"
   | "loadingNearby"
+  | "noVerifiedNearby"
   | "searchRadiusWithin"
   | "searchExpand"
   | "searchNearestOrgs"
@@ -227,7 +228,9 @@ const en: Record<TranslationKey, string> = {
   chatError: "Sorry, I couldn't respond right now. Please try again in a moment.",
   chatTyping: "Typing…",
   verified: "Verified",
-  loadingNearby: "Finding more nearby…",
+  loadingNearby: "Loading verified organizations…",
+  noVerifiedNearby:
+    "No verified organizations found nearby. Try the Emergency button for urgent help.",
   searchRadiusWithin: "Showing results within {km} km",
   searchExpand: "Expand search",
   searchNearestOrgs: "Nearest organizations ({km} km away)",
