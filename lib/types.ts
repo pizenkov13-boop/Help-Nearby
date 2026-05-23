@@ -48,7 +48,6 @@ export interface Organization {
 }
 
 export interface FilterState {
-  country: string;
   category: Category | "all";
   openNow: boolean;
   searchQuery: string;
