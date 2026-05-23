@@ -3,7 +3,7 @@
 import { useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { DEFAULT_LOCATION, NEARBY_RADIUS_METERS } from "@/lib/constants";
-import { fetchOrganizations, fetchCountries } from "@/lib/data";
+import { fetchOrganizations } from "@/lib/data";
 import { filterOrganizations } from "@/lib/filterOrganizations";
 import {
   watchUserLocation,
@@ -41,7 +41,6 @@ import { MapView } from "@/components/map/MapViewDynamic";
 const ACCORDION_DURATION_MS = 500;
 
 const defaultFilters: FilterState = {
-  country: "all",
   category: "all",
   openNow: false,
   searchQuery: "",
@@ -60,7 +59,6 @@ export function HomePage() {
   const [usingDefaultLocation, setUsingDefaultLocation] = useState(false);
   const [isLocating, setIsLocating] = useState(false);
   const [allOrganizations, setAllOrganizations] = useState<Organization[]>([]);
-  const [countryOptions, setCountryOptions] = useState<string[]>([]);
   const [orgsLoading, setOrgsLoading] = useState(true);
   const [overpassLoading, setOverpassLoading] = useState(false);
   const [routeDestination, setRouteDestination] = useState<Organization | null>(
@@ -150,12 +148,8 @@ export function HomePage() {
     async function loadCatalog() {
       setOrgsLoading(true);
       try {
-        const [orgs, countries] = await Promise.all([
-          fetchOrganizations(),
-          fetchCountries(),
-        ]);
+        const orgs = await fetchOrganizations();
         if (cancelled) return;
-        setCountryOptions(countries);
         setAllOrganizations(orgs);
       } catch (error) {
         console.error("[HomePage] Supabase catalog load failed:", error);
@@ -202,8 +196,13 @@ export function HomePage() {
           radius: String(NEARBY_RADIUS_METERS),
         });
         const res = await fetch(`/api/nearby?${params}`);
-        if (!res.ok) throw new Error("Overpass fetch failed");
         const nearby = (await res.json()) as Organization[];
+        if (!res.ok) {
+          console.warn("[HomePage] /api/nearby non-OK status:", res.status);
+        }
+        if (!Array.isArray(nearby)) {
+          throw new Error("Invalid nearby response");
+        }
         if (cancelled) return;
 
         setAllOrganizations(mergeOrganizations(catalog, nearby));
@@ -492,11 +491,7 @@ export function HomePage() {
                     value={filters.searchQuery}
                     onChange={updateSearchQuery}
                   />
-                  <Filters
-                    filters={filters}
-                    onChange={setFilters}
-                    countryOptions={countryOptions}
-                  />
+                  <Filters filters={filters} onChange={setFilters} />
                   {liteModeActive && (
                     <button
                       type="button"

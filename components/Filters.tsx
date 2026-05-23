@@ -9,10 +9,9 @@ import { cn } from "@/lib/utils";
 interface FiltersProps {
   filters: FilterState;
   onChange: (filters: FilterState) => void;
-  countryOptions: string[];
 }
 
-export function Filters({ filters, onChange, countryOptions }: FiltersProps) {
+export function Filters({ filters, onChange }: FiltersProps) {
   const { t } = useLanguage();
 
   const categoryLabel = (cat: Category) => {
@@ -34,30 +33,6 @@ export function Filters({ filters, onChange, countryOptions }: FiltersProps) {
       </div>
 
       <div className="space-y-5">
-        <div>
-          <label
-            htmlFor="country-filter"
-            className="mb-1.5 block text-sm font-medium text-gray-400"
-          >
-            {t("filterCountry")}
-          </label>
-          <select
-            id="country-filter"
-            value={filters.country}
-            onChange={(e) =>
-              onChange({ ...filters, country: e.target.value })
-            }
-            className="w-full rounded-lg border border-gray-700 bg-gray-900 px-3 py-2 text-sm text-gray-200 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
-          >
-            <option value="all">{t("filterCountryAll")}</option>
-            {countryOptions.map((c) => (
-              <option key={c} value={c}>
-                {c}
-              </option>
-            ))}
-          </select>
-        </div>
-
         <div>
           <span className="mb-2 block text-sm font-medium text-gray-400">
             {t("filterCategory")}
