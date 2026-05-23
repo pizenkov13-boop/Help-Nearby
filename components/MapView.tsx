@@ -12,7 +12,9 @@ import {
   useMap,
 } from "react-leaflet";
 import L from "leaflet";
-import { RouteControls } from "@/components/RouteControls";
+import { Loader2, X } from "lucide-react";
+import { useLanguage } from "@/lib/i18n/LanguageProvider";
+import { organizationHasGeocodableAddress } from "@/lib/nominatimGeocode";
 import type { RouteData } from "@/lib/routing";
 import { hasValidMapCoordinates } from "@/lib/mapCoordinates";
 import { resolveOrganizationsForMap } from "@/lib/resolveOrganizationCoordinates";
@@ -242,26 +244,27 @@ export default function MapView({
   routeLoading,
   onClearRoute,
 }: MapViewProps) {
+  const { t } = useLanguage();
   const [mapOrganizations, setMapOrganizations] = useState<Organization[]>([]);
   const [markerGeneration, setMarkerGeneration] = useState(0);
   const [geocoding, setGeocoding] = useState(false);
 
   useEffect(() => {
-    const withCoords = organizations.filter(hasValidMapCoordinates);
-    const missingCoords = organizations.filter(
-      (org) => !hasValidMapCoordinates(org),
-    );
+    const withStoredCoords = organizations.filter(hasValidMapCoordinates);
+    const needsNominatim = organizations.filter(organizationHasGeocodableAddress);
 
     console.log("[MapView] organizations prop:", {
       total: organizations.length,
-      withValidCoords: withCoords.length,
-      needsGeocode: missingCoords.length,
+      storedCoords: withStoredCoords.length,
+      nominatimRefine: needsNominatim.length,
     });
 
-    setMapOrganizations(withCoords);
+    setMapOrganizations(
+      withStoredCoords.length > 0 ? withStoredCoords : organizations,
+    );
     setMarkerGeneration((g) => g + 1);
 
-    if (missingCoords.length === 0) {
+    if (needsNominatim.length === 0) {
       setGeocoding(false);
       return;
     }
@@ -271,25 +274,33 @@ export default function MapView({
 
     void (async () => {
       try {
-        const geocoded = await resolveOrganizationsForMap(missingCoords, 15);
+        const refined = await resolveOrganizationsForMap(
+          needsNominatim,
+          Math.min(needsNominatim.length, 40),
+        );
         if (cancelled) return;
 
-        const newlyPlaced = geocoded.filter(hasValidMapCoordinates);
-        console.log(
-          "[MapView] geocoded markers added:",
-          newlyPlaced.length,
-        );
+        const placed = refined.filter(hasValidMapCoordinates);
+        console.log("[MapView] Nominatim markers placed:", placed.length);
 
         setMapOrganizations((prev) => {
           const byId = new Map(prev.map((o) => [o.id, o]));
-          for (const org of newlyPlaced) {
+          for (const org of placed) {
             byId.set(org.id, org);
+          }
+          for (const org of organizations) {
+            if (
+              !organizationHasGeocodableAddress(org) &&
+              hasValidMapCoordinates(org)
+            ) {
+              byId.set(org.id, org);
+            }
           }
           return Array.from(byId.values());
         });
         setMarkerGeneration((g) => g + 1);
       } catch (error) {
-        console.error("[MapView] background geocode failed:", error);
+        console.error("[MapView] Nominatim geocode failed:", error);
       } finally {
         if (!cancelled) setGeocoding(false);
       }
@@ -338,7 +349,7 @@ export default function MapView({
 
         {route && route.coordinates.length > 1 && (
           <Polyline
-            key={`route-${route.coordinates.length}-${route.distanceKm}`}
+            key={`route-${route.coordinates.length}`}
             positions={route.coordinates}
             pathOptions={ROUTE_STYLE}
           />
@@ -361,8 +372,20 @@ export default function MapView({
         </div>
       )}
 
-      {(routeDestination || route) && (
-        <RouteControls loading={routeLoading} onClear={onClearRoute} />
+      {route && route.coordinates.length > 1 && (
+        <button
+          type="button"
+          onClick={onClearRoute}
+          disabled={routeLoading}
+          className="absolute right-3 top-3 z-[1000] flex h-10 w-10 items-center justify-center rounded-full border border-gray-600/80 bg-gray-900/95 text-gray-200 shadow-lg backdrop-blur-sm transition-colors hover:bg-gray-800 hover:text-white disabled:opacity-60"
+          aria-label={t("routeClear")}
+        >
+          {routeLoading ? (
+            <Loader2 className="h-5 w-5 animate-spin text-blue-400" />
+          ) : (
+            <X className="h-5 w-5" />
+          )}
+        </button>
       )}
     </div>
   );
