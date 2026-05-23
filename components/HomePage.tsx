@@ -529,7 +529,6 @@ export function HomePage() {
                       route={route}
                       routeDestination={routeDestination}
                       routeLoading={routeLoading}
-                      routeError={routeError}
                       onClearRoute={handleClearRoute}
                     />
                   </div>
