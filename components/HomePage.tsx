@@ -22,7 +22,6 @@ import {
 import {
   fetchRoute,
   type RouteData,
-  type RoutingMode,
 } from "@/lib/routing";
 import { searchNearbyWithSmartRadius } from "@/lib/nearbySearch";
 import {
@@ -30,7 +29,7 @@ import {
   metersToDisplayKm,
   type SearchRadiusMode,
 } from "@/lib/smartRadius";
-import type { FilterState, Organization } from "@/lib/types";
+import type { FilterState, Organization, UserLocation } from "@/lib/types";
 import { useLanguage } from "@/lib/i18n/LanguageProvider";
 import {
   formatSearchNearestOrgs,
@@ -73,7 +72,6 @@ export function HomePage() {
     null,
   );
   const [route, setRoute] = useState<RouteData | null>(null);
-  const [routeMode, setRouteMode] = useState<RoutingMode>("walking");
   const [routeLoading, setRouteLoading] = useState(false);
   const [routeError, setRouteError] = useState<string | null>(null);
   const [detectedSlowCountry, setDetectedSlowCountry] =
@@ -96,8 +94,6 @@ export function HomePage() {
   const liteAutoOpenedRef = useRef(false);
 
   const liteModeActive = shouldUseLiteMode(detectedSlowCountry, viewPreference);
-  const canRoute = Boolean(userLocation && !usingDefaultLocation);
-
   useEffect(() => {
     setViewPreference(getStoredViewMode());
   }, []);
@@ -247,6 +243,7 @@ export function HomePage() {
 
       setSelected(resolved);
       setRouteDestination(resolved);
+      setRoute(null);
       setRouteError(null);
       shouldScrollRef.current = true;
       if (!mapExpanded) {
@@ -298,12 +295,18 @@ export function HomePage() {
       return;
     }
 
-    const from = userLocationRef.current;
-    if (!from) {
+    const originRef = userLocationRef.current;
+    if (!originRef || !routeDestination) {
       setRoute(null);
+      setRouteError(t("locationError"));
       return;
     }
 
+    const origin: UserLocation = {
+      lat: originRef.lat,
+      lng: originRef.lng,
+    };
+    const destination = routeDestination;
     let cancelled = false;
 
     async function loadRoute() {
@@ -311,7 +314,7 @@ export function HomePage() {
       setRouteError(null);
 
       try {
-        const data = await fetchRoute(from!, routeDestination!, routeMode);
+        const data = await fetchRoute(origin, destination, "walking");
         if (cancelled) return;
         setRoute(data);
       } catch (error) {
@@ -325,12 +328,12 @@ export function HomePage() {
       }
     }
 
-    loadRoute();
+    void loadRoute();
 
     return () => {
       cancelled = true;
     };
-  }, [routeDestination, routeMode, liteModeActive, canRoute]);
+  }, [routeDestination, userLocation, liteModeActive, t]);
 
   useEffect(() => {
     if (!mapExpanded || !shouldScrollRef.current) return;
@@ -525,10 +528,8 @@ export function HomePage() {
                       yourLocationLabel={t("yourLocation")}
                       route={route}
                       routeDestination={routeDestination}
-                      routeMode={routeMode}
                       routeLoading={routeLoading}
                       routeError={routeError}
-                      onRouteModeChange={setRouteMode}
                       onClearRoute={handleClearRoute}
                     />
                   </div>

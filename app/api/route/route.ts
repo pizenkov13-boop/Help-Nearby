@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { getOsrmProfile, type RouteStep, type RoutingMode } from "@/lib/routing";
+import { getOsrmProfile, type RoutingMode } from "@/lib/routing";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -10,18 +10,6 @@ function isRoutingMode(value: string | null): value is RoutingMode {
   return value === "driving" || value === "walking";
 }
 
-interface OsrmManeuver {
-  type?: string;
-  modifier?: string;
-}
-
-interface OsrmStep {
-  name?: string;
-  distance: number;
-  duration: number;
-  maneuver: OsrmManeuver;
-}
-
 interface OsrmRouteResponse {
   code: string;
   routes?: {
@@ -30,40 +18,8 @@ interface OsrmRouteResponse {
     geometry: {
       coordinates: [number, number][];
     };
-    legs?: { steps?: OsrmStep[] }[];
   }[];
   message?: string;
-}
-
-function formatManeuver(step: OsrmStep): string {
-  const road = step.name?.trim() || "the road";
-  const { type, modifier } = step.maneuver;
-
-  if (type === "depart") return `Head ${modifier ? modifier.replace(/_/g, " ") + " on " : ""}${road}`;
-  if (type === "arrive") return `Arrive at ${road}`;
-  if (type === "roundabout" || type === "rotary") {
-    return `Take the roundabout onto ${road}`;
-  }
-  if (modifier) {
-    const dir = modifier.replace(/_/g, " ");
-    return `${dir.charAt(0).toUpperCase() + dir.slice(1)} onto ${road}`;
-  }
-  if (type) {
-    return `${type.charAt(0).toUpperCase() + type.slice(1)} onto ${road}`;
-  }
-  return `Continue on ${road}`;
-}
-
-function parseSteps(legs: { steps?: OsrmStep[] }[] | undefined): RouteStep[] {
-  if (!legs?.length) return [];
-
-  return legs.flatMap((leg) =>
-    (leg.steps ?? []).map((step) => ({
-      instruction: formatManeuver(step),
-      distanceM: Math.round(step.distance),
-      durationS: Math.round(step.duration),
-    })),
-  );
 }
 
 export async function GET(request: Request) {
@@ -73,7 +29,7 @@ export async function GET(request: Request) {
   const toLat = Number(searchParams.get("toLat"));
   const toLng = Number(searchParams.get("toLng"));
   const modeParam = searchParams.get("mode");
-  const mode: RoutingMode = isRoutingMode(modeParam) ? modeParam : "driving";
+  const mode: RoutingMode = isRoutingMode(modeParam) ? modeParam : "walking";
 
   if (
     !Number.isFinite(fromLat) ||
@@ -89,7 +45,7 @@ export async function GET(request: Request) {
 
   const profile = getOsrmProfile(mode);
   const coords = `${fromLng},${fromLat};${toLng},${toLat}`;
-  const url = `${OSRM_BASE}/${profile}/${coords}?overview=full&geometries=geojson&steps=true`;
+  const url = `${OSRM_BASE}/${profile}/${coords}?overview=full&geometries=geojson`;
 
   try {
     const response = await fetch(url, {
@@ -122,7 +78,7 @@ export async function GET(request: Request) {
       distanceKm: Math.round((route.distance / 1000) * 10) / 10,
       durationMinutes: Math.max(1, Math.round(route.duration / 60)),
       mode,
-      steps: parseSteps(route.legs),
+      steps: [],
     });
   } catch (error) {
     console.error("[api/route]", error);
