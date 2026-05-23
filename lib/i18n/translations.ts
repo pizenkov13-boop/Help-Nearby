@@ -99,6 +99,9 @@ export type TranslationKey =
   | "chatTyping"
   | "verified"
   | "loadingNearby"
+  | "searchRadiusWithin"
+  | "searchExpand"
+  | "searchNearestOrgs"
   | "routeWalking"
   | "routeDriving"
   | "routeTransit"
@@ -225,6 +228,9 @@ const en: Record<TranslationKey, string> = {
   chatTyping: "Typing…",
   verified: "Verified",
   loadingNearby: "Finding more nearby…",
+  searchRadiusWithin: "Showing results within {km} km",
+  searchExpand: "Expand search",
+  searchNearestOrgs: "Nearest organizations ({km} km away)",
   routeWalking: "Walking",
   routeDriving: "Driving",
   routeTransit: "Transit",
@@ -667,4 +673,24 @@ export function formatImpactCounter(
   const template =
     translations[language].impactCounter ?? translations.en.impactCounter;
   return template.replace("{count}", String(count));
+}
+
+export function formatSearchRadiusWithin(
+  language: LanguageCode,
+  km: number,
+): string {
+  const template =
+    translations[language].searchRadiusWithin ??
+    translations.en.searchRadiusWithin;
+  return template.replace("{km}", String(km));
+}
+
+export function formatSearchNearestOrgs(
+  language: LanguageCode,
+  km: number,
+): string {
+  const template =
+    translations[language].searchNearestOrgs ??
+    translations.en.searchNearestOrgs;
+  return template.replace("{km}", String(km));
 }

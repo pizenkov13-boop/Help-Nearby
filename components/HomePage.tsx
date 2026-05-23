@@ -2,8 +2,7 @@
 
 import { useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { DEFAULT_LOCATION, NEARBY_RADIUS_METERS } from "@/lib/constants";
-import { fetchOrganizations } from "@/lib/data";
+import { DEFAULT_LOCATION } from "@/lib/constants";
 import { filterOrganizations } from "@/lib/filterOrganizations";
 import {
   watchUserLocation,
@@ -20,14 +19,23 @@ import {
   subscribeToNetworkChanges,
   type ViewModePreference,
 } from "@/lib/liteMode";
-import { mergeOrganizations } from "@/lib/mergeOrganizations";
 import {
   fetchRoute,
   type RouteData,
   type RoutingMode,
 } from "@/lib/routing";
+import { searchNearbyWithSmartRadius } from "@/lib/nearbySearch";
+import {
+  getTierIndex,
+  metersToDisplayKm,
+  type SearchRadiusMode,
+} from "@/lib/smartRadius";
 import type { FilterState, Organization } from "@/lib/types";
 import { useLanguage } from "@/lib/i18n/LanguageProvider";
+import {
+  formatSearchNearestOrgs,
+  formatSearchRadiusWithin,
+} from "@/lib/i18n/translations";
 import { SiteLayout } from "@/components/layout/SiteLayout";
 import { cn } from "@/lib/utils";
 import { Filters } from "./Filters";
@@ -47,7 +55,7 @@ const defaultFilters: FilterState = {
 };
 
 export function HomePage() {
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   const searchParams = useSearchParams();
   const mapSectionRef = useRef<HTMLDivElement>(null);
   const [filters, setFilters] = useState<FilterState>(defaultFilters);
@@ -75,6 +83,14 @@ export function HomePage() {
   );
   const [liteDetectionDone, setLiteDetectionDone] = useState(false);
   const [impactCount, setImpactCount] = useState<number | null>(null);
+  const [searchRadiusMeters, setSearchRadiusMeters] = useState<number | null>(
+    null,
+  );
+  const [searchMode, setSearchMode] = useState<SearchRadiusMode>("within");
+  const [canExpandSearch, setCanExpandSearch] = useState(false);
+  const [nearestFallbackKm, setNearestFallbackKm] = useState<number | null>(
+    null,
+  );
   const shouldScrollRef = useRef(false);
   const findTriggeredRef = useRef(false);
   const liteAutoOpenedRef = useRef(false);
@@ -142,83 +158,53 @@ export function HomePage() {
     );
   }, []);
 
-  useEffect(() => {
-    let cancelled = false;
-
-    async function loadCatalog() {
-      setOrgsLoading(true);
-      try {
-        const orgs = await fetchOrganizations();
-        if (cancelled) return;
-        setAllOrganizations(orgs);
-      } catch (error) {
-        console.error("[HomePage] Supabase catalog load failed:", error);
-      } finally {
-        if (!cancelled) setOrgsLoading(false);
-      }
-    }
-
-    loadCatalog();
-
-    return () => {
-      cancelled = true;
-    };
-  }, []);
-
-  useEffect(() => {
-    if (liteModeActive || !userLocation) return;
-
-    let cancelled = false;
-
-    async function loadNearby() {
+  const runNearbySearch = useCallback(
+    async (options?: { startTierIndex?: number; autoExpand?: boolean }) => {
       const location = userLocation;
       if (!location) return;
 
       setOrgsLoading(true);
       setOverpassLoading(true);
 
-      const geo = await reverseGeocodeCountry(location.lat, location.lng);
-
-      const catalog = await fetchOrganizations(location, {
-        country: geo?.country ?? undefined,
-        radiusMeters: NEARBY_RADIUS_METERS,
-      });
-
-      if (cancelled) return;
-
-      setAllOrganizations(catalog);
-      setOrgsLoading(false);
-
       try {
-        const params = new URLSearchParams({
-          lat: String(location.lat),
-          lng: String(location.lng),
-          radius: String(NEARBY_RADIUS_METERS),
+        const geo = await reverseGeocodeCountry(location.lat, location.lng);
+        const result = await searchNearbyWithSmartRadius(location, {
+          liteMode: liteModeActive,
+          country: geo?.country ?? undefined,
+          startTierIndex: options?.startTierIndex,
+          autoExpand: options?.autoExpand,
         });
-        const res = await fetch(`/api/nearby?${params}`);
-        const nearby = (await res.json()) as Organization[];
-        if (!res.ok) {
-          console.warn("[HomePage] /api/nearby non-OK status:", res.status);
-        }
-        if (!Array.isArray(nearby)) {
-          throw new Error("Invalid nearby response");
-        }
-        if (cancelled) return;
 
-        setAllOrganizations(mergeOrganizations(catalog, nearby));
+        setAllOrganizations(result.organizations);
+        setSearchRadiusMeters(result.activeRadiusMeters);
+        setSearchMode(result.mode);
+        setCanExpandSearch(result.canExpand);
+        setNearestFallbackKm(result.farthestKm);
       } catch (error) {
-        console.error("[HomePage] Overpass load failed:", error);
+        console.error("[HomePage] Smart radius search failed:", error);
+        setAllOrganizations([]);
+        setCanExpandSearch(false);
       } finally {
-        if (!cancelled) setOverpassLoading(false);
+        setOrgsLoading(false);
+        setOverpassLoading(false);
       }
-    }
+    },
+    [userLocation, liteModeActive],
+  );
 
-    loadNearby();
+  useEffect(() => {
+    if (liteModeActive && !userLocation) return;
+    if (!liteModeActive && !userLocation) return;
 
-    return () => {
-      cancelled = true;
-    };
-  }, [userLocation, liteModeActive]);
+    void runNearbySearch({ autoExpand: true });
+  }, [userLocation, liteModeActive, runNearbySearch]);
+
+  const handleExpandSearch = useCallback(() => {
+    if (!userLocation || searchRadiusMeters == null) return;
+    const nextIndex =
+      getTierIndex(searchRadiusMeters, liteModeActive) + 1;
+    void runNearbySearch({ startTierIndex: nextIndex, autoExpand: false });
+  }, [userLocation, searchRadiusMeters, liteModeActive, runNearbySearch]);
 
   const filtered = useMemo(
     () => filterOrganizations(allOrganizations, filters),
@@ -408,7 +394,6 @@ export function HomePage() {
     if (
       !liteModeActive ||
       !liteDetectionDone ||
-      orgsLoading ||
       mapExpanded ||
       liteAutoOpenedRef.current
     ) {
@@ -418,7 +403,7 @@ export function HomePage() {
     setUserLocation(DEFAULT_LOCATION);
     setUsingDefaultLocation(true);
     setMapExpanded(true);
-  }, [liteModeActive, liteDetectionDone, orgsLoading, mapExpanded]);
+  }, [liteModeActive, liteDetectionDone, mapExpanded]);
 
   useEffect(() => {
     if (
@@ -457,25 +442,53 @@ export function HomePage() {
         {(userLocation || liteModeActive) && (
           <section className="map-panel">
             <div className="container">
-              <div className="mb-6 flex flex-wrap items-center gap-3">
-                <h2>
-                  {t("mapTitle")}
-                  {liteModeActive && (
-                    <span className="map-badge emerald">
-                      {t("liteModeNotice")}
-                    </span>
-                  )}
-                  {usingDefaultLocation && !liteModeActive && (
-                    <span className="map-badge amber">
-                      {t("defaultLocationNotice")}
-                    </span>
-                  )}
-                  {overpassLoading && !liteModeActive && (
-                    <span className="map-badge blue">
-                      {t("loadingNearby")}
-                    </span>
-                  )}
-                </h2>
+              <div className="mb-6 flex flex-col gap-3">
+                <div className="flex flex-wrap items-center gap-3">
+                  <h2>
+                    {t("mapTitle")}
+                    {liteModeActive && (
+                      <span className="map-badge emerald">
+                        {t("liteModeNotice")}
+                      </span>
+                    )}
+                    {usingDefaultLocation && !liteModeActive && (
+                      <span className="map-badge amber">
+                        {t("defaultLocationNotice")}
+                      </span>
+                    )}
+                    {overpassLoading && (
+                      <span className="map-badge blue">
+                        {t("loadingNearby")}
+                      </span>
+                    )}
+                  </h2>
+                </div>
+
+                {!orgsLoading && searchRadiusMeters != null && (
+                  <div className="flex flex-wrap items-center gap-3">
+                    <p className="text-sm text-slate-400">
+                      {searchMode === "nearest" && nearestFallbackKm != null
+                        ? formatSearchNearestOrgs(
+                            language,
+                            nearestFallbackKm,
+                          )
+                        : formatSearchRadiusWithin(
+                            language,
+                            metersToDisplayKm(searchRadiusMeters),
+                          )}
+                    </p>
+                    {canExpandSearch && (
+                      <button
+                        type="button"
+                        onClick={handleExpandSearch}
+                        disabled={overpassLoading}
+                        className="rounded-full border border-blue-500/40 bg-blue-500/10 px-3 py-1 text-xs font-semibold text-blue-300 transition-colors hover:bg-blue-500/20 disabled:opacity-50"
+                      >
+                        {t("searchExpand")}
+                      </button>
+                    )}
+                  </div>
+                )}
               </div>
 
               <div
