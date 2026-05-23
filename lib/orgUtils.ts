@@ -38,15 +38,12 @@ function getWeekday(date: Date): Weekday {
   return WEEKDAYS[date.getDay()];
 }
 
-export function isOrganizationOpen(
-  org: Organization,
-  date: Date = new Date(),
-): boolean {
-  const schedule = org.hours[getWeekday(date)];
-  if (!schedule) {
-    return false;
-  }
+function hasAnyHoursData(org: Organization): boolean {
+  if (org.hoursRaw?.trim()) return true;
+  return Object.values(org.hours).some((schedule) => schedule !== undefined);
+}
 
+function isOpenForSchedule(schedule: DaySchedule, date: Date): boolean {
   const nowMinutes = date.getHours() * 60 + date.getMinutes();
   const openMinutes = parseTimeToMinutes(schedule.open);
   const closeMinutes = parseTimeToMinutes(schedule.close);
@@ -56,6 +53,32 @@ export function isOrganizationOpen(
   }
 
   return nowMinutes >= openMinutes || nowMinutes < closeMinutes;
+}
+
+/**
+ * Open Now filter: unknown/missing hours count as open.
+ * Only exclude orgs explicitly closed today or outside today's hours.
+ */
+export function isOrganizationOpen(
+  org: Organization,
+  date: Date = new Date(),
+): boolean {
+  if (!hasAnyHoursData(org)) {
+    return true;
+  }
+
+  const weekday = getWeekday(date);
+
+  if (weekday in org.hours && org.hours[weekday] === null) {
+    return false;
+  }
+
+  const schedule = org.hours[weekday];
+  if (!schedule) {
+    return true;
+  }
+
+  return isOpenForSchedule(schedule, date);
 }
 
 export function formatTime12h(time: string): string {
