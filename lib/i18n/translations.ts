@@ -100,6 +100,7 @@ export type TranslationKey =
   | "verified"
   | "loadingNearby"
   | "noVerifiedNearby"
+  | "verifiedOnlyNotice"
   | "searchRadiusWithin"
   | "searchExpand"
   | "searchNearestOrgs"
@@ -231,6 +232,7 @@ const en: Record<TranslationKey, string> = {
   loadingNearby: "Loading verified organizations…",
   noVerifiedNearby:
     "No verified organizations found nearby. Try the Emergency button for urgent help.",
+  verifiedOnlyNotice: "Showing verified organizations only",
   searchRadiusWithin: "Showing results within {km} km",
   searchExpand: "Expand search",
   searchNearestOrgs: "Nearest organizations ({km} km away)",
