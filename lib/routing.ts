@@ -17,7 +17,7 @@ export interface RouteData {
 }
 
 export function getOsrmProfile(mode: RoutingMode): string {
-  return mode === "walking" ? "foot" : "driving";
+  return mode === "walking" ? "walking" : "driving";
 }
 
 export async function fetchRoute(

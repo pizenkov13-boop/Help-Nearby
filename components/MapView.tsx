@@ -13,7 +13,7 @@ import {
 } from "react-leaflet";
 import L from "leaflet";
 import { RouteControls } from "@/components/RouteControls";
-import type { RouteData, RoutingMode } from "@/lib/routing";
+import type { RouteData } from "@/lib/routing";
 import { hasValidMapCoordinates } from "@/lib/mapCoordinates";
 import { resolveOrganizationsForMap } from "@/lib/resolveOrganizationCoordinates";
 import type { Organization, UserLocation } from "@/lib/types";
@@ -66,8 +66,8 @@ const categoryColors: Record<string, string> = {
 
 const ROUTE_STYLE = {
   color: "#007bff",
-  weight: 5,
-  opacity: 0.92,
+  weight: 4,
+  opacity: 0.95,
   lineCap: "round" as const,
   lineJoin: "round" as const,
 };
@@ -228,10 +228,8 @@ interface MapViewProps {
   yourLocationLabel: string;
   route: RouteData | null;
   routeDestination: Organization | null;
-  routeMode: RoutingMode;
   routeLoading: boolean;
   routeError: string | null;
-  onRouteModeChange: (mode: RoutingMode) => void;
   onClearRoute: () => void;
 }
 
@@ -242,10 +240,8 @@ export default function MapView({
   yourLocationLabel,
   route,
   routeDestination,
-  routeMode,
   routeLoading,
   routeError,
-  onRouteModeChange,
   onClearRoute,
 }: MapViewProps) {
   const [mapOrganizations, setMapOrganizations] = useState<Organization[]>([]);
@@ -319,12 +315,9 @@ export default function MapView({
     [userLocation.lat, userLocation.lng],
   );
 
-  const mapKey = `map-${markerGeneration}-${mapOrganizations.length}`;
-
   return (
     <div className="relative h-full w-full">
       <MapContainer
-        key={mapKey}
         center={center}
         zoom={14}
         scrollWheelZoom
@@ -345,8 +338,12 @@ export default function MapView({
           hasRoute={Boolean(route?.coordinates.length)}
         />
 
-        {route && route.coordinates.length > 0 && (
-          <Polyline positions={route.coordinates} pathOptions={ROUTE_STYLE} />
+        {route && route.coordinates.length > 1 && (
+          <Polyline
+            key={`route-${route.coordinates.length}-${route.distanceKm}`}
+            positions={route.coordinates}
+            pathOptions={ROUTE_STYLE}
+          />
         )}
 
         <UserLocationLayer
@@ -366,27 +363,12 @@ export default function MapView({
         </div>
       )}
 
-      {route && !routeLoading && !routeError && (
-        <div className="pointer-events-none absolute inset-x-0 bottom-3 z-[1000] flex justify-center px-3">
-          <div className="rounded-xl border border-blue-500/40 bg-gray-900/95 px-4 py-2.5 text-center shadow-lg backdrop-blur-sm">
-            <p className="text-sm font-bold text-blue-400">
-              {route.distanceKm} km · {route.durationMinutes} min
-            </p>
-            <p className="text-[10px] uppercase tracking-wide text-gray-500">
-              {routeMode === "walking" ? "Walking" : "Driving"} · OSRM
-            </p>
-          </div>
-        </div>
-      )}
-
       {routeDestination && (
         <RouteControls
           destination={routeDestination}
           route={route}
-          routeMode={routeMode}
           loading={routeLoading}
           error={routeError}
-          onModeChange={onRouteModeChange}
           onClear={onClearRoute}
         />
       )}
