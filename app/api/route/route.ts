@@ -1,25 +1,12 @@
 import { NextResponse } from "next/server";
-import { getOsrmProfile, type RoutingMode } from "@/lib/routing";
+import { fetchSnappedWalkingRoute } from "@/lib/osrmRouting.server";
+import type { RoutingMode } from "@/lib/routing";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
-const OSRM_BASE = "https://router.project-osrm.org/route/v1";
-
 function isRoutingMode(value: string | null): value is RoutingMode {
   return value === "driving" || value === "walking";
-}
-
-interface OsrmRouteResponse {
-  code: string;
-  routes?: {
-    distance: number;
-    duration: number;
-    geometry: {
-      coordinates: [number, number][];
-    };
-  }[];
-  message?: string;
 }
 
 export async function GET(request: Request) {
@@ -43,47 +30,28 @@ export async function GET(request: Request) {
     );
   }
 
-  const profile = getOsrmProfile(mode);
-  const coords = `${fromLng},${fromLat};${toLng},${toLat}`;
-  const url = `${OSRM_BASE}/${profile}/${coords}?overview=full&geometries=geojson`;
+  if (mode !== "walking") {
+    return NextResponse.json(
+      { error: "Only walking routes are supported." },
+      { status: 400 },
+    );
+  }
 
   try {
-    const response = await fetch(url, {
-      headers: { "User-Agent": "HelpNearby/1.0 (help-nearby.app)" },
-    });
-
-    if (!response.ok) {
-      return NextResponse.json(
-        { error: `OSRM error: ${response.status}` },
-        { status: 502 },
-      );
-    }
-
-    const data = (await response.json()) as OsrmRouteResponse;
-
-    if (data.code !== "Ok" || !data.routes?.[0]) {
-      return NextResponse.json(
-        { error: data.message ?? "No route found." },
-        { status: 404 },
-      );
-    }
-
-    const route = data.routes[0];
-    const coordinates = route.geometry.coordinates.map(
-      ([lng, lat]) => [lat, lng] as [number, number],
+    const route = await fetchSnappedWalkingRoute(
+      fromLat,
+      fromLng,
+      toLat,
+      toLng,
     );
-
-    return NextResponse.json({
-      coordinates,
-      distanceKm: Math.round((route.distance / 1000) * 10) / 10,
-      durationMinutes: Math.max(1, Math.round(route.duration / 60)),
-      mode,
-      steps: [],
-    });
+    return NextResponse.json(route);
   } catch (error) {
     console.error("[api/route]", error);
     return NextResponse.json(
-      { error: "Failed to fetch route." },
+      {
+        error:
+          error instanceof Error ? error.message : "Failed to fetch route.",
+      },
       { status: 502 },
     );
   }

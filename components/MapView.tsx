@@ -229,7 +229,6 @@ interface MapViewProps {
   route: RouteData | null;
   routeDestination: Organization | null;
   routeLoading: boolean;
-  routeError: string | null;
   onClearRoute: () => void;
 }
 
@@ -241,7 +240,6 @@ export default function MapView({
   route,
   routeDestination,
   routeLoading,
-  routeError,
   onClearRoute,
 }: MapViewProps) {
   const [mapOrganizations, setMapOrganizations] = useState<Organization[]>([]);
@@ -363,14 +361,8 @@ export default function MapView({
         </div>
       )}
 
-      {routeDestination && (
-        <RouteControls
-          destination={routeDestination}
-          route={route}
-          loading={routeLoading}
-          error={routeError}
-          onClear={onClearRoute}
-        />
+      {(routeDestination || route) && (
+        <RouteControls loading={routeLoading} onClear={onClearRoute} />
       )}
     </div>
   );
