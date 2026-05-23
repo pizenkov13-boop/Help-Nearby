@@ -170,9 +170,11 @@ function UserLocationLayer({
 function OrganizationMarkers({
   organizations,
   markerGeneration,
+  routeDestination,
 }: {
   organizations: Organization[];
   markerGeneration: number;
+  routeDestination?: Organization | null;
 }) {
   useEffect(() => {
     console.log(
@@ -190,10 +192,13 @@ function OrganizationMarkers({
 
   return (
     <>
-      {organizations.map((org) => (
+      {organizations.map((org) => {
+        const atDestination =
+          routeDestination?.id === org.id ? routeDestination : org;
+        return (
         <Marker
           key={`${markerGeneration}-${org.id}`}
-          position={[org.lat, org.lng]}
+          position={[atDestination.lat, atDestination.lng]}
           icon={createCategoryIcon(
             categoryColors[org.category] ?? "#3b82f6",
             org.verified,
@@ -218,7 +223,8 @@ function OrganizationMarkers({
             </div>
           </Popup>
         </Marker>
-      ))}
+        );
+      })}
     </>
   );
 }
@@ -363,6 +369,7 @@ export default function MapView({
         <OrganizationMarkers
           organizations={mapOrganizations}
           markerGeneration={markerGeneration}
+          routeDestination={routeDestination}
         />
       </MapContainer>
 
