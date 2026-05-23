@@ -978,9 +978,14 @@ body {
   background: #131a2d !important;
 }
 
-.user-location-marker {
+.user-location-marker,
+.custom-marker {
   background: transparent !important;
   border: none !important;
+}
+
+.custom-marker {
+  overflow: visible !important;
 }
 
 .user-location-marker .user-marker-inner {

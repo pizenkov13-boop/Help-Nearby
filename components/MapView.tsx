@@ -14,6 +14,7 @@ import {
 import L from "leaflet";
 import { RouteControls } from "@/components/RouteControls";
 import type { RouteData, RoutingMode } from "@/lib/routing";
+import { hasValidMapCoordinates } from "@/lib/mapCoordinates";
 import { resolveOrganizationsForMap } from "@/lib/resolveOrganizationCoordinates";
 import type { Organization, UserLocation } from "@/lib/types";
 import type { TrackedUserLocation } from "@/lib/geolocation";
@@ -164,6 +165,62 @@ function UserLocationLayer({
   );
 }
 
+function OrganizationMarkers({
+  organizations,
+  markerGeneration,
+}: {
+  organizations: Organization[];
+  markerGeneration: number;
+}) {
+  useEffect(() => {
+    console.log(
+      "[MapView] markers layer:",
+      organizations.length,
+      "generation:",
+      markerGeneration,
+      organizations.slice(0, 3).map((o) => ({
+        id: o.id,
+        lat: o.lat,
+        lng: o.lng,
+      })),
+    );
+  }, [organizations, markerGeneration]);
+
+  return (
+    <>
+      {organizations.map((org) => (
+        <Marker
+          key={`${markerGeneration}-${org.id}`}
+          position={[org.lat, org.lng]}
+          icon={createCategoryIcon(
+            categoryColors[org.category] ?? "#3b82f6",
+            org.verified,
+          )}
+        >
+          <Popup>
+            <div className="text-sm">
+              <strong>{org.name}</strong>
+              {org.verified && (
+                <span className="ml-1 text-emerald-400">✓</span>
+              )}
+              <br />
+              <span>
+                {CATEGORY_CONFIG[org.category].icon} {org.category}
+              </span>
+              {org.address && (
+                <>
+                  <br />
+                  <span className="text-xs text-gray-400">{org.address}</span>
+                </>
+              )}
+            </div>
+          </Popup>
+        </Marker>
+      ))}
+    </>
+  );
+}
+
 interface MapViewProps {
   organizations: Organization[];
   selected?: Organization | null;
@@ -191,24 +248,58 @@ export default function MapView({
   onRouteModeChange,
   onClearRoute,
 }: MapViewProps) {
-  const [mapOrganizations, setMapOrganizations] = useState<Organization[]>(
-    organizations,
-  );
+  const [mapOrganizations, setMapOrganizations] = useState<Organization[]>([]);
+  const [markerGeneration, setMarkerGeneration] = useState(0);
   const [geocoding, setGeocoding] = useState(false);
 
   useEffect(() => {
-    let cancelled = false;
+    const withCoords = organizations.filter(hasValidMapCoordinates);
+    const missingCoords = organizations.filter(
+      (org) => !hasValidMapCoordinates(org),
+    );
 
-    async function resolve() {
-      setGeocoding(true);
-      const resolved = await resolveOrganizationsForMap(organizations);
-      if (!cancelled) {
-        setMapOrganizations(resolved);
-        setGeocoding(false);
-      }
+    console.log("[MapView] organizations prop:", {
+      total: organizations.length,
+      withValidCoords: withCoords.length,
+      needsGeocode: missingCoords.length,
+    });
+
+    setMapOrganizations(withCoords);
+    setMarkerGeneration((g) => g + 1);
+
+    if (missingCoords.length === 0) {
+      setGeocoding(false);
+      return;
     }
 
-    void resolve();
+    let cancelled = false;
+    setGeocoding(true);
+
+    void (async () => {
+      try {
+        const geocoded = await resolveOrganizationsForMap(missingCoords, 15);
+        if (cancelled) return;
+
+        const newlyPlaced = geocoded.filter(hasValidMapCoordinates);
+        console.log(
+          "[MapView] geocoded markers added:",
+          newlyPlaced.length,
+        );
+
+        setMapOrganizations((prev) => {
+          const byId = new Map(prev.map((o) => [o.id, o]));
+          for (const org of newlyPlaced) {
+            byId.set(org.id, org);
+          }
+          return Array.from(byId.values());
+        });
+        setMarkerGeneration((g) => g + 1);
+      } catch (error) {
+        console.error("[MapView] background geocode failed:", error);
+      } finally {
+        if (!cancelled) setGeocoding(false);
+      }
+    })();
 
     return () => {
       cancelled = true;
@@ -228,9 +319,12 @@ export default function MapView({
     [userLocation.lat, userLocation.lng],
   );
 
+  const mapKey = `map-${markerGeneration}-${mapOrganizations.length}`;
+
   return (
     <div className="relative h-full w-full">
       <MapContainer
+        key={mapKey}
         center={center}
         zoom={14}
         scrollWheelZoom
@@ -260,35 +354,10 @@ export default function MapView({
           yourLocationLabel={yourLocationLabel}
         />
 
-        {mapOrganizations.map((org) => (
-          <Marker
-            key={org.id}
-            position={[org.lat, org.lng]}
-            icon={createCategoryIcon(
-              categoryColors[org.category] ?? "#3b82f6",
-              org.verified,
-            )}
-          >
-            <Popup>
-              <div className="text-sm">
-                <strong>{org.name}</strong>
-                {org.verified && (
-                  <span className="ml-1 text-emerald-400">✓</span>
-                )}
-                <br />
-                <span>
-                  {CATEGORY_CONFIG[org.category].icon} {org.category}
-                </span>
-                {org.address && (
-                  <>
-                    <br />
-                    <span className="text-xs text-gray-400">{org.address}</span>
-                  </>
-                )}
-              </div>
-            </Popup>
-          </Marker>
-        ))}
+        <OrganizationMarkers
+          organizations={mapOrganizations}
+          markerGeneration={markerGeneration}
+        />
       </MapContainer>
 
       {geocoding && (
