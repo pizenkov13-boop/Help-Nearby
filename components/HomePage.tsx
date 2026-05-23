@@ -243,6 +243,9 @@ export function HomePage() {
 
       setSelected(resolved);
       setRouteDestination(resolved);
+      setAllOrganizations((prev) =>
+        prev.map((o) => (o.id === resolved.id ? resolved : o)),
+      );
       setRoute(null);
       setRouteError(null);
       shouldScrollRef.current = true;

@@ -1,17 +1,12 @@
 import "server-only";
 
 import type { RouteData, RoutingMode } from "@/lib/routing";
+import { snapToNearestWalkingRoad } from "@/lib/osrmSnap";
 
 const USER_AGENT = "HelpNearby/1.0 (help-nearby.app)";
-const OSRM_NEAREST = "https://router.project-osrm.org/nearest/v1/walking";
 const OSRM_ROUTE = "https://router.project-osrm.org/route/v1/walking";
 const OSM_DE_ROUTE =
   "https://routing.openstreetmap.de/routed-foot/route/v1/foot";
-
-interface OsrmNearestResponse {
-  code?: string;
-  waypoints?: { location?: [number, number] }[];
-}
 
 interface OsrmRouteLeg {
   distance: number;
@@ -28,39 +23,6 @@ interface OsrmRouteResponse {
 interface RoutePoint {
   lng: number;
   lat: number;
-}
-
-async function snapToNearestRoad(lng: number, lat: number): Promise<RoutePoint> {
-  const url = `${OSRM_NEAREST}/${lng},${lat}?number=1`;
-
-  try {
-    const response = await fetch(url, {
-      headers: { Accept: "application/json", "User-Agent": USER_AGENT },
-      signal: AbortSignal.timeout(15_000),
-    });
-
-    if (!response.ok) {
-      console.warn("[route] nearest HTTP", response.status, { lng, lat });
-      return { lng, lat };
-    }
-
-    const data = (await response.json()) as OsrmNearestResponse;
-    const location = data.waypoints?.[0]?.location;
-
-    if (
-      data.code === "Ok" &&
-      Array.isArray(location) &&
-      location.length >= 2 &&
-      Number.isFinite(location[0]) &&
-      Number.isFinite(location[1])
-    ) {
-      return { lng: location[0], lat: location[1] };
-    }
-  } catch (error) {
-    console.warn("[route] nearest snap failed:", error);
-  }
-
-  return { lng, lat };
 }
 
 function parseRouteGeometry(route: OsrmRouteLeg): [number, number][] {
@@ -133,8 +95,8 @@ export async function fetchSnappedWalkingRoute(
   toLng: number,
 ): Promise<RouteData> {
   const [from, to] = await Promise.all([
-    snapToNearestRoad(fromLng, fromLat),
-    snapToNearestRoad(toLng, toLat),
+    snapToNearestWalkingRoad(fromLng, fromLat),
+    snapToNearestWalkingRoad(toLng, toLat),
   ]);
 
   console.log("[route] snapped", {
