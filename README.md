@@ -46,6 +46,33 @@ Whether someone is facing hunger, homelessness, or an emergency, Help Nearby tur
 
 ---
 
+## 🌍 Global Coverage — 193 Countries
+
+Help Nearby provides verified humanitarian assistance coverage in **193 countries** worldwide through partnerships with UN agencies.
+
+### Verified UN Organizations
+Every country capital has a verified UNHCR, WFP, or ICRC contact:
+- **UNHCR** hotlines — confirmed working numbers from help.unhcr.org
+- **WFP** offices — World Food Programme country contacts  
+- **ICRC** — International Red Cross emergency contacts
+
+### Crisis Zones — Enhanced Coverage
+| Country | Status | Cities covered |
+|---------|--------|----------------|
+| 🇸🇩 Sudan | 🔴 CRISIS | Khartoum, Port Sudan, Al-Fashir, Atbara |
+| 🇾🇪 Yemen | 🔴 CRISIS | Sanaa, Aden |
+| 🇦🇫 Afghanistan | 🔴 CRISIS | Kabul + Awaaz 24/7 hotline |
+| 🇵🇸 Gaza | 🔴 CRISIS | UNRWA + WFP verified |
+| 🇭🇹 Haiti | 🔴 CRISIS | Port-au-Prince, Cap-Haitien |
+| 🇨🇩 DRC | 🔴 CRISIS | Kinshasa |
+
+### Data Accuracy
+- ✅ Crisis zones — manually verified from official UN sources
+- 🌍 All other countries — real-time OpenStreetMap data
+- Numbers verified directly from help.unhcr.org and wfp.org
+
+---
+
 ## Tech Stack
 
 | Layer | Technology |
