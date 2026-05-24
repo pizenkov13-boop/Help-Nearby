@@ -1,3 +1,8 @@
+import {
+  extractOsmOpeningHours,
+  parseOsmOpeningHours,
+  type OpenStatus,
+} from "@/lib/openingHours";
 import type { DaySchedule, Organization, Weekday, WeeklyHours } from "@/lib/types";
 
 const WEEKDAYS: Weekday[] = [
@@ -38,8 +43,7 @@ function getWeekday(date: Date): Weekday {
   return WEEKDAYS[date.getDay()];
 }
 
-function hasAnyHoursData(org: Organization): boolean {
-  if (org.hoursRaw?.trim()) return true;
+function hasStructuredHours(org: Organization): boolean {
   return Object.values(org.hours).some((schedule) => schedule !== undefined);
 }
 
@@ -55,30 +59,57 @@ function isOpenForSchedule(schedule: DaySchedule, date: Date): boolean {
   return nowMinutes >= openMinutes || nowMinutes < closeMinutes;
 }
 
+function evaluateStructuredHours(
+  org: Organization,
+  date: Date,
+): OpenStatus {
+  const weekday = getWeekday(date);
+
+  if (weekday in org.hours && org.hours[weekday] === null) {
+    return "closed";
+  }
+
+  const schedule = org.hours[weekday];
+  if (!schedule) {
+    const anyDayDefined = Object.keys(org.hours).length > 0;
+    return anyDayDefined ? "closed" : "unknown";
+  }
+
+  return isOpenForSchedule(schedule, date) ? "open" : "closed";
+}
+
+/** Whether opening hours are known well enough to show open/closed status. */
+export function hasKnownOpenStatus(org: Organization): boolean {
+  return getOrganizationOpenStatus(org) !== "unknown";
+}
+
 /**
- * Open Now filter: unknown/missing hours count as open.
- * Only exclude orgs explicitly closed today or outside today's hours.
+ * Returns open/closed/unknown for an organization.
+ * Unknown = no hours data (OSM orgs without opening_hours tag).
+ */
+export function getOrganizationOpenStatus(
+  org: Organization,
+  date: Date = new Date(),
+): OpenStatus {
+  if (hasStructuredHours(org)) {
+    return evaluateStructuredHours(org, date);
+  }
+
+  const osmHours = extractOsmOpeningHours(org.hoursRaw);
+  if (!osmHours) return "unknown";
+
+  return parseOsmOpeningHours(osmHours, date);
+}
+
+/**
+ * Open Now filter: unknown hours stay visible; only definitively closed orgs are hidden.
  */
 export function isOrganizationOpen(
   org: Organization,
   date: Date = new Date(),
 ): boolean {
-  if (!hasAnyHoursData(org)) {
-    return true;
-  }
-
-  const weekday = getWeekday(date);
-
-  if (weekday in org.hours && org.hours[weekday] === null) {
-    return false;
-  }
-
-  const schedule = org.hours[weekday];
-  if (!schedule) {
-    return true;
-  }
-
-  return isOpenForSchedule(schedule, date);
+  const status = getOrganizationOpenStatus(org, date);
+  return status !== "closed";
 }
 
 export function formatTime12h(time: string): string {
