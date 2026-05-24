@@ -7,6 +7,10 @@ import {
   OVERPASS_CACHE_TTL_MS,
   OVERPASS_TIMEOUT_MS,
 } from "@/lib/overpassCache";
+import {
+  buildEmergencyMetadataRaw,
+  isGenuineEmergencyOsmFacility,
+} from "@/lib/emergencyFacilities";
 import { slugify } from "@/lib/orgUtils";
 import {
   normalizeRawCoordinates,
@@ -69,11 +73,16 @@ export function buildEmergencyOverpassQuery(
   return `
 [out:json][timeout:25];
 (
+  nwr["emergency"="ambulance_station"]${around};
+  nwr["emergency"="emergency_ward"]${around};
+  nwr["amenity"="hospital"]["emergency"~"^(yes|emergency_ward|department)$"]${around};
+  nwr["amenity"="hospital"]["healthcare"="emergency"]${around};
+  nwr["healthcare"="emergency"]${around};
+  nwr["healthcare"="urgent_care"]${around};
+  nwr["amenity"="clinic"]["emergency"~"^(yes|emergency_ward)$"]${around};
+  nwr["amenity"="clinic"]["healthcare"="urgent_care"]${around};
   nwr["amenity"="hospital"]${around};
   nwr["amenity"="pharmacy"]${around};
-  nwr["amenity"="clinic"]${around};
-  nwr["amenity"="doctors"]${around};
-  nwr["emergency"="ambulance_station"]${around};
   nwr["amenity"="fire_station"]${around};
   nwr["amenity"="police"]${around};
 );
@@ -247,9 +256,14 @@ function mapElementToOrganization(
   el: OverpassElement,
   userLocation: UserLocation,
   maxRadiusMeters: number,
+  options?: { emergency?: boolean },
 ): Organization | null {
   const tags = el.tags;
   if (!tags) return null;
+
+  if (options?.emergency && !isGenuineEmergencyOsmFacility(tags)) {
+    return null;
+  }
 
   const coords = resolveOverpassCoordinates(
     el,
@@ -297,7 +311,9 @@ function mapElementToOrganization(
       tags.operator ??
       [tags.amenity, tags.social_facility].filter(Boolean).join(" · "),
     hours: {},
-    hoursRaw: buildHoursRaw(tags),
+    hoursRaw: options?.emergency
+      ? buildEmergencyMetadataRaw(tags)
+      : buildHoursRaw(tags),
     openNow: false,
     verified: false,
   };
@@ -307,13 +323,19 @@ function parseOverpassElements(
   data: OverpassResponse,
   userLocation: UserLocation,
   maxRadiusMeters: number,
+  options?: { emergency?: boolean },
 ): Organization[] {
   const elements = data.elements ?? [];
   const seen = new Set<string>();
   const organizations: Organization[] = [];
 
   for (const el of elements) {
-    const org = mapElementToOrganization(el, userLocation, maxRadiusMeters);
+    const org = mapElementToOrganization(
+      el,
+      userLocation,
+      maxRadiusMeters,
+      options,
+    );
     if (!org) continue;
     const key = `${org.lat.toFixed(5)}:${org.lng.toFixed(5)}:${org.name}`;
     if (seen.has(key)) continue;
@@ -350,9 +372,12 @@ async function fetchOverpassOrganizations(
   lng: number,
   radius: number,
   buildQuery: (lat: number, lng: number, radius: number) => string,
+  options?: { emergency?: boolean },
 ): Promise<Organization[]> {
   const userLocation: UserLocation = { lat, lng };
-  const cacheKey = buildOverpassCacheKey(lat, lng, radius);
+  const cacheKey =
+    buildOverpassCacheKey(lat, lng, radius) +
+    (options?.emergency ? ":emergency" : ":nearby");
   const cached = readServerCache(cacheKey);
   if (cached) {
     console.log(`[overpass] Cache hit (${cached.length} orgs)`);
@@ -361,7 +386,12 @@ async function fetchOverpassOrganizations(
 
   const query = buildQuery(lat, lng, radius);
   const data = await queryOverpass(query);
-  const organizations = parseOverpassElements(data, userLocation, radius);
+  const organizations = parseOverpassElements(
+    data,
+    userLocation,
+    radius,
+    options,
+  );
   writeServerCache(cacheKey, organizations);
   return organizations;
 }
@@ -384,5 +414,6 @@ export async function fetchEmergencyOverpassOrganizations(
     lng,
     radius,
     buildEmergencyOverpassQuery,
+    { emergency: true },
   );
 }

@@ -1,4 +1,5 @@
 import { getSupabase, isSupabaseFetchError } from "@/lib/supabase";
+import { getSupabaseAdmin } from "@/lib/supabaseAdmin";
 import type { Review } from "@/lib/types";
 
 const REVIEW_COLUMNS =
@@ -9,6 +10,21 @@ export interface SubmitReviewInput {
   country: string;
   message: string;
   rating: number;
+}
+
+function formatSupabaseError(error: {
+  message: string;
+  code?: string;
+  details?: string;
+  hint?: string;
+}): string {
+  const parts = [
+    error.message,
+    error.code ? `code=${error.code}` : "",
+    error.details ? `details=${error.details}` : "",
+    error.hint ? `hint=${error.hint}` : "",
+  ].filter(Boolean);
+  return parts.join(" | ");
 }
 
 export async function fetchApprovedReviews(): Promise<Review[]> {
@@ -23,7 +39,7 @@ export async function fetchApprovedReviews(): Promise<Review[]> {
       .order("created_at", { ascending: false });
 
     if (error) {
-      console.error("[fetchApprovedReviews]", error.message);
+      console.error("[fetchApprovedReviews]", formatSupabaseError(error));
       return [];
     }
 
@@ -44,14 +60,6 @@ export const fetchReviews = fetchApprovedReviews;
 export async function submitReview(
   input: SubmitReviewInput,
 ): Promise<{ ok: true; review: Review } | { ok: false; error: string }> {
-  const supabase = getSupabase();
-  if (!supabase) {
-    return {
-      ok: false,
-      error: "Reviews are temporarily unavailable. Please try again later.",
-    };
-  }
-
   const name = input.name.trim();
   const country = input.country.trim();
   const message = input.message.trim();
@@ -65,21 +73,71 @@ export async function submitReview(
     return { ok: false, error: "Rating must be between 1 and 5." };
   }
 
+  const row = { name, country, message, rating, approved: false as const };
+
+  const admin = getSupabaseAdmin();
+  if (admin) {
+    try {
+      const { data, error } = await admin
+        .from("reviews")
+        .insert(row)
+        .select(REVIEW_COLUMNS)
+        .single();
+
+      if (error) {
+        console.error("[submitReview] admin insert:", formatSupabaseError(error));
+        return {
+          ok: false,
+          error: "Could not save your review. Please try again.",
+        };
+      }
+
+      return { ok: true, review: data as Review };
+    } catch (error) {
+      console.error("[submitReview] admin insert exception:", error);
+      return {
+        ok: false,
+        error: "Could not save your review. Please try again.",
+      };
+    }
+  }
+
+  const supabase = getSupabase();
+  if (!supabase) {
+    return {
+      ok: false,
+      error: "Reviews are temporarily unavailable. Please try again later.",
+    };
+  }
+
   try {
-    const { data, error } = await supabase
-      .from("reviews")
-      .insert({ name, country, message, rating, approved: false })
-      .select(REVIEW_COLUMNS)
-      .single();
+    // Do not .select() after insert: RLS only allows SELECT on approved rows,
+    // so RETURNING would fail with 42501 even when INSERT succeeds.
+    const { error } = await supabase.from("reviews").insert(row);
 
     if (error) {
-      console.error("[submitReview]", error.message);
-      return { ok: false, error: "Could not save your review. Please try again." };
+      console.error("[submitReview] anon insert:", formatSupabaseError(error));
+      return {
+        ok: false,
+        error: "Could not save your review. Please try again.",
+      };
     }
 
-    return { ok: true, review: data as Review };
+    return {
+      ok: true,
+      review: {
+        id: 0,
+        name,
+        country,
+        message,
+        rating,
+        approved: false,
+        created_at: new Date().toISOString(),
+      },
+    };
   } catch (error) {
     if (isSupabaseFetchError(error)) {
+      console.error("[submitReview] Supabase unreachable:", error);
       return {
         ok: false,
         error: "Reviews are temporarily unavailable. Please try again later.",
