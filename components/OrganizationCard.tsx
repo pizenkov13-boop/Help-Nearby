@@ -10,6 +10,10 @@ import {
 } from "lucide-react";
 import { CATEGORY_CONFIG } from "@/lib/categories";
 import { useLanguage } from "@/lib/i18n/LanguageProvider";
+import {
+  trackCallOrganization,
+  trackGetDirections,
+} from "@/lib/analytics.client";
 import { recordImpactClick } from "@/lib/impact.client";
 import {
   getDirectionsUrl,
@@ -42,11 +46,13 @@ export function OrganizationCard({
   const hasPhone = Boolean(org.phone?.trim());
 
   const handleCallClick = () => {
+    trackCallOrganization(org);
     recordImpactClick(org.id, "call");
     onImpactRecorded?.();
   };
 
   const handleDirectionsClick = () => {
+    trackGetDirections(org);
     recordImpactClick(org.id, "directions");
     onImpactRecorded?.();
     onGetDirections?.(org);
@@ -178,6 +184,7 @@ export function OrganizationCard({
             target="_blank"
             rel="noopener noreferrer"
             onClick={() => {
+              trackGetDirections(org);
               recordImpactClick(org.id, "directions");
               onImpactRecorded?.();
             }}
