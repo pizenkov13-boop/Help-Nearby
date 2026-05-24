@@ -14,6 +14,10 @@ import {
   Star,
 } from "lucide-react";
 import { SiteLayout } from "@/components/layout/SiteLayout";
+import {
+  trackCallOrganization,
+  trackGetDirections,
+} from "@/lib/analytics.client";
 import { CATEGORY_CONFIG } from "@/lib/categories";
 import { useLanguage } from "@/lib/i18n/LanguageProvider";
 import {
@@ -143,6 +147,7 @@ export function OrganizationDetailPage({ org }: OrganizationDetailPageProps) {
         <div className="flex flex-col gap-3 sm:flex-row">
           <a
             href={telUrl}
+            onClick={() => trackCallOrganization(org)}
             className="inline-flex flex-1 items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-emerald-500 to-emerald-600 px-6 py-4 text-lg font-semibold text-white shadow-lg shadow-emerald-500/25 transition-all hover:from-emerald-400 hover:to-emerald-500"
           >
             <Phone className="h-5 w-5" />
@@ -152,6 +157,7 @@ export function OrganizationDetailPage({ org }: OrganizationDetailPageProps) {
             href={directionsUrl}
             target="_blank"
             rel="noopener noreferrer"
+            onClick={() => trackGetDirections(org)}
             className="inline-flex flex-1 items-center justify-center gap-2 rounded-xl border border-gray-300 bg-white px-6 py-4 text-lg font-semibold text-gray-900 transition-colors hover:border-blue-500/50 hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-800 dark:text-white dark:hover:bg-gray-700/50"
           >
             <Navigation className="h-5 w-5 text-blue-400" />

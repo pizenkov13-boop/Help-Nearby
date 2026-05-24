@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState } from "react";
 import { Loader2, MapPin, Phone, X } from "lucide-react";
 import { DEFAULT_LOCATION, NEARBY_RADIUS_METERS } from "@/lib/constants";
 import { useLanguage } from "@/lib/i18n/LanguageProvider";
+import { trackCallOrganization } from "@/lib/analytics.client";
 import { getPhoneTelUrl } from "@/lib/orgUtils";
 import type { Organization, UserLocation } from "@/lib/types";
 import { EMERGENCY_OPEN_EVENT } from "@/lib/emergencyEvents";
@@ -196,6 +197,7 @@ export function EmergencyHelp() {
                           {org.phone?.trim() ? (
                             <a
                               href={getPhoneTelUrl(org.phone)}
+                              onClick={() => trackCallOrganization(org)}
                               className="mb-2 inline-flex items-center gap-2 text-base font-bold text-emerald-400 hover:text-emerald-300"
                             >
                               <Phone className="h-4 w-4 shrink-0" />
@@ -221,6 +223,7 @@ export function EmergencyHelp() {
                           {org.phone?.trim() && (
                             <a
                               href={getPhoneTelUrl(org.phone)}
+                              onClick={() => trackCallOrganization(org)}
                               className="mt-3 flex w-full items-center justify-center gap-2 rounded-lg bg-emerald-600 py-2.5 text-sm font-semibold text-white hover:bg-emerald-500"
                             >
                               <Phone className="h-4 w-4" />
