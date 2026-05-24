@@ -1,5 +1,5 @@
 import { fetchOrganizations } from "@/lib/data";
-import { distanceMiles, formatDistanceMiles } from "@/lib/geo";
+import { validateOrganizationForNearby } from "@/lib/organizationCoordinates";
 import { mergeOrganizations } from "@/lib/mergeOrganizations";
 import {
   readOverpassClientCache,
@@ -45,25 +45,9 @@ function filterByRadius(
   location: UserLocation,
   radiusMeters: number,
 ): Organization[] {
-  const radiusMiles = radiusMeters / 1609.34;
   return orgs
-    .filter(
-      (org) =>
-        Number.isFinite(org.lat) &&
-        Number.isFinite(org.lng) &&
-        !(org.lat === 0 && org.lng === 0) &&
-        distanceMiles(location.lat, location.lng, org.lat, org.lng) <=
-          radiusMiles,
-    )
-    .map((org) => ({
-      ...org,
-      distance: formatDistanceMiles(
-        location.lat,
-        location.lng,
-        org.lat,
-        org.lng,
-      ),
-    }));
+    .map((org) => validateOrganizationForNearby(org, location, radiusMeters))
+    .filter((org): org is Organization => org !== null);
 }
 
 async function fetchOverpassNearby(

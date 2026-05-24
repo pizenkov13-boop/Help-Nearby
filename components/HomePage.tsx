@@ -9,6 +9,11 @@ import {
   type TrackedUserLocation,
 } from "@/lib/geolocation";
 import { reverseGeocodeCountry } from "@/lib/geocode";
+import {
+  getOrganizationCoordinates,
+  organizationHasTrustedCoordinates,
+  validateOrganizationForNearby,
+} from "@/lib/organizationCoordinates";
 import { resolveOrganizationCoordinates } from "@/lib/resolveOrganizationCoordinates";
 import {
   detectSlowConnectionFromNetwork,
@@ -26,6 +31,7 @@ import {
 import { readNearbyCache, writeNearbyCache } from "@/lib/nearbyCache";
 import { searchNearbyWithSmartRadius } from "@/lib/nearbySearch";
 import {
+  getMaxRadiusMeters,
   getTierIndex,
   metersToDisplayKm,
   type SearchRadiusMode,
@@ -270,9 +276,20 @@ export function HomePage() {
     void runNearbySearch({ startTierIndex: nextIndex, autoExpand: false });
   }, [userLocation, searchRadiusMeters, liteModeActive, runNearbySearch]);
 
+  const maxSearchRadiusMeters = getMaxRadiusMeters(liteModeActive);
+
+  const coordinateValidated = useMemo(() => {
+    if (!userLocation) return allOrganizations;
+    return allOrganizations
+      .map((org) =>
+        validateOrganizationForNearby(org, userLocation, maxSearchRadiusMeters),
+      )
+      .filter((org): org is Organization => org !== null);
+  }, [allOrganizations, userLocation, maxSearchRadiusMeters]);
+
   const filtered = useMemo(
-    () => filterOrganizations(allOrganizations, filters),
-    [allOrganizations, filters],
+    () => filterOrganizations(coordinateValidated, filters),
+    [coordinateValidated, filters],
   );
 
   useEffect(() => {
@@ -298,22 +315,41 @@ export function HomePage() {
 
   const handleGetDirections = useCallback(
     async (org: Organization) => {
-      const resolved = await resolveOrganizationCoordinates(org);
+      const location = userLocation;
+      if (!location) {
+        setRouteError(t("locationError"));
+        return;
+      }
+
+      const maxRadius =
+        searchRadiusMeters ?? getMaxRadiusMeters(liteModeActive);
+      const validated = validateOrganizationForNearby(org, location, maxRadius);
+      if (!validated) {
+        setRouteError(t("locationError"));
+        return;
+      }
+
+      let destination = organizationHasTrustedCoordinates(validated)
+        ? validated
+        : await resolveOrganizationCoordinates(validated);
+
+      destination =
+        validateOrganizationForNearby(destination, location, maxRadius) ??
+        validated;
+
+      const coords = getOrganizationCoordinates(destination);
 
       if (liteModeActive) {
         window.open(
-          `https://www.google.com/maps/dir/?api=1&destination=${resolved.lat},${resolved.lng}`,
+          `https://www.google.com/maps/dir/?api=1&destination=${coords.lat},${coords.lng}`,
           "_blank",
           "noopener,noreferrer",
         );
         return;
       }
 
-      setSelected(resolved);
-      setRouteDestination(resolved);
-      setAllOrganizations((prev) =>
-        prev.map((o) => (o.id === resolved.id ? resolved : o)),
-      );
+      setSelected(destination);
+      setRouteDestination(destination);
       setRoute(null);
       setRouteError(null);
       shouldScrollRef.current = true;
@@ -323,7 +359,14 @@ export function HomePage() {
         scrollToMapTop();
       }
     },
-    [liteModeActive, mapExpanded, scrollToMapTop],
+    [
+      userLocation,
+      searchRadiusMeters,
+      liteModeActive,
+      mapExpanded,
+      scrollToMapTop,
+      t,
+    ],
   );
 
   const handleSwitchToFullVersion = useCallback(() => {
@@ -377,7 +420,7 @@ export function HomePage() {
       lat: originRef.lat,
       lng: originRef.lng,
     };
-    const destination = routeDestination;
+    const destination = getOrganizationCoordinates(routeDestination);
     let cancelled = false;
 
     async function loadRoute() {
