@@ -3,6 +3,7 @@
 import { ChatWidget } from "@/components/ChatWidget";
 import { EmergencyHelp } from "@/components/EmergencyHelp";
 import { Header } from "@/components/layout/Header";
+import { ScrollToHash } from "@/components/layout/ScrollToHash";
 import { useLanguage } from "@/lib/i18n/LanguageProvider";
 import { SiteFooter } from "./SiteFooter";
 
@@ -19,6 +20,7 @@ export function SiteLayout({ children }: SiteLayoutProps) {
       className="flex min-h-screen flex-col bg-[#0a0f1f] bg-surface text-slate-100"
     >
       <Header />
+      <ScrollToHash />
       <EmergencyHelp />
       <main className="flex-1">{children}</main>
       <SiteFooter />

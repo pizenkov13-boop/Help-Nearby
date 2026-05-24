@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { BrandLogo } from "@/components/BrandLogo";
+import { AnchorNavLink } from "@/components/navigation/AnchorNavLink";
 import { useLanguage } from "@/lib/i18n/LanguageProvider";
 import { LANGUAGES } from "@/lib/i18n/translations";
 import { openEmergencyHelp } from "@/lib/emergencyEvents";
@@ -91,14 +92,14 @@ function NavSectionMenu({
       {items.length > 0 && (
         <div className="dd-menu">
           {items.map((item) => (
-            <Link
+            <AnchorNavLink
               key={item.href}
               href={item.href}
               className="nav-link"
-              onClick={onClose}
+              onNavigate={onClose}
             >
               {item.label}
-            </Link>
+            </AnchorNavLink>
           ))}
         </div>
       )}
@@ -131,7 +132,7 @@ export function Header() {
   const whyItems = [
     { label: "The Problem", href: "/why-it-matters#the-problem" },
     { label: "Our Solution", href: "/why-it-matters#our-solution" },
-    { label: "Cities in Need", href: "/#cities-in-need" },
+    { label: "Cities in Need", href: "/why-it-matters#cities-in-need" },
   ];
 
   const isAboutActive =
@@ -311,14 +312,14 @@ export function Header() {
           {t("navAbout")}
         </Link>
         {aboutItems.map((item) => (
-          <Link
+          <AnchorNavLink
             key={item.href}
             href={item.href}
             className="nav-link m-sub"
-            onClick={closeAll}
+            onNavigate={closeAll}
           >
             {item.label}
-          </Link>
+          </AnchorNavLink>
         ))}
         <Link
           href="/why-it-matters"
@@ -328,14 +329,14 @@ export function Header() {
           {t("navWhy")}
         </Link>
         {whyItems.map((item) => (
-          <Link
+          <AnchorNavLink
             key={item.href}
             href={item.href}
             className="nav-link m-sub"
-            onClick={closeAll}
+            onNavigate={closeAll}
           >
             {item.label}
-          </Link>
+          </AnchorNavLink>
         ))}
         <Link href="/reviews" className="nav-link" onClick={closeAll}>
           {t("navReviews")}

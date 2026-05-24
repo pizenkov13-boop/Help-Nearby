@@ -49,7 +49,6 @@ import { Hero } from "./Hero";
 import { OrganizationList } from "./OrganizationList";
 import { SearchBar } from "./SearchBar";
 import { HowItWorks } from "./HowItWorks";
-import { CitiesSection } from "./home/CitiesSection";
 import { MapView } from "@/components/map/MapViewDynamic";
 
 const ACCORDION_DURATION_MS = 500;
@@ -687,7 +686,6 @@ export function HomePage() {
       </div>
 
       <HowItWorks />
-      <CitiesSection />
     </SiteLayout>
   );
 }

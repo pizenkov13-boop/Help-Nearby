@@ -1,4 +1,4 @@
-import { CITIES_IN_NEED, type CityUrgency } from "@/lib/homeContent";
+﻿import { CITIES_IN_NEED, type CityUrgency } from "@/lib/homeContent";
 import { cn } from "@/lib/utils";
 
 function badgeClass(urgency: CityUrgency) {
@@ -15,9 +15,12 @@ function badgeLabel(urgency: CityUrgency) {
 
 export function CitiesSection() {
   return (
-    <section className="cities" id="cities-in-need">
+    <section className="cities page-section scroll-anchor" id="cities-in-need">
       <div className="container">
-        <h2 className="section-title">Cities in Greatest Need</h2>
+        <div className="hiw-head">
+          <h2 className="section-title">Cities in Need</h2>
+          <span className="underline" />
+        </div>
         <p className="section-sub">
           Communities facing urgent humanitarian crises need help the most.
         </p>

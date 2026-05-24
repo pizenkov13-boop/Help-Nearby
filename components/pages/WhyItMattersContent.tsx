@@ -1,4 +1,5 @@
 import { Heart } from "lucide-react";
+import { CitiesSection } from "@/components/home/CitiesSection";
 import { ImageHero } from "@/components/layout/ImageHero";
 
 const CRISIS_STATS = [
@@ -55,7 +56,7 @@ export function WhyItMattersContent() {
         }
       />
 
-      <section id="the-problem" className="page-section scroll-mt-20">
+      <section id="the-problem" className="page-section scroll-anchor">
         <div className="container">
           <div className="hiw-head">
             <h2>The Problem</h2>
@@ -101,7 +102,7 @@ export function WhyItMattersContent() {
         </div>
       </section>
 
-      <section id="our-solution" className="page-section alt scroll-mt-20">
+      <section id="our-solution" className="page-section alt scroll-anchor">
         <div className="container">
           <div className="hiw-head">
             <h2>Our Solution</h2>
@@ -117,6 +118,8 @@ export function WhyItMattersContent() {
           </div>
         </div>
       </section>
+
+      <CitiesSection />
     </>
   );
 }
