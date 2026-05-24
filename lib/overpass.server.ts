@@ -8,6 +8,9 @@ import {
   OVERPASS_TIMEOUT_MS,
 } from "@/lib/overpassCache";
 import { slugify } from "@/lib/orgUtils";
+import {
+  normalizeRawCoordinates,
+} from "@/lib/organizationCoordinates";
 import type { Category, Organization, UserLocation } from "@/lib/types";
 
 const OVERPASS_URLS = [
@@ -120,14 +123,77 @@ async function queryOverpass(query: string): Promise<OverpassResponse> {
     : new Error("All Overpass endpoints failed");
 }
 
-function getCoordinates(el: OverpassElement): { lat: number; lng: number } | null {
-  if (el.lat != null && el.lon != null) {
-    return { lat: el.lat, lng: el.lon };
+function getElementGeometryCoordinates(
+  el: OverpassElement,
+): { lat: number; lng: number } | null {
+  // Nodes: use node position. Ways/relations: prefer `out center` geometry.
+  if (el.type === "node") {
+    if (el.lat != null && el.lon != null) {
+      return { lat: el.lat, lng: el.lon };
+    }
+    return null;
   }
+
   if (el.center?.lat != null && el.center?.lon != null) {
     return { lat: el.center.lat, lng: el.center.lon };
   }
+
+  if (el.lat != null && el.lon != null) {
+    return { lat: el.lat, lng: el.lon };
+  }
+
   return null;
+}
+
+function getTagAddressCoordinates(
+  tags: Record<string, string>,
+): { lat: number; lng: number } | null {
+  const lat = Number(tags["addr:lat"]);
+  const lng = Number(tags["addr:lon"]);
+  if (!Number.isFinite(lat) || !Number.isFinite(lng)) return null;
+  if (Math.abs(lat) > 90 || Math.abs(lng) > 180) return null;
+  return { lat, lng };
+}
+
+function resolveOverpassCoordinates(
+  el: OverpassElement,
+  tags: Record<string, string>,
+  userLocation: UserLocation,
+  maxRadiusMeters: number,
+): { lat: number; lng: number } | null {
+  const geometry = getElementGeometryCoordinates(el);
+  const tagCoords = getTagAddressCoordinates(tags);
+
+  const candidates: { lat: number; lng: number }[] = [];
+  if (geometry) candidates.push(geometry);
+  if (tagCoords) candidates.push(tagCoords);
+
+  if (candidates.length === 0) return null;
+
+  // Prefer candidate within radius; if both valid, prefer tag address when geometry is far off
+  let best: { lat: number; lng: number } | null = null;
+  let bestDist = Infinity;
+
+  for (const candidate of candidates) {
+    const normalized = normalizeRawCoordinates(
+      candidate.lat,
+      candidate.lng,
+      userLocation,
+      maxRadiusMeters,
+    );
+    if (!normalized) continue;
+
+    const dist = Math.hypot(
+      normalized.lat - userLocation.lat,
+      normalized.lng - userLocation.lng,
+    );
+    if (dist < bestDist) {
+      bestDist = dist;
+      best = normalized;
+    }
+  }
+
+  return best;
 }
 
 function mapTagsToCategory(tags: Record<string, string>): Category {
@@ -180,10 +246,18 @@ function buildHoursRaw(tags: Record<string, string>): string {
 function mapElementToOrganization(
   el: OverpassElement,
   userLocation: UserLocation,
+  maxRadiusMeters: number,
 ): Organization | null {
-  const coords = getCoordinates(el);
   const tags = el.tags;
-  if (!coords || !tags) return null;
+  if (!tags) return null;
+
+  const coords = resolveOverpassCoordinates(
+    el,
+    tags,
+    userLocation,
+    maxRadiusMeters,
+  );
+  if (!coords) return null;
 
   const name =
     tags.name ??
@@ -232,13 +306,14 @@ function mapElementToOrganization(
 function parseOverpassElements(
   data: OverpassResponse,
   userLocation: UserLocation,
+  maxRadiusMeters: number,
 ): Organization[] {
   const elements = data.elements ?? [];
   const seen = new Set<string>();
   const organizations: Organization[] = [];
 
   for (const el of elements) {
-    const org = mapElementToOrganization(el, userLocation);
+    const org = mapElementToOrganization(el, userLocation, maxRadiusMeters);
     if (!org) continue;
     const key = `${org.lat.toFixed(5)}:${org.lng.toFixed(5)}:${org.name}`;
     if (seen.has(key)) continue;
@@ -286,7 +361,7 @@ async function fetchOverpassOrganizations(
 
   const query = buildQuery(lat, lng, radius);
   const data = await queryOverpass(query);
-  const organizations = parseOverpassElements(data, userLocation);
+  const organizations = parseOverpassElements(data, userLocation, radius);
   writeServerCache(cacheKey, organizations);
   return organizations;
 }

@@ -3,6 +3,7 @@ import {
   parseOsmOpeningHours,
   type OpenStatus,
 } from "@/lib/openingHours";
+import { getOrganizationCoordinates } from "@/lib/organizationCoordinates";
 import type { DaySchedule, Organization, Weekday, WeeklyHours } from "@/lib/types";
 
 const WEEKDAYS: Weekday[] = [
@@ -136,7 +137,8 @@ export function formatWeeklyHours(hours: WeeklyHours): string[] {
 }
 
 export function getDirectionsUrl(org: Organization): string {
-  return `https://www.google.com/maps/dir/?api=1&destination=${org.lat},${org.lng}`;
+  const { lat, lng } = getOrganizationCoordinates(org);
+  return `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}`;
 }
 
 export function getPhoneTelUrl(phone: string): string {

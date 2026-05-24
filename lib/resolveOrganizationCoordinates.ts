@@ -1,8 +1,14 @@
 import { forwardGeocodeQuery } from "@/lib/geocode";
 import { hasValidMapCoordinates } from "@/lib/mapCoordinates";
 import {
+  getOrganizationCoordinates,
+  isOverpassOrganization,
+  organizationHasTrustedCoordinates,
+  snapIsAcceptable,
+} from "@/lib/organizationCoordinates";
+import {
   buildNominatimQuery,
-  organizationHasGeocodableAddress,
+  organizationNeedsGeocoding,
 } from "@/lib/nominatimGeocode";
 import type { Organization } from "@/lib/types";
 
@@ -54,25 +60,21 @@ async function geocodeOrganization(
   }
 }
 
-/** Snap marker to nearest walking road so routes meet the pin. */
-export async function snapOrganizationToRoad(
-  org: Organization,
-): Promise<Organization> {
-  if (!hasValidMapCoordinates(org)) return org;
-
-  const key = snapCacheKey(org.lat, org.lng);
+async function fetchSnappedCoordinates(
+  lat: number,
+  lng: number,
+): Promise<{ lat: number; lng: number } | null> {
+  const key = snapCacheKey(lat, lng);
   const cached = snapCache.get(key);
-  if (cached) {
-    return { ...org, lat: cached.lat, lng: cached.lng };
-  }
+  if (cached) return cached;
 
   try {
     const params = new URLSearchParams({
-      lat: String(org.lat),
-      lng: String(org.lng),
+      lat: String(lat),
+      lng: String(lng),
     });
     const res = await fetch(`/api/nearest?${params}`);
-    if (!res.ok) return org;
+    if (!res.ok) return null;
 
     const data = (await res.json()) as { lat?: number; lng?: number };
     if (
@@ -81,29 +83,51 @@ export async function snapOrganizationToRoad(
       !Number.isFinite(data.lat) ||
       !Number.isFinite(data.lng)
     ) {
-      return org;
+      return null;
     }
 
-    snapCache.set(key, { lat: data.lat, lng: data.lng });
-    return { ...org, lat: data.lat, lng: data.lng };
+    const coords = { lat: data.lat, lng: data.lng };
+    snapCache.set(key, coords);
+    return coords;
   } catch (error) {
     console.warn("[resolve] road snap failed:", error);
+    return null;
+  }
+}
+
+/** Snap marker to nearest walking road when drift stays within tolerance. */
+export async function snapOrganizationToRoad(
+  org: Organization,
+): Promise<Organization> {
+  if (!hasValidMapCoordinates(org) || isOverpassOrganization(org)) {
     return org;
   }
+
+  const original = getOrganizationCoordinates(org);
+  const snapped = await fetchSnappedCoordinates(original.lat, original.lng);
+  if (!snapped || !snapIsAcceptable(original, snapped)) {
+    return org;
+  }
+
+  return { ...org, lat: snapped.lat, lng: snapped.lng };
 }
 
 const delay = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
 /**
- * Nominatim address → OSRM nearest road snap.
- * Marker and route endpoint share the same snapped coordinates.
+ * Resolve coordinates for routing/markers.
+ * Overpass OSM coordinates are never replaced; list, map, and route share the same lat/lng.
  */
 export async function resolveOrganizationCoordinates(
   org: Organization,
 ): Promise<Organization> {
+  if (organizationHasTrustedCoordinates(org)) {
+    return org;
+  }
+
   let positioned = org;
 
-  if (organizationHasGeocodableAddress(org)) {
+  if (organizationNeedsGeocoding(org)) {
     const coords = await geocodeOrganization(org);
     if (coords) {
       positioned = { ...org, lat: coords.lat, lng: coords.lng };
@@ -113,7 +137,7 @@ export async function resolveOrganizationCoordinates(
   return snapOrganizationToRoad(positioned);
 }
 
-/** Refine marker positions (Nominatim + road snap, rate-limited). */
+/** Refine marker positions for orgs missing coordinates (Nominatim, rate-limited). */
 export async function resolveOrganizationsForMap(
   orgs: Organization[],
   maxGeocode = 40,
@@ -122,7 +146,7 @@ export async function resolveOrganizationsForMap(
   let geocoded = 0;
 
   for (const org of orgs) {
-    if (organizationHasGeocodableAddress(org) && geocoded < maxGeocode) {
+    if (organizationNeedsGeocoding(org) && geocoded < maxGeocode) {
       const resolved = await resolveOrganizationCoordinates(org);
       results.push(resolved);
       geocoded += 1;
@@ -130,7 +154,7 @@ export async function resolveOrganizationsForMap(
         await delay(1100);
       }
     } else {
-      results.push(await snapOrganizationToRoad(org));
+      results.push(org);
     }
   }
 

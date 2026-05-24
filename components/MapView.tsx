@@ -14,9 +14,10 @@ import {
 import L from "leaflet";
 import { Loader2, X } from "lucide-react";
 import { useLanguage } from "@/lib/i18n/LanguageProvider";
-import { organizationHasGeocodableAddress } from "@/lib/nominatimGeocode";
+import { organizationNeedsGeocoding } from "@/lib/nominatimGeocode";
 import type { RouteData } from "@/lib/routing";
 import { hasValidMapCoordinates } from "@/lib/mapCoordinates";
+import { getOrganizationCoordinates } from "@/lib/organizationCoordinates";
 import { resolveOrganizationsForMap } from "@/lib/resolveOrganizationCoordinates";
 import type { Organization, UserLocation } from "@/lib/types";
 import type { TrackedUserLocation } from "@/lib/geolocation";
@@ -78,12 +79,12 @@ function MapViewport({
   organizations,
   userLocation,
   route,
-  destination,
+  destinationCoords,
 }: {
   organizations: Organization[];
   userLocation: UserLocation;
   route: RouteData | null;
-  destination: Organization | null;
+  destinationCoords: { lat: number; lng: number } | null;
 }) {
   const map = useMap();
 
@@ -91,8 +92,8 @@ function MapViewport({
     if (route?.coordinates.length) {
       const bounds = L.latLngBounds(route.coordinates);
       bounds.extend([userLocation.lat, userLocation.lng]);
-      if (destination) {
-        bounds.extend([destination.lat, destination.lng]);
+      if (destinationCoords) {
+        bounds.extend([destinationCoords.lat, destinationCoords.lng]);
       }
       map.fitBounds(bounds, { padding: [72, 72], maxZoom: 16 });
       return;
@@ -100,7 +101,10 @@ function MapViewport({
 
     const points: [number, number][] = [
       [userLocation.lat, userLocation.lng],
-      ...organizations.map((o) => [o.lat, o.lng] as [number, number]),
+      ...organizations.map((o) => {
+        const { lat, lng } = getOrganizationCoordinates(o);
+        return [lat, lng] as [number, number];
+      }),
     ];
 
     if (points.length === 1) {
@@ -110,7 +114,7 @@ function MapViewport({
 
     const bounds = L.latLngBounds(points);
     map.fitBounds(bounds, { padding: [48, 48], maxZoom: 14 });
-  }, [organizations, userLocation, map, route, destination]);
+  }, [organizations, userLocation, map, route, destinationCoords]);
 
   return null;
 }
@@ -126,7 +130,8 @@ function FlyToSelected({
 
   useEffect(() => {
     if (selected && !hasRoute) {
-      map.flyTo([selected.lat, selected.lng], 15, { duration: 0.8 });
+      const { lat, lng } = getOrganizationCoordinates(selected);
+      map.flyTo([lat, lng], 15, { duration: 0.8 });
     }
   }, [selected, map, hasRoute]);
 
@@ -170,11 +175,9 @@ function UserLocationLayer({
 function OrganizationMarkers({
   organizations,
   markerGeneration,
-  routeDestination,
 }: {
   organizations: Organization[];
   markerGeneration: number;
-  routeDestination?: Organization | null;
 }) {
   useEffect(() => {
     console.log(
@@ -193,12 +196,11 @@ function OrganizationMarkers({
   return (
     <>
       {organizations.map((org) => {
-        const atDestination =
-          routeDestination?.id === org.id ? routeDestination : org;
+        const { lat, lng } = getOrganizationCoordinates(org);
         return (
         <Marker
           key={`${markerGeneration}-${org.id}`}
-          position={[atDestination.lat, atDestination.lng]}
+          position={[lat, lng]}
           icon={createCategoryIcon(
             categoryColors[org.category] ?? "#3b82f6",
             org.verified,
@@ -257,7 +259,7 @@ export default function MapView({
 
   useEffect(() => {
     const withStoredCoords = organizations.filter(hasValidMapCoordinates);
-    const needsNominatim = organizations.filter(organizationHasGeocodableAddress);
+    const needsNominatim = organizations.filter(organizationNeedsGeocoding);
 
     console.log("[MapView] organizations prop:", {
       total: organizations.length,
@@ -295,10 +297,7 @@ export default function MapView({
             byId.set(org.id, org);
           }
           for (const org of organizations) {
-            if (
-              !organizationHasGeocodableAddress(org) &&
-              hasValidMapCoordinates(org)
-            ) {
+            if (hasValidMapCoordinates(org)) {
               byId.set(org.id, org);
             }
           }
@@ -317,12 +316,10 @@ export default function MapView({
     };
   }, [organizations]);
 
-  const destinationOnMap = useMemo(() => {
+  const routeDestinationCoords = useMemo(() => {
     if (!routeDestination) return null;
-    return (
-      mapOrganizations.find((o) => o.id === routeDestination.id) ??
-      routeDestination
-    );
+    const onMap = mapOrganizations.find((o) => o.id === routeDestination.id);
+    return getOrganizationCoordinates(onMap ?? routeDestination);
   }, [mapOrganizations, routeDestination]);
 
   const center = useMemo<[number, number]>(
@@ -346,7 +343,7 @@ export default function MapView({
           organizations={mapOrganizations}
           userLocation={userLocation}
           route={route}
-          destination={destinationOnMap}
+          destinationCoords={routeDestinationCoords}
         />
         <FlyToSelected
           selected={selected}
@@ -369,7 +366,6 @@ export default function MapView({
         <OrganizationMarkers
           organizations={mapOrganizations}
           markerGeneration={markerGeneration}
-          routeDestination={routeDestination}
         />
       </MapContainer>
 
