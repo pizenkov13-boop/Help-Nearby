@@ -1,26 +1,40 @@
 import { NEARBY_RADIUS_METERS } from "@/lib/constants";
 import { fetchOrganizations } from "@/lib/data";
 import {
+  emergencyFacilityPriority,
+  isGenuineEmergencyOrganization,
+} from "@/lib/emergencyFacilities";
+import {
   filterEmergency247Organizations,
   sortOrganizationsByDistance,
 } from "@/lib/emergency";
 import { fetchEmergencyOverpassOrganizations } from "@/lib/overpass.server";
 import type { Organization, UserLocation } from "@/lib/types";
 
-function filterEmergencyVerified(orgs: Organization[]): Organization[] {
-  return orgs.filter(
-    (org) =>
-      org.category === "medical" ||
-      org.categories.includes("medical") ||
-      /hospital|clinic|ambulance|emergency|health/i.test(
-        `${org.name} ${org.description}`,
-      ),
-  );
+function filterGenuineEmergencyOrganizations(
+  orgs: Organization[],
+): Organization[] {
+  return orgs.filter(isGenuineEmergencyOrganization);
+}
+
+function sortEmergencyByPriorityAndDistance(
+  orgs: Organization[],
+  location: UserLocation,
+): Organization[] {
+  const withDistance = sortOrganizationsByDistance(orgs, location);
+  return [...withDistance].sort((a, b) => {
+    const priorityDiff =
+      emergencyFacilityPriority(a) - emergencyFacilityPriority(b);
+    if (priorityDiff !== 0) return priorityDiff;
+    const distA = parseFloat(a.distance) || 999;
+    const distB = parseFloat(b.distance) || 999;
+    return distA - distB;
+  });
 }
 
 /**
- * Load 24/7 emergency organizations from Supabase and Overpass (medical-focused),
- * sorted nearest-first.
+ * Load 24/7 emergency organizations from Supabase and Overpass,
+ * sorted by facility type priority then distance.
  */
 export async function loadEmergencyOrganizations(
   location: UserLocation,
@@ -39,7 +53,7 @@ export async function loadEmergencyOrganizations(
   ]);
 
   const fromSupabase = filterEmergency247Organizations(catalog);
-  const fromOverpass = filterEmergencyVerified(overpassResult);
+  const fromOverpass = filterGenuineEmergencyOrganizations(overpassResult);
 
   const merged = [...fromSupabase];
   for (const org of fromOverpass) {
@@ -48,5 +62,5 @@ export async function loadEmergencyOrganizations(
     }
   }
 
-  return sortOrganizationsByDistance(merged, location);
+  return sortEmergencyByPriorityAndDistance(merged, location);
 }
