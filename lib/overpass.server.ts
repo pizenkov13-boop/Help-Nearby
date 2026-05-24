@@ -174,12 +174,7 @@ function buildAddress(tags: Record<string, string>): string {
 }
 
 function buildHoursRaw(tags: Record<string, string>): string {
-  const parts = [
-    tags.opening_hours,
-    tags.emergency ? `emergency:${tags.emergency}` : "",
-    tags.amenity ? `amenity:${tags.amenity}` : "",
-  ].filter(Boolean);
-  return parts.join(" ");
+  return tags.opening_hours?.trim() ?? "";
 }
 
 function mapElementToOrganization(
