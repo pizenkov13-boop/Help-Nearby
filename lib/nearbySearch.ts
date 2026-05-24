@@ -1,6 +1,13 @@
 import { fetchOrganizations } from "@/lib/data";
+import { distanceMiles, formatDistanceMiles } from "@/lib/geo";
 import { mergeOrganizations } from "@/lib/mergeOrganizations";
 import {
+  readOverpassClientCache,
+  writeOverpassClientCache,
+} from "@/lib/overpassClientCache";
+import { OVERPASS_TIMEOUT_MS } from "@/lib/overpassCache";
+import {
+  getMaxRadiusMeters,
   runSmartRadiusSearch,
   type SmartRadiusSearchResult,
 } from "@/lib/smartRadius";
@@ -8,7 +15,7 @@ import type { Organization, UserLocation } from "@/lib/types";
 
 export type { SmartRadiusSearchResult };
 
-const EXTERNAL_FETCH_TIMEOUT_MS = 8_000;
+const EXTERNAL_FETCH_TIMEOUT_MS = OVERPASS_TIMEOUT_MS;
 
 export interface MergedNearbyResult {
   organizations: Organization[];
@@ -16,7 +23,7 @@ export interface MergedNearbyResult {
 }
 
 export interface NearbySearchCallbacks {
-  /** Fired when Supabase catalog is ready (before HDX/GDHO). */
+  /** Fired when Supabase catalog is ready (before Overpass). */
   onOrganizationsUpdate?: (organizations: Organization[]) => void;
   onExternalTimeout?: () => void;
 }
@@ -33,59 +40,101 @@ export type SmartRadiusSearchResultWithMeta = SmartRadiusSearchResult & {
   externalTimedOut: boolean;
 };
 
-async function fetchVerifiedNearby(
+function filterByRadius(
+  orgs: Organization[],
   location: UserLocation,
   radiusMeters: number,
-  country: string,
-  countryCode: string | null | undefined,
+): Organization[] {
+  const radiusMiles = radiusMeters / 1609.34;
+  return orgs
+    .filter(
+      (org) =>
+        Number.isFinite(org.lat) &&
+        Number.isFinite(org.lng) &&
+        !(org.lat === 0 && org.lng === 0) &&
+        distanceMiles(location.lat, location.lng, org.lat, org.lng) <=
+          radiusMiles,
+    )
+    .map((org) => ({
+      ...org,
+      distance: formatDistanceMiles(
+        location.lat,
+        location.lng,
+        org.lat,
+        org.lng,
+      ),
+    }));
+}
+
+async function fetchOverpassNearby(
+  location: UserLocation,
+  radiusMeters: number,
   signal?: AbortSignal,
 ): Promise<Organization[]> {
+  const cached = readOverpassClientCache(
+    location.lat,
+    location.lng,
+    radiusMeters,
+  );
+  if (cached) {
+    return cached;
+  }
+
   const params = new URLSearchParams({
     lat: String(location.lat),
     lng: String(location.lng),
     radius: String(radiusMeters),
-    country: country.trim(),
   });
-  if (countryCode) {
-    params.set("countryCode", countryCode);
-  }
 
   const res = await fetch(`/api/nearby?${params}`, { signal });
   const data = (await res.json()) as unknown;
   if (!res.ok) {
     console.warn("[nearbySearch] /api/nearby status:", res.status);
+    return [];
   }
-  return Array.isArray(data) ? (data as Organization[]) : [];
+
+  const organizations = Array.isArray(data) ? (data as Organization[]) : [];
+  if (organizations.length > 0) {
+    writeOverpassClientCache(
+      location.lat,
+      location.lng,
+      radiusMeters,
+      organizations,
+    );
+  }
+  return organizations;
 }
 
-async function fetchVerifiedNearbyWithTimeout(
+async function fetchOverpassWithTimeout(
   location: UserLocation,
   radiusMeters: number,
-  country?: string,
-  countryCode?: string | null,
 ): Promise<{ organizations: Organization[]; timedOut: boolean }> {
-  if (!country?.trim()) {
-    return { organizations: [], timedOut: false };
-  }
-
   const controller = new AbortController();
-  const timeoutId = setTimeout(() => controller.abort(), EXTERNAL_FETCH_TIMEOUT_MS);
+  const timeoutId = setTimeout(
+    () => controller.abort(),
+    EXTERNAL_FETCH_TIMEOUT_MS,
+  );
 
   try {
-    const organizations = await fetchVerifiedNearby(
+    const organizations = await fetchOverpassNearby(
       location,
       radiusMeters,
-      country,
-      countryCode,
       controller.signal,
     );
     return { organizations, timedOut: false };
   } catch (error) {
     if (controller.signal.aborted) {
-      console.warn("[nearbySearch] HDX/GDHO timed out after 8s");
-      return { organizations: [], timedOut: true };
+      console.warn(
+        `[nearbySearch] Overpass timed out after ${EXTERNAL_FETCH_TIMEOUT_MS / 1000}s`,
+      );
+      const stale = readOverpassClientCache(
+        location.lat,
+        location.lng,
+        radiusMeters,
+      );
+      return { organizations: stale ?? [], timedOut: true };
     }
-    console.error("[nearbySearch] HDX/GDHO fetch failed:", error);
+    console.error("[nearbySearch] Overpass fetch failed:", error);
     return { organizations: [], timedOut: false };
   } finally {
     clearTimeout(timeoutId);
@@ -93,27 +142,28 @@ async function fetchVerifiedNearbyWithTimeout(
 }
 
 /**
- * Fetch Supabase catalog and HDX/GDHO in parallel.
- * Supabase results are surfaced via onCatalogReady before external data arrives.
+ * Fetch Supabase catalog and Overpass in parallel.
+ * Catalog results surface immediately; Overpass merges when ready.
  */
 export async function fetchMergedNearbyParallel(
   location: UserLocation,
   radiusMeters: number,
   country?: string,
-  countryCode?: string | null,
-  callbacks?: Pick<NearbySearchCallbacks, "onOrganizationsUpdate" | "onExternalTimeout">,
+  callbacks?: Pick<
+    NearbySearchCallbacks,
+    "onOrganizationsUpdate" | "onExternalTimeout"
+  >,
+  externalOrgs?: Organization[],
 ): Promise<MergedNearbyResult> {
   const catalogPromise = fetchOrganizations(location, {
     country,
     radiusMeters,
   });
 
-  const externalPromise = fetchVerifiedNearbyWithTimeout(
-    location,
-    radiusMeters,
-    country,
-    countryCode,
-  );
+  const externalPromise =
+    externalOrgs !== undefined
+      ? Promise.resolve({ organizations: externalOrgs, timedOut: false })
+      : fetchOverpassWithTimeout(location, radiusMeters);
 
   const catalog = await catalogPromise;
   callbacks?.onOrganizationsUpdate?.(mergeOrganizations(catalog, []));
@@ -126,7 +176,7 @@ export async function fetchMergedNearbyParallel(
 
   const organizations = mergeOrganizations(
     catalog,
-    externalResult.organizations,
+    filterByRadius(externalResult.organizations, location, radiusMeters),
   );
   callbacks?.onOrganizationsUpdate?.(organizations);
 
@@ -141,13 +191,11 @@ export async function fetchMergedNearby(
   location: UserLocation,
   radiusMeters: number,
   country?: string,
-  countryCode?: string | null,
 ): Promise<Organization[]> {
   const result = await fetchMergedNearbyParallel(
     location,
     radiusMeters,
     country,
-    countryCode,
   );
   return result.organizations;
 }
@@ -158,25 +206,36 @@ export async function searchNearbyWithSmartRadius(
   callbacks?: NearbySearchCallbacks,
 ): Promise<SmartRadiusSearchResultWithMeta> {
   let externalTimedOut = false;
+  const maxRadius = getMaxRadiusMeters(options.liteMode);
+
+  const catalogAtMaxPromise = fetchOrganizations(location, {
+    country: options.country,
+    radiusMeters: maxRadius,
+  });
+
+  const overpassAtMaxPromise = fetchOverpassWithTimeout(location, maxRadius);
 
   const fetchAtRadius = async (radiusMeters: number) => {
-    const result = await fetchMergedNearbyParallel(
+    const catalogAtMax = await catalogAtMaxPromise;
+    const catalog = filterByRadius(catalogAtMax, location, radiusMeters);
+    callbacks?.onOrganizationsUpdate?.(mergeOrganizations(catalog, []));
+
+    const overpassResult = await overpassAtMaxPromise;
+    if (overpassResult.timedOut) {
+      externalTimedOut = true;
+      callbacks?.onExternalTimeout?.();
+    }
+
+    const overpass = filterByRadius(
+      overpassResult.organizations,
       location,
       radiusMeters,
-      options.country,
-      options.countryCode,
-      {
-        onOrganizationsUpdate: callbacks?.onOrganizationsUpdate,
-        onExternalTimeout: () => {
-          externalTimedOut = true;
-          callbacks?.onExternalTimeout?.();
-        },
-      },
     );
-    if (result.externalTimedOut) {
-      externalTimedOut = true;
-    }
-    return result.organizations;
+
+    const merged = mergeOrganizations(catalog, overpass);
+    callbacks?.onOrganizationsUpdate?.(merged);
+
+    return merged;
   };
 
   const searchResult = await runSmartRadiusSearch(fetchAtRadius, {

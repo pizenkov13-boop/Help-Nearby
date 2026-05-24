@@ -33,14 +33,18 @@ export function OrganizationList({
   const trimmedSearch = searchQuery.trim();
   const hasSearch = trimmedSearch.length > 0;
 
+  const showSkeleton = isLoading && organizations.length === 0;
+
   return (
     <div className="flex flex-col gap-4">
-      <p className="text-sm text-gray-400">
-        <span className="font-semibold text-white">{organizations.length}</span>{" "}
-        {t("resultsCount")}
-      </p>
+      {!showSkeleton && (
+        <p className="text-sm text-gray-400">
+          <span className="font-semibold text-white">{organizations.length}</span>{" "}
+          {t("resultsCount")}
+        </p>
+      )}
 
-      {isLoading && organizations.length === 0 ? (
+      {showSkeleton ? (
         <OrganizationListSkeleton count={4} />
       ) : organizations.length === 0 ? (
         <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-gray-700 bg-gray-800/30 px-6 py-16 text-center">

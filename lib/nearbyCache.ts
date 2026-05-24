@@ -2,7 +2,7 @@ import type { Organization } from "@/lib/types";
 import type { SearchRadiusMode } from "@/lib/smartRadius";
 
 const CACHE_KEY = "help-nearby-orgs-cache";
-const CACHE_TTL_MS = 5 * 60 * 1000;
+const CACHE_TTL_MS = 60 * 60 * 1000;
 const LOCATION_TOLERANCE_DEG = 0.02;
 
 export interface NearbyCachePayload {
