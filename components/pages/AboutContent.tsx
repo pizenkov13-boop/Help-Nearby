@@ -46,7 +46,7 @@ export function AboutContent() {
         }
       />
 
-      <section id="our-story" className="page-section scroll-mt-20">
+      <section id="our-story" className="page-section scroll-anchor">
         <div className="container">
           <h2 className="section-title">Our Story</h2>
           <p className="prose-center" style={{ marginTop: "1.5rem" }}>
@@ -58,7 +58,7 @@ export function AboutContent() {
         </div>
       </section>
 
-      <section id="how-it-works" className="page-section alt scroll-mt-20">
+      <section id="how-it-works" className="page-section alt scroll-anchor">
         <div className="container">
           <div className="hiw-head">
             <h2>How It Works</h2>

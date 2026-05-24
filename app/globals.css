@@ -82,6 +82,7 @@ body {
     * { box-sizing: border-box; }
     html {
       scroll-behavior: smooth;
+      scroll-padding-top: 80px;
       -webkit-font-smoothing: antialiased;
       background-color: #0a0f1f;
       color: var(--text);
@@ -890,6 +891,9 @@ body {
 .page-section {
   padding: 96px 28px;
   background: var(--surface);
+}
+.scroll-anchor {
+  scroll-margin-top: 80px;
 }
 .page-section.alt {
   background: var(--surface-card);

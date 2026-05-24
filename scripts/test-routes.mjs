@@ -11,7 +11,7 @@ const baseUrl = (() => {
 const routes = [
   { path: "/", mustInclude: "Help Nearby" },
   { path: "/about", mustInclude: "Our Story" },
-  { path: "/why-it-matters", mustInclude: "The Problem" },
+  { path: "/why-it-matters", mustInclude: "Cities in Need" },
   { path: "/reviews", mustInclude: "Reviews" },
   { path: "/submit", mustInclude: "Submit an Organization" },
 ];
