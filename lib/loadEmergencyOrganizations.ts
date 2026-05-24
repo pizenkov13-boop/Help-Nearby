@@ -4,7 +4,7 @@ import {
   filterEmergency247Organizations,
   sortOrganizationsByDistance,
 } from "@/lib/emergency";
-import { fetchVerifiedNearbyOrganizations } from "@/lib/verifiedNearby.server";
+import { fetchEmergencyOverpassOrganizations } from "@/lib/overpass.server";
 import type { Organization, UserLocation } from "@/lib/types";
 
 function filterEmergencyVerified(orgs: Organization[]): Organization[] {
@@ -19,35 +19,30 @@ function filterEmergencyVerified(orgs: Organization[]): Organization[] {
 }
 
 /**
- * Load 24/7 emergency organizations from Supabase and HDX/GDHO (medical-focused),
+ * Load 24/7 emergency organizations from Supabase and Overpass (medical-focused),
  * sorted nearest-first.
  */
 export async function loadEmergencyOrganizations(
   location: UserLocation,
   radiusMeters = NEARBY_RADIUS_METERS,
-  country?: string,
-  countryCode?: string | null,
 ): Promise<Organization[]> {
-  const [catalog, verifiedResult] = await Promise.all([
+  const [catalog, overpassResult] = await Promise.all([
     fetchOrganizations(location),
-    country
-      ? fetchVerifiedNearbyOrganizations(
-          location,
-          radiusMeters,
-          country,
-          countryCode,
-        ).catch((error) => {
-          console.error("[loadEmergencyOrganizations] HDX/GDHO failed:", error);
-          return [] as Organization[];
-        })
-      : Promise.resolve([] as Organization[]),
+    fetchEmergencyOverpassOrganizations(
+      location.lat,
+      location.lng,
+      radiusMeters,
+    ).catch((error) => {
+      console.error("[loadEmergencyOrganizations] Overpass failed:", error);
+      return [] as Organization[];
+    }),
   ]);
 
   const fromSupabase = filterEmergency247Organizations(catalog);
-  const fromVerified = filterEmergencyVerified(verifiedResult);
+  const fromOverpass = filterEmergencyVerified(overpassResult);
 
   const merged = [...fromSupabase];
-  for (const org of fromVerified) {
+  for (const org of fromOverpass) {
     if (!merged.some((m) => m.id === org.id)) {
       merged.push(org);
     }

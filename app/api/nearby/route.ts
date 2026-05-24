@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { NEARBY_RADIUS_METERS } from "@/lib/constants";
-import { fetchVerifiedNearbyOrganizations } from "@/lib/verifiedNearby.server";
+import { fetchNearbyOverpassOrganizations } from "@/lib/overpass.server";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -13,30 +13,18 @@ export async function GET(request: Request) {
     const lat = Number(searchParams.get("lat"));
     const lng = Number(searchParams.get("lng"));
     const radius = Number(searchParams.get("radius") ?? NEARBY_RADIUS_METERS);
-    const country = searchParams.get("country")?.trim() ?? "";
-    const countryCode = searchParams.get("countryCode")?.trim() || null;
 
-    console.log("[api/nearby] Params:", { lat, lng, radius, country });
+    console.log("[api/nearby] Params:", { lat, lng, radius });
 
     if (!Number.isFinite(lat) || !Number.isFinite(lng)) {
       console.warn("[api/nearby] Invalid lat/lng — returning empty list");
       return NextResponse.json([]);
     }
 
-    if (!country) {
-      console.warn("[api/nearby] Missing country — returning empty list");
-      return NextResponse.json([]);
-    }
-
-    const organizations = await fetchVerifiedNearbyOrganizations(
-      { lat, lng },
-      radius,
-      country,
-      countryCode,
-    );
+    const organizations = await fetchNearbyOverpassOrganizations(lat, lng, radius);
 
     console.log(
-      `[api/nearby] Success: ${organizations.length} verified organization(s)`,
+      `[api/nearby] Success: ${organizations.length} organization(s) from Overpass`,
     );
     return NextResponse.json(organizations);
   } catch (error) {

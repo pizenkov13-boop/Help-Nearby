@@ -229,7 +229,7 @@ const en: Record<TranslationKey, string> = {
   chatError: "Sorry, I couldn't respond right now. Please try again in a moment.",
   chatTyping: "Typing…",
   verified: "Verified",
-  loadingNearby: "Loading verified organizations…",
+  loadingNearby: "Loading nearby organizations…",
   noVerifiedNearby:
     "No verified organizations found nearby. Try the Emergency button for urgent help.",
   verifiedOnlyNotice: "Showing verified organizations only",

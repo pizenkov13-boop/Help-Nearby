@@ -3,7 +3,7 @@ import type { Organization } from "@/lib/types";
 
 const DUPLICATE_RADIUS_MILES = 0.05;
 
-/** Merge Supabase catalog and HDX/GDHO verified sources; catalog wins duplicates. */
+/** Merge Supabase catalog and Overpass OSM sources; catalog wins duplicates. */
 export function mergeOrganizations(
   catalog: Organization[],
   externalVerified: Organization[],

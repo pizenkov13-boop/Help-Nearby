@@ -1,6 +1,5 @@
 import { NextResponse } from "next/server";
 import { NEARBY_RADIUS_METERS } from "@/lib/constants";
-import { reverseGeocodeCountry } from "@/lib/geocode";
 import { loadEmergencyOrganizations } from "@/lib/loadEmergencyOrganizations";
 
 export const runtime = "nodejs";
@@ -11,9 +10,6 @@ export async function GET(request: Request) {
   const lat = Number(searchParams.get("lat"));
   const lng = Number(searchParams.get("lng"));
   const radius = Number(searchParams.get("radius") ?? NEARBY_RADIUS_METERS);
-  let country = searchParams.get("country")?.trim() ?? "";
-  let countryCode = searchParams.get("countryCode")?.trim() || null;
-
   if (!Number.isFinite(lat) || !Number.isFinite(lng)) {
     return NextResponse.json(
       { error: "lat and lng query parameters are required." },
@@ -21,18 +17,10 @@ export async function GET(request: Request) {
     );
   }
 
-  if (!country) {
-    const geo = await reverseGeocodeCountry(lat, lng);
-    country = geo?.country ?? "";
-    countryCode = geo?.countryCode ?? countryCode;
-  }
-
   try {
     const organizations = await loadEmergencyOrganizations(
       { lat, lng },
       radius,
-      country || undefined,
-      countryCode,
     );
     return NextResponse.json(organizations);
   } catch (error) {
