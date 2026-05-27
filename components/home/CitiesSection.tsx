@@ -4,13 +4,13 @@ import { cn } from "@/lib/utils";
 function badgeClass(urgency: CityUrgency) {
   if (urgency === "CRISIS") return "badge badge-crisis";
   if (urgency === "HIGH NEED") return "badge badge-high";
-  return "badge badge-high";
+  return "badge badge-vulnerable";
 }
 
 function badgeLabel(urgency: CityUrgency) {
   if (urgency === "CRISIS") return "Crisis";
   if (urgency === "HIGH NEED") return "High Need";
-  return urgency;
+  return "Vulnerable";
 }
 
 export function CitiesSection() {
@@ -30,8 +30,10 @@ export function CitiesSection() {
             <article key={city.city} className="city-card">
               <div className="city-head">
                 <div>
-                  <h3>{city.city}</h3>
-                  <div className="country">{city.country}</div>
+                  <h3>
+                    {city.city}
+                    {city.country ? ` ${city.country}` : ""}
+                  </h3>
                 </div>
                 <span className={cn(badgeClass(city.urgency))}>
                   {badgeLabel(city.urgency)}
@@ -43,6 +45,9 @@ export function CitiesSection() {
                 </p>
                 <p>
                   <strong>Problem:</strong> {city.problem}
+                </p>
+                <p className="city-source">
+                  <strong>Source:</strong> {city.source}
                 </p>
               </div>
             </article>
