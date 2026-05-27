@@ -656,10 +656,27 @@ body {
       background: #f97316;
       border-color: #fb923c;
     }
+    .badge-vulnerable {
+      background: #ca8a04;
+      border-color: #eab308;
+      color: #1c1917;
+    }
     .city-body { font-size: 14.5px; line-height: 1.6; }
     .city-body p { margin: 0 0 10px; color: var(--text-muted); }
     .city-body p:last-child { margin-bottom: 0; color: var(--text-dim); }
     .city-body strong { color: var(--text); font-weight: 600; }
+    .city-source {
+      margin-top: 16px !important;
+      padding-top: 14px;
+      border-top: 1px solid var(--border-softer);
+      font-size: 12px !important;
+      line-height: 1.5;
+      color: var(--text-dim) !important;
+    }
+    .city-source strong {
+      color: var(--text-muted);
+      font-weight: 500;
+    }
   
     /* ---------- Footer ---------- */
     footer {
