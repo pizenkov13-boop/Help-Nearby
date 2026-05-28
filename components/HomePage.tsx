@@ -95,6 +95,7 @@ export function HomePage() {
   const [nearestFallbackKm, setNearestFallbackKm] = useState<number | null>(
     null,
   );
+  const [liteMapVisible, setLiteMapVisible] = useState(false);
   const [verifiedOnlyNotice, setVerifiedOnlyNotice] = useState(false);
   const shouldScrollRef = useRef(false);
   const findTriggeredRef = useRef(false);
@@ -390,6 +391,15 @@ export function HomePage() {
     );
   }, []);
 
+  const handleSwitchToLiteVersion = useCallback(() => {
+    setStoredViewMode("lite");
+    setViewPreference("lite");
+    setLiteMapVisible(false);
+    setRouteDestination(null);
+    setRoute(null);
+    setRouteError(null);
+  }, []);
+
   const userLocationRef = useRef(userLocation);
   userLocationRef.current = userLocation;
 
@@ -543,6 +553,7 @@ export function HomePage() {
         onFindHelp={handleFindHelp}
         isLocating={isLocating}
         impactCount={impactCount}
+        liteModeActive={liteModeActive}
       />
 
       <div
@@ -626,15 +637,19 @@ export function HomePage() {
                     onChange={updateSearchQuery}
                   />
                   <Filters filters={filters} onChange={setFilters} />
-                  {liteModeActive && (
-                    <button
-                      type="button"
-                      onClick={handleSwitchToFullVersion}
-                      className="mt-4 w-full rounded-lg border border-blue-500/40 bg-blue-500/10 px-4 py-2.5 text-sm font-medium text-blue-300 transition-colors hover:bg-blue-500/20"
-                    >
-                      {t("switchToFullVersion")}
-                    </button>
-                  )}
+                  <button
+                    type="button"
+                    onClick={
+                      liteModeActive
+                        ? handleSwitchToFullVersion
+                        : handleSwitchToLiteVersion
+                    }
+                    className="mt-4 w-full rounded-lg border border-blue-500/40 bg-blue-500/10 px-4 py-2.5 text-sm font-medium text-blue-300 transition-colors hover:bg-blue-500/20"
+                  >
+                    {liteModeActive
+                      ? t("switchToFullVersion")
+                      : t("switchToLiteVersion")}
+                  </button>
                 </div>
 
                 {!liteModeActive && userLocation && (
@@ -644,6 +659,21 @@ export function HomePage() {
                       selected={selected}
                       userLocation={userLocation}
                       yourLocationLabel={t("yourLocation")}
+                      route={route}
+                      routeDestination={routeDestination}
+                      routeLoading={routeLoading}
+                      onClearRoute={handleClearRoute}
+                    />
+                  </div>
+                )}
+                {liteModeActive && userLocation && liteMapVisible && (
+                  <div className="h-[280px] overflow-hidden rounded-brand border border-white/10 shadow-lg lg:h-[320px]">
+                    <MapView
+                      organizations={filtered}
+                      selected={selected}
+                      userLocation={userLocation}
+                      yourLocationLabel={t("yourLocation")}
+                      liteMode
                       route={route}
                       routeDestination={routeDestination}
                       routeLoading={routeLoading}
@@ -678,6 +708,17 @@ export function HomePage() {
                       onImpactRecorded={handleImpactRecorded}
                     />
                   </div>
+                  {liteModeActive && userLocation && !liteMapVisible && (
+                    <div className="border-t border-white/10 p-3">
+                      <button
+                        type="button"
+                        onClick={() => setLiteMapVisible(true)}
+                        className="w-full rounded-lg border border-white/20 bg-white/5 px-3 py-2 text-xs font-medium text-gray-200 transition-colors hover:bg-white/10"
+                      >
+                        {t("showLiteMap")}
+                      </button>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>

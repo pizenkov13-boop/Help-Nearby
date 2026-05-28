@@ -2,6 +2,7 @@
 export interface NetworkInformation {
   effectiveType?: "slow-2g" | "2g" | "3g" | "4g";
   downlink?: number;
+  saveData?: boolean;
   addEventListener?(type: "change", listener: () => void): void;
   removeEventListener?(type: "change", listener: () => void): void;
 }
@@ -87,18 +88,20 @@ export function getNetworkConnection(): NetworkInformation | null {
 export function isSlowNetworkConnection(
   connection: NetworkInformation | null,
 ): boolean {
-  if (!connection?.effectiveType) return false;
+  if (!connection) return false;
 
-  const { effectiveType, downlink } = connection;
-
-  if (effectiveType === "slow-2g" || effectiveType === "2g") {
+  if (connection.saveData) {
     return true;
   }
 
+  if (!connection.effectiveType) return false;
+
+  const { effectiveType } = connection;
+
   if (
-    effectiveType === "3g" &&
-    typeof downlink === "number" &&
-    downlink < 1
+    effectiveType === "slow-2g" ||
+    effectiveType === "2g" ||
+    effectiveType === "3g"
   ) {
     return true;
   }
@@ -112,7 +115,10 @@ export function isSlowNetworkConnection(
  */
 export function detectSlowConnectionFromNetwork(): boolean | null {
   const connection = getNetworkConnection();
-  if (!connection || connection.effectiveType === undefined) {
+  if (
+    !connection ||
+    (connection.effectiveType === undefined && connection.saveData === undefined)
+  ) {
     return null;
   }
 
@@ -159,13 +165,13 @@ export function subscribeToNetworkChanges(
 
 export function getStoredViewMode(): ViewModePreference | null {
   if (typeof window === "undefined") return null;
-  const value = localStorage.getItem(LITE_MODE_STORAGE_KEY);
+  const value = sessionStorage.getItem(LITE_MODE_STORAGE_KEY);
   if (value === "lite" || value === "full") return value;
   return null;
 }
 
 export function setStoredViewMode(mode: ViewModePreference): void {
-  localStorage.setItem(LITE_MODE_STORAGE_KEY, mode);
+  sessionStorage.setItem(LITE_MODE_STORAGE_KEY, mode);
 }
 
 export function shouldUseLiteMode(

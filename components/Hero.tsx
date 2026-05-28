@@ -9,16 +9,22 @@ interface HeroProps {
   onFindHelp: () => void;
   isLocating: boolean;
   impactCount: number | null;
+  liteModeActive?: boolean;
 }
 
-export function Hero({ onFindHelp, isLocating, impactCount }: HeroProps) {
+export function Hero({
+  onFindHelp,
+  isLocating,
+  impactCount,
+  liteModeActive = false,
+}: HeroProps) {
   const { t, language } = useLanguage();
 
   return (
     <section className="hero" id="hero">
       <div
         className="hero-bg"
-        style={{ backgroundImage: "url(/images/hero.jpg)" }}
+        style={liteModeActive ? undefined : { backgroundImage: "url(/images/hero.jpg)" }}
       />
       <div className="hero-overlay" />
       <div className="hero-grad" />

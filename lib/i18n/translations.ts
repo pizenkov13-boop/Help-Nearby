@@ -37,6 +37,8 @@ export type TranslationKey =
   | "searchNoResultsFor"
   | "liteModeNotice"
   | "switchToFullVersion"
+  | "switchToLiteVersion"
+  | "showLiteMap"
   | "categoryFood"
   | "categoryShelter"
   | "categoryMedical"
@@ -159,6 +161,8 @@ const en: Record<TranslationKey, string> = {
   searchNoResultsFor: '0 results for "{query}"',
   liteModeNotice: "Lite mode active — optimized for slow connection",
   switchToFullVersion: "Switch to full version",
+  switchToLiteVersion: "Switch to lite mode",
+  showLiteMap: "Load map (lite)",
   categoryFood: "Food",
   categoryShelter: "Shelter",
   categoryMedical: "Medical",
