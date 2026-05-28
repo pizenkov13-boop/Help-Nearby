@@ -65,6 +65,7 @@ const SLOW_INTERNET_COUNTRY_CODES = new Set([
 ]);
 
 export const LITE_MODE_STORAGE_KEY = "help-nearby-view-mode";
+export const SLOW_FETCH_THRESHOLD_MS = 2200;
 
 export type ViewModePreference = "lite" | "full";
 
@@ -175,10 +176,18 @@ export function setStoredViewMode(mode: ViewModePreference): void {
 }
 
 export function shouldUseLiteMode(
-  detectedSlowCountry: boolean,
+  detectedSlowConnection: boolean,
   preference: ViewModePreference | null,
 ): boolean {
   if (preference === "full") return false;
   if (preference === "lite") return true;
-  return detectedSlowCountry;
+  return detectedSlowConnection;
+}
+
+/**
+ * Fetch duration fallback for browsers where navigator.connection
+ * is missing or does not reflect throttled/devtools conditions.
+ */
+export function isSlowMeasuredFetch(durationMs: number): boolean {
+  return durationMs >= SLOW_FETCH_THRESHOLD_MS;
 }
