@@ -18,6 +18,7 @@ import { resolveOrganizationCoordinates } from "@/lib/resolveOrganizationCoordin
 import {
   detectSlowConnectionFromNetwork,
   getStoredViewMode,
+  isSlowMeasuredFetch,
   isSlowInternetCountry,
   setStoredViewMode,
   shouldUseLiteMode,
@@ -80,8 +81,9 @@ export function HomePage() {
   const [route, setRoute] = useState<RouteData | null>(null);
   const [routeLoading, setRouteLoading] = useState(false);
   const [routeError, setRouteError] = useState<string | null>(null);
-  const [detectedSlowCountry, setDetectedSlowCountry] =
-    useState<boolean>(false);
+  const [slowByNetworkInfo, setSlowByNetworkInfo] = useState(false);
+  const [slowByCountryFallback, setSlowByCountryFallback] = useState(false);
+  const [slowByMeasuredSpeed, setSlowByMeasuredSpeed] = useState(false);
   const [viewPreference, setViewPreference] = useState<ViewModePreference | null>(
     null,
   );
@@ -101,14 +103,24 @@ export function HomePage() {
   const findTriggeredRef = useRef(false);
   const liteAutoOpenedRef = useRef(false);
 
-  const liteModeActive = shouldUseLiteMode(detectedSlowCountry, viewPreference);
+  const detectedSlowConnection =
+    slowByNetworkInfo || slowByCountryFallback || slowByMeasuredSpeed;
+  const liteModeActive = shouldUseLiteMode(
+    detectedSlowConnection,
+    viewPreference,
+  );
   useEffect(() => {
     setViewPreference(getStoredViewMode());
   }, []);
 
   const refreshImpactCount = useCallback(async () => {
     try {
+      const startedAt = performance.now();
       const res = await fetch("/api/impact");
+      const durationMs = performance.now() - startedAt;
+      if (isSlowMeasuredFetch(durationMs)) {
+        setSlowByMeasuredSpeed(true);
+      }
       if (!res.ok) return;
       const data = (await res.json()) as { count?: number };
       setImpactCount(data.count ?? 0);
@@ -130,11 +142,11 @@ export function HomePage() {
     const networkSlow = detectSlowConnectionFromNetwork();
 
     if (networkSlow !== null) {
-      setDetectedSlowCountry(networkSlow);
+      setSlowByNetworkInfo(networkSlow);
       setLiteDetectionDone(true);
 
       return subscribeToNetworkChanges((slow) => {
-        setDetectedSlowCountry(slow);
+        setSlowByNetworkInfo(slow);
       });
     }
 
@@ -153,7 +165,7 @@ export function HomePage() {
           geo &&
           isSlowInternetCountry(geo.country, geo.countryCode)
         ) {
-          setDetectedSlowCountry(true);
+          setSlowByCountryFallback(true);
         }
         setLiteDetectionDone(true);
       },
