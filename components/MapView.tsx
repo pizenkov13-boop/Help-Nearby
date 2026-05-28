@@ -236,6 +236,7 @@ interface MapViewProps {
   selected?: Organization | null;
   userLocation: TrackedUserLocation;
   yourLocationLabel: string;
+  liteMode?: boolean;
   route: RouteData | null;
   routeDestination: Organization | null;
   routeLoading: boolean;
@@ -247,6 +248,7 @@ export default function MapView({
   selected,
   userLocation,
   yourLocationLabel,
+  liteMode = false,
   route,
   routeDestination,
   routeLoading,
@@ -272,7 +274,7 @@ export default function MapView({
     );
     setMarkerGeneration((g) => g + 1);
 
-    if (needsNominatim.length === 0) {
+    if (liteMode || needsNominatim.length === 0) {
       setGeocoding(false);
       return;
     }
@@ -314,7 +316,7 @@ export default function MapView({
     return () => {
       cancelled = true;
     };
-  }, [organizations]);
+  }, [organizations, liteMode]);
 
   const routeDestinationCoords = useMemo(() => {
     if (!routeDestination) return null;
@@ -337,7 +339,11 @@ export default function MapView({
       >
         <TileLayer
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-          url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
+          url={
+            liteMode
+              ? "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+              : "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
+          }
         />
         <MapViewport
           organizations={mapOrganizations}
