@@ -66,6 +66,13 @@ const ROUTE_STYLE = {
   lineJoin: "round" as const,
 };
 
+const MAP_TILE_ATTRIBUTION = "© OpenStreetMap contributors";
+
+/** Plain-text Leaflet prefix — no default logo/flag link. */
+function applyNeutralMapAttribution(map: L.Map) {
+  map.attributionControl.setPrefix("Leaflet");
+}
+
 function clearLeafletContainer(container: HTMLElement | null) {
   if (!container) return;
 
@@ -241,9 +248,10 @@ export default function MapView({
       scrollWheelZoom: true,
     });
 
+    applyNeutralMapAttribution(map);
+
     L.tileLayer(tileUrl, {
-      attribution:
-        '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+      attribution: MAP_TILE_ATTRIBUTION,
     }).addTo(map);
 
     markersLayerRef.current = L.layerGroup().addTo(map);
