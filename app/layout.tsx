@@ -56,11 +56,7 @@ export default function RootLayout({
       className={cn("font-sans", dmSans.variable, newsreader.variable)}
     >
       <head>
-        <script
-          dangerouslySetInnerHTML={{
-            __html: `(function(){try{var k='help-nearby-theme';var t=localStorage.getItem(k);var d=window.matchMedia('(prefers-color-scheme: dark)').matches;var el=document.documentElement;if(t==='dark'||(t==='system'&&d)||(!t&&d))el.classList.add('dark');else el.classList.remove('dark')}catch(e){}})();`,
-          }}
-        />
+        <script src="/theme-init.js" />
       </head>
       <body
         suppressHydrationWarning
