@@ -63,7 +63,7 @@ export default function RootLayout({
       </head>
       <body
         suppressHydrationWarning
-        className="min-h-screen bg-surface font-sans text-foreground antialiased transition-colors duration-300"
+        className="min-h-screen bg-surface font-sans text-foreground transition-[background-color] duration-300"
       >
         <AppProviders>{children}</AppProviders>
         <AnalyticsLoader />
