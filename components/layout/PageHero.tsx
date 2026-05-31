@@ -7,6 +7,8 @@ interface PageHeroProps {
   subtitle?: string;
   imageSrc?: string;
   compact?: boolean;
+  /** Blue-green gradient band (no photo) — for Reviews etc. */
+  gradient?: boolean;
 }
 
 export function PageHero({
@@ -14,6 +16,7 @@ export function PageHero({
   subtitle,
   imageSrc = "/images/hero.jpg",
   compact = false,
+  gradient = false,
 }: PageHeroProps) {
   return (
     <ImageHero
@@ -21,6 +24,7 @@ export function PageHero({
       title={title}
       subtitle={subtitle}
       compact={compact}
+      gradient={gradient}
     />
   );
 }
