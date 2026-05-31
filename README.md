@@ -16,6 +16,16 @@ Whether someone is facing hunger, homelessness, or an emergency, Help Nearby tur
 
 ---
 
+## Story
+
+Help Nearby was built by **Pavel Izenkin**, a 15-year-old from Prokopyevsk, a small coal-mining city in Siberia. With no professional coding background, Pavel and a friend pooled together 6000 rubles (about $70) for AI tool subscriptions, and built the first working version in 12 days.
+
+The project started during work on a UN Sustainable Development Goals challenge — and continued because real users in Russia, Sudan, Egypt, and other countries began using it.
+
+A user from Egypt asked for Arabic language support and a lite mode for slow internet — we built both. That's the principle: **real users, real feedback, honest data.**
+
+---
+
 ## Features
 
 | Feature | Description |
@@ -27,7 +37,7 @@ Whether someone is facing hunger, homelessness, or an emergency, Help Nearby tur
 | 📞 **Call Now** | One-tap `tel:` links on mobile; phone number on hover on desktop |
 | 🤖 **AI assistant** | Powered by **Groq** (Llama 3.3 70B) — answers questions about nearby help |
 | 🌐 **7 languages** | English, Russian, Spanish, French, German, Chinese, Arabic (RTL support) |
-| 📱 **PWA** | Installable via web manifest; service worker shows a static offline page if navigation fails (search, map, and APIs need a network connection) |
+| 📱 **PWA** | Installable as PWA (Progressive Web App). Service worker serves a static offline page if navigation fails without network; search, map, and APIs require a connection |
 | ⚡ **Lite mode** | Auto-enabled on slow networks (2G / slow-3G) or in low-connectivity regions — list-only, no map, loads fast |
 | ✅ **Verified organizations** | Community submissions reviewed by admin before showing a verified badge |
 | 💬 **Reviews** | User feedback with admin moderation |
@@ -37,9 +47,11 @@ Whether someone is facing hunger, homelessness, or an emergency, Help Nearby tur
 
 ## Impact
 
-- **OpenStreetMap coverage** — organization search works in any city where OSM has relevant POI data (quality varies by region)
-- **Impact counter** — displays the number of Call / Directions clicks recorded today in our database; it is a usage signal, not proof that someone received help
-- **Mission alignment** — the project references [UN Sustainable Development Goals](https://sdgs.un.org/) as guiding themes (SDG 1, 2, and 3 shown in the footer); this is not a UN partnership or endorsement
+Used by people from **24 countries** in the first month after launch (April 2026), including users from Russia, Kazakhstan, Belarus, Sudan, Egypt, and the United States. Tracked via [PostHog](https://posthog.com/) analytics.
+
+- **Impact counter** — displays the number of Call / Directions button clicks recorded today in Supabase; a usage signal, not proof that someone received aid
+- **OpenStreetMap coverage** — organization search works wherever OSM has relevant POI data (quality varies by region)
+- **Mission alignment** — references UN SDGs (1, 2, 3) as guiding themes shown in the footer; not a UN partnership or endorsement
 
 ---
 
@@ -211,6 +223,16 @@ Contributions are welcome — especially:
 4. Open a Pull Request  
 
 Please do not include API keys or `.env.local` in submissions.
+
+---
+
+## Roadmap (2026–2028, with Zayed Sustainability Prize support)
+
+- **1200** manually verified humanitarian organizations across **12 countries** in Europe & Central Asia
+- Reach **30,000** people seeking help
+- Native mobile app (iOS / Android)
+- Expanded language support
+- Partnership network with regional NGOs
 
 ---
 
