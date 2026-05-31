@@ -1,3 +1,5 @@
+import { CONTENT_SECURITY_POLICY } from "./config/contentSecurityPolicy.mjs";
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   transpilePackages: ["leaflet", "react-leaflet"],
@@ -13,15 +15,32 @@ const nextConfig = {
       },
     ],
   },
-  webpack: (config, { dev }) => {
-    if (dev) {
-      // Avoid eval-based source maps — fixes "CSP blocks eval" console warnings in dev.
+  webpack: (config, { dev, isServer }) => {
+    if (dev && !isServer) {
+      // Avoid eval-based source maps — fixes "CSP blocks eval" warnings in dev.
       config.devtool = "cheap-module-source-map";
+      config.plugins = config.plugins?.filter(
+        (plugin) => plugin?.constructor?.name !== "EvalSourceMapDevToolPlugin",
+      );
     }
     return config;
   },
   async headers() {
+    const securityHeaders =
+      process.env.NODE_ENV === "production"
+        ? [
+            {
+              key: "Content-Security-Policy",
+              value: CONTENT_SECURITY_POLICY,
+            },
+          ]
+        : [];
+
     return [
+      {
+        source: "/:path*",
+        headers: securityHeaders,
+      },
       {
         source: "/sw.js",
         headers: [
