@@ -636,13 +636,13 @@ export function HomePage() {
 
               <div
                 className={cn(
-                  "grid gap-6",
+                  "grid min-w-0 gap-4 md:gap-6",
                   liteModeActive
                     ? "lg:grid-cols-[280px_1fr]"
                     : "lg:grid-cols-[260px_1fr_340px]",
                 )}
               >
-                <div>
+                <div className="min-w-0">
                   <SearchBar
                     value={filters.searchQuery}
                     onChange={updateSearchQuery}
@@ -699,11 +699,11 @@ export function HomePage() {
 
                 <div
                   className={cn(
-                    "flex flex-col overflow-hidden rounded-brand border border-white/10 bg-surface/80",
+                    "flex w-full min-w-0 max-w-full flex-col overflow-hidden rounded-brand border border-white/10 bg-surface/80",
                     liteModeActive ? "min-h-[320px]" : "max-h-[520px] lg:max-h-[520px]",
                   )}
                 >
-                  <div className="flex-1 overflow-y-auto p-4">
+                  <div className="min-w-0 flex-1 overflow-x-hidden overflow-y-auto p-3 md:p-4">
                     <OrganizationList
                       organizations={filtered}
                       isLoading={orgsLoading && filtered.length === 0}

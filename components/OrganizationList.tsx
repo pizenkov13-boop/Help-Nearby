@@ -36,7 +36,7 @@ export function OrganizationList({
   const showSkeleton = isLoading && organizations.length === 0;
 
   return (
-    <div className="flex flex-col gap-4">
+    <div className="flex w-full min-w-0 max-w-full flex-col gap-3 md:gap-4">
       {!showSkeleton && (
         <p className="text-sm text-gray-400">
           <span className="font-semibold text-white">{organizations.length}</span>{" "}
@@ -47,16 +47,16 @@ export function OrganizationList({
       {showSkeleton ? (
         <OrganizationListSkeleton count={4} />
       ) : organizations.length === 0 ? (
-        <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-gray-700 bg-gray-800/30 px-6 py-16 text-center">
+        <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-gray-700 bg-gray-800/30 px-4 py-16 text-center md:px-6">
           <Building2 className="mb-3 h-12 w-12 text-gray-600" />
-          <p className="text-gray-400">
+          <p className="break-words text-gray-400">
             {hasSearch
               ? formatSearchNoResults(language, trimmedSearch)
               : (emptyMessage ?? t("noResults"))}
           </p>
         </div>
       ) : (
-        <div className="grid gap-4 sm:grid-cols-1">
+        <div className="grid w-full min-w-0 max-w-full gap-3 md:gap-4">
           {organizations.map((org) => (
             <OrganizationCard
               key={org.id}

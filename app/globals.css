@@ -883,11 +883,13 @@ body {
       margin-bottom: 16px;
     }
     .sdg-img {
-      width: 76px; height: 76px;
+      width: 76px;
+      height: 76px;
       border-radius: 6px;
       display: block;
       box-shadow: 0 6px 16px -8px rgba(0,0,0,.55);
-      object-fit: contain;
+      object-fit: cover;
+      image-rendering: auto;
     }
     .sdg-block .small { color: #94A3B8; font-size: 12px; margin: 10px auto 0; max-width: 600px; }
   
@@ -981,6 +983,15 @@ body {
   background: var(--surface-card);
   border-top: 1px solid var(--border-softer);
   padding: 40px 28px;
+}
+@media (max-width: 767px) {
+  .map-panel {
+    padding: 24px 16px;
+  }
+  .map-panel .container {
+    padding-left: 0;
+    padding-right: 0;
+  }
 }
 .map-panel .container { max-width: var(--max); margin: 0 auto; }
 .map-panel h2 {
