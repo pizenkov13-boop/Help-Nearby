@@ -6,12 +6,16 @@
 html {
   background-color: var(--surface);
   color: var(--text);
-  -webkit-font-smoothing: antialiased;
+  -webkit-font-smoothing: auto;
+  -moz-osx-font-smoothing: auto;
+  text-rendering: optimizeLegibility;
   color-scheme: light;
-  transition: background-color 0.3s ease, color 0.3s ease;
+  transition: background-color 0.3s ease;
 }
 html.dark {
   color-scheme: dark;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 body {
   margin: 0;
@@ -19,7 +23,7 @@ body {
   background-color: var(--surface);
   color: var(--text);
   font-family: var(--font-dm-sans, "DM Sans"), system-ui, sans-serif;
-  transition: background-color 0.3s ease, color 0.3s ease;
+  transition: background-color 0.3s ease;
 }
 
 @layer base {
@@ -35,12 +39,12 @@ body {
       --brand-amber: #f59e0b;
       --gradient-brand: linear-gradient(135deg, #3b82f6, #14b8a6);
       --text: #0f172a;
-      --text-muted: #475569;
-      --text-dim: #64748b;
-      --text-fade: #94a3b8;
+      --text-muted: #334155;
+      --text-dim: #475569;
+      --text-fade: #64748b;
       --heading: #0f172a;
-      --header-bg: rgba(248, 250, 252, 0.88);
-      --header-bg-scrolled: rgba(255, 255, 255, 0.96);
+      --header-bg: rgba(255, 255, 255, 0.98);
+      --header-bg-scrolled: #ffffff;
       --header-border-scrolled: rgba(15, 23, 42, 0.08);
       --hover-bg: rgba(15, 23, 42, 0.06);
       --hover-text: #0f172a;
@@ -133,7 +137,6 @@ body {
     html {
       scroll-behavior: smooth;
       scroll-padding-top: 80px;
-      -webkit-font-smoothing: antialiased;
       background-color: var(--surface);
       color: var(--text);
     }
@@ -147,7 +150,7 @@ body {
       color: var(--text);
       font-size: 16px;
       line-height: 1.55;
-      transition: background-color 0.3s ease, color 0.3s ease;
+      transition: background-color 0.3s ease;
     }
     img { max-width: 100%; display: block; }
     a { color: inherit; text-decoration: none; }
@@ -160,10 +163,16 @@ body {
       height: 72px;
       z-index: 50;
       background: var(--header-bg);
-      backdrop-filter: blur(20px) saturate(140%);
-      -webkit-backdrop-filter: blur(20px) saturate(140%);
       border-bottom: 1px solid var(--border-softer);
       transition: background 0.25s ease, border-color 0.25s ease;
+    }
+    html:not(.dark) .header {
+      backdrop-filter: none;
+      -webkit-backdrop-filter: none;
+    }
+    html.dark .header {
+      backdrop-filter: blur(12px) saturate(140%);
+      -webkit-backdrop-filter: blur(12px) saturate(140%);
     }
     .header.scrolled {
       background: var(--header-bg-scrolled);
@@ -195,7 +204,9 @@ body {
       flex-shrink: 0;
       display: block;
       background: transparent;
-      filter: drop-shadow(0 4px 12px rgba(59,130,246,.35));
+    }
+    html.dark .brand-logo {
+      filter: drop-shadow(0 4px 12px rgba(59, 130, 246, 0.35));
     }
     .brand-logo-circle {
       fill: #dbe9fc;
@@ -1015,9 +1026,12 @@ body {
         position: absolute;
         top: 72px; left: 0; right: 0;
         background: var(--mobile-menu-bg);
-        backdrop-filter: blur(20px);
         border-top: 1px solid var(--border-softer);
         padding: 18px 28px 24px;
+      }
+      html.dark .mobile-menu.open {
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
       }
       .mobile-menu a,
       .mobile-menu .nav-link,
