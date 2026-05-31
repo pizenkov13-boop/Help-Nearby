@@ -1,6 +1,7 @@
 "use client";
 
 import { Filter } from "lucide-react";
+import { CategoryIcon } from "@/components/icons/CategoryIcon";
 import { CATEGORIES, CATEGORY_CONFIG } from "@/lib/categories";
 import { useLanguage } from "@/lib/i18n/LanguageProvider";
 import type { Category, FilterState } from "@/lib/types";
@@ -51,7 +52,7 @@ export function Filters({ filters, onChange }: FiltersProps) {
                   active={filters.category === cat}
                   onClick={() => onChange({ ...filters, category: cat })}
                   label={categoryLabel(cat)}
-                  icon={cfg.icon}
+                  category={cat}
                   activeClass={cn(cfg.bg, cfg.color, "ring-1", cfg.ring)}
                 />
               );
@@ -81,13 +82,13 @@ function CategoryPill({
   active,
   onClick,
   label,
-  icon,
+  category,
   activeClass,
 }: {
   active: boolean;
   onClick: () => void;
   label: string;
-  icon?: string;
+  category?: Category;
   activeClass?: string;
 }) {
   return (
@@ -99,7 +100,7 @@ function CategoryPill({
         active && (activeClass ?? "border-blue-500/50 bg-blue-500/20 text-blue-300"),
       )}
     >
-      {icon && <span>{icon}</span>}
+      {category && <CategoryIcon category={category} />}
       {label}
     </button>
   );

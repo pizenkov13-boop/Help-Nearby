@@ -2,12 +2,14 @@
 
 import Link from "next/link";
 import {
+  BadgeCheck,
   Clock,
   MapPin,
   Navigation,
   Phone,
   Star,
 } from "lucide-react";
+import { CategoryIcon } from "@/components/icons/CategoryIcon";
 import { CATEGORY_CONFIG } from "@/lib/categories";
 import { useLanguage } from "@/lib/i18n/LanguageProvider";
 import {
@@ -70,11 +72,13 @@ export function OrganizationCard({
                 cfg.color,
               )}
             >
-              {cfg.icon} {org.category}
+              <CategoryIcon category={org.category} />
+              {org.category}
             </span>
             {org.verified && (
               <span className="inline-flex items-center gap-0.5 rounded-full bg-emerald-500/20 px-2 py-0.5 text-xs font-semibold text-emerald-400 ring-1 ring-emerald-500/30">
-                ✓ {t("verified")}
+                <BadgeCheck className="h-3 w-3" aria-hidden />
+                {t("verified")}
               </span>
             )}
             {org.verified && (

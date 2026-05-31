@@ -1,6 +1,7 @@
 import "server-only";
 
 import type { RouteData, RoutingMode } from "@/lib/routing";
+import { distanceMiles } from "@/lib/geo";
 import { snapToNearestWalkingRoad } from "@/lib/osrmSnap";
 
 const USER_AGENT = "HelpNearby/1.0 (help-nearby.app)";
@@ -68,6 +69,30 @@ async function fetchRouteFromUrl(url: string): Promise<RouteData | null> {
   return toRouteData(data.routes[0], "walking");
 }
 
+/** Straight segment from the road endpoint to the exact building marker. */
+function extendRouteToExactDestination(
+  route: RouteData,
+  exactLat: number,
+  exactLng: number,
+): RouteData {
+  const coords = [...route.coordinates];
+  if (coords.length === 0) return route;
+
+  const last = coords[coords.length - 1]!;
+  const gapMeters = distanceMiles(last[0], last[1], exactLat, exactLng) * 1609.34;
+
+  if (gapMeters < 10) return route;
+
+  coords.push([exactLat, exactLng]);
+  const extraKm = Math.round((gapMeters / 1000) * 10) / 10;
+
+  return {
+    ...route,
+    coordinates: coords,
+    distanceKm: Math.round((route.distanceKm + extraKm) * 10) / 10,
+  };
+}
+
 async function fetchOsrmWalkingRoute(
   from: RoutePoint,
   to: RoutePoint,
@@ -105,10 +130,10 @@ export async function fetchSnappedWalkingRoute(
   });
 
   const osrm = await fetchOsrmWalkingRoute(from, to);
-  if (osrm) return osrm;
+  if (osrm) return extendRouteToExactDestination(osrm, toLat, toLng);
 
   const osmDe = await fetchOsmDeFootRoute(from, to);
-  if (osmDe) return osmDe;
+  if (osmDe) return extendRouteToExactDestination(osmDe, toLat, toLng);
 
   throw new Error("No walking route found.");
 }

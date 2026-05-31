@@ -18,6 +18,7 @@ import {
   trackCallOrganization,
   trackGetDirections,
 } from "@/lib/analytics.client";
+import { CategoryIcon } from "@/components/icons/CategoryIcon";
 import { CATEGORY_CONFIG } from "@/lib/categories";
 import { useLanguage } from "@/lib/i18n/LanguageProvider";
 import {
@@ -108,7 +109,8 @@ export function OrganizationDetailPage({ org }: OrganizationDetailPageProps) {
                 cfg.color,
               )}
             >
-              {cfg.icon} {org.category}
+              <CategoryIcon category={org.category} className="h-4 w-4" />
+              {org.category}
             </span>
             <span
               className={cn(

@@ -12,8 +12,9 @@ import {
   Trash2,
 } from "lucide-react";
 import type { DbOrganization } from "@/lib/data";
+import { CategoryIcon } from "@/components/icons/CategoryIcon";
+import { CountryFlag } from "@/components/icons/CountryFlag";
 import { CATEGORIES, CATEGORY_CONFIG } from "@/lib/categories";
-import { countryToFlag } from "@/lib/countryFlags";
 import type { Category, Review } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
@@ -422,7 +423,7 @@ export function AdminPage({
                           cfg.color,
                         )}
                       >
-                        {cfg.icon}{" "}
+                        <CategoryIcon category={category} />
                         {CATEGORIES.includes(category) ? category : "food"}
                       </span>
                     </div>
@@ -479,9 +480,7 @@ export function AdminPage({
                     <span className="font-semibold text-white">
                       {review.name}
                     </span>
-                    <span className="text-lg" aria-hidden>
-                      {countryToFlag(review.country)}
-                    </span>
+                    <CountryFlag country={review.country} />
                     <span className="text-sm text-gray-500">
                       {review.country}
                     </span>

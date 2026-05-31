@@ -7,12 +7,16 @@ import { Loader2, X } from "lucide-react";
 import { useLanguage } from "@/lib/i18n/LanguageProvider";
 import { organizationNeedsGeocoding } from "@/lib/nominatimGeocode";
 import type { RouteData } from "@/lib/routing";
+import { distanceMiles } from "@/lib/geo";
 import { hasValidMapCoordinates } from "@/lib/mapCoordinates";
 import { getOrganizationCoordinates } from "@/lib/organizationCoordinates";
 import { resolveOrganizationsForMap } from "@/lib/resolveOrganizationCoordinates";
 import type { Organization, UserLocation } from "@/lib/types";
 import type { TrackedUserLocation } from "@/lib/geolocation";
-import { CATEGORY_CONFIG } from "@/lib/categories";
+import {
+  categoryIconMarkup,
+  verifiedCheckMarkup,
+} from "@/lib/categoryIconMarkup";
 
 const DefaultIcon = L.icon({
   iconUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png",
@@ -35,16 +39,21 @@ const userLocationIcon = L.divIcon({
   iconAnchor: [24, 24],
 });
 
-function createCategoryIcon(color: string, verified = false) {
+function createCategoryIcon(category: string, verified = false) {
+  const color = categoryColors[category] ?? "#3b82f6";
   const verifiedRing = verified
     ? "box-shadow:0 0 0 3px #10b981, 0 2px 8px rgba(0,0,0,0.4);"
     : "box-shadow:0 2px 8px rgba(0,0,0,0.4);";
   const badge = verified
-    ? `<span style="position:absolute;top:-4px;right:-4px;background:#10b981;color:white;font-size:10px;width:14px;height:14px;border-radius:50%;display:flex;align-items:center;justify-content:center;border:1px solid white;">✓</span>`
+    ? `<span style="position:absolute;top:-4px;right:-4px;background:#10b981;color:white;width:14px;height:14px;border-radius:50%;display:flex;align-items:center;justify-content:center;border:1px solid white;">${verifiedCheckMarkup(8)}</span>`
     : "";
+  const icon =
+    category in categoryColors
+      ? categoryIconMarkup(category as Organization["category"], 14, "#ffffff")
+      : "";
   return L.divIcon({
     className: "custom-marker",
-    html: `<div style="position:relative;background:${color};width:28px;height:28px;border-radius:50%;border:3px solid white;${verifiedRing}">${badge}</div>`,
+    html: `<div style="position:relative;background:${color};width:28px;height:28px;border-radius:50%;border:3px solid white;display:flex;align-items:center;justify-content:center;${verifiedRing}">${icon}${badge}</div>`,
     iconSize: [28, 28],
     iconAnchor: [14, 14],
   });
@@ -66,6 +75,46 @@ const ROUTE_STYLE = {
   lineJoin: "round" as const,
 };
 
+const ROUTE_CONNECTOR_STYLE = {
+  color: "#60a5fa",
+  weight: 3,
+  opacity: 0.85,
+  dashArray: "6 8",
+  lineCap: "round" as const,
+  lineJoin: "round" as const,
+};
+
+function splitRouteWithConnector(
+  coordinates: [number, number][],
+  destination: { lat: number; lng: number } | null,
+): { road: [number, number][]; connector: [number, number][] } {
+  if (!destination || coordinates.length < 2) {
+    return { road: coordinates, connector: [] };
+  }
+
+  const last = coordinates[coordinates.length - 1]!;
+  const atDestination =
+    Math.abs(last[0] - destination.lat) < 0.00005 &&
+    Math.abs(last[1] - destination.lng) < 0.00005;
+
+  if (!atDestination) {
+    return { road: coordinates, connector: [] };
+  }
+
+  const roadEnd = coordinates[coordinates.length - 2]!;
+  const gapMeters =
+    distanceMiles(roadEnd[0], roadEnd[1], last[0], last[1]) * 1609.34;
+
+  if (gapMeters < 10) {
+    return { road: coordinates, connector: [] };
+  }
+
+  return {
+    road: coordinates.slice(0, -1),
+    connector: [roadEnd, last],
+  };
+}
+
 const MAP_TILE_ATTRIBUTION = "© OpenStreetMap contributors";
 
 /** Plain-text Leaflet prefix — no default logo/flag link. */
@@ -84,17 +133,17 @@ function clearLeafletContainer(container: HTMLElement | null) {
 }
 
 function buildOrganizationPopup(org: Organization) {
-  const category = CATEGORY_CONFIG[org.category];
   const verified = org.verified
-    ? '<span style="margin-left:4px;color:#34d399;">✓</span>'
+    ? `<span style="display:inline-flex;align-items:center;margin-left:4px;color:#34d399;vertical-align:middle;">${verifiedCheckMarkup(14, "#34d399")}</span>`
     : "";
   const address = org.address
     ? `<br /><span style="font-size:12px;color:#9ca3af;">${org.address}</span>`
     : "";
+  const icon = categoryIconMarkup(org.category, 14, "#9ca3af");
 
   return `<div style="font-size:14px;">
     <strong>${org.name}</strong>${verified}<br />
-    <span>${category.icon} ${org.category}</span>${address}
+    <span style="display:inline-flex;align-items:center;gap:4px;">${icon} ${org.category}</span>${address}
   </div>`;
 }
 
@@ -161,6 +210,7 @@ export default function MapView({
   const mapRef = useRef<L.Map | null>(null);
   const markersLayerRef = useRef<L.LayerGroup | null>(null);
   const routeLayerRef = useRef<L.Polyline | null>(null);
+  const routeConnectorLayerRef = useRef<L.Polyline | null>(null);
   const selectedRef = useRef<Organization | null | undefined>(selected);
   const [mapOrganizations, setMapOrganizations] = useState<Organization[]>([]);
   const [markerGeneration, setMarkerGeneration] = useState(0);
@@ -261,6 +311,7 @@ export default function MapView({
     return () => {
       setMapReady(false);
       routeLayerRef.current = null;
+      routeConnectorLayerRef.current = null;
       markersLayerRef.current = null;
       map.remove();
       mapRef.current = null;
@@ -296,10 +347,7 @@ export default function MapView({
     for (const org of mapOrganizations) {
       const { lat, lng } = getOrganizationCoordinates(org);
       L.marker([lat, lng], {
-        icon: createCategoryIcon(
-          categoryColors[org.category] ?? "#3b82f6",
-          org.verified,
-        ),
+        icon: createCategoryIcon(org.category, org.verified),
       })
         .bindPopup(buildOrganizationPopup(org))
         .addTo(markersLayer);
@@ -309,9 +357,23 @@ export default function MapView({
       routeLayerRef.current.remove();
       routeLayerRef.current = null;
     }
+    if (routeConnectorLayerRef.current) {
+      routeConnectorLayerRef.current.remove();
+      routeConnectorLayerRef.current = null;
+    }
 
     if (route && route.coordinates.length > 1) {
-      routeLayerRef.current = L.polyline(route.coordinates, ROUTE_STYLE).addTo(map);
+      const { road, connector } = splitRouteWithConnector(
+        route.coordinates,
+        routeDestinationCoords,
+      );
+      routeLayerRef.current = L.polyline(road, ROUTE_STYLE).addTo(map);
+      if (connector.length > 1) {
+        routeConnectorLayerRef.current = L.polyline(
+          connector,
+          ROUTE_CONNECTOR_STYLE,
+        ).addTo(map);
+      }
     }
 
     fitMapToContent(

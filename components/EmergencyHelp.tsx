@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import { Loader2, MapPin, Phone, X } from "lucide-react";
+import { Loader2, LifeBuoy, MapPin, Phone, X } from "lucide-react";
 import { DEFAULT_LOCATION, NEARBY_RADIUS_METERS } from "@/lib/constants";
 import { useLanguage } from "@/lib/i18n/LanguageProvider";
 import { trackCallOrganization } from "@/lib/analytics.client";
@@ -126,7 +126,7 @@ export function EmergencyHelp() {
                   id="emergency-dialog-title"
                   className="flex items-center gap-2 text-lg font-bold text-white sm:text-xl"
                 >
-                  <span aria-hidden>🆘</span>
+                  <LifeBuoy className="h-5 w-5 shrink-0 text-red-300" aria-hidden />
                   {t("emergencyTitle")}
                 </h2>
                 <p className="mt-1 text-sm text-red-100/90">
