@@ -4,11 +4,12 @@ import { OrganizationDetailPage } from "@/components/pages/OrganizationDetailPag
 import { fetchOrganizationBySlug } from "@/lib/data";
 
 interface OrgPageProps {
-  params: { slug: string };
+  params: Promise<{ slug: string }>;
 }
 
 export async function generateMetadata({ params }: OrgPageProps): Promise<Metadata> {
-  const org = await fetchOrganizationBySlug(params.slug);
+  const { slug } = await params;
+  const org = await fetchOrganizationBySlug(slug);
   if (!org) {
     return { title: "Organization Not Found — Help Nearby" };
   }
@@ -19,7 +20,8 @@ export async function generateMetadata({ params }: OrgPageProps): Promise<Metada
 }
 
 export default async function OrgPage({ params }: OrgPageProps) {
-  const org = await fetchOrganizationBySlug(params.slug);
+  const { slug } = await params;
+  const org = await fetchOrganizationBySlug(slug);
   if (!org) {
     notFound();
   }
