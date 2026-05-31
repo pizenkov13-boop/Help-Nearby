@@ -2,88 +2,46 @@
 
 import { Loader2 } from "lucide-react";
 import { useLanguage } from "@/lib/i18n/LanguageProvider";
-import { formatImpactCounter } from "@/lib/i18n/translations";
 import { cn } from "@/lib/utils";
 
 interface HeroProps {
   onFindHelp: () => void;
   isLocating: boolean;
-  impactCount: number | null;
   liteModeActive?: boolean;
 }
 
-export function Hero({
-  onFindHelp,
-  isLocating,
-  impactCount,
-  liteModeActive = false,
-}: HeroProps) {
-  const { t, language } = useLanguage();
+export function Hero({ onFindHelp, isLocating }: HeroProps) {
+  const { t } = useLanguage();
 
   return (
     <section className="hero" id="hero">
-      <div
-        className="hero-bg"
-        style={liteModeActive ? undefined : { backgroundImage: "url(/images/hero.jpg)" }}
-      />
+      <div className="hero-bg" />
       <div className="hero-overlay" />
       <div className="hero-grad" />
 
       <div className="hero-inner">
         <div className="hero-content">
-          {impactCount !== null && (
-            <div className="hero-live">
-              <span className="pulse" />
-              {formatImpactCounter(language, impactCount)}
-            </div>
-          )}
-
-          <h1>
-            {language === "en" ? (
-              <>
-                Find help <span className="grad">near you</span>
-              </>
-            ) : (
-              t("heroTitle")
-            )}
-          </h1>
-
+          <h1>{t("heroTitle")}</h1>
           <p className="lead">{t("heroSubtitle")}</p>
 
-          <div className="cta-row">
-            <button
-              type="button"
-              className={cn("cta")}
-              onClick={onFindHelp}
-              disabled={isLocating}
-            >
-              {isLocating ? (
-                <>
-                  <Loader2
-                    className="inline-block animate-spin"
-                    style={{ width: 18, height: 18 }}
-                  />
-                  {t("locating")}
-                </>
-              ) : (
-                <>
-                  {t("heroCta")}
-                  <svg
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2.6"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    aria-hidden
-                  >
-                    <line x1="5" y1="12" x2="19" y2="12" />
-                    <polyline points="12 5 19 12 12 19" />
-                  </svg>
-                </>
-              )}
-            </button>
-          </div>
+          <button
+            type="button"
+            className={cn("cta cta-light")}
+            onClick={onFindHelp}
+            disabled={isLocating}
+          >
+            {isLocating ? (
+              <>
+                <Loader2
+                  className="inline-block animate-spin"
+                  style={{ width: 18, height: 18 }}
+                />
+                {t("locating")}
+              </>
+            ) : (
+              t("heroCta")
+            )}
+          </button>
         </div>
       </div>
 

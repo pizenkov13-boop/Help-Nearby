@@ -1,4 +1,4 @@
-const CACHE_NAME = "help-nearby-v4";
+const CACHE_NAME = "help-nearby-v5";
 const OFFLINE_URL = "/offline.html";
 
 const PRECACHE_URLS = [
@@ -73,16 +73,8 @@ self.addEventListener("fetch", (event) => {
     return;
   }
 
-  if (
-    url.pathname.startsWith("/_next/static/") &&
-    url.pathname.endsWith(".css")
-  ) {
-    event.respondWith(networkFirstAsset(request));
-    return;
-  }
-
   if (url.pathname.startsWith("/_next/static/")) {
-    event.respondWith(cacheFirst(request));
+    event.respondWith(networkFirstAsset(request));
     return;
   }
 

@@ -1,16 +1,7 @@
 "use client";
 
 import "leaflet/dist/leaflet.css";
-import { useEffect, useMemo, useState } from "react";
-import {
-  Circle,
-  MapContainer,
-  Marker,
-  Polyline,
-  Popup,
-  TileLayer,
-  useMap,
-} from "react-leaflet";
+import { useEffect, useMemo, useRef, useState } from "react";
 import L from "leaflet";
 import { Loader2, X } from "lucide-react";
 import { useLanguage } from "@/lib/i18n/LanguageProvider";
@@ -75,160 +66,62 @@ const ROUTE_STYLE = {
   lineJoin: "round" as const,
 };
 
-function MapViewport({
-  organizations,
-  userLocation,
-  route,
-  destinationCoords,
-}: {
-  organizations: Organization[];
-  userLocation: UserLocation;
-  route: RouteData | null;
-  destinationCoords: { lat: number; lng: number } | null;
-}) {
-  const map = useMap();
+function clearLeafletContainer(container: HTMLElement | null) {
+  if (!container) return;
 
-  useEffect(() => {
-    if (route?.coordinates.length) {
-      const bounds = L.latLngBounds(route.coordinates);
-      bounds.extend([userLocation.lat, userLocation.lng]);
-      if (destinationCoords) {
-        bounds.extend([destinationCoords.lat, destinationCoords.lng]);
-      }
-      map.fitBounds(bounds, { padding: [72, 72], maxZoom: 16 });
-      return;
-    }
-
-    const points: [number, number][] = [
-      [userLocation.lat, userLocation.lng],
-      ...organizations.map((o) => {
-        const { lat, lng } = getOrganizationCoordinates(o);
-        return [lat, lng] as [number, number];
-      }),
-    ];
-
-    if (points.length === 1) {
-      map.setView([userLocation.lat, userLocation.lng], 15);
-      return;
-    }
-
-    const bounds = L.latLngBounds(points);
-    map.fitBounds(bounds, { padding: [48, 48], maxZoom: 14 });
-  }, [organizations, userLocation, map, route, destinationCoords]);
-
-  return null;
+  container.querySelectorAll<HTMLElement>("[class*='leaflet']").forEach((el) => {
+    delete (el as HTMLElement & { _leaflet_id?: number })._leaflet_id;
+  });
+  delete (container as HTMLElement & { _leaflet_id?: number })._leaflet_id;
+  container.replaceChildren();
 }
 
-function FlyToSelected({
-  selected,
-  hasRoute,
-}: {
-  selected: Organization | null | undefined;
-  hasRoute: boolean;
-}) {
-  const map = useMap();
+function buildOrganizationPopup(org: Organization) {
+  const category = CATEGORY_CONFIG[org.category];
+  const verified = org.verified
+    ? '<span style="margin-left:4px;color:#34d399;">✓</span>'
+    : "";
+  const address = org.address
+    ? `<br /><span style="font-size:12px;color:#9ca3af;">${org.address}</span>`
+    : "";
 
-  useEffect(() => {
-    if (selected && !hasRoute) {
-      const { lat, lng } = getOrganizationCoordinates(selected);
-      map.flyTo([lat, lng], 15, { duration: 0.8 });
+  return `<div style="font-size:14px;">
+    <strong>${org.name}</strong>${verified}<br />
+    <span>${category.icon} ${org.category}</span>${address}
+  </div>`;
+}
+
+function fitMapToContent(
+  map: L.Map,
+  organizations: Organization[],
+  userLocation: UserLocation,
+  route: RouteData | null,
+  destinationCoords: { lat: number; lng: number } | null,
+) {
+  if (route?.coordinates.length) {
+    const bounds = L.latLngBounds(route.coordinates);
+    bounds.extend([userLocation.lat, userLocation.lng]);
+    if (destinationCoords) {
+      bounds.extend([destinationCoords.lat, destinationCoords.lng]);
     }
-  }, [selected, map, hasRoute]);
+    map.fitBounds(bounds, { padding: [72, 72], maxZoom: 16 });
+    return;
+  }
 
-  return null;
-}
+  const points: [number, number][] = [
+    [userLocation.lat, userLocation.lng],
+    ...organizations.map((org) => {
+      const { lat, lng } = getOrganizationCoordinates(org);
+      return [lat, lng] as [number, number];
+    }),
+  ];
 
-function UserLocationLayer({
-  userLocation,
-  yourLocationLabel,
-}: {
-  userLocation: TrackedUserLocation;
-  yourLocationLabel: string;
-}) {
-  const position: [number, number] = [userLocation.lat, userLocation.lng];
-  const accuracy = userLocation.accuracy;
+  if (points.length === 1) {
+    map.setView([userLocation.lat, userLocation.lng], 15);
+    return;
+  }
 
-  return (
-    <>
-      {accuracy != null && accuracy > 0 && accuracy < 500 && (
-        <Circle
-          center={position}
-          radius={accuracy}
-          pathOptions={{
-            color: "#007bff",
-            fillColor: "#007bff",
-            fillOpacity: 0.12,
-            weight: 1,
-            opacity: 0.35,
-          }}
-        />
-      )}
-      <Marker position={position} icon={userLocationIcon} zIndexOffset={1000}>
-        <Popup>
-          <div className="text-sm font-medium">{yourLocationLabel}</div>
-        </Popup>
-      </Marker>
-    </>
-  );
-}
-
-function OrganizationMarkers({
-  organizations,
-  markerGeneration,
-}: {
-  organizations: Organization[];
-  markerGeneration: number;
-}) {
-  useEffect(() => {
-    console.log(
-      "[MapView] markers layer:",
-      organizations.length,
-      "generation:",
-      markerGeneration,
-      organizations.slice(0, 3).map((o) => ({
-        id: o.id,
-        lat: o.lat,
-        lng: o.lng,
-      })),
-    );
-  }, [organizations, markerGeneration]);
-
-  return (
-    <>
-      {organizations.map((org) => {
-        const { lat, lng } = getOrganizationCoordinates(org);
-        return (
-        <Marker
-          key={`${markerGeneration}-${org.id}`}
-          position={[lat, lng]}
-          icon={createCategoryIcon(
-            categoryColors[org.category] ?? "#3b82f6",
-            org.verified,
-          )}
-        >
-          <Popup>
-            <div className="text-sm">
-              <strong>{org.name}</strong>
-              {org.verified && (
-                <span className="ml-1 text-emerald-400">✓</span>
-              )}
-              <br />
-              <span>
-                {CATEGORY_CONFIG[org.category].icon} {org.category}
-              </span>
-              {org.address && (
-                <>
-                  <br />
-                  <span className="text-xs text-gray-400">{org.address}</span>
-                </>
-              )}
-            </div>
-          </Popup>
-        </Marker>
-        );
-      })}
-    </>
-  );
+  map.fitBounds(L.latLngBounds(points), { padding: [48, 48], maxZoom: 14 });
 }
 
 interface MapViewProps {
@@ -241,6 +134,7 @@ interface MapViewProps {
   routeDestination: Organization | null;
   routeLoading: boolean;
   onClearRoute: () => void;
+  mapVisible?: boolean;
 }
 
 export default function MapView({
@@ -253,21 +147,24 @@ export default function MapView({
   routeDestination,
   routeLoading,
   onClearRoute,
+  mapVisible = true,
 }: MapViewProps) {
   const { t } = useLanguage();
+  const mapHostRef = useRef<HTMLDivElement>(null);
+  const mapRef = useRef<L.Map | null>(null);
+  const markersLayerRef = useRef<L.LayerGroup | null>(null);
+  const routeLayerRef = useRef<L.Polyline | null>(null);
+  const selectedRef = useRef<Organization | null | undefined>(selected);
   const [mapOrganizations, setMapOrganizations] = useState<Organization[]>([]);
   const [markerGeneration, setMarkerGeneration] = useState(0);
   const [geocoding, setGeocoding] = useState(false);
+  const [mapReady, setMapReady] = useState(false);
+
+  selectedRef.current = selected;
 
   useEffect(() => {
     const withStoredCoords = organizations.filter(hasValidMapCoordinates);
     const needsNominatim = organizations.filter(organizationNeedsGeocoding);
-
-    console.log("[MapView] organizations prop:", {
-      total: organizations.length,
-      storedCoords: withStoredCoords.length,
-      nominatimRefine: needsNominatim.length,
-    });
 
     setMapOrganizations(
       withStoredCoords.length > 0 ? withStoredCoords : organizations,
@@ -291,7 +188,6 @@ export default function MapView({
         if (cancelled) return;
 
         const placed = refined.filter(hasValidMapCoordinates);
-        console.log("[MapView] Nominatim markers placed:", placed.length);
 
         setMapOrganizations((prev) => {
           const byId = new Map(prev.map((o) => [o.id, o]));
@@ -329,55 +225,154 @@ export default function MapView({
     [userLocation.lat, userLocation.lng],
   );
 
+  const tileUrl = liteMode
+    ? "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+    : "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png";
+
+  useEffect(() => {
+    const container = mapHostRef.current;
+    if (!container) return;
+
+    clearLeafletContainer(container);
+
+    const map = L.map(container, {
+      center,
+      zoom: 14,
+      scrollWheelZoom: true,
+    });
+
+    L.tileLayer(tileUrl, {
+      attribution:
+        '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+    }).addTo(map);
+
+    markersLayerRef.current = L.layerGroup().addTo(map);
+    mapRef.current = map;
+    setMapReady(true);
+
+    return () => {
+      setMapReady(false);
+      routeLayerRef.current = null;
+      markersLayerRef.current = null;
+      map.remove();
+      mapRef.current = null;
+      clearLeafletContainer(container);
+    };
+  }, [tileUrl]);
+
+  useEffect(() => {
+    const map = mapRef.current;
+    const markersLayer = markersLayerRef.current;
+    if (!map || !markersLayer) return;
+
+    markersLayer.clearLayers();
+
+    const position: [number, number] = [userLocation.lat, userLocation.lng];
+    const accuracy = userLocation.accuracy;
+
+    if (accuracy != null && accuracy > 0 && accuracy < 500) {
+      L.circle(position, {
+        radius: accuracy,
+        color: "#007bff",
+        fillColor: "#007bff",
+        fillOpacity: 0.12,
+        weight: 1,
+        opacity: 0.35,
+      }).addTo(markersLayer);
+    }
+
+    L.marker(position, { icon: userLocationIcon, zIndexOffset: 1000 })
+      .bindPopup(`<div style="font-size:14px;font-weight:500;">${yourLocationLabel}</div>`)
+      .addTo(markersLayer);
+
+    for (const org of mapOrganizations) {
+      const { lat, lng } = getOrganizationCoordinates(org);
+      L.marker([lat, lng], {
+        icon: createCategoryIcon(
+          categoryColors[org.category] ?? "#3b82f6",
+          org.verified,
+        ),
+      })
+        .bindPopup(buildOrganizationPopup(org))
+        .addTo(markersLayer);
+    }
+
+    if (routeLayerRef.current) {
+      routeLayerRef.current.remove();
+      routeLayerRef.current = null;
+    }
+
+    if (route && route.coordinates.length > 1) {
+      routeLayerRef.current = L.polyline(route.coordinates, ROUTE_STYLE).addTo(map);
+    }
+
+    fitMapToContent(
+      map,
+      mapOrganizations,
+      userLocation,
+      route,
+      routeDestinationCoords,
+    );
+  }, [
+    mapOrganizations,
+    markerGeneration,
+    userLocation,
+    yourLocationLabel,
+    route,
+    routeDestinationCoords,
+    mapReady,
+  ]);
+
+  useEffect(() => {
+    const map = mapRef.current;
+    const selectedOrg = selectedRef.current;
+    if (!map || !selectedOrg || route?.coordinates.length) return;
+
+    const { lat, lng } = getOrganizationCoordinates(selectedOrg);
+    map.flyTo([lat, lng], 15, { duration: 0.8 });
+  }, [selected, route, mapReady]);
+
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map || !mapVisible) return;
+
+    const timer = window.setTimeout(() => {
+      map.invalidateSize();
+      fitMapToContent(
+        map,
+        mapOrganizations,
+        userLocation,
+        route,
+        routeDestinationCoords,
+      );
+    }, 350);
+
+    return () => window.clearTimeout(timer);
+  }, [
+    mapVisible,
+    mapOrganizations,
+    userLocation,
+    route,
+    routeDestinationCoords,
+    mapReady,
+  ]);
+
   return (
     <div className="relative h-full w-full">
-      <MapContainer
-        center={center}
-        zoom={14}
-        scrollWheelZoom
-        className="z-0 h-full w-full rounded-xl"
-      >
-        <TileLayer
-          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-          url={
-            liteMode
-              ? "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-              : "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
-          }
-        />
-        <MapViewport
-          organizations={mapOrganizations}
-          userLocation={userLocation}
-          route={route}
-          destinationCoords={routeDestinationCoords}
-        />
-        <FlyToSelected
-          selected={selected}
-          hasRoute={Boolean(route?.coordinates.length)}
-        />
+      <div
+        ref={mapHostRef}
+        className="absolute inset-0 z-0 h-full w-full rounded-xl"
+      />
 
-        {route && route.coordinates.length > 1 && (
-          <Polyline
-            key={`route-${route.coordinates.length}`}
-            positions={route.coordinates}
-            pathOptions={ROUTE_STYLE}
-          />
-        )}
-
-        <UserLocationLayer
-          userLocation={userLocation}
-          yourLocationLabel={yourLocationLabel}
-        />
-
-        <OrganizationMarkers
-          organizations={mapOrganizations}
-          markerGeneration={markerGeneration}
-        />
-      </MapContainer>
+      {!mapReady && (
+        <div className="absolute inset-0 flex items-center justify-center rounded-xl bg-surface-card text-sm text-slate-400">
+          {t("mapLoading")}
+        </div>
+      )}
 
       {geocoding && (
         <div className="pointer-events-none absolute bottom-3 left-3 z-[1000] rounded-lg bg-gray-900/90 px-3 py-1.5 text-xs text-gray-300">
-          Refining marker locations…
+          {t("mapRefiningLocations")}
         </div>
       )}
 

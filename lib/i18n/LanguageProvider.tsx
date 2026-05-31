@@ -31,7 +31,7 @@ function readStoredLanguage(): LanguageCode {
 
 function applyDocumentLanguage(code: LanguageCode) {
   document.documentElement.lang = code;
-  document.documentElement.dir = code === "ar" ? "rtl" : "ltr";
+  document.documentElement.dir = "ltr";
 }
 
 interface LanguageContextValue {
@@ -67,7 +67,7 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
     [language],
   );
 
-  const dir: "ltr" | "rtl" = language === "ar" ? "rtl" : "ltr";
+  const dir: "ltr" | "rtl" = "ltr";
 
   const value = useMemo(
     () => ({ language, setLanguage, t, dir }),
