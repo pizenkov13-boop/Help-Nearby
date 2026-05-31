@@ -46,7 +46,7 @@ A user from Egypt asked for Arabic language support and a lite mode for slow int
 
 ---
 
-## ☀️ Adaptive theme — why it matters
+## Adaptive theme — why it matters
 
 Most apps use a dark theme by default, but for many of our users this is a real accessibility barrier. People in Sudan, Egypt, Yemen, Afghanistan, and other sunny regions cannot read dark screens in bright outdoor sunlight — and these are exactly the regions where humanitarian help is needed most.
 
