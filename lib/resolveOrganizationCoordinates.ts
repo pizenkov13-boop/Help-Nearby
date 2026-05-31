@@ -1,4 +1,3 @@
-import { forwardGeocodeQuery } from "@/lib/geocode";
 import { hasValidMapCoordinates } from "@/lib/mapCoordinates";
 import {
   getOrganizationCoordinates,
@@ -52,11 +51,7 @@ async function geocodeOrganization(
     geocodeCache.set(key, coords);
     return coords;
   } catch {
-    const direct = await forwardGeocodeQuery(query);
-    if (direct) {
-      geocodeCache.set(key, direct);
-    }
-    return direct;
+    return null;
   }
 }
 

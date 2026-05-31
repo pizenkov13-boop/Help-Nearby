@@ -82,12 +82,13 @@ export async function mockNearbyApi(page: Page) {
     });
   });
 
-  await page.route(/nominatim\.openstreetmap\.org\/reverse/, async (route) => {
+  await page.route(/\/api\/geocode\/reverse/, async (route) => {
     await route.fulfill({
       status: 200,
       contentType: "application/json",
       body: JSON.stringify({
-        address: { country: "United States", country_code: "us" },
+        country: "United States",
+        countryCode: "US",
       }),
     });
   });

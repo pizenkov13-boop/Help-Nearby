@@ -1,7 +1,6 @@
 "use client";
 
 import { useTheme } from "next-themes";
-import "leaflet/dist/leaflet.css";
 import { useEffect, useMemo, useRef, useState } from "react";
 import L from "leaflet";
 import { Loader2, X } from "lucide-react";
@@ -116,7 +115,13 @@ function splitRouteWithConnector(
   };
 }
 
-const MAP_TILE_ATTRIBUTION = "© OpenStreetMap contributors";
+const MAP_TILE_ATTRIBUTION =
+  "© OpenStreetMap contributors © CARTO";
+
+const TILE_URL_LIGHT =
+  "https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png";
+const TILE_URL_DARK =
+  "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png";
 
 /** Plain-text Leaflet prefix — no default logo/flag link. */
 function applyNeutralMapAttribution(map: L.Map) {
@@ -291,10 +296,10 @@ export default function MapView({
       document.documentElement.classList.contains("dark"));
 
   const tileUrl = liteMode
-    ? "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+    ? TILE_URL_LIGHT
     : isDarkTheme
-      ? "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
-      : "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png";
+      ? TILE_URL_DARK
+      : TILE_URL_LIGHT;
 
   useEffect(() => {
     const container = mapHostRef.current;
