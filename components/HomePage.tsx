@@ -703,7 +703,7 @@ export function HomePage() {
 
                 <div
                   className={cn(
-                    "flex w-full min-w-0 max-w-full flex-col overflow-hidden rounded-brand border border-slate-200 bg-white/80 dark:border-white/10 dark:bg-surface/80",
+                    "flex w-full min-w-0 max-w-full flex-col overflow-hidden rounded-brand border border-slate-200 bg-white/80 dark:border-white/10 dark:bg-surface-card",
                     liteModeActive ? "min-h-[320px]" : "max-h-[520px] lg:max-h-[520px]",
                   )}
                 >
