@@ -72,7 +72,11 @@ const KNOWN_CITY_COORDINATES: Record<string, { lat: number; lng: number }> = {
   "saint petersburg": { lat: 59.9311, lng: 30.3609 },
   "санкт петербург": { lat: 59.9311, lng: 30.3609 },
   "новосибирск": { lat: 55.0084, lng: 82.9357 },
-  "novosibirsk": { lat: 55.0084, lng: 82.9357 },
+  novosibirsk: { lat: 55.0084, lng: 82.9357 },
+  "нью йорк": { lat: 40.7128, lng: -74.006 },
+  "нью йорке": { lat: 40.7128, lng: -74.006 },
+  "new york": { lat: 40.7128, lng: -74.006 },
+  "new york city": { lat: 40.7128, lng: -74.006 },
 };
 
 function lookupKnownCity(placeQuery: string): { lat: number; lng: number } | null {
@@ -117,9 +121,9 @@ function buildPlaceCandidates(placeQuery: string): string[] {
   }
 
   const hasCyrillic = /[\u0400-\u04FF]/.test(trimmed);
-  if (hasCyrillic) {
+  if (hasCyrillic && !lookupKnownCity(trimmed)) {
     for (const base of [...candidates]) {
-      if (!base.includes(",")) {
+      if (!base.includes(",") && !lookupKnownCity(base)) {
         candidates.add(`${base}, Россия`);
         candidates.add(`${base}, Russia`);
       }

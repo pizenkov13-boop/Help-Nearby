@@ -129,6 +129,7 @@ const STOP_WORDS = new Set([
   "ищу",
   "дай",
   "дайте",
+  "а",
   "в",
   "во",
   "in",
@@ -201,14 +202,20 @@ function isValidPlaceQuery(place: string): boolean {
   const tokens = place.split(" ").filter(Boolean);
   if (tokens.length === 0) return false;
 
-  for (const token of tokens) {
-    if (token.length < 4) return false;
-    if (INVALID_PLACE_TOKENS.has(token)) return false;
-    if (ALL_CATEGORY_KEYWORDS.has(token)) return false;
-    if (STOP_WORDS.has(token)) return false;
+  const meaningful = tokens.filter(
+    (token) =>
+      !STOP_WORDS.has(token) &&
+      !ALL_CATEGORY_KEYWORDS.has(token) &&
+      !INVALID_PLACE_TOKENS.has(token),
+  );
+
+  if (meaningful.length === 0) return false;
+
+  if (meaningful.length === 1) {
+    return meaningful[0]!.length >= 3;
   }
 
-  return true;
+  return meaningful.join(" ").length >= 4;
 }
 
 function tokensMatch(a: string, b: string): boolean {
@@ -474,19 +481,27 @@ export function isHelpSearchQuery(query: string): boolean {
   return Boolean(extractPlaceQuery(query) || detectCategory(query));
 }
 
-/** First search with a city → list from DB. Follow-ups → Groq. New city → list again. */
+/** Database list when user asks for help or names a place; Groq only for detail questions. */
 export function shouldUseDirectSearch(
   messages: ChatTurn[],
   currentQuery: string,
+  intent: SearchIntent,
 ): boolean {
-  const hasPriorAssistant = messages.some(
-    (message, index) =>
-      message.role === "assistant" && index < messages.length - 1,
-  );
+  if (intent.place || intent.category) return true;
 
-  if (extractPlaceQuery(currentQuery)) return true;
-  if (!hasPriorAssistant) return true;
-  return false;
+  const lastAssistant = [...messages]
+    .slice(0, -1)
+    .reverse()
+    .find((message) => message.role === "assistant");
+
+  if (!lastAssistant) return true;
+
+  const showedOrgList =
+    lastAssistant.content.includes("•") ||
+    lastAssistant.content.startsWith("Помощь") ||
+    lastAssistant.content.startsWith("Help nearby");
+
+  return !showedOrgList;
 }
 
 export function buildContextSearchQuery(
