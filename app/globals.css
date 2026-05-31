@@ -887,6 +887,7 @@ body {
       border-radius: 6px;
       display: block;
       box-shadow: 0 6px 16px -8px rgba(0,0,0,.55);
+      object-fit: contain;
     }
     .sdg-block .small { color: #94A3B8; font-size: 12px; margin: 10px auto 0; max-width: 600px; }
   
