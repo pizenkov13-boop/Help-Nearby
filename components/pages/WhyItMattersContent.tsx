@@ -1,99 +1,100 @@
-import { Heart } from "lucide-react";
+"use client";
+
 import { CitiesSection } from "@/components/home/CitiesSection";
-import { ImageHero } from "@/components/layout/ImageHero";
-
-const CRISIS_STATS = [
-  { value: "700M", label: "people live in extreme poverty" },
-  { value: "150M", label: "homeless people worldwide" },
-  { value: "2.3B", label: "people lack food security" },
-] as const;
-
-const PROBLEM_CARDS = [
-  {
-    title: "Hard to Find",
-    text: "People in crisis don't know where to turn. Resources are scattered and information is hard to find.",
-  },
-  {
-    title: "No Transparency",
-    text: "No operating hours, no real-time info. People waste time going to closed locations.",
-  },
-  {
-    title: "No Connection",
-    text: "Organizations and people in need are disconnected, making effective help harder to reach.",
-  },
-] as const;
-
-const SOLUTION_CARDS = [
-  {
-    title: "All in One Place",
-    text: "Every local assistance organization in one easy-to-use map interface.",
-  },
-  {
-    title: "Real-Time Info",
-    text: "See what's open now, get directions, call instantly.",
-  },
-  {
-    title: "Works Everywhere",
-    text: "7 languages, offline mode, optimized for 2G networks in crisis zones.",
-  },
-] as const;
+import { PageHead } from "@/components/layout/PageHead";
+import { useLanguage } from "@/lib/i18n/LanguageProvider";
 
 export function WhyItMattersContent() {
+  const { t } = useLanguage();
+
+  const crisisStats = [
+    { value: "700M", label: t("whyStat700m") },
+    { value: "150M", label: t("whyStat150m") },
+    { value: "2.3B", label: t("whyStat2_3b") },
+  ] as const;
+
+  const problemCards = [
+    {
+      title: t("whyProblem1Title"),
+      text: t("whyProblem1Text"),
+    },
+    {
+      title: t("whyProblem2Title"),
+      text: t("whyProblem2Text"),
+    },
+    {
+      title: t("whyProblem3Title"),
+      text: t("whyProblem3Text"),
+    },
+  ] as const;
+
+  const solutionCards = [
+    {
+      title: t("whySolution1Title"),
+      text: t("whySolution1Text"),
+      iconClass: "blue",
+      icon: (
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+          <circle cx="12" cy="12" r="9" />
+          <path d="M3 12h18" />
+          <ellipse cx="12" cy="12" rx="4" ry="9" />
+        </svg>
+      ),
+    },
+    {
+      title: t("whySolution2Title"),
+      text: t("whySolution2Text"),
+      iconClass: "purple",
+      icon: (
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+          <circle cx="12" cy="12" r="9" />
+          <path d="M12 7.5V12l3 1.8" />
+        </svg>
+      ),
+    },
+    {
+      title: t("whySolution3Title"),
+      text: t("whySolution3Text"),
+      iconClass: "green",
+      icon: (
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+          <path d="M2.5 9.5a13 13 0 0 1 19 0" />
+          <path d="M6.5 14a7.5 7.5 0 0 1 11 0" />
+          <circle cx="12" cy="19" r="1.3" fill="currentColor" stroke="none" />
+        </svg>
+      ),
+    },
+  ] as const;
+
   return (
     <>
-      <ImageHero
-        imageSrc="/images/why-it-matters.jpg"
-        title="Help Should Be Accessible To All"
-        subtitle="No one should face crisis alone — anywhere in the world."
-        badge={
-          <span className="hero-live">
-            <Heart
-              className="inline"
-              style={{ width: 14, height: 14, color: "#34d399" }}
-            />
-            Why It Matters
-          </span>
-        }
+      <PageHead
+        badge={t("whyPageTitle")}
+        title={t("whyPageTitle")}
+        subtitle={t("whyPageSubtitle")}
       />
 
       <section id="the-problem" className="page-section scroll-anchor">
         <div className="container">
-          <div className="hiw-head">
-            <h2>The Problem</h2>
-            <span className="underline" />
+          <div className="hiw-head no-rule">
+            <div className="alert-badge">
+              <span className="dot">!</span>
+            </div>
+            <h2>{t("navTheProblem")}</h2>
           </div>
 
           <div className="page-card-grid cols-3" style={{ marginTop: "2.5rem" }}>
-            {CRISIS_STATS.map((stat) => (
-              <div
-                key={stat.value}
-                className="page-card"
-                style={{
-                  textAlign: "center",
-                  background: "var(--gradient-brand)",
-                  border: "none",
-                }}
-              >
-                <p
-                  style={{
-                    margin: 0,
-                    fontSize: "2.25rem",
-                    fontWeight: 800,
-                    color: "#fff",
-                  }}
-                >
-                  {stat.value}
-                </p>
-                <p style={{ margin: "0.5rem 0 0", color: "rgba(255,255,255,.9)" }}>
-                  {stat.label}
-                </p>
+            {crisisStats.map((stat) => (
+              <div key={stat.value} className="page-card stat-card">
+                <p className="v">{stat.value}</p>
+                <p className="l">{stat.label}</p>
               </div>
             ))}
           </div>
 
           <div className="page-card-grid cols-3" style={{ marginTop: "1.5rem" }}>
-            {PROBLEM_CARDS.map((card) => (
-              <article key={card.title} className="page-card">
+            {problemCards.map((card) => (
+              <article key={card.title} className="page-card problem-card">
                 <h3>{card.title}</h3>
                 <p>{card.text}</p>
               </article>
@@ -105,12 +106,13 @@ export function WhyItMattersContent() {
       <section id="our-solution" className="page-section alt scroll-anchor">
         <div className="container">
           <div className="hiw-head">
-            <h2>Our Solution</h2>
+            <h2>{t("navOurSolution")}</h2>
             <span className="underline" />
           </div>
           <div className="page-card-grid cols-3" style={{ marginTop: "3rem" }}>
-            {SOLUTION_CARDS.map((card) => (
+            {solutionCards.map((card) => (
               <article key={card.title} className="page-card">
+                <div className={`card-icon ${card.iconClass}`}>{card.icon}</div>
                 <h3>{card.title}</h3>
                 <p>{card.text}</p>
               </article>

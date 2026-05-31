@@ -564,7 +564,6 @@ export function HomePage() {
       <Hero
         onFindHelp={handleFindHelp}
         isLocating={isLocating}
-        impactCount={impactCount}
         liteModeActive={liteModeActive}
       />
 
@@ -664,9 +663,11 @@ export function HomePage() {
                   </button>
                 </div>
 
-                {!liteModeActive && userLocation && (
+                {!liteModeActive && userLocation && mapExpanded && (
                   <div className="h-[400px] overflow-hidden rounded-brand border border-white/10 shadow-lg lg:h-[520px]">
                     <MapView
+                      key="full-map"
+                      mapVisible={mapExpanded}
                       organizations={filtered}
                       selected={selected}
                       userLocation={userLocation}
@@ -678,9 +679,11 @@ export function HomePage() {
                     />
                   </div>
                 )}
-                {liteModeActive && userLocation && liteMapVisible && (
+                {liteModeActive && userLocation && liteMapVisible && mapExpanded && (
                   <div className="h-[280px] overflow-hidden rounded-brand border border-white/10 shadow-lg lg:h-[320px]">
                     <MapView
+                      key="lite-map"
+                      mapVisible={mapExpanded}
                       organizations={filtered}
                       selected={selected}
                       userLocation={userLocation}

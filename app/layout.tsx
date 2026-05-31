@@ -41,6 +41,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
+      dir="ltr"
       suppressHydrationWarning
       className={cn(
         "dark font-sans bg-[#0a0f1f] text-slate-100",

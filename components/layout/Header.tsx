@@ -51,6 +51,7 @@ interface NavSectionMenuProps {
   href: string;
   label: string;
   items: { label: string; href: string }[];
+  toggleAriaLabel: string;
   active?: boolean;
   open: boolean;
   onToggle: () => void;
@@ -61,6 +62,7 @@ function NavSectionMenu({
   href,
   label,
   items,
+  toggleAriaLabel,
   active,
   open,
   onToggle,
@@ -79,7 +81,7 @@ function NavSectionMenu({
         <button
           type="button"
           className="dd-chevron"
-          aria-label={`${label} menu`}
+          aria-label={toggleAriaLabel}
           aria-expanded={open}
           onClick={(e) => {
             e.stopPropagation();
@@ -125,14 +127,14 @@ export function Header() {
   }, []);
 
   const aboutItems = [
-    { label: "Our Story", href: "/about#our-story" },
-    { label: "How It Works", href: "/about#how-it-works" },
+    { label: t("navOurStory"), href: "/about#our-story" },
+    { label: t("navHowItWorks"), href: "/about#how-it-works" },
   ];
 
   const whyItems = [
-    { label: "The Problem", href: "/why-it-matters#the-problem" },
-    { label: "Our Solution", href: "/why-it-matters#our-solution" },
-    { label: "Cities in Need", href: "/why-it-matters#cities-in-need" },
+    { label: t("navTheProblem"), href: "/why-it-matters#the-problem" },
+    { label: t("navOurSolution"), href: "/why-it-matters#our-solution" },
+    { label: t("navCitiesInNeed"), href: "/why-it-matters#cities-in-need" },
   ];
 
   const isAboutActive =
@@ -168,7 +170,7 @@ export function Header() {
     <header ref={headerRef} className={cn("header", scrolled && "scrolled")}>
       <div className="header-inner">
         <Link href="/" className="brand" onClick={closeAll}>
-          <BrandLogo />
+          <BrandLogo barId="hn-bar-nav" />
           <span>{t("brand")}</span>
         </Link>
 
@@ -198,6 +200,7 @@ export function Header() {
               href="/about"
               label={t("navAbout")}
               items={aboutItems}
+              toggleAriaLabel={t("openMenu")}
               active={isAboutActive}
               open={aboutOpen}
               onToggle={() => {
@@ -212,6 +215,7 @@ export function Header() {
               href="/why-it-matters"
               label={t("navWhy")}
               items={whyItems}
+              toggleAriaLabel={t("openMenu")}
               active={isWhyActive}
               open={whyOpen}
               onToggle={() => {
@@ -227,7 +231,7 @@ export function Header() {
               className={cn("nav-link", pathname === "/reviews" && "active")}
               onClick={closeAll}
             >
-              {t("navReviews")}
+              {t("navReviewsShort")}
             </Link>
           </nav>
 
@@ -235,6 +239,7 @@ export function Header() {
             <button
               type="button"
               className="lang-btn"
+              aria-label={t("languageMenu")}
               aria-haspopup="true"
               aria-expanded={langOpen}
               onClick={() => {
@@ -247,7 +252,7 @@ export function Header() {
               <span className="current">{currentLangLabel}</span>
               <ChevronIcon />
             </button>
-            <div className="lang-menu" role="menu" aria-label="Language">
+            <div className="lang-menu" role="menu" aria-label={t("languageMenu")}>
               {LANGUAGES.map(({ code, label }) => (
                 <button
                   key={code}
@@ -268,7 +273,7 @@ export function Header() {
           <button
             type="button"
             className="mobile-toggle"
-            aria-label="Open menu"
+            aria-label={t("openMenu")}
             onClick={() => setMenuOpen((o) => !o)}
           >
             <svg
@@ -304,11 +309,7 @@ export function Header() {
         <Link href="/" className="nav-link" onClick={closeAll}>
           {t("navHome")}
         </Link>
-        <Link
-          href="/about"
-          className={cn("nav-link m-section-link", isAboutActive && "active")}
-          onClick={closeAll}
-        >
+        <Link href="/about" className="nav-link" onClick={closeAll}>
           {t("navAbout")}
         </Link>
         {aboutItems.map((item) => (
@@ -321,11 +322,7 @@ export function Header() {
             {item.label}
           </AnchorNavLink>
         ))}
-        <Link
-          href="/why-it-matters"
-          className={cn("nav-link m-section-link", isWhyActive && "active")}
-          onClick={closeAll}
-        >
+        <Link href="/why-it-matters" className="nav-link" onClick={closeAll}>
           {t("navWhy")}
         </Link>
         {whyItems.map((item) => (
