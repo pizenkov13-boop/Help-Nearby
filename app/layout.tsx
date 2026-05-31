@@ -3,6 +3,7 @@ import { DM_Sans, Newsreader } from "next/font/google";
 import { AnalyticsLoader } from "@/components/providers/AnalyticsLoader";
 import { ServiceWorkerRegister } from "@/components/ServiceWorkerRegister";
 import { AppProviders } from "@/components/providers/AppProviders";
+import "leaflet/dist/leaflet.css";
 import "./globals.css";
 import { cn } from "@/lib/utils";
 

@@ -36,6 +36,38 @@ export async function nominatimSearch(
   return { lat, lng };
 }
 
+/** Reverse geocode coordinates to country — server-side only (Nominatim usage policy). */
+export async function nominatimReverse(
+  lat: number,
+  lng: number,
+): Promise<{ country: string; countryCode: string | null } | null> {
+  if (!Number.isFinite(lat) || !Number.isFinite(lng)) return null;
+
+  const url = new URL("https://nominatim.openstreetmap.org/reverse");
+  url.searchParams.set("lat", String(lat));
+  url.searchParams.set("lon", String(lng));
+  url.searchParams.set("format", "json");
+
+  const response = await fetch(url.toString(), {
+    headers: { "User-Agent": "HelpNearby/1.0 (help-nearby.app)" },
+    signal: AbortSignal.timeout(15_000),
+  });
+
+  if (!response.ok) return null;
+
+  const data = (await response.json()) as {
+    address?: { country?: string; country_code?: string };
+  };
+
+  const country = data.address?.country;
+  if (!country) return null;
+
+  return {
+    country,
+    countryCode: data.address?.country_code?.toUpperCase() ?? null,
+  };
+}
+
 async function photonSearch(
   query: string,
 ): Promise<{ lat: number; lng: number } | null> {

@@ -1,4 +1,4 @@
-import { forwardGeocode } from "@/lib/geocode";
+import { nominatimSearch } from "@/lib/nominatim.server";
 import { slugify } from "@/lib/orgUtils";
 import { getSupabase, isSupabaseFetchError } from "@/lib/supabase";
 import type { Category } from "@/lib/types";
@@ -80,7 +80,8 @@ export async function submitOrganization(
     };
   }
 
-  const coords = await forwardGeocode(address, city, country);
+  const query = [address, city, country].filter(Boolean).join(", ");
+  const coords = query ? await nominatimSearch(query) : null;
   const slug = await uniqueSlug(`${name}-${city}`);
 
   try {
