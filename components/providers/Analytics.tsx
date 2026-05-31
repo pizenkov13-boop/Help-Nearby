@@ -21,6 +21,7 @@ export function Analytics() {
           capture_pageview: false,
           capture_pageleave: true,
           disable_surveys: true,
+          advanced_disable_decide: true,
         });
         initialized.current = true;
       }

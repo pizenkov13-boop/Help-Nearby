@@ -1,4 +1,4 @@
-const CACHE_NAME = "help-nearby-v12";
+const CACHE_NAME = "help-nearby-v13";
 const OFFLINE_URL = "/offline.html";
 
 /** Static assets only — do not precache HTML routes (Next.js RSC pages are not cache-safe). */
@@ -54,7 +54,6 @@ function shouldBypassServiceWorker(request, url) {
   if (url.origin !== self.location.origin) return true;
   if (isApiRequest(url)) return true;
   if (isNextJsCodeAsset(url.pathname)) return true;
-  if (request.mode === "navigate") return false;
   if (url.pathname.startsWith("/_next/") && !url.pathname.startsWith("/_next/static/")) {
     return true;
   }
@@ -68,10 +67,13 @@ self.addEventListener("fetch", (event) => {
   const { request } = event;
   const url = new URL(request.url);
 
+  // HTML navigations must always hit the network first — never serve stale CSP/HTML.
+  if (request.mode === "navigate") {
+    event.respondWith(networkFirstNavigation(request));
+    return;
+  }
+
   if (shouldBypassServiceWorker(request, url)) {
-    if (request.mode === "navigate") {
-      event.respondWith(networkFirstNavigation(request));
-    }
     return;
   }
 
