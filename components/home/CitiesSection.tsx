@@ -56,7 +56,7 @@ export function CitiesSection() {
                 <h3>
                   {city.city}
                   {city.country && (
-                    <span className="city-meta"> · {city.country}</span>
+                    <span className="city-meta">{city.country}</span>
                   )}
                 </h3>
                 <span className={cn(badgeClass(city.urgency))}>
@@ -68,17 +68,19 @@ export function CitiesSection() {
                   <span className="icon">
                     <TrendIcon />
                   </span>
-                  <span>
-                    <strong>{t("cityIssueLabel")}</strong> {city.issue}
-                  </span>
+                  <div className="city-row-body">
+                    <span className="city-row-label">{t("cityIssueLabel")}</span>
+                    <p className="city-row-text">{city.issue}</p>
+                  </div>
                 </div>
                 <div className="city-row">
                   <span className="icon">
                     <HomeIcon />
                   </span>
-                  <span>
-                    <strong>{t("cityProblemLabel")}</strong> {city.problem}
-                  </span>
+                  <div className="city-row-body">
+                    <span className="city-row-label">{t("cityProblemLabel")}</span>
+                    <p className="city-row-text">{city.problem}</p>
+                  </div>
                 </div>
                 <p className="city-source">
                   <strong>{t("citySourceLabel")}</strong> {city.source}
