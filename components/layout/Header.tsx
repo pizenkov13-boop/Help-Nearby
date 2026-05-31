@@ -185,7 +185,6 @@ export function Header() {
                 openEmergencyHelp();
               }}
             >
-              <span className="dot" />
               {t("emergencyHelp")}
             </button>
 
@@ -306,7 +305,6 @@ export function Header() {
             openEmergencyHelp();
           }}
         >
-          <span className="dot" />
           {t("emergencyHelp")}
         </button>
         <Link href="/" className="nav-link" onClick={closeAll}>
