@@ -21,55 +21,38 @@ Whether someone is facing hunger, homelessness, or an emergency, Help Nearby tur
 | Feature | Description |
 |--------|-------------|
 | 🗺️ **Interactive map** | Real-time geolocation, street-level routing (OSRM), and organization markers |
-| 🌍 **Worldwide coverage** | OpenStreetMap data via the Overpass API — works in any city |
+| 🌍 **OSM coverage** | OpenStreetMap via Overpass API — any city where OSM has relevant organization data (coverage varies) |
 | 🆘 **Emergency Help** | One-tap access to **24/7** organizations (hospitals, pharmacies, ambulance stations) sorted by distance |
 | 🔍 **Smart search** | Real-time filter by name, city, or address — works with country & category filters |
 | 📞 **Call Now** | One-tap `tel:` links on mobile; phone number on hover on desktop |
 | 🤖 **AI assistant** | Powered by **Groq** (Llama 3.3 70B) — answers questions about nearby help |
 | 🌐 **7 languages** | English, Russian, Spanish, French, German, Chinese, Arabic (RTL support) |
-| 📱 **PWA** | Installable app with offline fallback page |
+| 📱 **PWA** | Installable via web manifest; service worker shows a static offline page if navigation fails (search, map, and APIs need a network connection) |
 | ⚡ **Lite mode** | Auto-enabled on slow networks (2G / slow-3G) or in low-connectivity regions — list-only, no map, loads fast |
 | ✅ **Verified organizations** | Community submissions reviewed by admin before showing a verified badge |
 | 💬 **Reviews** | User feedback with admin moderation |
-| 📊 **Impact counter** | Tracks “people found help today” from Call & Directions clicks |
+| 📊 **Impact counter** | Counts today’s Call and Directions button clicks (stored in Supabase); not a verified count of people who received aid |
 
 ---
 
 ## Impact
 
-- Users from **7+ countries** including Sudan, Nigeria, and South Korea  
-- **Real-time coverage** in any city with OpenStreetMap data  
-- Designed around **UN Sustainable Development Goals**:  
-  - **SDG 1** — No Poverty  
-  - **SDG 2** — Zero Hunger  
-  - **SDG 3** — Good Health and Well-being  
+- **OpenStreetMap coverage** — organization search works in any city where OSM has relevant POI data (quality varies by region)
+- **Impact counter** — displays the number of Call / Directions clicks recorded today in our database; it is a usage signal, not proof that someone received help
+- **Mission alignment** — the project references [UN Sustainable Development Goals](https://sdgs.un.org/) as guiding themes (SDG 1, 2, and 3 shown in the footer); this is not a UN partnership or endorsement
 
 ---
 
-## 🌍 Global Coverage — 193 Countries
+## Data sources
 
-Help Nearby provides verified humanitarian assistance coverage in **193 countries** worldwide through partnerships with UN agencies.
+Help Nearby uses two data layers:
 
-### Verified UN Organizations
-Every country capital has a verified UNHCR, WFP, or ICRC contact:
-- **UNHCR** hotlines — confirmed working numbers from help.unhcr.org
-- **WFP** offices — World Food Programme country contacts  
-- **ICRC** — International Red Cross emergency contacts
+1. **OpenStreetMap (Overpass API)** — covers any city worldwide where OSM has data on humanitarian organizations
+2. **A small verified network of organizations in our region**, manually checked by our team against official public sources
 
-### Crisis Zones — Enhanced Coverage
-| Country | Status | Cities covered |
-|---------|--------|----------------|
-| 🇸🇩 Sudan | 🔴 CRISIS | Khartoum, Port Sudan, Al-Fashir, Atbara |
-| 🇾🇪 Yemen | 🔴 CRISIS | Sanaa, Aden |
-| 🇦🇫 Afghanistan | 🔴 CRISIS | Kabul + Awaaz 24/7 hotline |
-| 🇵🇸 Gaza | 🔴 CRISIS | UNRWA + WFP verified |
-| 🇭🇹 Haiti | 🔴 CRISIS | Port-au-Prince, Cap-Haitien |
-| 🇨🇩 DRC | 🔴 CRISIS | Kinshasa |
+We do **not** have formal partnerships with UN agencies. Our partner is [Kindness Corporation](https://www.kindnesscorporation.ru/) (community organization).
 
-### Data Accuracy
-- ✅ Crisis zones — manually verified from official UN sources
-- 🌍 All other countries — real-time OpenStreetMap data
-- Numbers verified directly from help.unhcr.org and wfp.org
+Verified entries in Supabase are moderated through `/admin`. Everything else comes from live Overpass queries and is only as accurate as the underlying OSM tags.
 
 ---
 
@@ -77,7 +60,7 @@ Every country capital has a verified UNHCR, WFP, or ICRC contact:
 
 | Layer | Technology |
 |-------|------------|
-| Framework | [Next.js 14](https://nextjs.org/) (App Router), [TypeScript](https://www.typescriptlang.org/) |
+| Framework | [Next.js 16](https://nextjs.org/) (App Router), [TypeScript](https://www.typescriptlang.org/) |
 | Styling | [Tailwind CSS](https://tailwindcss.com/), [Radix UI](https://www.radix-ui.com/) |
 | Database | [Supabase](https://supabase.com/) (PostgreSQL + Row Level Security) |
 | Maps | [Leaflet](https://leafletjs.com/) + [react-leaflet](https://react-leaflet.js.org/), [OpenStreetMap](https://www.openstreetmap.org/) tiles |
@@ -99,7 +82,7 @@ Every country capital has a verified UNHCR, WFP, or ICRC contact:
 
 This project is submitted for the **Zayed Sustainability Prize 2026** — **Global High Schools** category.
 
-Help Nearby demonstrates how young innovators can use open data and accessible technology to address humanitarian needs at global scale with a lightweight, inclusive product.
+Help Nearby demonstrates how young innovators can use open data and accessible technology to help people find local assistance — with clear limits on what the data can guarantee.
 
 ---
 

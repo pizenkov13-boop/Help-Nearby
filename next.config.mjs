@@ -2,6 +2,7 @@
 const nextConfig = {
   transpilePackages: ["leaflet", "react-leaflet"],
   images: {
+    qualities: [100, 75],
     remotePatterns: [
       {
         protocol: "https",
