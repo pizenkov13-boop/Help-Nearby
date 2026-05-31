@@ -36,10 +36,22 @@ const nextConfig = {
           ]
         : [];
 
+    const documentHeaders =
+      process.env.NODE_ENV === "production"
+        ? [
+            {
+              key: "Cache-Control",
+              value: "no-cache, must-revalidate",
+            },
+            ...securityHeaders,
+          ]
+        : [];
+
     return [
       {
-        source: "/:path*",
-        headers: securityHeaders,
+        source:
+          "/((?!_next/static|_next/image|favicon.ico|icons|images|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico|js|css|woff2)$).*)",
+        headers: documentHeaders,
       },
       {
         source: "/sw.js",

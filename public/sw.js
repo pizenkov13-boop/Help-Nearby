@@ -1,4 +1,4 @@
-const CACHE_NAME = "help-nearby-v10";
+const CACHE_NAME = "help-nearby-v11";
 const OFFLINE_URL = "/offline.html";
 
 /** Static assets only — do not precache HTML routes (Next.js RSC pages are not cache-safe). */
@@ -31,9 +31,8 @@ self.addEventListener("activate", (event) => {
   event.waitUntil(
     (async () => {
       const keys = await caches.keys();
-      await Promise.all(
-        keys.filter((key) => key !== CACHE_NAME).map((key) => caches.delete(key)),
-      );
+      await Promise.all(keys.map((key) => caches.delete(key)));
+      await caches.open(CACHE_NAME);
       await self.clients.claim();
     })(),
   );
@@ -65,25 +64,6 @@ function shouldBypassServiceWorker(request, url) {
   return false;
 }
 
-function isCacheableResponse(response) {
-  return (
-    response &&
-    response.ok &&
-    response.status === 200 &&
-    response.type === "basic" &&
-    !(response.headers.get("Cache-Control") || "").includes("no-store")
-  );
-}
-
-async function safeCachePut(cache, request, response) {
-  try {
-    if (!isCacheableResponse(response)) return;
-    await cache.put(request, response.clone());
-  } catch {
-    /* QuotaExceededError, opaque body, or RSC stream — ignore */
-  }
-}
-
 self.addEventListener("fetch", (event) => {
   const { request } = event;
   const url = new URL(request.url);
@@ -92,11 +72,6 @@ self.addEventListener("fetch", (event) => {
     if (request.mode === "navigate") {
       event.respondWith(networkFirstNavigation(request));
     }
-    return;
-  }
-
-  if (url.pathname.startsWith("/_next/static/")) {
-    event.respondWith(networkFirstStatic(request));
     return;
   }
 
@@ -118,27 +93,19 @@ async function networkFirstNavigation(request) {
   }
 }
 
-async function networkFirstStatic(request) {
-  const cache = await caches.open(CACHE_NAME);
-
-  try {
-    const response = await fetch(request);
-    await safeCachePut(cache, request, response);
-    return response;
-  } catch {
-    const cached = await cache.match(request);
-    if (cached) return cached;
-    return new Response("", { status: 503 });
-  }
-}
-
 async function staleWhileRevalidate(request) {
   const cache = await caches.open(CACHE_NAME);
   const cached = await cache.match(request);
 
   const networkPromise = fetch(request)
     .then(async (response) => {
-      await safeCachePut(cache, request, response);
+      if (response.ok && response.status === 200 && response.type === "basic") {
+        try {
+          await cache.put(request, response.clone());
+        } catch {
+          /* ignore quota / opaque errors */
+        }
+      }
       return response;
     })
     .catch(() => null);
