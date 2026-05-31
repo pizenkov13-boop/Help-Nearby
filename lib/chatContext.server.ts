@@ -1,13 +1,22 @@
 import "server-only";
 
-import { NEARBY_RADIUS_METERS } from "@/lib/constants";
 import { fetchOrganizations } from "@/lib/data";
 import { mergeOrganizations } from "@/lib/mergeOrganizations";
-import { nominatimSearch } from "@/lib/nominatim.server";
-import { fetchNearbyOverpassOrganizations } from "@/lib/overpass.server";
+import { resolvePlaceCoordinates } from "@/lib/nominatim.server";
+import { fetchChatOverpassOrganizations } from "@/lib/overpass.server";
+import {
+  RADIUS_TIERS_STANDARD,
+  runSmartRadiusSearch,
+} from "@/lib/smartRadius";
 import type { Category, Organization, UserLocation } from "@/lib/types";
 
-const CHAT_SEARCH_RADIUS_METERS = NEARBY_RADIUS_METERS * 4;
+const CATEGORY_LABELS: Record<Category, string> = {
+  food: "еда",
+  shelter: "приют",
+  medical: "медицина",
+  clothing: "одежда",
+  volunteer: "волонтеры",
+};
 
 const CATEGORY_KEYWORDS: Record<Category, string[]> = {
   food: [
@@ -164,16 +173,17 @@ function tokensMatch(a: string, b: string): boolean {
   return a.slice(0, prefixLength) === b.slice(0, prefixLength);
 }
 
+function removeStopWords(text: string): string {
+  return text
+    .split(" ")
+    .filter((token) => token.length > 0 && !STOP_WORDS.has(token))
+    .join(" ");
+}
+
 /** City/country phrase from any language, e.g. "прокопьевске", "new york", "berlin". */
 export function extractPlaceQuery(query: string): string | null {
   const normalized = normalizeText(query);
-  let place = stripCategoryWords(normalized);
-
-  for (const stopWord of STOP_WORDS) {
-    place = place.replace(new RegExp(`\\b${stopWord}\\b`, "gu"), " ");
-  }
-
-  place = place.replace(/\s+/g, " ").trim();
+  const place = removeStopWords(stripCategoryWords(normalized)).replace(/\s+/g, " ").trim();
   if (place.length >= 3) return place;
   return null;
 }
@@ -293,19 +303,22 @@ async function fetchNearbyForCoordinates(
   location: UserLocation,
   category: Category | null,
 ): Promise<Organization[]> {
-  const [catalog, overpass] = await Promise.all([
-    fetchOrganizations(location, { radiusMeters: CHAT_SEARCH_RADIUS_METERS }),
-    fetchNearbyOverpassOrganizations(
-      location.lat,
-      location.lng,
-      CHAT_SEARCH_RADIUS_METERS,
-    ),
-  ]);
+  const fetchAtRadius = async (radiusMeters: number) => {
+    const [catalog, overpass] = await Promise.all([
+      fetchOrganizations(location, { radiusMeters }),
+      fetchChatOverpassOrganizations(location.lat, location.lng, radiusMeters),
+    ]);
+    const merged = mergeOrganizations(catalog, overpass);
+    const filtered = filterByCategory(merged, category);
+    return filtered.length > 0 ? filtered : merged;
+  };
 
-  return filterByCategory(
-    mergeOrganizations(catalog, overpass),
-    category,
-  ).slice(0, 8);
+  const result = await runSmartRadiusSearch(fetchAtRadius, {
+    liteMode: false,
+    autoExpand: true,
+  });
+
+  return result.organizations.slice(0, 8);
 }
 
 async function searchCatalogByText(
@@ -351,52 +364,142 @@ export async function findOrganizationsForChat(
   );
 
   if (placeQuery) {
-    const coords = await nominatimSearch(placeQuery);
+    const coords = await resolvePlaceCoordinates(placeQuery);
     if (coords) {
       const nearby = await fetchNearbyForCoordinates(coords, category);
       const merged = dedupeOrganizations([...catalogMatches, ...nearby]);
       if (merged.length > 0) return merged.slice(0, limit);
-      return nearby.slice(0, limit);
     }
   }
 
   return catalogMatches;
 }
 
-function formatOrganizationLine(org: Organization): string {
-  const parts = [
-    org.name,
-    org.category,
-    [org.city, org.country].filter(Boolean).join(", "),
-    org.address,
-    org.phone ? `tel: ${org.phone}` : "",
-    org.website ? `web: ${org.website}` : "",
-  ].filter(Boolean);
-
-  return `- ${parts.join(" | ")}`;
-}
-
-export function buildChatSystemPrompt(
+export function formatChatReply(
   organizations: Organization[],
   userQuery: string,
 ): string {
   const placeQuery = extractPlaceQuery(userQuery);
-  const orgBlock =
-    organizations.length > 0
-      ? organizations.map(formatOrganizationLine).join("\n")
-      : "(none matched in database)";
+  const isRussian = /[\u0400-\u04FF]/.test(userQuery);
 
-  return `You are the Help Nearby assistant. Answer using ONLY the ORGANIZATIONS list below.
+  if (organizations.length === 0) {
+    if (isRussian) {
+      return placeQuery
+        ? `В ${placeQuery} в базе пока ничего не найдено. Откройте карту на главной или нажмите «Экстренная помощь».`
+        : "Напишите город и тип помощи (еда, приют, медицина). Или откройте карту на главной.";
+    }
+    return placeQuery
+      ? `No locations found for ${placeQuery}. Open the map on the homepage or tap Emergency Help.`
+      : "Include a city and type of help (food, shelter, medical). Or use the map on the homepage.";
+  }
 
-STRICT RULES:
+  const header = isRussian
+    ? `Помощь${placeQuery ? ` — ${placeQuery}` : ""}:`
+    : `Help nearby${placeQuery ? ` — ${placeQuery}` : ""}:`;
+
+  const lines = organizations.slice(0, 5).map((org) => {
+    const details = [org.address, org.phone, org.website].filter(Boolean).join(", ");
+    return details ? `• ${org.name} — ${details}` : `• ${org.name}`;
+  });
+
+  return [header, ...lines].join("\n");
+}
+
+export interface ChatTurn {
+  role: "user" | "assistant";
+  content: string;
+}
+
+export function isHelpSearchQuery(query: string): boolean {
+  return Boolean(extractPlaceQuery(query) || detectCategory(query));
+}
+
+/** First search with a city → list from DB. Follow-ups → Groq. New city → list again. */
+export function shouldUseDirectSearch(
+  messages: ChatTurn[],
+  currentQuery: string,
+): boolean {
+  const hasPriorAssistant = messages.some(
+    (message, index) =>
+      message.role === "assistant" && index < messages.length - 1,
+  );
+
+  if (extractPlaceQuery(currentQuery)) return true;
+  if (!hasPriorAssistant) return true;
+  return false;
+}
+
+export function buildContextSearchQuery(
+  priorMessages: ChatTurn[],
+  currentQuery: string,
+): string {
+  const priorUserQueries = priorMessages
+    .filter((message) => message.role === "user")
+    .map((message) => message.content);
+
+  const lastSearch = [...priorUserQueries].reverse().find(isHelpSearchQuery);
+  if (!lastSearch) return currentQuery;
+
+  const place =
+    extractPlaceQuery(lastSearch) ?? extractPlaceQuery(currentQuery);
+  const category =
+    detectCategory(currentQuery) ?? detectCategory(lastSearch);
+
+  const parts: string[] = [];
+  if (category) parts.push(CATEGORY_LABELS[category]);
+  if (place) parts.push(place);
+
+  return parts.length > 0 ? parts.join(" ") : lastSearch;
+}
+
+function formatOrganizationsForPrompt(organizations: Organization[]): string {
+  if (organizations.length === 0) return "(none in database)";
+
+  return organizations
+    .slice(0, 8)
+    .map((org, index) => {
+      const parts = [
+        `${index + 1}. ${org.name}`,
+        org.category,
+        [org.city, org.country].filter(Boolean).join(", "),
+        org.address,
+        org.phone ? `tel: ${org.phone}` : "",
+        org.website ? `web: ${org.website}` : "",
+      ].filter(Boolean);
+      return parts.join(" | ");
+    })
+    .join("\n");
+}
+
+export function buildFollowUpSystemPrompt(
+  organizations: Organization[],
+  contextQuery: string,
+): string {
+  return `You are the Help Nearby assistant. The user already saw nearby help locations. Answer their follow-up using ONLY ORGANIZATIONS below.
+
+RULES:
 - Reply in the same language as the user.
-- Format: 1 short intro line (max 12 words) with the city/area if known, then bullet list (max 5 items).
-- Each bullet: **Name** — address, phone/website if available. One line only.
-- No greetings like "Hello". No closing phrases. No generic advice. No invented places.
-- If ORGANIZATIONS is empty: say no matches for ${placeQuery ?? "that place"} in our database, suggest opening the map on the homepage or Emergency button. Max 2 sentences.
+- Max 3 short sentences OR up to 4 bullet points.
+- No greetings, no filler, no invented addresses or phone numbers.
+- If the data does not contain the answer, say so in one sentence and suggest the homepage map.
+
+SEARCH CONTEXT: ${contextQuery}
 
 ORGANIZATIONS:
-${orgBlock}
+${formatOrganizationsForPrompt(organizations)}`;
+}
 
-USER QUERY: ${userQuery}`;
+export function formatFollowUpFallback(
+  userQuery: string,
+  organizations: Organization[],
+): string {
+  const isRussian = /[\u0400-\u04FF]/.test(userQuery);
+
+  if (detectCategory(userQuery) && organizations.length > 0) {
+    return formatChatReply(organizations, userQuery);
+  }
+
+  return isRussian
+    ? "Смотрите список выше. Для нового поиска напишите город и тип помощи."
+    : "See the list above. For a new search, include a city and type of help.";
 }

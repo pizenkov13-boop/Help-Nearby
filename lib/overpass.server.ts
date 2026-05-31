@@ -64,6 +64,36 @@ out center tags;
 `.trim();
 }
 
+/** Broader humanitarian search for AI chat (soup kitchens, charity shops, etc.). */
+export function buildChatOverpassQuery(
+  lat: number,
+  lng: number,
+  radius: number,
+): string {
+  const around = `(around:${radius},${lat},${lng})`;
+  return `
+[out:json][timeout:25];
+(
+  nwr["amenity"="food_bank"]${around};
+  nwr["amenity"="shelter"]${around};
+  nwr["amenity"="clinic"]${around};
+  nwr["amenity"="hospital"]${around};
+  nwr["amenity"="pharmacy"]${around};
+  nwr["amenity"="social_facility"]${around};
+  nwr["social_facility"="food_bank"]${around};
+  nwr["social_facility"="shelter"]${around};
+  nwr["social_facility"="soup_kitchen"]${around};
+  nwr["social_facility"="nutrition_center"]${around};
+  nwr["social_facility:for"="food"]${around};
+  nwr["shop"="charity"]${around};
+  nwr["charity"="yes"]${around};
+  nwr["amenity"="give_box"]${around};
+  nwr["amenity"="community_centre"]["community_centre:for"="social_facility"]${around};
+);
+out center tags;
+`.trim();
+}
+
 export function buildEmergencyOverpassQuery(
   lat: number,
   lng: number,
@@ -212,7 +242,10 @@ function mapTagsToCategory(tags: Record<string, string>): Category {
   if (
     amenity === "food_bank" ||
     social === "food_bank" ||
-    tags["social_facility:for"] === "food"
+    social === "soup_kitchen" ||
+    social === "nutrition_center" ||
+    tags["social_facility:for"] === "food" ||
+    amenity === "give_box"
   ) {
     return "food";
   }
@@ -402,6 +435,19 @@ export async function fetchNearbyOverpassOrganizations(
   radius = NEARBY_RADIUS_METERS,
 ): Promise<Organization[]> {
   return fetchOverpassOrganizations(lat, lng, radius, buildOverpassQuery);
+}
+
+export async function fetchChatOverpassOrganizations(
+  lat: number,
+  lng: number,
+  radius: number,
+): Promise<Organization[]> {
+  return fetchOverpassOrganizations(
+    lat,
+    lng,
+    radius,
+    buildChatOverpassQuery,
+  );
 }
 
 export async function fetchEmergencyOverpassOrganizations(
