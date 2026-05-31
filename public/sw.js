@@ -1,4 +1,4 @@
-const CACHE_NAME = "help-nearby-v5";
+const CACHE_NAME = "help-nearby-v7";
 const OFFLINE_URL = "/offline.html";
 
 const PRECACHE_URLS = [
