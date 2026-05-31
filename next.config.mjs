@@ -49,6 +49,10 @@ const nextConfig = {
 
     return [
       {
+        source: "/",
+        headers: documentHeaders,
+      },
+      {
         source:
           "/((?!_next/static|_next/image|favicon.ico|icons|images|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico|js|css|woff2)$).*)",
         headers: documentHeaders,
