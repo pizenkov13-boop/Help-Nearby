@@ -1,13 +1,12 @@
 import { NextResponse } from "next/server";
 import {
-  buildContextSearchQuery,
   buildFollowUpSystemPrompt,
   findOrganizationsForChat,
   formatChatReply,
   formatFollowUpFallback,
   shouldUseDirectSearch,
 } from "@/lib/chatContext.server";
-import { parseSearchIntent } from "@/lib/chatIntent.server";
+import { resolveSearchIntent } from "@/lib/chatIntent.server";
 import { getGroqApiKey } from "@/lib/env.server";
 
 export const runtime = "nodejs";
@@ -83,11 +82,13 @@ export async function POST(request: Request) {
     .find((message) => message.role === "user");
 
   const userQuery = lastUserMessage?.content ?? "";
+  const priorMessages = validMessages.slice(0, -1);
   const apiKey = getGroqApiKey();
 
   try {
-    if (shouldUseDirectSearch(validMessages, userQuery)) {
-      const intent = await parseSearchIntent(userQuery, apiKey);
+    const intent = await resolveSearchIntent(priorMessages, userQuery, apiKey);
+
+    if (shouldUseDirectSearch(validMessages, userQuery, intent)) {
       const organizations = await findOrganizationsForChat(
         userQuery,
         6,
@@ -98,13 +99,10 @@ export async function POST(request: Request) {
       });
     }
 
-    const priorMessages = validMessages.slice(0, -1);
-    const contextQuery = buildContextSearchQuery(priorMessages, userQuery);
-    const contextIntent = await parseSearchIntent(contextQuery, apiKey);
     const organizations = await findOrganizationsForChat(
-      contextQuery,
+      userQuery,
       6,
-      contextIntent,
+      intent,
     );
 
     if (!apiKey) {
@@ -113,7 +111,14 @@ export async function POST(request: Request) {
       });
     }
 
-    const systemPrompt = buildFollowUpSystemPrompt(organizations, contextQuery);
+    const contextLabel = [intent.category, intent.place]
+      .filter(Boolean)
+      .join(", ");
+
+    const systemPrompt = buildFollowUpSystemPrompt(
+      organizations,
+      contextLabel || userQuery,
+    );
     const reply = await askGroqFollowUp(systemPrompt, validMessages, apiKey);
 
     if (!reply) {
