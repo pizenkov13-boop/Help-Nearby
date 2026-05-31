@@ -1,6 +1,8 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   transpilePackages: ["leaflet", "react-leaflet"],
+  // Next.js 16 defaults to Turbopack; empty config acknowledges custom webpack (dev only).
+  turbopack: {},
   images: {
     qualities: [100, 75],
     remotePatterns: [
