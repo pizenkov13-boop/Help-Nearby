@@ -1,4 +1,4 @@
-import { readFile, writeFile, mkdir } from "node:fs/promises";
+import { readFile, writeFile, mkdir, copyFile } from "node:fs/promises";
 import path from "node:path";
 import sharp from "sharp";
 import toIco from "to-ico";
@@ -7,6 +7,7 @@ const root = process.cwd();
 const logoPath = path.join(root, "public", "images", "logo.svg");
 const publicDir = path.join(root, "public");
 const iconsDir = path.join(publicDir, "icons");
+const appDir = path.join(root, "app");
 
 const sizes = [
   { name: "favicon-16x16.png", size: 16, dir: publicDir },
@@ -40,3 +41,8 @@ for (const { name, size, dir } of sizes) {
 const faviconIco = await toIco([pngBySize.get(16), pngBySize.get(32)]);
 await writeFile(path.join(publicDir, "favicon.ico"), faviconIco);
 console.log("Wrote public/favicon.ico");
+
+await copyFile(path.join(publicDir, "favicon.ico"), path.join(appDir, "favicon.ico"));
+await copyFile(path.join(publicDir, "favicon.png"), path.join(appDir, "icon.png"));
+await copyFile(path.join(iconsDir, "icon-192.png"), path.join(appDir, "apple-icon.png"));
+console.log("Copied favicon.ico, icon.png, apple-icon.png to app/");
