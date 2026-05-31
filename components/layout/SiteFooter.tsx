@@ -111,7 +111,7 @@ export function SiteFooter() {
             // eslint-disable-next-line @next/next/no-img-element
             <img
               key={goal.id}
-              src={`/images/sdg/${goal.id}.png`}
+              src={`/images/sdg/${goal.id}.svg`}
               alt={goal.label}
               width={76}
               height={76}
