@@ -218,13 +218,6 @@ function isValidPlaceQuery(place: string): boolean {
   return meaningful.join(" ").length >= 4;
 }
 
-function tokensMatch(a: string, b: string): boolean {
-  if (!a || !b) return false;
-  if (a.includes(b) || b.includes(a)) return true;
-  const prefixLength = Math.min(a.length, b.length, 6);
-  return a.slice(0, prefixLength) === b.slice(0, prefixLength);
-}
-
 function removeStopWords(text: string): string {
   return text
     .split(" ")
@@ -243,95 +236,12 @@ export function extractPlaceQuery(query: string): string | null {
   return place;
 }
 
-function orgMatchesKnownPlaces(
-  org: Organization,
-  knownPlaces: string[],
-): boolean {
-  if (knownPlaces.length === 0) return false;
-
-  const city = normalizeText(org.city);
-  const country = normalizeText(org.country);
-  const address = normalizeText(org.address);
-
-  return knownPlaces.some(
-    (place) =>
-      tokensMatch(city, place) ||
-      tokensMatch(country, place) ||
-      tokensMatch(address, place),
-  );
-}
-
-function orgMatchesPlaceQuery(org: Organization, placeQuery: string): boolean {
-  const haystack = normalizeText(
-    [org.city, org.address, org.country, org.name].filter(Boolean).join(" "),
-  );
-  if (!haystack) return false;
-
-  if (tokensMatch(haystack, placeQuery)) return true;
-
-  return placeQuery
-    .split(" ")
-    .filter((token) => token.length >= 3)
-    .some((token) =>
-      haystack.split(" ").some((part) => tokensMatch(part, token)),
-    );
-}
-
 function filterByCategory(
   organizations: Organization[],
   category: Category | null,
 ): Organization[] {
   if (!category) return organizations;
   return organizations.filter((org) => org.categories.includes(category));
-}
-
-function dedupeOrganizations(organizations: Organization[]): Organization[] {
-  const seen = new Set<string>();
-  const unique: Organization[] = [];
-
-  for (const org of organizations) {
-    const key = `${org.name}|${org.lat}|${org.lng}`;
-    if (seen.has(key)) continue;
-    seen.add(key);
-    unique.push(org);
-  }
-
-  return unique;
-}
-
-function scoreOrganization(
-  org: Organization,
-  placeQuery: string | null,
-  knownPlaces: string[],
-  category: Category | null,
-): number {
-  let score = 0;
-
-  if (category && org.categories.includes(category)) score += 5;
-  if (org.verified) score += 2;
-
-  const city = normalizeText(org.city);
-  const address = normalizeText(org.address);
-  const country = normalizeText(org.country);
-
-  for (const place of knownPlaces) {
-    if (city && tokensMatch(city, place)) score += 14;
-    if (address && tokensMatch(address, place)) score += 10;
-    if (country && tokensMatch(country, place)) score += 6;
-  }
-
-  if (placeQuery) {
-    if (city && tokensMatch(city, placeQuery)) score += 12;
-    if (address && tokensMatch(address, placeQuery)) score += 8;
-    if (country && tokensMatch(country, placeQuery)) score += 4;
-
-    for (const token of placeQuery.split(" ").filter((part) => part.length >= 3)) {
-      if (city && tokensMatch(city, token)) score += 10;
-      if (address && tokensMatch(address, token)) score += 6;
-    }
-  }
-
-  return score;
 }
 
 async function fetchNearbyForCoordinates(
@@ -357,33 +267,6 @@ async function fetchNearbyForCoordinates(
   return result.organizations.slice(0, 8);
 }
 
-async function searchCatalogByPlace(
-  allOrganizations: Organization[],
-  placeQuery: string,
-  category: Category | null,
-  limit: number,
-): Promise<Organization[]> {
-  const normalizedPlace = normalizeText(placeQuery);
-  const knownPlaces = [normalizedPlace];
-
-  return allOrganizations
-    .map((org) => ({
-      org,
-      score: scoreOrganization(org, placeQuery, knownPlaces, category),
-    }))
-    .filter(({ org, score }) => {
-      if (score <= 0) return false;
-      if (category && !org.categories.includes(category)) return false;
-      return (
-        orgMatchesKnownPlaces(org, knownPlaces) ||
-        orgMatchesPlaceQuery(org, placeQuery)
-      );
-    })
-    .sort((a, b) => b.score - a.score)
-    .slice(0, limit)
-    .map(({ org }) => org);
-}
-
 export async function findOrganizationsForChat(
   query: string,
   limit = 6,
@@ -400,22 +283,12 @@ export async function findOrganizationsForChat(
     return [];
   }
 
-  // Source 1: Supabase — match city / address / country by name
-  const allOrganizations = await fetchOrganizations();
-  const catalogMatches = await searchCatalogByPlace(
-    allOrganizations,
-    placeQuery,
-    category,
-    limit,
-  );
-
-  // Source 2: Supabase (radius) + OpenStreetMap — geocode city, search nearby
   const coords = await resolvePlaceCoordinates(placeQuery);
-  const geoMatches = coords
-    ? await fetchNearbyForCoordinates(coords, category)
-    : [];
+  if (!coords) {
+    return [];
+  }
 
-  return dedupeOrganizations([...catalogMatches, ...geoMatches]).slice(0, limit);
+  return (await fetchNearbyForCoordinates(coords, category)).slice(0, limit);
 }
 
 export function formatChatReply(
