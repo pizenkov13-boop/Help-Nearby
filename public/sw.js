@@ -1,37 +1,41 @@
-const CACHE_NAME = "help-nearby-v7";
+const CACHE_NAME = "help-nearby-v9";
 const OFFLINE_URL = "/offline.html";
 
+/** Static assets only — do not precache HTML routes (Next.js RSC pages are not cache-safe). */
 const PRECACHE_URLS = [
-  "/",
-  "/about",
-  "/why-it-matters",
-  "/reviews",
-  "/submit",
-  "/manifest.json",
   OFFLINE_URL,
+  "/manifest.json",
+  "/favicon.ico",
+  "/icons/icon-192.png",
 ];
 
 self.addEventListener("install", (event) => {
   event.waitUntil(
-    caches
-      .open(CACHE_NAME)
-      .then((cache) => cache.addAll(PRECACHE_URLS))
-      .then(() => self.skipWaiting()),
+    (async () => {
+      const cache = await caches.open(CACHE_NAME);
+      await Promise.all(
+        PRECACHE_URLS.map(async (url) => {
+          try {
+            await cache.add(url);
+          } catch {
+            /* skip missing assets during install */
+          }
+        }),
+      );
+      await self.skipWaiting();
+    })(),
   );
 });
 
 self.addEventListener("activate", (event) => {
   event.waitUntil(
-    caches
-      .keys()
-      .then((keys) =>
-        Promise.all(
-          keys
-            .filter((key) => key !== CACHE_NAME)
-            .map((key) => caches.delete(key)),
-        ),
-      )
-      .then(() => self.clients.claim()),
+    (async () => {
+      const keys = await caches.keys();
+      await Promise.all(
+        keys.filter((key) => key !== CACHE_NAME).map((key) => caches.delete(key)),
+      );
+      await self.clients.claim();
+    })(),
   );
 });
 
@@ -39,54 +43,52 @@ function isApiRequest(url) {
   return url.pathname.startsWith("/api/");
 }
 
-function isSupabaseRequest(url) {
-  return url.hostname.includes("supabase.co");
+function shouldBypassServiceWorker(request, url) {
+  if (request.method !== "GET") return true;
+  if (url.origin !== self.location.origin) return true;
+  if (isApiRequest(url)) return true;
+  if (request.mode === "navigate") return false;
+  if (url.pathname.startsWith("/_next/") && !url.pathname.startsWith("/_next/static/")) {
+    return true;
+  }
+  if (request.headers.get("RSC") === "1") return true;
+  if (request.headers.get("Next-Router-Prefetch") === "1") return true;
+  if (request.headers.get("Next-Router-State-Tree")) return true;
+  return false;
 }
 
-function isExternalDataRequest(url) {
+function isCacheableResponse(response) {
   return (
-    url.hostname.includes("humdata.org") ||
-    url.hostname.includes("humanitarianoutcomes.org") ||
-    url.hostname.includes("openstreetmap.org")
+    response &&
+    response.ok &&
+    response.status === 200 &&
+    response.type === "basic" &&
+    !(response.headers.get("Cache-Control") || "").includes("no-store")
   );
+}
+
+async function safeCachePut(cache, request, response) {
+  try {
+    if (!isCacheableResponse(response)) return;
+    await cache.put(request, response.clone());
+  } catch {
+    /* QuotaExceededError, opaque body, or RSC stream — ignore */
+  }
 }
 
 self.addEventListener("fetch", (event) => {
   const { request } = event;
-
-  if (request.method !== "GET") return;
-
   const url = new URL(request.url);
 
-  if (url.origin !== self.location.origin) {
-    if (isSupabaseRequest(url) || isExternalDataRequest(url)) {
-      return;
+  if (shouldBypassServiceWorker(request, url)) {
+    if (request.mode === "navigate") {
+      event.respondWith(networkFirstNavigation(request));
     }
-  }
-
-  if (isApiRequest(url)) {
-    return;
-  }
-
-  if (request.mode === "navigate") {
-    event.respondWith(networkFirstNavigation(request));
     return;
   }
 
   if (url.pathname.startsWith("/_next/static/")) {
-    event.respondWith(networkFirstAsset(request));
-    return;
-  }
-
-  if (
-    url.pathname.startsWith("/_next/") ||
-    url.pathname.startsWith("/icons/") ||
-    url.pathname.endsWith(".css") ||
-    url.pathname.endsWith(".js") ||
-    url.pathname.endsWith(".woff") ||
-    url.pathname.endsWith(".woff2")
-  ) {
-    event.respondWith(staleWhileRevalidate(request));
+    event.respondWith(cacheFirstStatic(request));
     return;
   }
 
@@ -94,18 +96,10 @@ self.addEventListener("fetch", (event) => {
 });
 
 async function networkFirstNavigation(request) {
-  const cache = await caches.open(CACHE_NAME);
-
   try {
-    const response = await fetch(request);
-    if (response.ok) {
-      cache.put(request, response.clone());
-    }
-    return response;
+    return await fetch(request);
   } catch {
-    const cached = await cache.match(request);
-    if (cached) return cached;
-
+    const cache = await caches.open(CACHE_NAME);
     const offline = await cache.match(OFFLINE_URL);
     if (offline) return offline;
 
@@ -116,32 +110,14 @@ async function networkFirstNavigation(request) {
   }
 }
 
-async function networkFirstAsset(request) {
-  const cache = await caches.open(CACHE_NAME);
-
-  try {
-    const response = await fetch(request);
-    if (response.ok) {
-      cache.put(request, response.clone());
-    }
-    return response;
-  } catch {
-    const cached = await cache.match(request);
-    if (cached) return cached;
-    return new Response("", { status: 503 });
-  }
-}
-
-async function cacheFirst(request) {
+async function cacheFirstStatic(request) {
   const cache = await caches.open(CACHE_NAME);
   const cached = await cache.match(request);
   if (cached) return cached;
 
   try {
     const response = await fetch(request);
-    if (response.ok) {
-      cache.put(request, response.clone());
-    }
+    await safeCachePut(cache, request, response);
     return response;
   } catch {
     return new Response("", { status: 503 });
@@ -152,15 +128,18 @@ async function staleWhileRevalidate(request) {
   const cache = await caches.open(CACHE_NAME);
   const cached = await cache.match(request);
 
-  const fetchPromise = fetch(request)
-    .then((response) => {
-      if (response.ok) {
-        cache.put(request, response.clone());
-      }
+  const networkPromise = fetch(request)
+    .then(async (response) => {
+      await safeCachePut(cache, request, response);
       return response;
     })
     .catch(() => null);
 
-  const network = await fetchPromise;
-  return cached || network || new Response("", { status: 503 });
+  if (cached) {
+    void networkPromise;
+    return cached;
+  }
+
+  const network = await networkPromise;
+  return network || new Response("", { status: 503 });
 }

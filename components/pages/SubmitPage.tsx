@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useState } from "react";
 import { Building2, CheckCircle2, Loader2 } from "lucide-react";
@@ -18,9 +18,9 @@ const CATEGORY_LABELS: Record<Category, string> = {
 };
 
 const inputClass =
-  "w-full rounded-lg border border-gray-700 bg-gray-950 px-3 py-2.5 text-gray-100 placeholder:text-gray-500 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500";
+  "w-full rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-slate-900 placeholder:text-slate-400 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-700 dark:bg-gray-950 dark:text-gray-100 dark:placeholder:text-gray-500";
 
-const labelClass = "mb-1.5 block text-sm font-medium text-gray-300";
+const labelClass = "mb-1.5 block text-sm font-medium text-slate-600 dark:text-gray-300";
 
 interface FormState {
   name: string;
@@ -94,19 +94,18 @@ export function SubmitPage() {
   };
 
   return (
-    <div className="dark">
-      <SiteLayout>
+    <SiteLayout>
         <PageHero
           title="Submit an Organization"
           subtitle="Add a local assistance organization to Help Nearby. Submissions are reviewed before appearing as verified."
         />
 
-        <section className="bg-gray-950 px-4 py-12 sm:px-6 lg:px-8">
+        <section className="bg-surface px-4 py-12 sm:px-6 lg:px-8">
           <div className="mx-auto max-w-2xl">
-            <div className="rounded-2xl border border-gray-800 bg-gray-900/80 p-6 shadow-xl sm:p-8">
-              <div className="mb-6 flex items-center gap-2 text-emerald-400">
+            <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-xl dark:border-gray-800 dark:bg-gray-900/80 sm:p-8">
+              <div className="mb-6 flex items-center gap-2 text-teal-600 dark:text-emerald-400">
                 <Building2 className="h-5 w-5" />
-                <span className="font-medium text-white">Organization details</span>
+                <span className="font-medium text-slate-900 dark:text-white">Organization details</span>
               </div>
 
               {submitted ? (
@@ -114,18 +113,18 @@ export function SubmitPage() {
                   className="flex flex-col items-center gap-3 rounded-lg border border-emerald-500/30 bg-emerald-500/10 px-4 py-8 text-center"
                   role="status"
                 >
-                  <CheckCircle2 className="h-12 w-12 text-emerald-400" />
-                  <p className="text-lg font-semibold text-emerald-300">
+                  <CheckCircle2 className="h-12 w-12 text-teal-600 dark:text-emerald-400" />
+                  <p className="text-lg font-semibold text-teal-800 dark:text-emerald-300">
                     Thank you! Your organization has been submitted.
                   </p>
-                  <p className="max-w-md text-sm text-gray-400">
+                  <p className="max-w-md text-sm text-slate-600 dark:text-gray-400">
                     Our team will review it shortly. Once approved, it will appear on the map
                     with a verified badge.
                   </p>
                   <Button
                     type="button"
                     variant="outline"
-                    className="mt-2 border-gray-600 bg-transparent text-gray-200 hover:bg-gray-800"
+                    className="mt-2 border-slate-300 bg-transparent text-slate-700 hover:bg-slate-50 dark:border-gray-600 dark:text-gray-200 dark:hover:bg-gray-800"
                     onClick={() => setSubmitted(false)}
                   >
                     Submit another
@@ -314,7 +313,6 @@ export function SubmitPage() {
           </div>
         </section>
       </SiteLayout>
-    </div>
   );
 }
 

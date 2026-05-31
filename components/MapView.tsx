@@ -1,5 +1,6 @@
 "use client";
 
+import { useTheme } from "next-themes";
 import "leaflet/dist/leaflet.css";
 import { useEffect, useMemo, useRef, useState } from "react";
 import L from "leaflet";
@@ -206,6 +207,7 @@ export default function MapView({
   mapVisible = true,
 }: MapViewProps) {
   const { t } = useLanguage();
+  const { resolvedTheme } = useTheme();
   const mapHostRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<L.Map | null>(null);
   const markersLayerRef = useRef<L.LayerGroup | null>(null);
@@ -282,9 +284,17 @@ export default function MapView({
     [userLocation.lat, userLocation.lng],
   );
 
+  const isDarkTheme =
+    resolvedTheme === "dark" ||
+    (resolvedTheme === undefined &&
+      typeof document !== "undefined" &&
+      document.documentElement.classList.contains("dark"));
+
   const tileUrl = liteMode
     ? "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-    : "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png";
+    : isDarkTheme
+      ? "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
+      : "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png";
 
   useEffect(() => {
     const container = mapHostRef.current;
@@ -441,7 +451,7 @@ export default function MapView({
       )}
 
       {geocoding && (
-        <div className="pointer-events-none absolute bottom-3 left-3 z-[1000] rounded-lg bg-gray-900/90 px-3 py-1.5 text-xs text-gray-300">
+        <div className="pointer-events-none absolute bottom-3 left-3 z-[1000] rounded-lg bg-white/95 px-3 py-1.5 text-xs text-slate-600 shadow dark:bg-gray-900/90 dark:text-gray-300">
           {t("mapRefiningLocations")}
         </div>
       )}
@@ -451,7 +461,7 @@ export default function MapView({
           type="button"
           onClick={onClearRoute}
           disabled={routeLoading}
-          className="absolute right-3 top-3 z-[1000] flex h-10 w-10 items-center justify-center rounded-full border border-gray-600/80 bg-gray-900/95 text-gray-200 shadow-lg backdrop-blur-sm transition-colors hover:bg-gray-800 hover:text-white disabled:opacity-60"
+          className="absolute right-3 top-3 z-[1000] flex h-10 w-10 items-center justify-center rounded-full border border-slate-200 bg-white/95 text-slate-700 shadow-lg backdrop-blur-sm transition-colors hover:bg-slate-50 hover:text-slate-900 disabled:opacity-60 dark:border-gray-600/80 dark:bg-gray-900/95 dark:text-gray-200 dark:hover:bg-gray-800 dark:hover:text-white"
           aria-label={t("routeClear")}
         >
           {routeLoading ? (

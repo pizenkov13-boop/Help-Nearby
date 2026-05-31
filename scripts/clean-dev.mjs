@@ -40,6 +40,7 @@ for (let attempt = 0; attempt < 5; attempt++) {
       maxRetries: 5,
       retryDelay: 300,
     });
+    rmSync(".turbo", { recursive: true, force: true });
     break;
   } catch (err) {
     if (attempt === 4) throw err;

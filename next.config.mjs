@@ -11,6 +11,13 @@ const nextConfig = {
       },
     ],
   },
+  webpack: (config, { dev }) => {
+    if (dev) {
+      // Avoid eval-based source maps — fixes "CSP blocks eval" console warnings in dev.
+      config.devtool = "cheap-module-source-map";
+    }
+    return config;
+  },
   async headers() {
     return [
       {

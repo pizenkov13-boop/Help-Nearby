@@ -25,14 +25,14 @@ export function SearchBar({ value, onChange }: SearchBarProps) {
           value={value}
           onChange={(e) => onChange(e.target.value)}
           placeholder={t("searchPlaceholder")}
-          className="w-full rounded-brand border border-white/10 bg-surface py-2.5 pl-10 pr-10 text-sm text-slate-200 placeholder:text-slate-500 focus:border-brand-blue focus:outline-none focus:ring-1 focus:ring-brand-blue"
+          className="w-full rounded-brand border border-slate-200 bg-white py-2.5 pl-10 pr-10 text-sm text-slate-900 placeholder:text-slate-400 focus:border-brand-blue focus:outline-none focus:ring-1 focus:ring-brand-blue dark:border-white/10 dark:bg-surface dark:text-slate-200 dark:placeholder:text-slate-500"
           autoComplete="off"
         />
         {hasValue && (
           <button
             type="button"
             onClick={() => onChange("")}
-            className="absolute right-2 top-1/2 -translate-y-1/2 rounded-md p-1 text-gray-400 transition-colors hover:bg-gray-700 hover:text-white"
+            className="absolute right-2 top-1/2 -translate-y-1/2 rounded-md p-1 text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-700 dark:hover:bg-gray-700 dark:hover:text-white"
             aria-label={t("searchClear")}
           >
             <X className="h-4 w-4" />

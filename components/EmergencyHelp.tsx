@@ -119,24 +119,24 @@ export function EmergencyHelp() {
             onClick={handleClose}
           />
 
-          <div className="relative z-10 flex max-h-[min(85vh,720px)] w-full max-w-lg flex-col overflow-hidden rounded-2xl border-2 border-red-500/60 bg-gray-900 shadow-2xl shadow-red-900/30">
-            <div className="flex items-start justify-between gap-3 border-b border-red-500/30 bg-red-600/20 px-4 py-4 sm:px-5">
+          <div className="relative z-10 flex max-h-[min(85vh,720px)] w-full max-w-lg flex-col overflow-hidden rounded-2xl border-2 border-red-500/60 bg-white shadow-2xl shadow-red-900/20 dark:bg-gray-900 dark:shadow-red-900/30">
+            <div className="flex items-start justify-between gap-3 border-b border-red-500/30 bg-red-50 px-4 py-4 dark:bg-red-600/20 sm:px-5">
               <div>
                 <h2
                   id="emergency-dialog-title"
-                  className="flex items-center gap-2 text-lg font-bold text-white sm:text-xl"
+                  className="flex items-center gap-2 text-lg font-bold text-red-900 dark:text-white sm:text-xl"
                 >
-                  <LifeBuoy className="h-5 w-5 shrink-0 text-red-300" aria-hidden />
+                  <LifeBuoy className="h-5 w-5 shrink-0 text-red-600 dark:text-red-300" aria-hidden />
                   {t("emergencyTitle")}
                 </h2>
-                <p className="mt-1 text-sm text-red-100/90">
+                <p className="mt-1 text-sm text-red-800/90 dark:text-red-100/90">
                   {t("emergencySubtitle")}
                 </p>
               </div>
               <button
                 type="button"
                 onClick={handleClose}
-                className="shrink-0 rounded-lg p-2 text-red-100 transition-colors hover:bg-red-500/30 hover:text-white"
+                className="shrink-0 rounded-lg p-2 text-red-700 transition-colors hover:bg-red-100 hover:text-red-900 dark:text-red-100 dark:hover:bg-red-500/30 dark:hover:text-white"
                 aria-label={t("emergencyClose")}
               >
                 <X className="h-5 w-5" />
@@ -145,7 +145,7 @@ export function EmergencyHelp() {
 
             <div className="flex-1 overflow-y-auto px-4 py-4 sm:px-5">
               {isBusy && (
-                <div className="flex flex-col items-center justify-center gap-3 py-12 text-gray-300">
+                <div className="flex flex-col items-center justify-center gap-3 py-12 text-slate-600 dark:text-gray-300">
                   <Loader2 className="h-8 w-8 animate-spin text-red-400" />
                   <p className="text-sm">
                     {state === "locating"
@@ -157,7 +157,7 @@ export function EmergencyHelp() {
 
               {!isBusy && errorMessage && (
                 <div className="space-y-4 py-6 text-center">
-                  <p className="text-sm text-red-300" role="alert">
+                  <p className="text-sm text-red-700 dark:text-red-300" role="alert">
                     {errorMessage}
                   </p>
                   <button
@@ -173,7 +173,7 @@ export function EmergencyHelp() {
               {!isBusy && !errorMessage && state === "ready" && (
                 <>
                   {organizations.length === 0 ? (
-                    <p className="py-10 text-center text-sm text-gray-400">
+                    <p className="py-10 text-center text-sm text-slate-500 dark:text-gray-400">
                       {t("emergencyNoResults")}
                     </p>
                   ) : (
@@ -181,10 +181,10 @@ export function EmergencyHelp() {
                       {organizations.map((org) => (
                         <li
                           key={org.id}
-                          className="rounded-xl border border-red-500/25 bg-gray-800/80 p-4"
+                          className="rounded-xl border border-red-500/25 bg-red-50/80 p-4 dark:bg-gray-800/80"
                         >
                           <div className="mb-2 flex items-start justify-between gap-2">
-                            <h3 className="font-semibold text-white">
+                            <h3 className="font-semibold text-slate-900 dark:text-white">
                               {org.name}
                             </h3>
                             {org.distance && (
@@ -198,7 +198,7 @@ export function EmergencyHelp() {
                             <a
                               href={getPhoneTelUrl(org.phone)}
                               onClick={() => trackCallOrganization(org)}
-                              className="mb-2 inline-flex items-center gap-2 text-base font-bold text-emerald-400 hover:text-emerald-300"
+                              className="mb-2 inline-flex items-center gap-2 text-base font-bold text-emerald-700 hover:text-emerald-600 dark:text-emerald-400 dark:hover:text-emerald-300"
                             >
                               <Phone className="h-4 w-4 shrink-0" />
                               {org.phone}
@@ -210,7 +210,7 @@ export function EmergencyHelp() {
                           )}
 
                           {org.address && (
-                            <p className="flex items-start gap-2 text-sm text-gray-400">
+                            <p className="flex items-start gap-2 text-sm text-slate-600 dark:text-gray-400">
                               <MapPin className="mt-0.5 h-4 w-4 shrink-0" />
                               <span>
                                 {[org.address, org.city, org.country]
