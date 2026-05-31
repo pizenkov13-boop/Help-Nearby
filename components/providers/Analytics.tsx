@@ -20,6 +20,7 @@ export function Analytics() {
           ui_host: "https://us.posthog.com",
           capture_pageview: false,
           capture_pageleave: true,
+          disable_surveys: true,
         });
         initialized.current = true;
       }
