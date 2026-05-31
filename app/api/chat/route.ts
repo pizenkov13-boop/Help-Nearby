@@ -1,11 +1,12 @@
 import { NextResponse } from "next/server";
+import {
+  buildChatSystemPrompt,
+  findOrganizationsForChat,
+} from "@/lib/chatContext.server";
 import { getGroqApiKey } from "@/lib/env.server";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
-
-const SYSTEM_PROMPT =
-  "You are a helpful assistant for Help Nearby - a platform that helps people find free food, shelter, medical aid, clothing and volunteer opportunities. You help people in crisis find assistance near them. Be compassionate, helpful and concise. You support 7 languages: English, Russian, Spanish, French, German, Chinese, Arabic. Always respond in the same language the user writes in.";
 
 const GROQ_MODEL = "llama-3.3-70b-versatile";
 
@@ -49,6 +50,19 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "No valid messages." }, { status: 400 });
   }
 
+  const lastUserMessage = [...validMessages]
+    .reverse()
+    .find((message) => message.role === "user");
+
+  const organizations = lastUserMessage
+    ? await findOrganizationsForChat(lastUserMessage.content)
+    : [];
+
+  const systemPrompt = buildChatSystemPrompt(
+    organizations,
+    lastUserMessage?.content ?? "",
+  );
+
   try {
     const groqResponse = await fetch(
       "https://api.groq.com/openai/v1/chat/completions",
@@ -60,9 +74,9 @@ export async function POST(request: Request) {
         },
         body: JSON.stringify({
           model: GROQ_MODEL,
-          messages: [{ role: "system", content: SYSTEM_PROMPT }, ...validMessages],
-          temperature: 0.7,
-          max_tokens: 1024,
+          messages: [{ role: "system", content: systemPrompt }, ...validMessages],
+          temperature: 0.2,
+          max_tokens: 320,
         }),
       },
     );
