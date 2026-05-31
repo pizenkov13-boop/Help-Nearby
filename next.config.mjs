@@ -26,26 +26,31 @@ const nextConfig = {
     return config;
   },
   async headers() {
-    const securityHeaders =
-      process.env.NODE_ENV === "production"
-        ? [
-            {
-              key: "Content-Security-Policy",
-              value: CONTENT_SECURITY_POLICY,
-            },
-          ]
-        : [];
+    const swHeaders = [
+      {
+        key: "Cache-Control",
+        value: "no-cache, no-store, must-revalidate",
+      },
+      {
+        key: "Service-Worker-Allowed",
+        value: "/",
+      },
+    ];
 
-    const documentHeaders =
-      process.env.NODE_ENV === "production"
-        ? [
-            {
-              key: "Cache-Control",
-              value: "no-cache, must-revalidate",
-            },
-            ...securityHeaders,
-          ]
-        : [];
+    if (process.env.NODE_ENV !== "production") {
+      return [{ source: "/sw.js", headers: swHeaders }];
+    }
+
+    const documentHeaders = [
+      {
+        key: "Cache-Control",
+        value: "no-cache, must-revalidate",
+      },
+      {
+        key: "Content-Security-Policy",
+        value: CONTENT_SECURITY_POLICY,
+      },
+    ];
 
     return [
       {
@@ -59,16 +64,7 @@ const nextConfig = {
       },
       {
         source: "/sw.js",
-        headers: [
-          {
-            key: "Cache-Control",
-            value: "no-cache, no-store, must-revalidate",
-          },
-          {
-            key: "Service-Worker-Allowed",
-            value: "/",
-          },
-        ],
+        headers: swHeaders,
       },
     ];
   },
