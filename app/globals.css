@@ -1155,6 +1155,28 @@ section[id], .scroll-anchor { scroll-margin-top: 92px; }
 .page-section-compact {
   padding: 28px 28px 56px;
 }
+
+/* Inner page hero: dark gradient in dark mode, readable text in light mode */
+html:not(.dark) .hero.page-hero {
+  background: var(--surface);
+  border-bottom: 1px solid var(--border-softer);
+}
+html:not(.dark) .hero.page-hero .hero-bg,
+html:not(.dark) .hero.page-hero .hero-overlay,
+html:not(.dark) .hero.page-hero .hero-grad {
+  display: none;
+}
+html:not(.dark) .hero.page-hero h1 {
+  color: var(--heading);
+}
+html:not(.dark) .hero.page-hero p.lead {
+  color: var(--text-muted);
+  opacity: 1;
+}
+html:not(.dark) .hero.page-hero .wave svg {
+  color: var(--surface);
+}
+
 @media (max-width: 768px) {
   .hero.page-hero .hero-inner {
     padding: 88px 20px 32px;
