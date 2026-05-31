@@ -29,8 +29,11 @@ export function Filters({ filters, onChange }: FiltersProps) {
   return (
     <aside className="rounded-brand border border-slate-200 bg-white/90 p-4 shadow-lg backdrop-blur-sm transition-colors duration-300 dark:border-white/10 dark:bg-surface-card/90 lg:sticky lg:top-20">
       <div className="mb-4 flex items-center gap-2 text-slate-900 dark:text-white">
-        <Filter className="h-5 w-5 text-blue-500 dark:text-blue-400" />
-        <h2 className="font-semibold">{t("filtersTitle")}</h2>
+        <Filter
+          className="size-5 shrink-0 text-blue-500 dark:text-blue-400"
+          aria-hidden
+        />
+        <h2 className="m-0 text-base font-semibold leading-5">{t("filtersTitle")}</h2>
       </div>
 
       <div className="space-y-5">
