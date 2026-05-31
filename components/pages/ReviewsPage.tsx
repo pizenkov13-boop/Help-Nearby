@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import { MessageSquare, Star } from "lucide-react";
+import { Star } from "lucide-react";
 import { PageHero } from "@/components/layout/PageHero";
 import { ReviewCard } from "@/components/ReviewCard";
 import { SiteLayout } from "@/components/layout/SiteLayout";
@@ -89,131 +89,123 @@ export function ReviewsPage() {
 
   return (
     <SiteLayout>
-      <PageHero title={t("reviewsTitle")} subtitle={t("reviewsSubtitle")} />
+      <PageHero
+        compact
+        title={t("reviewsTitle")}
+        subtitle={t("reviewsSubtitle")}
+      />
 
-      <section className="page-section">
+      <section className="page-section page-section-compact" id="review-form">
         <div className="container" style={{ maxWidth: "36rem" }}>
-        <div className="reviews-form-card">
-          <div className="mb-6 flex items-center gap-2" style={{ color: "#34d399" }}>
-            <MessageSquare className="h-5 w-5" />
-            <span className="font-medium" style={{ color: "#fff" }}>
-              {t("reviewsTitle")}
-            </span>
-          </div>
-
-          {submitted && (
-            <p
-              className="mb-5 rounded-brand border border-brand-emerald/30 bg-brand-emerald/10 px-4 py-3 text-center text-brand-emerald"
-              role="status"
-            >
-              {t("reviewsFormSuccess")}
-            </p>
-          )}
-
-          <form onSubmit={handleSubmit} className="space-y-5">
-            {error && (
-              <p className="text-sm text-red-400" role="alert">
-                {error}
+          <div className="reviews-form-card">
+            {submitted && (
+              <p
+                className="mb-5 rounded-brand border border-teal-500/30 bg-teal-500/10 px-4 py-3 text-center text-teal-800 dark:text-brand-emerald"
+                role="status"
+              >
+                {t("reviewsFormSuccess")}
               </p>
             )}
 
-            <div>
-              <label htmlFor="review-name">{t("reviewsFormName")}</label>
-              <input
-                id="review-name"
-                type="text"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-              />
-            </div>
+            <form onSubmit={handleSubmit} className="space-y-5">
+              {error && (
+                <p className="text-sm text-red-600 dark:text-red-400" role="alert">
+                  {error}
+                </p>
+              )}
 
-            <div>
-              <label htmlFor="review-country">{t("reviewsFormCountry")}</label>
-              <input
-                id="review-country"
-                type="text"
-                value={country}
-                onChange={(e) => setCountry(e.target.value)}
-                placeholder="e.g. Sudan, Yemen, Haiti"
-              />
-            </div>
+              <div>
+                <label htmlFor="review-name">{t("reviewsFormName")}</label>
+                <input
+                  id="review-name"
+                  type="text"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                />
+              </div>
 
-            <div>
-              <span className="mb-2 block text-sm font-medium" style={{ color: "var(--text-muted)" }}>
-                {t("reviewsFormRating")}
-              </span>
-              <div className="flex gap-1">
-                {[1, 2, 3, 4, 5].map((n) => (
-                  <button
-                    key={n}
-                    type="button"
-                    onClick={() => setRating(n)}
-                    className="rounded p-1 transition-colors hover:bg-slate-100 dark:hover:bg-white/10"
-                    aria-label={`${n} stars`}
-                  >
-                    <Star
-                      className={cn(
-                        "h-7 w-7",
-                        n <= rating
-                          ? "fill-amber-400 text-amber-400"
-                          : "text-slate-300 dark:text-gray-600",
-                      )}
-                    />
-                  </button>
+              <div>
+                <label htmlFor="review-country">{t("reviewsFormCountry")}</label>
+                <input
+                  id="review-country"
+                  type="text"
+                  value={country}
+                  onChange={(e) => setCountry(e.target.value)}
+                  placeholder="e.g. Sudan, Yemen, Haiti"
+                />
+              </div>
+
+              <div>
+                <span className="mb-2 block text-sm font-medium text-[var(--text-muted)]">
+                  {t("reviewsFormRating")}
+                </span>
+                <div className="flex gap-1">
+                  {[1, 2, 3, 4, 5].map((n) => (
+                    <button
+                      key={n}
+                      type="button"
+                      onClick={() => setRating(n)}
+                      className="rounded p-1 transition-colors hover:bg-slate-100 dark:hover:bg-white/10"
+                      aria-label={`${n} stars`}
+                    >
+                      <Star
+                        className={cn(
+                          "h-7 w-7",
+                          n <= rating
+                            ? "fill-amber-400 text-amber-400"
+                            : "text-slate-300 dark:text-gray-600",
+                        )}
+                      />
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div>
+                <label htmlFor="review-message">{t("reviewsFormMessage")}</label>
+                <textarea
+                  id="review-message"
+                  rows={4}
+                  value={message}
+                  onChange={(e) => setMessage(e.target.value)}
+                />
+              </div>
+
+              <button
+                type="submit"
+                disabled={submitting}
+                className="cta"
+                style={{ width: "100%" }}
+              >
+                {submitting ? t("reviewsLoading") : t("reviewsFormSubmit")}
+              </button>
+            </form>
+          </div>
+
+          <div className="mt-8">
+            <h2
+              className="section-title"
+              style={{ fontSize: "1.25rem", marginBottom: "1.5rem" }}
+            >
+              {t("reviewsListTitle")}
+            </h2>
+
+            {loadingReviews ? (
+              <p className="text-center text-sm text-[var(--text-fade)]">
+                {t("reviewsLoading")}
+              </p>
+            ) : reviews.length === 0 ? (
+              <p className="rounded-brand border border-dashed border-[var(--border-soft)] px-6 py-12 text-center text-[var(--text-dim)]">
+                {t("reviewsListEmpty")}
+              </p>
+            ) : (
+              <div className="flex flex-col gap-4">
+                {reviews.map((review) => (
+                  <ReviewCard key={review.id} review={review} />
                 ))}
               </div>
-            </div>
-
-            <div>
-              <label htmlFor="review-message">{t("reviewsFormMessage")}</label>
-              <textarea
-                id="review-message"
-                rows={5}
-                value={message}
-                onChange={(e) => setMessage(e.target.value)}
-              />
-            </div>
-
-            <button
-              type="submit"
-              disabled={submitting}
-              className="cta"
-              style={{ width: "100%" }}
-            >
-              {submitting ? t("reviewsLoading") : t("reviewsFormSubmit")}
-            </button>
-          </form>
-        </div>
-
-        <div className="mt-12">
-          <h2 className="section-title" style={{ fontSize: "1.25rem", marginBottom: "1.5rem" }}>
-            {t("reviewsListTitle")}
-          </h2>
-
-          {loadingReviews ? (
-            <p className="text-center text-sm" style={{ color: "var(--text-fade)" }}>
-              {t("reviewsLoading")}
-            </p>
-          ) : reviews.length === 0 ? (
-            <p
-              className="text-center"
-              style={{
-                border: "1px dashed var(--border-soft)",
-                borderRadius: "var(--radius)",
-                padding: "3rem 1.5rem",
-                color: "var(--text-dim)",
-              }}
-            >
-              {t("reviewsListEmpty")}
-            </p>
-          ) : (
-            <div className="flex flex-col gap-4">
-              {reviews.map((review) => (
-                <ReviewCard key={review.id} review={review} />
-              ))}
-            </div>
-          )}
-        </div>
+            )}
+          </div>
         </div>
       </section>
     </SiteLayout>
