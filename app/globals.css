@@ -58,6 +58,8 @@ body {
       --stat-card-value: #2563eb;
       --problem-card-bg: #f1f5f9;
       --problem-card-text: #475569;
+      --alert-badge-bg: radial-gradient(circle at 50% 38%, #fee2e2 0%, #fecaca 100%);
+      --alert-badge-border: rgba(239, 68, 68, 0.22);
       --radius: 14px;
       --radius-lg: 22px;
       --max: 1200px;
@@ -111,6 +113,8 @@ body {
       --stat-card-value: #38bdf8;
       --problem-card-bg: #232c3d;
       --problem-card-text: #9aa6b8;
+      --alert-badge-bg: radial-gradient(circle at 50% 38%, #20293c, #131a2d);
+      --alert-badge-border: rgba(255, 255, 255, 0.07);
 
       --background: 222 47% 7%;
       --foreground: 210 40% 98%;
@@ -1245,15 +1249,16 @@ section[id], .scroll-anchor { scroll-margin-top: 92px; }
   width: 56px; height: 56px; border-radius: 50%;
   margin: 0 auto 24px;
   display: grid; place-items: center;
-  background: radial-gradient(circle at 50% 38%, #20293c, #131a2d);
-  border: 1px solid rgba(255,255,255,.07);
+  background: var(--alert-badge-bg);
+  border: 1px solid var(--alert-badge-border);
+  transition: background 0.3s ease, border-color 0.3s ease;
 }
 .alert-badge .dot {
   width: 30px; height: 30px; border-radius: 50%;
   background: #ef4444; color: #fff;
   display: grid; place-items: center;
   font-weight: 800; font-size: 17px; line-height: 1;
-  box-shadow: 0 0 16px rgba(239,68,68,.55);
+  box-shadow: 0 0 16px rgba(239, 68, 68, 0.45);
 }
 .hiw-head.no-rule .underline { display: none; }
 .problem-card { background: var(--problem-card-bg); border-color: var(--border-softer); }
@@ -1265,9 +1270,12 @@ section[id], .scroll-anchor { scroll-margin-top: 92px; }
   display: grid; place-items: center; margin-bottom: 20px;
 }
 .card-icon svg { width: 24px; height: 24px; }
-.card-icon.blue { background: rgba(59,130,246,.14); color: #60a5fa; }
-.card-icon.purple { background: rgba(168,85,247,.14); color: #c084fc; }
-.card-icon.green { background: rgba(16,185,129,.14); color: #34d399; }
+.card-icon.blue { background: rgba(59,130,246,.14); color: #2563eb; }
+.card-icon.purple { background: rgba(168,85,247,.14); color: #7c3aed; }
+.card-icon.green { background: rgba(16,185,129,.14); color: #059669; }
+.dark .card-icon.blue { color: #60a5fa; }
+.dark .card-icon.purple { color: #c084fc; }
+.dark .card-icon.green { color: #34d399; }
 .card-icon.center { margin-left: auto; margin-right: auto; }
 .card-icon.grad { background: linear-gradient(135deg, #2f86e8, #14b8a6); color: #fff; }
 @media (max-width: 880px) {
