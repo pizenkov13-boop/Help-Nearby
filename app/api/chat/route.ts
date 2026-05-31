@@ -7,6 +7,7 @@ import {
   formatFollowUpFallback,
   shouldUseDirectSearch,
 } from "@/lib/chatContext.server";
+import { parseSearchIntent } from "@/lib/chatIntent.server";
 import { getGroqApiKey } from "@/lib/env.server";
 
 export const runtime = "nodejs";
@@ -82,19 +83,29 @@ export async function POST(request: Request) {
     .find((message) => message.role === "user");
 
   const userQuery = lastUserMessage?.content ?? "";
+  const apiKey = getGroqApiKey();
 
   try {
     if (shouldUseDirectSearch(validMessages, userQuery)) {
-      const organizations = await findOrganizationsForChat(userQuery);
+      const intent = await parseSearchIntent(userQuery, apiKey);
+      const organizations = await findOrganizationsForChat(
+        userQuery,
+        6,
+        intent,
+      );
       return NextResponse.json({
-        message: formatChatReply(organizations, userQuery),
+        message: formatChatReply(organizations, userQuery, intent),
       });
     }
 
     const priorMessages = validMessages.slice(0, -1);
     const contextQuery = buildContextSearchQuery(priorMessages, userQuery);
-    const organizations = await findOrganizationsForChat(contextQuery);
-    const apiKey = getGroqApiKey();
+    const contextIntent = await parseSearchIntent(contextQuery, apiKey);
+    const organizations = await findOrganizationsForChat(
+      contextQuery,
+      6,
+      contextIntent,
+    );
 
     if (!apiKey) {
       return NextResponse.json({
