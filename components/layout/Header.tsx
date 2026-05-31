@@ -235,63 +235,65 @@ export function Header() {
             </Link>
           </nav>
 
-          <ThemeToggle />
+          <div className="header-toolbar">
+            <div className={cn("lang-wrap", langOpen && "open")}>
+              <button
+                type="button"
+                className="lang-btn"
+                aria-label={t("languageMenu")}
+                aria-haspopup="true"
+                aria-expanded={langOpen}
+                onClick={() => {
+                  setAboutOpen(false);
+                  setWhyOpen(false);
+                  setLangOpen((o) => !o);
+                }}
+              >
+                <GlobeIcon />
+                <span className="current">{currentLangLabel}</span>
+                <ChevronIcon />
+              </button>
+              <div className="lang-menu" role="menu" aria-label={t("languageMenu")}>
+                {LANGUAGES.map(({ code, label }) => (
+                  <button
+                    key={code}
+                    type="button"
+                    role="menuitem"
+                    className={cn("lang-item", language === code && "on")}
+                    onClick={() => {
+                      setLanguage(code as LanguageCode);
+                      setLangOpen(false);
+                    }}
+                  >
+                    {label}
+                  </button>
+                ))}
+              </div>
+            </div>
 
-          <div className={cn("lang-wrap", langOpen && "open")}>
+            <ThemeToggle />
+
             <button
               type="button"
-              className="lang-btn"
-              aria-label={t("languageMenu")}
-              aria-haspopup="true"
-              aria-expanded={langOpen}
-              onClick={() => {
-                setAboutOpen(false);
-                setWhyOpen(false);
-                setLangOpen((o) => !o);
-              }}
+              className="mobile-toggle"
+              aria-label={t("openMenu")}
+              onClick={() => setMenuOpen((o) => !o)}
             >
-              <GlobeIcon />
-              <span className="current">{currentLangLabel}</span>
-              <ChevronIcon />
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                aria-hidden
+              >
+                <line x1="3" y1="6" x2="21" y2="6" />
+                <line x1="3" y1="12" x2="21" y2="12" />
+                <line x1="3" y1="18" x2="21" y2="18" />
+              </svg>
             </button>
-            <div className="lang-menu" role="menu" aria-label={t("languageMenu")}>
-              {LANGUAGES.map(({ code, label }) => (
-                <button
-                  key={code}
-                  type="button"
-                  role="menuitem"
-                  className={cn("lang-item", language === code && "on")}
-                  onClick={() => {
-                    setLanguage(code as LanguageCode);
-                    setLangOpen(false);
-                  }}
-                >
-                  {label}
-                </button>
-              ))}
-            </div>
           </div>
-
-          <button
-            type="button"
-            className="mobile-toggle"
-            aria-label={t("openMenu")}
-            onClick={() => setMenuOpen((o) => !o)}
-          >
-            <svg
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              aria-hidden
-            >
-              <line x1="3" y1="6" x2="21" y2="6" />
-              <line x1="3" y1="12" x2="21" y2="12" />
-              <line x1="3" y1="18" x2="21" y2="18" />
-            </svg>
-          </button>
         </div>
       </div>
 

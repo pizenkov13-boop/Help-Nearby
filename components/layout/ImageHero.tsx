@@ -6,6 +6,7 @@ interface ImageHeroProps {
   subtitle?: ReactNode;
   badge?: ReactNode;
   children?: ReactNode;
+  compact?: boolean;
 }
 
 export function ImageHero({
@@ -14,9 +15,10 @@ export function ImageHero({
   subtitle,
   badge,
   children,
+  compact = false,
 }: ImageHeroProps) {
   return (
-    <section className="hero page-hero">
+    <section className={compact ? "hero page-hero page-hero-compact" : "hero page-hero"}>
       <div
         className="hero-bg"
         style={{ backgroundImage: `url(${imageSrc})` }}
