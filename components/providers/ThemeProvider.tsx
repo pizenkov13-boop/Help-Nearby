@@ -2,6 +2,7 @@
 
 import { ThemeProvider as NextThemesProvider } from "next-themes";
 import type { ReactNode } from "react";
+import { THEME_STORAGE_KEY } from "@/lib/themePreference";
 
 export function ThemeProvider({ children }: { children: ReactNode }) {
   return (
@@ -9,7 +10,7 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
       attribute="class"
       defaultTheme="system"
       enableSystem
-      storageKey="help-nearby-theme"
+      storageKey={THEME_STORAGE_KEY}
       disableTransitionOnChange={false}
     >
       {children}

@@ -3,6 +3,7 @@
 import { useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { DEFAULT_LOCATION } from "@/lib/constants";
+import { cacheDetectedCountry } from "@/lib/detectedCountry";
 import { filterOrganizations } from "@/lib/filterOrganizations";
 import {
   watchUserLocation,
@@ -161,11 +162,11 @@ export function HomePage() {
           position.coords.latitude,
           position.coords.longitude,
         );
-        if (
-          geo &&
-          isSlowInternetCountry(geo.country, geo.countryCode)
-        ) {
-          setSlowByCountryFallback(true);
+        if (geo) {
+          cacheDetectedCountry(geo.country, geo.countryCode);
+          if (isSlowInternetCountry(geo.country, geo.countryCode)) {
+            setSlowByCountryFallback(true);
+          }
         }
         setLiteDetectionDone(true);
       },
@@ -219,6 +220,9 @@ export function HomePage() {
 
       try {
         const geo = await reverseGeocodeCountry(location.lat, location.lng);
+        if (geo) {
+          cacheDetectedCountry(geo.country, geo.countryCode);
+        }
         const result = await searchNearbyWithSmartRadius(
           location,
           {
