@@ -91,6 +91,7 @@ export function ReviewsPage() {
     <SiteLayout>
       <PageHero
         compact
+        gradient
         title={t("reviewsTitle")}
         subtitle={t("reviewsSubtitle")}
       />

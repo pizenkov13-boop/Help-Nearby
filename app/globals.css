@@ -1163,25 +1163,27 @@ section[id], .scroll-anchor { scroll-margin-top: 92px; }
   padding: 28px 28px 56px;
 }
 
-/* Inner page hero: dark gradient in dark mode, readable text in light mode */
-html:not(.dark) .hero.page-hero {
-  background: var(--surface);
-  border-bottom: 1px solid var(--border-softer);
+/* Inner page hero with site gradient band + white text (Reviews, etc.) */
+.hero.page-hero[data-gradient="true"] .hero-bg {
+  background:
+    radial-gradient(110% 120% at 102% 108%, #14b86b 0%, rgba(20, 184, 107, 0.55) 26%, rgba(20, 184, 107, 0) 50%),
+    linear-gradient(118deg, #1f5fe0 0%, #2670e8 48%, #2f86e8 100%);
 }
-html:not(.dark) .hero.page-hero .hero-bg,
-html:not(.dark) .hero.page-hero .hero-overlay,
-html:not(.dark) .hero.page-hero .hero-grad {
-  display: none;
+.hero.page-hero[data-gradient="true"] h1 {
+  color: #fff;
 }
-html:not(.dark) .hero.page-hero h1 {
-  color: var(--heading);
-}
-html:not(.dark) .hero.page-hero p.lead {
-  color: var(--text-muted);
+.hero.page-hero[data-gradient="true"] p.lead {
+  color: rgba(255, 255, 255, 0.92);
   opacity: 1;
 }
-html:not(.dark) .hero.page-hero .wave svg {
-  color: var(--surface);
+.page-hero-underline {
+  display: block;
+  width: 72px;
+  height: 9px;
+  border-radius: 4px;
+  background: linear-gradient(135deg, #3b82f6, #14b8a6);
+  margin: 0 auto 16px;
+  box-shadow: 0 2px 12px rgba(20, 184, 166, 0.35);
 }
 
 @media (max-width: 768px) {

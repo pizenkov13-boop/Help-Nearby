@@ -7,6 +7,7 @@ interface ImageHeroProps {
   badge?: ReactNode;
   children?: ReactNode;
   compact?: boolean;
+  gradient?: boolean;
 }
 
 export function ImageHero({
@@ -16,12 +17,22 @@ export function ImageHero({
   badge,
   children,
   compact = false,
+  gradient = false,
 }: ImageHeroProps) {
   return (
-    <section className={compact ? "hero page-hero page-hero-compact" : "hero page-hero"}>
+    <section
+      className={
+        compact
+          ? "hero page-hero page-hero-compact"
+          : "hero page-hero"
+      }
+      data-gradient={gradient ? "true" : undefined}
+    >
       <div
         className="hero-bg"
-        style={{ backgroundImage: `url(${imageSrc})` }}
+        style={
+          gradient ? undefined : { backgroundImage: `url(${imageSrc})` }
+        }
       />
       <div className="hero-overlay" />
       <div className="hero-grad" />
@@ -30,6 +41,7 @@ export function ImageHero({
         <div className="hero-content">
           {badge}
           <h1>{title}</h1>
+          {gradient && <span className="page-hero-underline" aria-hidden />}
           {subtitle && <p className="lead">{subtitle}</p>}
           {children}
         </div>
