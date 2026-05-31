@@ -10,6 +10,11 @@ import {
 } from "@/lib/smartRadius";
 import type { Category, Organization, UserLocation } from "@/lib/types";
 
+export interface SearchIntent {
+  category: Category | null;
+  place: string | null;
+}
+
 const CATEGORY_LABELS: Record<Category, string> = {
   food: "еда",
   shelter: "приют",
@@ -395,9 +400,10 @@ async function searchCatalogByText(
 export async function findOrganizationsForChat(
   query: string,
   limit = 6,
+  intent?: SearchIntent,
 ): Promise<Organization[]> {
-  const category = detectCategory(query);
-  const placeQuery = extractPlaceQuery(query);
+  const category = intent?.category ?? detectCategory(query);
+  const placeQuery = intent?.place ?? extractPlaceQuery(query);
 
   if (category && !placeQuery) {
     return [];
@@ -424,20 +430,22 @@ export async function findOrganizationsForChat(
 export function formatChatReply(
   organizations: Organization[],
   userQuery: string,
+  intent?: SearchIntent,
 ): string {
-  const placeQuery = extractPlaceQuery(userQuery);
+  const placeQuery = intent?.place ?? extractPlaceQuery(userQuery);
+  const category = intent?.category ?? detectCategory(userQuery);
   const isRussian = /[\u0400-\u04FF]/.test(userQuery);
 
   if (organizations.length === 0) {
     if (isRussian) {
-      if (detectCategory(userQuery) && !placeQuery) {
-        return "Укажите город, например: «где поесть в Прокопьевске» или «еда в Москве».";
+      if (category && !placeQuery) {
+        return "Укажите город, например: «где поесть в Прокопьевске» или «хочу есть в Москве».";
       }
       return placeQuery
         ? `В ${placeQuery} в базе пока ничего не найдено. Откройте карту на главной или нажмите «Экстренная помощь».`
         : "Напишите город и тип помощи (еда, приют, медицина). Или откройте карту на главной.";
     }
-    if (detectCategory(userQuery) && !placeQuery) {
+    if (category && !placeQuery) {
       return "Include a city, e.g. «food in Moscow» or «where to eat in Berlin».";
     }
     return placeQuery
