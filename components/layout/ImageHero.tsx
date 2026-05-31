@@ -41,7 +41,6 @@ export function ImageHero({
         <div className="hero-content">
           {badge}
           <h1>{title}</h1>
-          {gradient && <span className="page-hero-underline" aria-hidden />}
           {subtitle && <p className="lead">{subtitle}</p>}
           {children}
         </div>

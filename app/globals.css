@@ -1176,15 +1176,6 @@ section[id], .scroll-anchor { scroll-margin-top: 92px; }
   color: rgba(255, 255, 255, 0.92);
   opacity: 1;
 }
-.page-hero-underline {
-  display: block;
-  width: 72px;
-  height: 9px;
-  border-radius: 4px;
-  background: linear-gradient(135deg, #3b82f6, #14b8a6);
-  margin: 0 auto 16px;
-  box-shadow: 0 2px 12px rgba(20, 184, 166, 0.35);
-}
 
 @media (max-width: 768px) {
   .hero.page-hero .hero-inner {
