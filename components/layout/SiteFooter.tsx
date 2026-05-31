@@ -1,13 +1,15 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { BrandLogo } from "@/components/BrandLogo";
 import { useLanguage } from "@/lib/i18n/LanguageProvider";
+
 const SDG_GOALS = [
-  { id: "sdg-1", label: "UN Sustainable Development Goal 1: No Poverty" },
-  { id: "sdg-2", label: "UN Sustainable Development Goal 2: Zero Hunger" },
-  { id: "sdg-3", label: "UN Sustainable Development Goal 3: Good Health and Well-being" },
-  { id: "sdg-10", label: "UN Sustainable Development Goal 10: Reduced Inequalities" },
+  { id: "1", label: "UN Sustainable Development Goal 1: No Poverty" },
+  { id: "2", label: "UN Sustainable Development Goal 2: Zero Hunger" },
+  { id: "3", label: "UN Sustainable Development Goal 3: Good Health and Well-being" },
+  { id: "10", label: "UN Sustainable Development Goal 10: Reduced Inequalities" },
 ] as const;
 
 const INSTAGRAM_URL =
@@ -108,13 +110,13 @@ export function SiteFooter() {
         <h4 className="sdg-heading">{t("footerSdgHeading")}</h4>
         <div className="sdg-row">
           {SDG_GOALS.map((goal) => (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img
+            <Image
               key={goal.id}
-              src={`/images/sdg/${goal.id}.svg`}
+              src={`/images/sdg/${goal.id}.png`}
               alt={goal.label}
-              width={76}
-              height={76}
+              width={152}
+              height={152}
+              quality={100}
               className="sdg-img"
             />
           ))}
