@@ -1,4 +1,4 @@
-const CACHE_NAME = "help-nearby-v11";
+const CACHE_NAME = "help-nearby-v12";
 const OFFLINE_URL = "/offline.html";
 
 /** Static assets only — do not precache HTML routes (Next.js RSC pages are not cache-safe). */

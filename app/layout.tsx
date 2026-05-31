@@ -56,6 +56,7 @@ export default function RootLayout({
       className={cn("font-sans", dmSans.variable, newsreader.variable)}
     >
       <head>
+        <script src="/chunk-recovery.js" />
         <script src="/theme-init.js" />
       </head>
       <body
