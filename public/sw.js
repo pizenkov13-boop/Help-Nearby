@@ -1,4 +1,4 @@
-const CACHE_NAME = "help-nearby-v9";
+const CACHE_NAME = "help-nearby-v10";
 const OFFLINE_URL = "/offline.html";
 
 /** Static assets only — do not precache HTML routes (Next.js RSC pages are not cache-safe). */
@@ -43,10 +43,18 @@ function isApiRequest(url) {
   return url.pathname.startsWith("/api/");
 }
 
+function isNextJsCodeAsset(pathname) {
+  return (
+    pathname.startsWith("/_next/static/") &&
+    (pathname.endsWith(".js") || pathname.endsWith(".css"))
+  );
+}
+
 function shouldBypassServiceWorker(request, url) {
   if (request.method !== "GET") return true;
   if (url.origin !== self.location.origin) return true;
   if (isApiRequest(url)) return true;
+  if (isNextJsCodeAsset(url.pathname)) return true;
   if (request.mode === "navigate") return false;
   if (url.pathname.startsWith("/_next/") && !url.pathname.startsWith("/_next/static/")) {
     return true;
@@ -88,7 +96,7 @@ self.addEventListener("fetch", (event) => {
   }
 
   if (url.pathname.startsWith("/_next/static/")) {
-    event.respondWith(cacheFirstStatic(request));
+    event.respondWith(networkFirstStatic(request));
     return;
   }
 
@@ -110,16 +118,16 @@ async function networkFirstNavigation(request) {
   }
 }
 
-async function cacheFirstStatic(request) {
+async function networkFirstStatic(request) {
   const cache = await caches.open(CACHE_NAME);
-  const cached = await cache.match(request);
-  if (cached) return cached;
 
   try {
     const response = await fetch(request);
     await safeCachePut(cache, request, response);
     return response;
   } catch {
+    const cached = await cache.match(request);
+    if (cached) return cached;
     return new Response("", { status: 503 });
   }
 }

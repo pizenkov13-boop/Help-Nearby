@@ -19,9 +19,27 @@ export function ServiceWorkerRegister() {
       return;
     }
 
-    navigator.serviceWorker.register("/sw.js").catch((error) => {
-      console.error("[ServiceWorker] registration failed:", error);
-    });
+    const register = navigator.serviceWorker.register("/sw.js");
+
+    register
+      .then((registration) => {
+        registration.addEventListener("updatefound", () => {
+          const worker = registration.installing;
+          if (!worker) return;
+
+          worker.addEventListener("statechange", () => {
+            if (
+              worker.state === "activated" &&
+              navigator.serviceWorker.controller
+            ) {
+              window.location.reload();
+            }
+          });
+        });
+      })
+      .catch((error) => {
+        console.error("[ServiceWorker] registration failed:", error);
+      });
   }, []);
 
   return null;
