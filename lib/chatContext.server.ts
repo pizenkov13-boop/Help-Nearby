@@ -243,26 +243,6 @@ export function extractPlaceQuery(query: string): string | null {
   return place;
 }
 
-function collectKnownPlaces(organizations: Organization[]): string[] {
-  const places = new Set<string>();
-  for (const org of organizations) {
-    if (org.city.trim()) places.add(normalizeText(org.city));
-    if (org.country.trim()) places.add(normalizeText(org.country));
-  }
-  return Array.from(places).filter((place) => place.length >= 3);
-}
-
-function findKnownPlacesInQuery(
-  normalizedQuery: string,
-  organizations: Organization[],
-): string[] {
-  return collectKnownPlaces(organizations).filter(
-    (place) =>
-      normalizedQuery.includes(place) ||
-      normalizedQuery.split(" ").some((token) => tokensMatch(token, place)),
-  );
-}
-
 function orgMatchesKnownPlaces(
   org: Organization,
   knownPlaces: string[],
@@ -377,15 +357,14 @@ async function fetchNearbyForCoordinates(
   return result.organizations.slice(0, 8);
 }
 
-async function searchCatalogByText(
-  query: string,
+async function searchCatalogByPlace(
   allOrganizations: Organization[],
+  placeQuery: string,
   category: Category | null,
   limit: number,
 ): Promise<Organization[]> {
-  const normalizedQuery = normalizeText(query);
-  const placeQuery = extractPlaceQuery(query);
-  const knownPlaces = findKnownPlacesInQuery(normalizedQuery, allOrganizations);
+  const normalizedPlace = normalizeText(placeQuery);
+  const knownPlaces = [normalizedPlace];
 
   return allOrganizations
     .map((org) => ({
@@ -395,9 +374,10 @@ async function searchCatalogByText(
     .filter(({ org, score }) => {
       if (score <= 0) return false;
       if (category && !org.categories.includes(category)) return false;
-      if (knownPlaces.length > 0) return orgMatchesKnownPlaces(org, knownPlaces);
-      if (placeQuery) return orgMatchesPlaceQuery(org, placeQuery);
-      return false;
+      return (
+        orgMatchesKnownPlaces(org, knownPlaces) ||
+        orgMatchesPlaceQuery(org, placeQuery)
+      );
     })
     .sort((a, b) => b.score - a.score)
     .slice(0, limit)
@@ -416,22 +396,26 @@ export async function findOrganizationsForChat(
     return [];
   }
 
-  const allOrganizations = await fetchOrganizations();
-
-  const catalogMatches = placeQuery
-    ? await searchCatalogByText(query, allOrganizations, category, limit)
-    : [];
-
-  if (placeQuery) {
-    const coords = await resolvePlaceCoordinates(placeQuery);
-    if (coords) {
-      const nearby = await fetchNearbyForCoordinates(coords, category);
-      const merged = dedupeOrganizations([...catalogMatches, ...nearby]);
-      if (merged.length > 0) return merged.slice(0, limit);
-    }
+  if (!placeQuery) {
+    return [];
   }
 
-  return catalogMatches;
+  // Source 1: Supabase — match city / address / country by name
+  const allOrganizations = await fetchOrganizations();
+  const catalogMatches = await searchCatalogByPlace(
+    allOrganizations,
+    placeQuery,
+    category,
+    limit,
+  );
+
+  // Source 2: Supabase (radius) + OpenStreetMap — geocode city, search nearby
+  const coords = await resolvePlaceCoordinates(placeQuery);
+  const geoMatches = coords
+    ? await fetchNearbyForCoordinates(coords, category)
+    : [];
+
+  return dedupeOrganizations([...catalogMatches, ...geoMatches]).slice(0, limit);
 }
 
 export function formatChatReply(
@@ -449,14 +433,14 @@ export function formatChatReply(
         return "Укажите город, например: «где поесть в Прокопьевске» или «хочу есть в Москве».";
       }
       return placeQuery
-        ? `В ${placeQuery} в базе пока ничего не найдено. Откройте карту на главной или нажмите «Экстренная помощь».`
+        ? `В ${placeQuery} ничего не найдено (Supabase + OpenStreetMap). Откройте карту на главной или «Экстренная помощь».`
         : "Напишите город и тип помощи (еда, приют, медицина). Или откройте карту на главной.";
     }
     if (category && !placeQuery) {
       return "Include a city, e.g. «food in Moscow» or «where to eat in Berlin».";
     }
     return placeQuery
-      ? `No locations found for ${placeQuery}. Open the map on the homepage or tap Emergency Help.`
+      ? `No locations found for ${placeQuery} (Supabase + OpenStreetMap). Open the map on the homepage or tap Emergency Help.`
       : "Include a city and type of help (food, shelter, medical). Or use the map on the homepage.";
   }
 
