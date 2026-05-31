@@ -98,7 +98,7 @@ export function OrganizationCard({
             "inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-medium",
             open
               ? "bg-emerald-500/20 text-emerald-400"
-              : "bg-gray-700 text-gray-400",
+              : "bg-slate-200 text-slate-600 dark:bg-gray-700 dark:text-gray-400",
           )}
         >
           <Clock className="h-3 w-3 shrink-0" />
@@ -114,11 +114,11 @@ export function OrganizationCard({
 
       <div className="order-1 min-w-0 md:order-2 md:flex md:items-start md:justify-between md:gap-3">
         <div className="min-w-0 flex-1">
-          <h3 className="text-base font-semibold leading-snug text-white break-words break-anywhere md:truncate md:text-lg group-hover:text-blue-300">
+          <h3 className="text-base font-semibold leading-snug text-slate-900 break-words break-anywhere md:truncate md:text-lg group-hover:text-blue-600 dark:text-white dark:group-hover:text-blue-300">
             {org.name}
           </h3>
           {org.country && (
-            <p className="mt-0.5 text-sm text-gray-500 break-words break-anywhere">
+            <p className="mt-0.5 text-sm text-slate-500 break-words break-anywhere dark:text-gray-500">
               {org.country}
             </p>
           )}
@@ -131,8 +131,8 @@ export function OrganizationCard({
       </div>
 
       {org.address && (
-        <p className="order-2 flex min-w-0 items-start gap-2 text-sm text-gray-400 md:order-3">
-          <MapPin className="mt-0.5 h-4 w-4 shrink-0 text-gray-500" aria-hidden />
+        <p className="order-2 flex min-w-0 items-start gap-2 text-sm text-slate-600 md:order-3 dark:text-gray-400">
+          <MapPin className="mt-0.5 h-4 w-4 shrink-0 text-slate-400 dark:text-gray-500" aria-hidden />
           <span className="min-w-0 break-words break-anywhere">{org.address}</span>
         </p>
       )}
@@ -148,7 +148,7 @@ export function OrganizationCard({
   return (
     <article
       className={cn(
-        "group w-full max-w-full min-w-0 overflow-hidden rounded-xl border border-gray-800 bg-gray-800/60 transition-all hover:border-gray-700 hover:bg-gray-800 hover:shadow-lg hover:shadow-blue-500/5",
+        "group w-full max-w-full min-w-0 overflow-hidden rounded-xl border border-slate-200 bg-white transition-all hover:border-slate-300 hover:bg-slate-50 hover:shadow-lg hover:shadow-blue-500/5 dark:border-gray-800 dark:bg-gray-800/60 dark:hover:border-gray-700 dark:hover:bg-gray-800",
         selected && "border-blue-500/50 ring-1 ring-blue-500/30",
         org.verified && "border-blue-500/20",
       )}
@@ -171,7 +171,7 @@ export function OrganizationCard({
         </button>
       )}
 
-      <div className="flex flex-col gap-2 border-t border-gray-700/50 px-3 pb-3 pt-2.5 md:flex-row md:px-4 md:pb-4 md:pt-3">
+      <div className="flex flex-col gap-2 border-t border-slate-200 px-3 pb-3 pt-2.5 dark:border-gray-700/50 md:flex-row md:px-4 md:pb-4 md:pt-3">
         {hasPhone && (
           <a
             href={telUrl}

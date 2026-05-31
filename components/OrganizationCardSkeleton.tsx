@@ -1,7 +1,7 @@
 export function OrganizationCardSkeleton() {
   return (
     <div
-      className="w-full max-w-full min-w-0 animate-pulse rounded-xl border border-white/10 bg-gray-800/50 p-3 md:p-4"
+      className="w-full max-w-full min-w-0 animate-pulse rounded-xl border border-slate-200 bg-slate-100 p-3 dark:border-white/10 dark:bg-gray-800/50 md:p-4"
       aria-hidden
     >
       <div className="mb-3 flex min-w-0 flex-col gap-2 md:flex-row md:items-start md:justify-between">

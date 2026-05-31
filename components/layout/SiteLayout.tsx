@@ -17,7 +17,7 @@ export function SiteLayout({ children }: SiteLayoutProps) {
   return (
     <div
       dir={dir}
-      className="flex min-h-screen flex-col bg-[#0a0f1f] bg-surface text-slate-100"
+      className="flex min-h-screen flex-col bg-surface text-foreground transition-colors duration-300"
     >
       <Header />
       <ScrollToHash />

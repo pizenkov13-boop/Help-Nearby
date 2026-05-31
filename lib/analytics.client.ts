@@ -19,6 +19,7 @@ let posthogPromise: Promise<PostHogClient | null> | null = null;
 
 function loadPostHog(): Promise<PostHogClient | null> {
   if (typeof window === "undefined") return Promise.resolve(null);
+  if (process.env.NODE_ENV !== "production") return Promise.resolve(null);
   const key = getPostHogKey();
   if (!key) return Promise.resolve(null);
 

@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
+import { ThemeToggle } from "@/components/ThemeToggle";
 import { BrandLogo } from "@/components/BrandLogo";
 import { AnchorNavLink } from "@/components/navigation/AnchorNavLink";
 import { useLanguage } from "@/lib/i18n/LanguageProvider";
@@ -234,6 +235,8 @@ export function Header() {
               {t("navReviewsShort")}
             </Link>
           </nav>
+
+          <ThemeToggle />
 
           <div className={cn("lang-wrap", langOpen && "open")}>
             <button

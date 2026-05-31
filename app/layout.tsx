@@ -28,19 +28,6 @@ export const metadata: Metadata = {
     "Discover food banks, shelters, medical aid, clothing donations, and volunteer opportunities near you.",
   applicationName: "Help Nearby",
   manifest: "/manifest.json",
-  icons: {
-    icon: [
-      { url: "/favicon.ico", sizes: "any" },
-      { url: "/favicon-16x16.png", sizes: "16x16", type: "image/png" },
-      { url: "/favicon-32x32.png", sizes: "32x32", type: "image/png" },
-      { url: "/favicon.png", sizes: "32x32", type: "image/png" },
-      { url: "/icons/icon-192.png", sizes: "192x192", type: "image/png" },
-    ],
-    apple: [
-      { url: "/icons/icon-192.png", sizes: "192x192", type: "image/png" },
-      { url: "/icons/icon-512.png", sizes: "512x512", type: "image/png" },
-    ],
-  },
   appleWebApp: {
     capable: true,
     title: "Help Nearby",
@@ -49,7 +36,10 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: "#0a0f1f",
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#ffffff" },
+    { media: "(prefers-color-scheme: dark)", color: "#0a0f1f" },
+  ],
 };
 
 export default function RootLayout({
@@ -62,15 +52,18 @@ export default function RootLayout({
       lang="en"
       dir="ltr"
       suppressHydrationWarning
-      className={cn(
-        "dark font-sans bg-[#0a0f1f] text-slate-100",
-        dmSans.variable,
-        newsreader.variable,
-      )}
+      className={cn("font-sans", dmSans.variable, newsreader.variable)}
     >
+      <head>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `(function(){try{var k='help-nearby-theme';var t=localStorage.getItem(k);var d=window.matchMedia('(prefers-color-scheme: dark)').matches;var el=document.documentElement;if(t==='dark'||(t==='system'&&d)||(!t&&d))el.classList.add('dark');else el.classList.remove('dark')}catch(e){}})();`,
+          }}
+        />
+      </head>
       <body
         suppressHydrationWarning
-        className="min-h-screen bg-[#0a0f1f] bg-surface font-sans text-slate-100 antialiased"
+        className="min-h-screen bg-surface font-sans text-foreground antialiased transition-colors duration-300"
       >
         <AppProviders>{children}</AppProviders>
         <AnalyticsLoader />

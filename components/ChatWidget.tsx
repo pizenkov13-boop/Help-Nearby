@@ -99,16 +99,16 @@ export function ChatWidget() {
   return (
     <>
       {open && (
-        <div className="fixed bottom-24 right-4 z-50 flex h-[min(480px,70vh)] w-[min(380px,calc(100vw-2rem))] flex-col overflow-hidden rounded-2xl border border-gray-700 bg-gray-900 shadow-2xl shadow-blue-500/10 animate-fade-in sm:right-6">
-          <div className="flex items-center justify-between border-b border-gray-800 bg-gradient-to-r from-blue-600/20 to-emerald-600/20 px-4 py-3">
+        <div className="fixed bottom-24 right-4 z-50 flex h-[min(480px,70vh)] w-[min(380px,calc(100vw-2rem))] flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-2xl shadow-blue-500/10 animate-fade-in dark:border-gray-700 dark:bg-gray-900 sm:right-6">
+          <div className="flex items-center justify-between border-b border-slate-200 bg-gradient-to-r from-blue-600/10 to-teal-500/10 px-4 py-3 dark:border-gray-800 dark:from-blue-600/20 dark:to-emerald-600/20">
             <div className="flex items-center gap-2">
-              <Bot className="h-5 w-5 text-emerald-400" />
-              <span className="font-semibold text-white">{t("chatTitle")}</span>
+              <Bot className="h-5 w-5 text-teal-600 dark:text-emerald-400" />
+              <span className="font-semibold text-slate-900 dark:text-white">{t("chatTitle")}</span>
             </div>
             <button
               type="button"
               onClick={() => setOpen(false)}
-              className="rounded-lg p-1 text-gray-400 hover:bg-gray-800 hover:text-white"
+              className="rounded-lg p-1 text-slate-500 hover:bg-slate-100 hover:text-slate-900 dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-white"
               aria-label="Close chat"
             >
               <X className="h-5 w-5" />
@@ -123,21 +123,21 @@ export function ChatWidget() {
                   "max-w-[85%] rounded-xl px-3 py-2 text-sm",
                   msg.role === "user"
                     ? "ml-auto bg-blue-600 text-white"
-                    : "bg-gray-800 text-gray-200",
+                    : "bg-slate-100 text-slate-800 dark:bg-gray-800 dark:text-gray-200",
                 )}
               >
                 {msg.text}
               </div>
             ))}
             {isLoading && (
-              <div className="flex max-w-[85%] items-center gap-2 rounded-xl bg-gray-800 px-3 py-2 text-sm text-gray-400">
-                <Loader2 className="h-4 w-4 animate-spin text-emerald-400" />
+              <div className="flex max-w-[85%] items-center gap-2 rounded-xl bg-slate-100 px-3 py-2 text-sm text-slate-500 dark:bg-gray-800 dark:text-gray-400">
+                <Loader2 className="h-4 w-4 animate-spin text-teal-600 dark:text-emerald-400" />
                 <span>{t("chatTyping")}</span>
               </div>
             )}
           </div>
 
-          <div className="border-t border-gray-800 p-3">
+          <div className="border-t border-slate-200 p-3 dark:border-gray-800">
             <div className="flex gap-2">
               <input
                 type="text"
@@ -146,7 +146,7 @@ export function ChatWidget() {
                 onKeyDown={(e) => e.key === "Enter" && !e.shiftKey && sendMessage()}
                 placeholder={t("chatPlaceholder")}
                 disabled={isLoading}
-                className="flex-1 rounded-lg border border-gray-700 bg-gray-800 px-3 py-2 text-sm text-gray-200 placeholder:text-gray-500 focus:border-blue-500 focus:outline-none disabled:opacity-60"
+                className="flex-1 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 placeholder:text-slate-400 focus:border-blue-500 focus:outline-none disabled:opacity-60 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-200 dark:placeholder:text-gray-500"
               />
               <button
                 type="button"

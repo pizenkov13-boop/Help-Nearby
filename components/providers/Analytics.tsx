@@ -10,7 +10,7 @@ export function Analytics() {
   const initialized = useRef(false);
 
   useEffect(() => {
-    if (!key) return;
+    if (!key || process.env.NODE_ENV !== "production") return;
     const apiKey = key;
 
     void import("posthog-js").then(({ default: posthog }) => {

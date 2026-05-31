@@ -609,7 +609,7 @@ export function HomePage() {
 
                 {!orgsLoading && searchRadiusMeters != null && (
                   <div className="flex flex-wrap items-center gap-3">
-                    <p className="text-sm text-slate-400">
+                    <p className="text-sm text-slate-600 dark:text-slate-400">
                       {searchMode === "nearest" && nearestFallbackKm != null
                         ? formatSearchNearestOrgs(
                             language,
@@ -625,7 +625,7 @@ export function HomePage() {
                         type="button"
                         onClick={handleExpandSearch}
                         disabled={sourcesLoading}
-                        className="rounded-full border border-blue-500/40 bg-blue-500/10 px-3 py-1 text-xs font-semibold text-blue-300 transition-colors hover:bg-blue-500/20 disabled:opacity-50"
+                        className="rounded-full border border-blue-500/40 bg-blue-500/10 px-3 py-1 text-xs font-semibold text-blue-700 transition-colors hover:bg-blue-500/20 disabled:opacity-50 dark:text-blue-300"
                       >
                         {t("searchExpand")}
                       </button>
@@ -664,7 +664,7 @@ export function HomePage() {
                 </div>
 
                 {!liteModeActive && userLocation && mapExpanded && (
-                  <div className="h-[400px] overflow-hidden rounded-brand border border-white/10 shadow-lg lg:h-[520px]">
+                  <div className="h-[400px] overflow-hidden rounded-brand border border-slate-200 shadow-lg dark:border-white/10 lg:h-[520px]">
                     <MapView
                       key="full-map"
                       mapVisible={mapExpanded}
@@ -680,7 +680,7 @@ export function HomePage() {
                   </div>
                 )}
                 {liteModeActive && userLocation && liteMapVisible && mapExpanded && (
-                  <div className="h-[280px] overflow-hidden rounded-brand border border-white/10 shadow-lg lg:h-[320px]">
+                  <div className="h-[280px] overflow-hidden rounded-brand border border-slate-200 shadow-lg dark:border-white/10 lg:h-[320px]">
                     <MapView
                       key="lite-map"
                       mapVisible={mapExpanded}
@@ -699,7 +699,7 @@ export function HomePage() {
 
                 <div
                   className={cn(
-                    "flex w-full min-w-0 max-w-full flex-col overflow-hidden rounded-brand border border-white/10 bg-surface/80",
+                    "flex w-full min-w-0 max-w-full flex-col overflow-hidden rounded-brand border border-slate-200 bg-white/80 dark:border-white/10 dark:bg-surface/80",
                     liteModeActive ? "min-h-[320px]" : "max-h-[520px] lg:max-h-[520px]",
                   )}
                 >
@@ -724,11 +724,11 @@ export function HomePage() {
                     />
                   </div>
                   {liteModeActive && userLocation && !liteMapVisible && (
-                    <div className="border-t border-white/10 p-3">
+                    <div className="border-t border-slate-200 p-3 dark:border-white/10">
                       <button
                         type="button"
                         onClick={() => setLiteMapVisible(true)}
-                        className="w-full rounded-lg border border-white/20 bg-white/5 px-3 py-2 text-xs font-medium text-gray-200 transition-colors hover:bg-white/10"
+                        className="w-full rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-xs font-medium text-slate-700 transition-colors hover:bg-slate-100 dark:border-white/20 dark:bg-white/5 dark:text-gray-200 dark:hover:bg-white/10"
                       >
                         {t("showLiteMap")}
                       </button>

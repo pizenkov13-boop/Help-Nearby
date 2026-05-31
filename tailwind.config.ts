@@ -17,12 +17,13 @@ const config: Config = {
       },
       colors: {
         surface: {
-          DEFAULT: "#0a0f1f",
-          card: "#131a2d",
+          DEFAULT: "var(--surface)",
+          card: "var(--surface-card)",
         },
         brand: {
           blue: "#3b82f6",
-          emerald: "#10b981",
+          emerald: "#14b8a6",
+          amber: "#f59e0b",
         },
         background: "hsl(var(--background))",
         foreground: "hsl(var(--foreground))",
@@ -62,7 +63,7 @@ const config: Config = {
         brand: "14px",
       },
       backgroundImage: {
-        "gradient-brand": "linear-gradient(135deg, #3b82f6, #10b981)",
+        "gradient-brand": "linear-gradient(135deg, #3b82f6, #14b8a6)",
       },
       keyframes: {
         "accordion-down": {
