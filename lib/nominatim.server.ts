@@ -133,6 +133,11 @@ function buildPlaceCandidates(placeQuery: string): string[] {
 export async function resolvePlaceCoordinates(
   placeQuery: string,
 ): Promise<{ lat: number; lng: number } | null> {
+  const trimmed = placeQuery.trim();
+  if (trimmed.length < 4) {
+    return lookupKnownCity(trimmed);
+  }
+
   const known = lookupKnownCity(placeQuery);
   if (known) return known;
 

@@ -30,6 +30,9 @@ const CATEGORY_KEYWORDS: Record<Category, string[]> = {
     "еды",
     "пищ",
     "продукт",
+    "покушать",
+    "поесть",
+    "кушать",
     "покуш",
     "голод",
     "столов",
@@ -134,6 +137,22 @@ const STOP_WORDS = new Set([
   "с",
 ]);
 
+const FOOD_PHRASE_WORDS = new Set([
+  "покушать",
+  "поесть",
+  "кушать",
+  "пообедать",
+  "позавтракать",
+  "перекусить",
+]);
+
+const ALL_CATEGORY_KEYWORDS = new Set(
+  Object.values(CATEGORY_KEYWORDS).flat().map((word) => word.toLowerCase()),
+);
+
+/** Too short / broken fragments after bad keyword stripping (e.g. «ать» from «покушать»). */
+const INVALID_PLACE_TOKENS = new Set(["ать", "ест", "еду", "edi"]);
+
 function normalizeText(value: string): string {
   return value
     .toLowerCase()
@@ -157,13 +176,34 @@ export function detectCategory(query: string): Category | null {
 }
 
 function stripCategoryWords(normalizedQuery: string): string {
-  let result = normalizedQuery;
-  for (const keywords of Object.values(CATEGORY_KEYWORDS)) {
-    for (const keyword of keywords) {
-      result = result.replaceAll(keyword, " ");
-    }
+  return normalizedQuery
+    .split(" ")
+    .filter((token) => {
+      if (!token) return false;
+      if (FOOD_PHRASE_WORDS.has(token)) return false;
+      if (ALL_CATEGORY_KEYWORDS.has(token)) return false;
+      for (const keyword of ALL_CATEGORY_KEYWORDS) {
+        if (keyword.length >= 3 && token.includes(keyword) && token.length <= keyword.length + 2) {
+          return false;
+        }
+      }
+      return true;
+    })
+    .join(" ");
+}
+
+function isValidPlaceQuery(place: string): boolean {
+  const tokens = place.split(" ").filter(Boolean);
+  if (tokens.length === 0) return false;
+
+  for (const token of tokens) {
+    if (token.length < 4) return false;
+    if (INVALID_PLACE_TOKENS.has(token)) return false;
+    if (ALL_CATEGORY_KEYWORDS.has(token)) return false;
+    if (STOP_WORDS.has(token)) return false;
   }
-  return result.replace(/\s+/g, " ").trim();
+
+  return true;
 }
 
 function tokensMatch(a: string, b: string): boolean {
@@ -183,9 +223,12 @@ function removeStopWords(text: string): string {
 /** City/country phrase from any language, e.g. "прокопьевске", "new york", "berlin". */
 export function extractPlaceQuery(query: string): string | null {
   const normalized = normalizeText(query);
-  const place = removeStopWords(stripCategoryWords(normalized)).replace(/\s+/g, " ").trim();
-  if (place.length >= 3) return place;
-  return null;
+  const place = removeStopWords(stripCategoryWords(normalized))
+    .replace(/\s+/g, " ")
+    .trim();
+
+  if (!isValidPlaceQuery(place)) return null;
+  return place;
 }
 
 function collectKnownPlaces(organizations: Organization[]): string[] {
@@ -310,7 +353,8 @@ async function fetchNearbyForCoordinates(
     ]);
     const merged = mergeOrganizations(catalog, overpass);
     const filtered = filterByCategory(merged, category);
-    return filtered.length > 0 ? filtered : merged;
+    if (category) return filtered;
+    return merged;
   };
 
   const result = await runSmartRadiusSearch(fetchAtRadius, {
@@ -354,14 +398,16 @@ export async function findOrganizationsForChat(
 ): Promise<Organization[]> {
   const category = detectCategory(query);
   const placeQuery = extractPlaceQuery(query);
+
+  if (category && !placeQuery) {
+    return [];
+  }
+
   const allOrganizations = await fetchOrganizations();
 
-  const catalogMatches = await searchCatalogByText(
-    query,
-    allOrganizations,
-    category,
-    limit,
-  );
+  const catalogMatches = placeQuery
+    ? await searchCatalogByText(query, allOrganizations, category, limit)
+    : [];
 
   if (placeQuery) {
     const coords = await resolvePlaceCoordinates(placeQuery);
@@ -384,9 +430,15 @@ export function formatChatReply(
 
   if (organizations.length === 0) {
     if (isRussian) {
+      if (detectCategory(userQuery) && !placeQuery) {
+        return "Укажите город, например: «где поесть в Прокопьевске» или «еда в Москве».";
+      }
       return placeQuery
         ? `В ${placeQuery} в базе пока ничего не найдено. Откройте карту на главной или нажмите «Экстренная помощь».`
         : "Напишите город и тип помощи (еда, приют, медицина). Или откройте карту на главной.";
+    }
+    if (detectCategory(userQuery) && !placeQuery) {
+      return "Include a city, e.g. «food in Moscow» or «where to eat in Berlin».";
     }
     return placeQuery
       ? `No locations found for ${placeQuery}. Open the map on the homepage or tap Emergency Help.`
