@@ -39,9 +39,20 @@ A user from Egypt asked for Arabic language support and a lite mode for slow int
 | 🌐 **7 languages** | English, Russian, Spanish, French, German, Chinese, Arabic (RTL support) |
 | 📱 **PWA** | Installable as PWA (Progressive Web App). Service worker serves a static offline page if navigation fails without network; search, map, and APIs require a connection |
 | ⚡ **Lite mode** | Auto-enabled on slow networks (2G / slow-3G) or in low-connectivity regions — list-only, no map, loads fast |
+| ☀️ **Adaptive theme** | Automatic light/dark theme detection — light theme auto-enabled for users in sunny regions (Africa, Arabian Peninsula, Middle East, South Asia, Australia, etc.) where dark screens are unreadable in bright sunlight. Manual toggle also available. |
 | ✅ **Verified organizations** | Community submissions reviewed by admin before showing a verified badge |
 | 💬 **Reviews** | User feedback with admin moderation |
 | 📊 **Impact counter** | Counts today’s Call and Directions button clicks (stored in Supabase); not a verified count of people who received aid |
+
+---
+
+## ☀️ Adaptive theme — why it matters
+
+Most apps use a dark theme by default, but for many of our users this is a real accessibility barrier. People in Sudan, Egypt, Yemen, Afghanistan, and other sunny regions cannot read dark screens in bright outdoor sunlight — and these are exactly the regions where humanitarian help is needed most.
+
+Help Nearby detects the user's region and automatically switches to a light theme for users in high-sunlight countries. Users in other regions get the default dark theme. A manual sun/moon toggle is always available in the top bar.
+
+This is a small change with a big impact: a person in Khartoum at noon can actually read the screen and find help nearby. That's the principle of the whole project — making the platform usable for the people who actually need it.
 
 ---
 
