@@ -13,7 +13,8 @@
     "test:e2e": "playwright test",
     "test:e2e:ui": "playwright test --ui",
     "test:e2e:report": "playwright show-report",
-    "test:build": "npm run build && node scripts/test-routes.mjs"
+    "test:build": "npm run build && node scripts/test-routes.mjs",
+    "icons:generate": "node scripts/generate-favicons.mjs"
   },
   "dependencies": {
     "@radix-ui/react-slot": "^1.2.4",
@@ -43,7 +44,9 @@
     "eslint": "^9",
     "eslint-config-next": "^16.2.6",
     "postcss": "^8",
+    "sharp": "^0.34.5",
     "tailwindcss": "^3.4.1",
+    "to-ico": "^1.1.5",
     "typescript": "^5"
   }
 }

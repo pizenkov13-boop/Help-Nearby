@@ -27,6 +27,25 @@ export const metadata: Metadata = {
   description:
     "Discover food banks, shelters, medical aid, clothing donations, and volunteer opportunities near you.",
   applicationName: "Help Nearby",
+  manifest: "/manifest.json",
+  icons: {
+    icon: [
+      { url: "/favicon.ico", sizes: "any" },
+      { url: "/favicon-16x16.png", sizes: "16x16", type: "image/png" },
+      { url: "/favicon-32x32.png", sizes: "32x32", type: "image/png" },
+      { url: "/favicon.png", sizes: "32x32", type: "image/png" },
+      { url: "/icons/icon-192.png", sizes: "192x192", type: "image/png" },
+    ],
+    apple: [
+      { url: "/icons/icon-192.png", sizes: "192x192", type: "image/png" },
+      { url: "/icons/icon-512.png", sizes: "512x512", type: "image/png" },
+    ],
+  },
+  appleWebApp: {
+    capable: true,
+    title: "Help Nearby",
+    statusBarStyle: "black-translucent",
+  },
 };
 
 export const viewport: Viewport = {
@@ -49,25 +68,6 @@ export default function RootLayout({
         newsreader.variable,
       )}
     >
-      <head>
-        <link rel="manifest" href="/manifest.json" />
-        <link
-          rel="apple-touch-icon"
-          href="/icons/icon-192.png"
-          sizes="192x192"
-        />
-        <link
-          rel="apple-touch-icon"
-          href="/icons/icon-512.png"
-          sizes="512x512"
-        />
-        <meta name="apple-mobile-web-app-capable" content="yes" />
-        <meta name="apple-mobile-web-app-title" content="Help Nearby" />
-        <meta
-          name="apple-mobile-web-app-status-bar-style"
-          content="black-translucent"
-        />
-      </head>
       <body
         suppressHydrationWarning
         className="min-h-screen bg-[#0a0f1f] bg-surface font-sans text-slate-100 antialiased"

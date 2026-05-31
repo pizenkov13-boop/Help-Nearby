@@ -62,7 +62,7 @@ async function testPages() {
 }
 
 async function testStaticAssets() {
-  for (const asset of ["/images/logo.svg", "/images/sdg/1.png"]) {
+  for (const asset of ["/images/logo.svg", "/images/sdg/1.png", "/favicon.ico", "/favicon.png"]) {
     try {
       const { res } = await get(asset);
       if (res.status === 200) pass("Ассет", asset);
