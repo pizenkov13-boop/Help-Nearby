@@ -54,7 +54,7 @@ Community submissions via `/submit` are stored as **unverified** until approved 
 | Feature | Description |
 |---------|-------------|
 | **Interactive map** | Leaflet map with category markers, verified badge, and source labels |
-| **Two-tier data** | **Tier 1:** Supabase verified catalog · **Tier 2:** live Overpass OSM queries |
+| **Multi-source data** | Supabase verified catalog + HDX + GDHO + live Overpass OSM queries |
 | **Emergency mode** | One-tap list of 24/7 organizations (hospitals, pharmacies, shelters) |
 | **Smart radius search** | Auto-expands search radius until results are found |
 | **Turn-by-turn routing** | OSRM routing via `/api/route` |
@@ -76,17 +76,17 @@ Community submissions via `/submit` are stored as **unverified** until approved 
 |--------|------|------|
 | **Supabase** | Verified organization catalog (PostgreSQL + RLS) | `lib/data.ts` |
 | **OpenStreetMap / Overpass** | Live POI search worldwide | `lib/overpass.server.ts` → `/api/nearby` |
+| **HDX** (UN OCHA Humanitarian Data Exchange) | Country-level humanitarian orgs | `lib/hdx.ts` → `lib/verifiedNearby.server.ts` → `/api/verified-nearby` |
+| **GDHO** (Global Directory of Humanitarian Organizations) | Country-level humanitarian orgs | `lib/gdho.ts` → `lib/verifiedNearby.server.ts` → `/api/verified-nearby` |
 | **Nominatim** | Forward/reverse geocoding for addresses | `lib/nominatim.server.ts` → `/api/geocode` |
 | **OSRM** | Turn-by-turn routing | `lib/osrmRouting.server.ts` → `/api/route` |
 
-### Implemented in codebase (not wired to main search on current `main`)
+HDX and GDHO results merge with Supabase + Overpass in `lib/nearbySearch.ts` (deduplicated by name). Each source has a 5-second timeout; failures do not block other results.
 
-These modules exist and are tested in code, but `fetchVerifiedNearbyOrganizations` is **not called** from the deployed nearby search flow yet:
+### Not deployed
 
-| Source | File | Status on `main` |
-|--------|------|------------------|
-| **HDX** (UN OCHA Humanitarian Data Exchange) | `lib/hdx.ts` | Module ready · used in `lib/verifiedNearby.server.ts` |
-| **GDHO** (Global Directory of Humanitarian Organizations) | `lib/gdho.ts` | Module ready · used in `lib/verifiedNearby.server.ts` |
+| Source | File | Status |
+|--------|------|--------|
 | **ReliefWeb** | `lib/reliefweb.ts` | Local branch only · **not deployed** (API approval pending) |
 
 ---
@@ -217,6 +217,7 @@ scripts/             # Geocoding and build utilities
 | Route | Purpose |
 |-------|---------|
 | `/api/nearby` | Overpass organizations near coordinates |
+| `/api/verified-nearby` | HDX + GDHO organizations for a country (geocoded, radius-filtered) |
 | `/api/emergency` | 24/7 Supabase + Overpass emergency list |
 | `/api/route` | OSRM turn-by-turn routing |
 | `/api/geocode` | Nominatim address → coordinates |

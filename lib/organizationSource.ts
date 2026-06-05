@@ -7,7 +7,7 @@ export interface OrganizationSource {
 
 type SourceInput = Pick<
   Organization,
-  "slug" | "website" | "description" | "country" | "verified"
+  "id" | "slug" | "website" | "description" | "country" | "verified"
 >;
 
 function hostFromUrl(url: string): string | null {
@@ -35,7 +35,18 @@ export function getOrganizationSource(org: SourceInput): OrganizationSource | nu
   if (fromDesc) return fromDesc;
 
   const slug = org.slug.toLowerCase();
+  const id = org.id.toLowerCase();
   const website = org.website?.trim() ?? "";
+
+  if (slug.startsWith("hdx-") || id.startsWith("hdx-")) {
+    return { label: "HDX", url: "https://data.humdata.org" };
+  }
+  if (slug.startsWith("gdho-") || id.startsWith("gdho-")) {
+    return {
+      label: "GDHO",
+      url: "https://humanitarianoutcomes.org/gdho",
+    };
+  }
 
   if (slug.startsWith("srcs-") && slug.endsWith("-sudan")) {
     return { label: "srcs.sd", url: "https://www.srcs.sd" };

@@ -3,7 +3,38 @@ import type { Organization } from "@/lib/types";
 
 const DUPLICATE_RADIUS_MILES = 0.05;
 
-/** Merge Supabase catalog and Overpass OSM sources; catalog wins duplicates. */
+function normalizeOrgName(name: string): string {
+  return name
+    .toLowerCase()
+    .replace(/[^a-z0-9\u0400-\u04ff]+/g, " ")
+    .trim();
+}
+
+function isDuplicateOrganization(
+  existing: Organization,
+  candidate: Organization,
+): boolean {
+  if (normalizeOrgName(existing.name) === normalizeOrgName(candidate.name)) {
+    return true;
+  }
+
+  const hasCoords =
+    Number.isFinite(existing.lat) &&
+    Number.isFinite(existing.lng) &&
+    Number.isFinite(candidate.lat) &&
+    Number.isFinite(candidate.lng) &&
+    !(existing.lat === 0 && existing.lng === 0) &&
+    !(candidate.lat === 0 && candidate.lng === 0);
+
+  if (!hasCoords) return false;
+
+  return (
+    distanceMiles(existing.lat, existing.lng, candidate.lat, candidate.lng) <
+    DUPLICATE_RADIUS_MILES
+  );
+}
+
+/** Merge sources; earlier batches win duplicates (name or proximity). */
 export function mergeOrganizations(
   catalog: Organization[],
   externalVerified: Organization[],
@@ -11,9 +42,8 @@ export function mergeOrganizations(
   const merged = [...catalog];
 
   for (const org of externalVerified) {
-    const isDuplicate = catalog.some(
-      (v) =>
-        distanceMiles(v.lat, v.lng, org.lat, org.lng) < DUPLICATE_RADIUS_MILES,
+    const isDuplicate = merged.some((existing) =>
+      isDuplicateOrganization(existing, org),
     );
     if (!isDuplicate) {
       merged.push(org);
