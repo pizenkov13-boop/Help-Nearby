@@ -34,11 +34,11 @@ INSERT INTO organizations (
 ),
 (
   'Реабилитационный приют Ночлежки',
-  'reabilitatsionnyy-priyt-nochelezhka-spb',
+  'reabilitatsionnyy-priyt-nochlezhka-spb',
   ARRAY['shelter'],
   '52 места (12 женских, 40 мужских). Жильё, еда, соцработники, юристы, психологи. Заселение через консультацию.',
   'ул. Боровая, 112Б (м. Обводный канал)',
-  'Saint Petersburg', 'Russia', 59.918504, 30.346321, '+78124073090', 'https://nochelezhka.ru',
+  'Saint Petersburg', 'Russia', 59.918504, 30.346321, '+78124073090', 'https://homeless.ru',
   NULL, true
 ),
 (

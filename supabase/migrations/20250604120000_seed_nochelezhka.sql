@@ -51,7 +51,7 @@ INSERT INTO organizations (
   ARRAY['volunteer'],
   'Соц. и юр. помощь, документы, пенсии. Вход с ул. Расстанной.',
   'ул. Боровая, 112Б (м. Обводный канал)',
-  'Saint Petersburg', 'Russia', 59.918504, 30.346321, '+78124073090', 'https://nochelezhka.ru',
+  'Saint Petersburg', 'Russia', 59.918504, 30.346321, '+78124073090', 'https://homeless.ru',
   'Соцработники: Пн,Вт,Ср,Пт 10:00–17:00 (перерыв 14:00–15:00). Юристы: Ср,Пт 10:00–17:00', true
 ),
 -- ========== СПб — ночной автобус Ночлежки (еда) ==========
@@ -61,7 +61,7 @@ INSERT INTO organizations (
   ARRAY['food'],
   'Горячая еда, доврачебная помощь, консультация соцработника.',
   'ст. м. Проспект Славы, ж/д платформа Сортировочная, Южное ш., 37, к. 4',
-  'Saint Petersburg', 'Russia', 59.866311, 30.424742, NULL, 'https://nochelezhka.ru',
+  'Saint Petersburg', 'Russia', 59.866311, 30.424742, NULL, 'https://homeless.ru',
   'Пн–Пт 19:00–19:30', true
 ),
 (
@@ -70,7 +70,7 @@ INSERT INTO organizations (
   ARRAY['food'],
   'Горячая еда, доврачебная помощь.',
   'ж/д платформа Лигово, Таллинское ш., 90',
-  'Saint Petersburg', 'Russia', 59.821657, 30.185917, NULL, 'https://nochelezhka.ru',
+  'Saint Petersburg', 'Russia', 59.821657, 30.185917, NULL, 'https://homeless.ru',
   'Пн–Пт 20:30–21:00', true
 ),
 (
@@ -79,7 +79,7 @@ INSERT INTO organizations (
   ARRAY['food'],
   'Горячая еда. Парковка перед мемориальным кладбищем.',
   'ст. м. Приморская (парковка напротив пр. КИМа, 1)',
-  'Saint Petersburg', 'Russia', 59.90042, 30.214641, NULL, 'https://nochelezhka.ru',
+  'Saint Petersburg', 'Russia', 59.90042, 30.214641, NULL, 'https://homeless.ru',
   'Пн–Пт 22:00–22:30', true
 ),
 (
@@ -88,7 +88,7 @@ INSERT INTO organizations (
   ARRAY['food'],
   'Горячая еда. Сквер напротив ул. Кантемировской, 37.',
   'ст. м. Лесная, сквер напротив ул. Кантемировской, 37',
-  'Saint Petersburg', 'Russia', 59.98549, 30.353688, NULL, 'https://nochelezhka.ru',
+  'Saint Petersburg', 'Russia', 59.98549, 30.353688, NULL, 'https://homeless.ru',
   'Пн–Пт 23:00–23:30', true
 ),
 -- ========== СПб — другие раздачи еды ==========
@@ -207,7 +207,7 @@ INSERT INTO organizations (
   ARRAY['shelter'],
   '40 мест. Ночлег, душ, туалет, прачечная. Без справок.',
   'ст. м. Обухово, пр. Девятого Января, 8',
-  'Saint Petersburg', 'Russia', 59.8505, 30.450455, NULL, 'https://nochelezhka.ru',
+  'Saint Petersburg', 'Russia', 59.8505, 30.450455, NULL, 'https://homeless.ru',
   'Ежедневно 20:00–08:00, круглый год', true
 ),
 (
@@ -216,7 +216,7 @@ INSERT INTO organizations (
   ARRAY['shelter'],
   '50 мест. С 15 октября по 15 апреля. Ночлег, питание.',
   'ст. м. Площадь Мужества, Политехническая ул., 11Б (вход с Новороссийской)',
-  'Saint Petersburg', 'Russia', 60.001728, 30.366316, NULL, 'https://nochelezhka.ru',
+  'Saint Petersburg', 'Russia', 60.001728, 30.366316, NULL, 'https://homeless.ru',
   '15.10–15.04, ежедневно 20:00–08:00', true
 ),
 (
@@ -225,7 +225,7 @@ INSERT INTO organizations (
   ARRAY['shelter'],
   '50 мест. Сезонный обогрев.',
   'ст. м. Приморская, Шкиперский проток, 18, к. 16',
-  'Saint Petersburg', 'Russia', 59.9345, 30.222649, NULL, 'https://nochelezhka.ru',
+  'Saint Petersburg', 'Russia', 59.9345, 30.222649, NULL, 'https://homeless.ru',
   '15.10–15.04, ежедневно 20:00–08:00', true
 ),
 -- ========== СПб — прачечная, душ, одежда (Ночлежка) ==========
@@ -235,7 +235,7 @@ INSERT INTO organizations (
   ARRAY['clothing'],
   'Бесплатная стирка и сушка, стрижка.',
   'ул. Боровая, 116',
-  'Saint Petersburg', 'Russia', 59.906953, 30.343003, NULL, 'https://nochelezhka.ru',
+  'Saint Petersburg', 'Russia', 59.906953, 30.343003, NULL, 'https://homeless.ru',
   'Пн–Пт 10:00–17:00 (приём до 14:30)', true
 ),
 (
@@ -244,7 +244,7 @@ INSERT INTO organizations (
   ARRAY['clothing'],
   'Одежда, обувь, гигиена, душ. Чт — только для женщин.',
   'ул. Боровая, 112Б',
-  'Saint Petersburg', 'Russia', 59.918504, 30.346321, NULL, 'https://nochelezhka.ru',
+  'Saint Petersburg', 'Russia', 59.918504, 30.346321, NULL, 'https://homeless.ru',
   'Пн,Вт,Ср,Пт 12:00–14:00; Чт только женщины', true
 ),
 (
@@ -253,7 +253,7 @@ INSERT INTO organizations (
   ARRAY['clothing'],
   'Бесплатный душ.',
   'ул. Политехническая, 11Б',
-  'Saint Petersburg', 'Russia', 60.001728, 30.366316, NULL, 'https://nochelezhka.ru',
+  'Saint Petersburg', 'Russia', 60.001728, 30.366316, NULL, 'https://homeless.ru',
   'Вт–Сб (зима 15:00–22:00, лето 10:00–17:00)', true
 ),
 -- ========== СПб — медицина (из справочника) ==========

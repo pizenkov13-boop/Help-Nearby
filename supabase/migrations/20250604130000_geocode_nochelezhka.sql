@@ -74,7 +74,7 @@ FROM (
     ('zhenskaya-gruppa-rubinshteina-spb', 59.927378, 30.342749),
     ('spid-anon-kabinet-108-spb', 59.909665, 30.295238),
     ('mchs-warming-ligovo-spb', 59.8962, 30.3552),
-    ('reabilitatsionnyy-priyt-nochelezhka-spb', 59.918504, 30.346321),
+    ('reabilitatsionnyy-priyt-nochlezhka-spb', 59.918504, 30.346321),
     ('parikmakherskaya-krupskoy-spb', 59.9072, 30.2621)
 ) AS v(slug, lat, lng)
 WHERE o.slug = v.slug;
