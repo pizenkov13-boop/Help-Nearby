@@ -12,9 +12,33 @@ test.describe("Home page", () => {
   test.describe.configure({ mode: "serial" });
 
   test.beforeEach(async ({ page }) => {
+    await page.setViewportSize({ width: 1280, height: 720 });
     await preferFullMode(page);
     await mockNearbyApi(page);
     await grantNycLocation(page);
+  });
+
+  test("emergency help modal opens and loads list", async ({ page }) => {
+    await page.goto("/");
+
+    const emergencyBtn = headerNav(page).getByRole("button", {
+      name: /Emergency Help/i,
+    });
+    await expect(emergencyBtn).toBeVisible();
+    await emergencyBtn.click();
+
+    const dialog = page.getByRole("dialog");
+    await expect(page.locator("#emergency-dialog-title")).toBeVisible({
+      timeout: 15_000,
+    });
+    await expect(dialog.getByRole("heading", { name: /24\/7 Emergency Help/i })).toBeVisible();
+
+    await expect(
+      dialog.locator("li").first().or(dialog.getByText(/no organizations/i)),
+    ).toBeVisible({ timeout: 45_000 });
+
+    await dialog.locator(".relative.z-10 button[aria-label='Close']").click();
+    await expect(dialog).toBeHidden();
   });
 
   test("hero CTA loads organizations and map", async ({ page }) => {
@@ -48,19 +72,27 @@ test.describe("Home page", () => {
     expect(filtered).toBeLessThanOrEqual(total);
   });
 
-  test("emergency help modal opens and loads list", async ({ page }) => {
-    await page.goto("/");
-    await headerNav(page).getByRole("button", { name: /Emergency Help/i }).click();
+  test("verified organizations show badge and source", async ({ page }) => {
+    await openMapWithOrgs(page);
 
-    const dialog = page.getByRole("dialog");
-    await expect(dialog).toBeVisible();
-    await expect(dialog.getByRole("heading", { name: /Emergency Help/i })).toBeVisible();
+    const verifiedCard = orgCards(page).filter({ hasText: "E2E Test Food Bank" });
+    await expect(verifiedCard.getByText(/^Verified$/)).toBeVisible();
+  });
 
-    await expect(
-      dialog.locator("li").first().or(dialog.getByText(/no organizations/i)),
-    ).toBeVisible({ timeout: 45_000 });
+  test("lite mode renders list without full map", async ({ page }) => {
+    await openMapWithOrgs(page);
 
-    await dialog.locator(".relative.z-10 button[aria-label='Close']").click();
-    await expect(dialog).toBeHidden();
+    await page.getByRole("button", { name: /Switch to lite mode/i }).click();
+    await expect(page.getByText(/Lite mode active/i)).toBeVisible();
+    await expect(page.locator(".leaflet-container")).toHaveCount(0);
+    expect(await orgCards(page).count()).toBeGreaterThan(0);
+  });
+
+  test("mobile viewport shows map and organization list", async ({ page }) => {
+    await page.setViewportSize({ width: 390, height: 844 });
+    await openMapWithOrgs(page);
+
+    await expect(page.locator(".leaflet-container")).toBeVisible();
+    expect(await orgCards(page).count()).toBeGreaterThan(0);
   });
 });

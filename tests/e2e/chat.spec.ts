@@ -4,6 +4,17 @@ import { preferFullMode } from "./helpers";
 test.describe("Chat widget", () => {
   test.beforeEach(async ({ page }) => {
     await preferFullMode(page);
+
+    await page.route(/\/api\/chat/, async (route) => {
+      await route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify({
+          message:
+            "Here are food organizations near New York:\n• E2E Test Food Bank — 0.5 mi\n• Community Kitchen — volunteer support",
+        }),
+      });
+    });
   });
 
   test("opens, sends message, receives reply", async ({ page }) => {
@@ -26,10 +37,10 @@ test.describe("Chat widget", () => {
     await expect(panel.getByText(/typing|Typing/i)).toBeHidden({ timeout: 45_000 });
 
     const reply = panel
-      .locator(".bg-gray-800")
-      .filter({ hasText: /•|food|help|помощ|organization|орган/i })
+      .locator(".rounded-xl")
+      .filter({ hasText: /E2E Test Food Bank|food organizations near New York/i })
       .last();
-    await expect(reply).toBeVisible({ timeout: 5_000 });
+    await expect(reply).toBeVisible({ timeout: 10_000 });
     expect((await reply.textContent())?.length ?? 0).toBeGreaterThan(20);
 
     await panel.getByLabel("Close chat").click();

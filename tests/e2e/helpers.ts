@@ -25,7 +25,7 @@ export const MOCK_NEARBY_ORGS: Organization[] = [
     hours: {},
     hoursRaw: "",
     openNow: true,
-    verified: false,
+    verified: true,
   },
   {
     id: "e2e-shelter-1",
@@ -71,6 +71,14 @@ export async function mockNearbyApi(page: Page) {
     });
   });
 
+  await page.route(/\/api\/verified-nearby/, async (route) => {
+    await route.fulfill({
+      status: 200,
+      contentType: "application/json",
+      body: JSON.stringify([]),
+    });
+  });
+
   await page.route(/\/rest\/v1\/organizations/, async (route) => {
     await route.fulfill({
       status: 200,
@@ -108,7 +116,7 @@ export async function grantNycLocation(page: Page) {
 }
 
 export function orgCards(page: Page) {
-  return page.locator(".map-panel article");
+  return page.locator(".map-panel .grid.w-full > article");
 }
 
 export async function openMapWithOrgs(page: Page) {
