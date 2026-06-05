@@ -1,134 +1,146 @@
-# Help Nearby 🌍
+# Help Nearby
 
-**Find life-saving help near you — anywhere in the world.**
+[![Live Site](https://img.shields.io/badge/Live-help--nearby.org-2563eb?style=flat-square)](https://help-nearby.org)
+[![Languages](https://img.shields.io/badge/Languages-7-10b981?style=flat-square)](#features)
+[![Next.js](https://img.shields.io/badge/Next.js-16.2.6-000000?style=flat-square&logo=next.js&logoColor=white)](https://nextjs.org/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5-3178c6?style=flat-square&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
 
-[Live Demo](https://help-nearby.org) · [Submit an organization](https://help-nearby.org/submit) · [Leave a review](https://help-nearby.org/reviews)
+**Find free humanitarian assistance near you — food, shelter, medical aid, clothing, and volunteer support on one map.**
+
+[Live app](https://help-nearby.org) · [Submit an organization](https://help-nearby.org/submit) · [Leave a review](https://help-nearby.org/reviews)
 
 ---
 
 ## About
 
-**Help Nearby** is a free, open-source platform that connects people in crisis with local assistance organizations worldwide — food banks, shelters, medical aid, clothing donations, and volunteer opportunities.
+**Help Nearby** is a free, open-source web platform that helps people in crisis find local assistance organizations. It combines a **verified catalog** stored in Supabase with **live OpenStreetMap data** from the Overpass API, then shows results on an interactive map or in a lightweight list view.
 
-The project was built by a 15-year-old developer from Russia with a simple goal: make it fast and easy for anyone, on any device, to find trusted help close to where they are.
-
-Whether someone is facing hunger, homelessness, or an emergency, Help Nearby turns scattered information into one clear map and list — in their own language.
+The project was built by **Pavel Izenkin**, 15, from Prokopyevsk, Russia — with the goal of making trusted help easy to find on any device, in any language, even on slow networks.
 
 ---
 
-## Story
+## Status
 
-Help Nearby was built by **Pavel Izenkin**, a 15-year-old from Prokopyevsk, a small coal-mining city in Siberia. With no professional coding background, Pavel and a friend pooled together 6000 rubles (about $70) for AI tool subscriptions, and built the first working version in 12 days.
+| | |
+|---|---|
+| **Development** | April 16 – June 4, 2026 (7 weeks) |
+| **Production** | [help-nearby.org](https://help-nearby.org) |
+| **Prize submission** | Zayed Sustainability Prize **2027** — Global High Schools category |
+| **Analytics** | Used in **24 countries** in the first month after launch (April 2026), tracked via PostHog |
 
-The project started during work on a UN Sustainable Development Goals challenge — and continued because real users in Russia, Sudan, Egypt, and other countries began using it.
+---
 
-A user from Egypt asked for Arabic language support and a lite mode for slow internet — we built both. That's the principle: **real users, real feedback, honest data.**
+## Verified humanitarian directory
+
+These organizations are seeded in Supabase with `verified = true` and official source attribution. Counts are from the SQL seed files in this repository (not a live DB query).
+
+| Region / source | Organizations | Seed file | Official source |
+|-----------------|---------------|---------|-----------------|
+| Russia (Nochelezhka / homeless.ru) | **70** | `supabase/RUN_NOCHELEZHKa.sql` | [nochelezhka.ru](https://nochelezhka.ru) · [homeless.ru](https://homeless.ru) |
+| Sudan (Sudanese Red Crescent) | **18** | `supabase/RUN_SUDAN_RED_CRESCENT.sql` | [srcs.sd](https://www.srcs.sd) |
+| Kazakhstan (Red Crescent) | **16** | `supabase/RUN_KAZAKHSTAN_RED_CRESCENT.sql` | [redcrescent.kz](https://redcrescent.kz) |
+| UAE (Emirates Red Crescent) | **10** | `supabase/RUN_UAE_RED_CRESCENT.sql` | [emiratesrc.ae](https://emiratesrc.ae) |
+| Belarus (Red Cross) | **9** | `supabase/RUN_BELARUS_RED_CROSS.sql` | [redcross.by](https://redcross.by) |
+| Demo seed (New York, US) | **3** | `supabase/migrations/20250319000001_seed_organizations.sql` | Example data |
+| **Total (all seeds)** | **126** | | |
+
+Community submissions via `/submit` are stored as **unverified** until approved in `/admin`.
 
 ---
 
 ## Features
 
 | Feature | Description |
-|--------|-------------|
-| 🗺️ **Interactive map** | Real-time geolocation, street-level routing (OSRM), and organization markers |
-| 🌍 **OSM coverage** | OpenStreetMap via Overpass API — any city where OSM has relevant organization data (coverage varies) |
-| 🆘 **Emergency Help** | One-tap access to **24/7** organizations (hospitals, pharmacies, ambulance stations) sorted by distance |
-| 🔍 **Smart search** | Real-time filter by name, city, or address — works with country & category filters |
-| 📞 **Call Now** | One-tap `tel:` links on mobile; phone number on hover on desktop |
-| 🤖 **AI assistant** | Powered by **Groq** (Llama 3.3 70B) — answers questions about nearby help |
-| 🌐 **7 languages** | English, Russian, Spanish, French, German, Chinese, Arabic (RTL support) |
-| 📱 **PWA** | Installable as PWA (Progressive Web App). Service worker serves a static offline page if navigation fails without network; search, map, and APIs require a connection |
-| ⚡ **Lite mode** | Auto-enabled on slow networks (2G / slow-3G) or in low-connectivity regions — list-only, no map, loads fast |
-| ☀️ **Adaptive theme** | Automatic light/dark theme detection — light theme auto-enabled for users in sunny regions (Africa, Arabian Peninsula, Middle East, South Asia, Australia, etc.) where dark screens are unreadable in bright sunlight. Manual toggle also available. |
-| ✅ **Verified organizations** | Community submissions reviewed by admin before showing a verified badge |
-| 💬 **Reviews** | User feedback with admin moderation |
-| 📊 **Impact counter** | Counts today’s Call and Directions button clicks (stored in Supabase); not a verified count of people who received aid |
+|---------|-------------|
+| **Interactive map** | Leaflet map with category markers, verified badge, and source labels |
+| **Two-tier data** | **Tier 1:** Supabase verified catalog · **Tier 2:** live Overpass OSM queries |
+| **Emergency mode** | One-tap list of 24/7 organizations (hospitals, pharmacies, shelters) |
+| **Smart radius search** | Auto-expands search radius until results are found |
+| **Turn-by-turn routing** | OSRM routing via `/api/route` |
+| **7 languages** | English, Russian, Spanish, French, German, Chinese, Arabic (RTL) |
+| **Lite mode** | List-only view (no map tiles) for slow networks and low-connectivity regions |
+| **Adaptive theme** | Auto light theme in sunny regions; manual dark/light toggle |
+| **AI assistant** | Groq (Llama 3.3 70B) chat for help finding nearby services |
+| **PWA** | Installable; offline fallback page via service worker |
+| **Admin moderation** | Password-protected `/admin` for org and review approval |
+| **Impact counter** | Tracks Call / Directions clicks in Supabase (usage signal, not aid delivery proof) |
 
 ---
 
-## Adaptive theme — why it matters
+## Data sources & integrations
 
-Most apps use a dark theme by default, but for many of our users this is a real accessibility barrier. People in Sudan, Egypt, Yemen, Afghanistan, and other sunny regions cannot read dark screens in bright outdoor sunlight — and these are exactly the regions where humanitarian help is needed most.
+### Active in production search flow
 
-Help Nearby detects the user's region and automatically switches to a light theme for users in high-sunlight countries. Users in other regions get the default dark theme. A manual sun/moon toggle is always available in the top bar.
+| Source | Role | Code |
+|--------|------|------|
+| **Supabase** | Verified organization catalog (PostgreSQL + RLS) | `lib/data.ts` |
+| **OpenStreetMap / Overpass** | Live POI search worldwide | `lib/overpass.server.ts` → `/api/nearby` |
+| **Nominatim** | Forward/reverse geocoding for addresses | `lib/nominatim.server.ts` → `/api/geocode` |
+| **OSRM** | Turn-by-turn routing | `lib/osrmRouting.server.ts` → `/api/route` |
 
-This is a small change with a big impact: a person in Khartoum at noon can actually read the screen and find help nearby. That's the principle of the whole project — making the platform usable for the people who actually need it.
+### Implemented in codebase (not wired to main search on current `main`)
 
----
+These modules exist and are tested in code, but `fetchVerifiedNearbyOrganizations` is **not called** from the deployed nearby search flow yet:
 
-## Impact
-
-Used by people from **24 countries** in the first month after launch (April 2026), including users from Russia, Kazakhstan, Belarus, Sudan, Egypt, and the United States. Tracked via [PostHog](https://posthog.com/) analytics.
-
-- **Impact counter** — displays the number of Call / Directions button clicks recorded today in Supabase; a usage signal, not proof that someone received aid
-- **OpenStreetMap coverage** — organization search works wherever OSM has relevant POI data (quality varies by region)
-- **Mission alignment** — references UN SDGs (1, 2, 3) as guiding themes shown in the footer; not a UN partnership or endorsement
-
----
-
-## Data sources
-
-Help Nearby uses two data layers:
-
-1. **OpenStreetMap (Overpass API)** — covers any city worldwide where OSM has data on humanitarian organizations
-2. **A small verified network of organizations in our region**, manually checked by our team against official public sources
-
-We do **not** have formal partnerships with UN agencies. Our partner is [Kindness Corporation](https://www.kindnesscorporation.ru/) (community organization).
-
-Verified entries in Supabase are moderated through `/admin`. Everything else comes from live Overpass queries and is only as accurate as the underlying OSM tags.
+| Source | File | Status on `main` |
+|--------|------|------------------|
+| **HDX** (UN OCHA Humanitarian Data Exchange) | `lib/hdx.ts` | Module ready · used in `lib/verifiedNearby.server.ts` |
+| **GDHO** (Global Directory of Humanitarian Organizations) | `lib/gdho.ts` | Module ready · used in `lib/verifiedNearby.server.ts` |
+| **ReliefWeb** | `lib/reliefweb.ts` | Local branch only · **not deployed** (API approval pending) |
 
 ---
 
-## Tech Stack
+## Tech stack
 
-| Layer | Technology |
-|-------|------------|
-| Framework | [Next.js 16](https://nextjs.org/) (App Router), [TypeScript](https://www.typescriptlang.org/) |
-| Styling | [Tailwind CSS](https://tailwindcss.com/), [Radix UI](https://www.radix-ui.com/) |
-| Database | [Supabase](https://supabase.com/) (PostgreSQL + Row Level Security) |
-| Maps | [Leaflet](https://leafletjs.com/) + [react-leaflet](https://react-leaflet.js.org/), [OpenStreetMap](https://www.openstreetmap.org/) tiles |
-| Geocoding & POIs | [Nominatim](https://nominatim.org/), [Overpass API](https://wiki.openstreetmap.org/wiki/Overpass_API) |
-| Routing | [OSRM](http://project-osrm.org/) |
-| AI | [Groq](https://groq.com/) — Llama 3.3 70B Versatile |
-| Analytics | [PostHog](https://posthog.com/) |
-| Hosting | [Vercel](https://vercel.com/) |
+Verified from `package.json` and project source:
 
----
-
-## Live Demo
-
-👉 **[https://help-nearby.org](https://help-nearby.org)**
-
----
-
-## Zayed Sustainability Prize 2026
-
-This project is submitted for the **Zayed Sustainability Prize 2026** — **Global High Schools** category.
-
-Help Nearby demonstrates how young innovators can use open data and accessible technology to help people find local assistance — with clear limits on what the data can guarantee.
+| Layer | Technology | Version |
+|-------|------------|---------|
+| Framework | [Next.js](https://nextjs.org/) (App Router) | **16.2.6** |
+| Language | [TypeScript](https://www.typescriptlang.org/) | **5.x** |
+| UI | [React](https://react.dev/) | **18** |
+| Styling | [Tailwind CSS](https://tailwindcss.com/) | **3.4.1** |
+| Components | [Radix UI](https://www.radix-ui.com/) (`@radix-ui/react-slot`), [Lucide](https://lucide.dev/) icons | — |
+| Database | [Supabase](https://supabase.com/) (`@supabase/supabase-js`) | **2.106.0** |
+| Maps | [Leaflet](https://leafletjs.com/) + [react-leaflet](https://react-leaflet.js.org/) | 1.9.4 / 4.2.1 |
+| Geocoding | [Nominatim](https://nominatim.org/) | via `/api/geocode` |
+| POI data | [Overpass API](https://wiki.openstreetmap.org/wiki/Overpass_API) | via `/api/nearby` |
+| Routing | [OSRM](http://project-osrm.org/) | via `/api/route` |
+| AI chat | [Groq](https://groq.com/) — `llama-3.3-70b-versatile` | via `/api/chat` |
+| Analytics | [PostHog](https://posthog.com/) (`posthog-js`) | **1.374.3** |
+| Hosting | [Vercel](https://vercel.com/) | Production + preview deploys |
+| E2E tests | [Playwright](https://playwright.dev/) | **1.60.0** |
 
 ---
 
-## Getting Started
+## Live deployment
+
+| Environment | URL |
+|-------------|-----|
+| **Production (primary)** | [https://help-nearby.org](https://help-nearby.org) |
+| **Vercel (legacy redirect)** | [https://help-nearby-jgvv.vercel.app](https://help-nearby-jgvv.vercel.app) → redirects to `help-nearby.org` |
+
+---
+
+## Getting started
 
 ### Prerequisites
 
-- [Node.js](https://nodejs.org/) 18+  
-- [npm](https://www.npmjs.com/) (or pnpm / yarn)  
-- A [Supabase](https://supabase.com/) project  
-- Optional: [Groq API](https://console.groq.com/) key for the AI chat  
+- Node.js 18+
+- npm (or pnpm / yarn)
+- A [Supabase](https://supabase.com/) project
 
 ### 1. Clone & install
 
 ```bash
-git clone https://github.com/YOUR_USERNAME/help-nearby.git
-cd help-nearby
+git clone https://github.com/pizenkov13-boop/Help-Nearby.git
+cd Help-Nearby
 npm install
 ```
 
 ### 2. Environment variables
 
-Create `.env.local` in the project root:
+Create `.env.local`:
 
 ```env
 # Supabase (required)
@@ -147,21 +159,26 @@ NEXT_PUBLIC_POSTHOG_KEY=your-posthog-key
 NEXT_PUBLIC_POSTHOG_HOST=https://us.i.posthog.com
 ```
 
-> **Never commit `.env.local` or secret keys to Git.**
+> Never commit `.env.local` or secret keys to Git.
 
 ### 3. Database setup
 
-Run the SQL migrations in order in the Supabase SQL Editor (or use the Supabase CLI):
+Run migrations in order in the Supabase SQL Editor, then apply regional seed files:
 
 ```
 supabase/migrations/20250319000000_create_organizations.sql
 supabase/migrations/20250319000001_seed_organizations.sql
-supabase/migrations/20250319000002_allow_organization_submit.sql
-supabase/migrations/20250320000000_create_reviews.sql
-supabase/migrations/20250320000001_mark_247_organizations.sql
-supabase/migrations/20250320000002_create_impact_clicks.sql
-supabase/migrations/20250320000003_admin_verify_organizations.sql
-supabase/migrations/20250320000004_reviews_approved.sql
+… (see supabase/migrations/ for full list)
+```
+
+Quick regional seeds (run in Supabase SQL Editor):
+
+```
+supabase/RUN_NOCHELEZHKa.sql
+supabase/RUN_SUDAN_RED_CRESCENT.sql
+supabase/RUN_KAZAKHSTAN_RED_CRESCENT.sql
+supabase/RUN_UAE_RED_CRESCENT.sql
+supabase/RUN_BELARUS_RED_CROSS.sql
 ```
 
 ### 4. Run locally
@@ -172,39 +189,29 @@ npm run dev
 
 Open [http://localhost:3000](http://localhost:3000).
 
-### 5. Build for production
+### 5. Build & test
 
 ```bash
 npm run build
-npm start
+npm run test:e2e
 ```
 
 ---
 
-## Admin
-
-Password-protected moderation at **`/admin`**:
-
-- Approve **organizations** submitted via the public form  
-- Approve or delete **reviews** before they appear on the site  
-
-Requires `ADMIN_PASSWORD` and `SUPABASE_SERVICE_ROLE_KEY` in `.env.local`.
-
----
-
-## Project Structure
+## Project structure
 
 ```
 app/                 # Next.js App Router pages & API routes
 components/          # React UI (map, filters, emergency, chat, …)
 lib/                 # Data, geocoding, routing, i18n, Supabase helpers
 public/              # PWA manifest, icons, service worker
-supabase/migrations/ # PostgreSQL schema & policies
+supabase/migrations/ # PostgreSQL schema, policies, and seed SQL
+scripts/             # Geocoding and build utilities
 ```
 
 ---
 
-## API Routes (overview)
+## API routes
 
 | Route | Purpose |
 |-------|---------|
@@ -212,6 +219,7 @@ supabase/migrations/ # PostgreSQL schema & policies
 | `/api/emergency` | 24/7 Supabase + Overpass emergency list |
 | `/api/route` | OSRM turn-by-turn routing |
 | `/api/geocode` | Nominatim address → coordinates |
+| `/api/geocode/reverse` | Coordinates → country |
 | `/api/submit` | Public organization submissions |
 | `/api/reviews` | Approved reviews (GET) / new review (POST) |
 | `/api/chat` | Groq AI assistant |
@@ -222,41 +230,40 @@ supabase/migrations/ # PostgreSQL schema & policies
 
 ## Contributing
 
-Contributions are welcome — especially:
+Contributions are welcome — especially organization data for underserved regions, translations, and performance fixes on slow networks.
 
-- Organization data for underserved regions  
-- Translations and accessibility improvements  
-- Bug reports and performance fixes on slow networks  
-
-1. Fork the repository  
-2. Create a feature branch (`git checkout -b feature/amazing-feature`)  
-3. Commit your changes  
-4. Open a Pull Request  
+1. Fork [pizenkov13-boop/Help-Nearby](https://github.com/pizenkov13-boop/Help-Nearby)
+2. Create a feature branch (`git checkout -b feature/your-feature`)
+3. Commit your changes
+4. Open a Pull Request
 
 Please do not include API keys or `.env.local` in submissions.
 
 ---
 
-## Roadmap (2026–2028, with Zayed Sustainability Prize support)
+## Founder
 
-- **1200** manually verified humanitarian organizations across **12 countries** in Europe & Central Asia
-- Reach **30,000** people seeking help
-- Native mobile app (iOS / Android)
-- Expanded language support
-- Partnership network with regional NGOs
+**Pavel Izenkin** — 15 years old, Prokopyevsk, Russia.
+
+Built with support from the open-source community, OpenStreetMap contributors, Supabase, and Groq.
+
+Community partner: [Kindness Corporation](https://www.kindnesscorporation.ru/)
 
 ---
 
 ## License
 
-This project is open source. See repository license terms for details.
+No `LICENSE` file is present in this repository at this time.  
+If you plan to use, fork, or redistribute this project, please contact the maintainer for terms.
 
 ---
 
-## Contact & Links
+## Repository
 
-- **Live app:** [help-nearby.org](https://help-nearby.org)  
-- **Built with:** OpenStreetMap contributors, Supabase, Groq, and the open-source community  
+| | |
+|---|---|
+| **GitHub** | [github.com/pizenkov13-boop/Help-Nearby](https://github.com/pizenkov13-boop/Help-Nearby) |
+| **Default branch** | `main` |
 
 ---
 
