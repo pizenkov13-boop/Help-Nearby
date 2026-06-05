@@ -22,6 +22,7 @@ import {
   getPhoneTelUrl,
   isOrganizationOpen,
 } from "@/lib/orgUtils";
+import { getOrganizationSource } from "@/lib/organizationSource";
 import type { Organization } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
@@ -42,6 +43,7 @@ export function OrganizationCard({
 }: OrganizationCardProps) {
   const { t } = useLanguage();
   const cfg = CATEGORY_CONFIG[org.category];
+  const source = getOrganizationSource(org);
   const open = isOrganizationOpen(org);
   const directionsUrl = getDirectionsUrl(org);
   const telUrl = getPhoneTelUrl(org.phone);
@@ -90,6 +92,26 @@ export function OrganizationCard({
         <span className="inline-flex items-center gap-0.5 rounded-full bg-emerald-500/20 px-2 py-0.5 text-xs font-semibold text-emerald-400 ring-1 ring-emerald-500/30">
           <BadgeCheck className="h-3 w-3 shrink-0" aria-hidden />
           {t("verified")}
+        </span>
+      )}
+      {source && (
+        <span className="inline-flex max-w-full items-center rounded-full bg-slate-100 px-2 py-0.5 text-xs font-medium text-slate-600 dark:bg-gray-700/60 dark:text-gray-300">
+          <span className="shrink-0 text-slate-400 dark:text-gray-500">
+            {t("citySourceLabel")}{" "}
+          </span>
+          {source.url ? (
+            <a
+              href={source.url}
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={(e) => e.stopPropagation()}
+              className="truncate text-blue-600 hover:underline dark:text-blue-400"
+            >
+              {source.label}
+            </a>
+          ) : (
+            <span className="truncate">{source.label}</span>
+          )}
         </span>
       )}
       {org.verified && (

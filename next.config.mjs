@@ -25,6 +25,17 @@ const nextConfig = {
     }
     return config;
   },
+  async redirects() {
+    const productionHost = "help-nearby.org";
+    const legacyVercelHosts = ["help-nearby-jgvv.vercel.app"];
+
+    return legacyVercelHosts.map((host) => ({
+      source: "/:path*",
+      has: [{ type: "host", value: host }],
+      destination: `https://${productionHost}/:path*`,
+      permanent: true,
+    }));
+  },
   async headers() {
     const swHeaders = [
       {

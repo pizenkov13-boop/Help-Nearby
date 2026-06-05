@@ -17,6 +17,7 @@ import {
   categoryIconMarkup,
   verifiedCheckMarkup,
 } from "@/lib/categoryIconMarkup";
+import { getOrganizationSource } from "@/lib/organizationSource";
 
 const DefaultIcon = L.icon({
   iconUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png",
@@ -142,6 +143,10 @@ function buildOrganizationPopup(org: Organization) {
   const verified = org.verified
     ? `<span style="display:inline-flex;align-items:center;margin-left:4px;color:#34d399;vertical-align:middle;">${verifiedCheckMarkup(14, "#34d399")}</span>`
     : "";
+  const source = getOrganizationSource(org);
+  const sourceLine = source
+    ? `<br /><span style="font-size:11px;color:#6b7280;">Source: ${source.label}</span>`
+    : "";
   const address = org.address
     ? `<br /><span style="font-size:12px;color:#9ca3af;">${org.address}</span>`
     : "";
@@ -149,7 +154,7 @@ function buildOrganizationPopup(org: Organization) {
 
   return `<div style="font-size:14px;">
     <strong>${org.name}</strong>${verified}<br />
-    <span style="display:inline-flex;align-items:center;gap:4px;">${icon} ${org.category}</span>${address}
+    <span style="display:inline-flex;align-items:center;gap:4px;">${icon} ${org.category}</span>${sourceLine}${address}
   </div>`;
 }
 

@@ -2,7 +2,7 @@
 
 **Find life-saving help near you — anywhere in the world.**
 
-[Live Demo](https://help-nearby-jgvv.vercel.app) · [Submit an organization](https://help-nearby-jgvv.vercel.app/submit) · [Leave a review](https://help-nearby-jgvv.vercel.app/reviews)
+[Live Demo](https://help-nearby.org) · [Submit an organization](https://help-nearby.org/submit) · [Leave a review](https://help-nearby.org/reviews)
 
 ---
 
@@ -97,7 +97,7 @@ Verified entries in Supabase are moderated through `/admin`. Everything else com
 
 ## Live Demo
 
-👉 **[https://help-nearby-jgvv.vercel.app](https://help-nearby-jgvv.vercel.app)**
+👉 **[https://help-nearby.org](https://help-nearby.org)**
 
 ---
 
@@ -255,7 +255,7 @@ This project is open source. See repository license terms for details.
 
 ## Contact & Links
 
-- **Live app:** [help-nearby-jgvv.vercel.app](https://help-nearby-jgvv.vercel.app)  
+- **Live app:** [help-nearby.org](https://help-nearby.org)  
 - **Built with:** OpenStreetMap contributors, Supabase, Groq, and the open-source community  
 
 ---
