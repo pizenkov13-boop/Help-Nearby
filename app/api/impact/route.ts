@@ -6,7 +6,7 @@ import {
   type ImpactAction,
 } from "@/lib/impact.server";
 
-export const runtime = "nodejs";
+export const runtime = "edge";
 export const dynamic = "force-dynamic";
 
 function isImpactAction(value: unknown): value is ImpactAction {

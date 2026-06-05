@@ -9,7 +9,7 @@ import {
 import { resolveSearchIntent } from "@/lib/chatIntent.server";
 import { getGroqApiKey } from "@/lib/env.server";
 
-export const runtime = "nodejs";
+export const runtime = "edge";
 export const dynamic = "force-dynamic";
 
 const GROQ_MODEL = "llama-3.3-70b-versatile";

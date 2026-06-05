@@ -1,13 +1,9 @@
 import "server-only";
 
-import { loadEnvConfig } from "@next/env";
-
 let envLoaded = false;
 
-/** Loads .env.local for API routes and server-only modules. */
+/** Server env accessors. Edge/Cloudflare inject vars at runtime; Next.js loads .env.local in dev. */
 export function ensureEnvLoaded() {
-  if (envLoaded) return;
-  loadEnvConfig(process.cwd());
   envLoaded = true;
 }
 

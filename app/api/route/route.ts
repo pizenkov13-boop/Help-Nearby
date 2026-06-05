@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { fetchSnappedWalkingRoute } from "@/lib/osrmRouting.server";
 import type { RoutingMode } from "@/lib/routing";
 
-export const runtime = "nodejs";
+export const runtime = "edge";
 export const dynamic = "force-dynamic";
 
 function isRoutingMode(value: string | null): value is RoutingMode {
