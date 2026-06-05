@@ -3,7 +3,7 @@ import { submitOrganization } from "@/lib/submit";
 import type { Category } from "@/lib/types";
 import { CATEGORIES } from "@/lib/categories";
 
-export const runtime = "edge";
+export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
 function isCategory(value: unknown): value is Category {

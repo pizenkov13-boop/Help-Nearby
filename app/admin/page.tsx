@@ -3,7 +3,7 @@ import { AdminPage } from "@/components/pages/AdminPage";
 import { getAdminPassword, isAdminAuthenticated } from "@/lib/adminAuth";
 import { getSupabaseAdmin } from "@/lib/supabaseAdmin";
 
-export const runtime = "edge";
+export const runtime = "nodejs";
 
 export const metadata: Metadata = {
   title: "Admin — Help Nearby",
