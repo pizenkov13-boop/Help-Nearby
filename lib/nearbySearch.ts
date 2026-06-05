@@ -1,4 +1,5 @@
 import { fetchOrganizations } from "@/lib/data";
+import { geocodeVerifiedCatalog } from "@/lib/geocodeVerifiedCatalog";
 import { validateOrganizationForNearby } from "@/lib/organizationCoordinates";
 import { mergeOrganizations } from "@/lib/mergeOrganizations";
 import {
@@ -48,6 +49,22 @@ function filterByRadius(
   return orgs
     .map((org) => validateOrganizationForNearby(org, location, radiusMeters))
     .filter((org): org is Organization => org !== null);
+}
+
+/** Supabase verified catalog: Nominatim first when lat/lng missing, then radius filter. */
+async function fetchSupabaseCatalog(
+  location: UserLocation,
+  country: string | undefined,
+  radiusMeters: number,
+  liteMode = false,
+): Promise<Organization[]> {
+  if (!country) {
+    return fetchOrganizations(location, { country, radiusMeters });
+  }
+
+  let catalog = await fetchOrganizations(null, { country });
+  catalog = await geocodeVerifiedCatalog(catalog, { liteMode });
+  return filterByRadius(catalog, location, radiusMeters);
 }
 
 async function fetchOverpassNearby(
@@ -139,10 +156,7 @@ export async function fetchMergedNearbyParallel(
   >,
   externalOrgs?: Organization[],
 ): Promise<MergedNearbyResult> {
-  const catalogPromise = fetchOrganizations(location, {
-    country,
-    radiusMeters,
-  });
+  const catalogPromise = fetchSupabaseCatalog(location, country, radiusMeters);
 
   const externalPromise =
     externalOrgs !== undefined
@@ -192,10 +206,12 @@ export async function searchNearbyWithSmartRadius(
   let externalTimedOut = false;
   const maxRadius = getMaxRadiusMeters(options.liteMode);
 
-  const catalogAtMaxPromise = fetchOrganizations(location, {
-    country: options.country,
-    radiusMeters: maxRadius,
-  });
+  const catalogAtMaxPromise = fetchSupabaseCatalog(
+    location,
+    options.country,
+    maxRadius,
+    options.liteMode,
+  );
 
   const overpassAtMaxPromise = fetchOverpassWithTimeout(location, maxRadius);
 
