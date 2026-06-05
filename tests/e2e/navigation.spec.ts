@@ -14,15 +14,15 @@ test.describe("Navigation", () => {
 
     const nav = headerNav(page);
 
-    await nav.locator('a[href="/about"]').click();
+    await nav.getByRole("link", { name: "About", exact: true }).click();
     await expect(page).toHaveURL(/\/about/);
     await expect(page.getByRole("heading", { name: /Our Story/i })).toBeVisible();
 
-    await nav.locator('a[href="/why-it-matters"]').click();
+    await nav.getByRole("link", { name: "Why It Matters", exact: true }).click();
     await expect(page).toHaveURL(/\/why-it-matters/);
     await expect(page.getByText(/Cities in Need/i).first()).toBeVisible();
 
-    await nav.locator('a[href="/reviews"]').click();
+    await nav.getByRole("link", { name: "Reviews", exact: true }).click();
     await expect(page).toHaveURL(/\/reviews/);
     await expect(page.getByRole("heading", { name: /Reviews/i })).toBeVisible();
 
