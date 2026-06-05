@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useCallback, useState } from "react";
 import {
   ArrowLeft,
+  BadgeCheck,
   Clock,
   Globe,
   Mail,
@@ -27,6 +28,7 @@ import {
   getPhoneTelUrl,
   isOrganizationOpen,
 } from "@/lib/orgUtils";
+import { getOrganizationSource } from "@/lib/organizationSource";
 import type { Organization } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
@@ -64,6 +66,7 @@ function StarRating({ rating }: { rating: number }) {
 export function OrganizationDetailPage({ org }: OrganizationDetailPageProps) {
   const { t } = useLanguage();
   const cfg = CATEGORY_CONFIG[org.category];
+  const source = getOrganizationSource(org);
   const open = isOrganizationOpen(org);
   const [copied, setCopied] = useState(false);
 
@@ -112,6 +115,12 @@ export function OrganizationDetailPage({ org }: OrganizationDetailPageProps) {
               <CategoryIcon category={org.category} className="h-4 w-4" />
               {org.category}
             </span>
+            {org.verified && (
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-500/20 px-3 py-1 text-sm font-semibold text-emerald-400 ring-1 ring-emerald-500/30">
+                <BadgeCheck className="h-4 w-4" aria-hidden />
+                {t("verified")}
+              </span>
+            )}
             <span
               className={cn(
                 "inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-sm font-medium",
@@ -135,6 +144,28 @@ export function OrganizationDetailPage({ org }: OrganizationDetailPageProps) {
               <>
                 <span aria-hidden>·</span>
                 <span className="font-medium text-blue-400">{org.distance}</span>
+              </>
+            )}
+            {source && (
+              <>
+                <span aria-hidden>·</span>
+                <span>
+                  {t("citySourceLabel")}{" "}
+                  {source.url ? (
+                    <a
+                      href={source.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="font-medium text-blue-500 hover:underline dark:text-blue-400"
+                    >
+                      {source.label}
+                    </a>
+                  ) : (
+                    <span className="font-medium text-gray-700 dark:text-gray-300">
+                      {source.label}
+                    </span>
+                  )}
+                </span>
               </>
             )}
           </div>
