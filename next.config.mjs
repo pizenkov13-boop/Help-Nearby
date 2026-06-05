@@ -2,6 +2,7 @@ import { CONTENT_SECURITY_POLICY } from "./config/contentSecurityPolicy.mjs";
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  output: "standalone",
   transpilePackages: ["leaflet", "react-leaflet"],
   // Next.js 16 defaults to Turbopack; empty config acknowledges custom webpack (dev only).
   turbopack: {},
@@ -24,17 +25,6 @@ const nextConfig = {
       );
     }
     return config;
-  },
-  async redirects() {
-    const productionHost = "help-nearby.org";
-    const legacyVercelHosts = ["help-nearby-jgvv.vercel.app"];
-
-    return legacyVercelHosts.map((host) => ({
-      source: "/:path*",
-      has: [{ type: "host", value: host }],
-      destination: `https://${productionHost}/:path*`,
-      permanent: true,
-    }));
   },
   async headers() {
     const swHeaders = [
