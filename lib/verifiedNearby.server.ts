@@ -6,9 +6,9 @@ import { fetchHdxOrganizationsForCountry } from "@/lib/hdx";
 import { nominatimSearch } from "@/lib/nominatim.server";
 import type { Organization, UserLocation } from "@/lib/types";
 
-const DUPLICATE_RADIUS_MILES = 0.05;
+const SOURCE_TIMEOUT_MS = 5000;
 const GEOCODE_DELAY_MS = 1100;
-const MAX_GEOCODE = 40;
+const MAX_GEOCODE = 12;
 
 function normalizeName(name: string): string {
   return name
@@ -17,14 +17,39 @@ function normalizeName(name: string): string {
     .trim();
 }
 
-function mergeHdxAndGdho(hdx: Organization[], gdho: Organization[]): Organization[] {
-  const merged = [...hdx];
+async function fetchWithSourceTimeout<T>(
+  label: string,
+  fetcher: () => Promise<T>,
+  fallback: T,
+): Promise<T> {
+  try {
+    return await Promise.race([
+      fetcher(),
+      new Promise<never>((_, reject) => {
+        setTimeout(
+          () => reject(new Error(`${label} timed out after ${SOURCE_TIMEOUT_MS}ms`)),
+          SOURCE_TIMEOUT_MS,
+        );
+      }),
+    ]);
+  } catch (error) {
+    console.warn(`[verifiedNearby] ${label} unavailable:`, error);
+    return fallback;
+  }
+}
 
-  for (const org of gdho) {
-    const isDuplicate = merged.some(
-      (existing) => normalizeName(existing.name) === normalizeName(org.name),
-    );
-    if (!isDuplicate) merged.push(org);
+function mergeVerifiedCatalog(
+  batches: Organization[][],
+): Organization[] {
+  const merged: Organization[] = [];
+
+  for (const batch of batches) {
+    for (const org of batch) {
+      const isDuplicate = merged.some(
+        (existing) => normalizeName(existing.name) === normalizeName(org.name),
+      );
+      if (!isDuplicate) merged.push(org);
+    }
   }
 
   return merged;
@@ -101,7 +126,7 @@ function sortByDistance(
 }
 
 /**
- * HDX (UN OCHA) + GDHO organizations for a country, geocoded and filtered by radius.
+ * HDX + GDHO organizations for a country, geocoded and filtered by radius.
  */
 export async function fetchVerifiedNearbyOrganizations(
   location: UserLocation,
@@ -110,11 +135,19 @@ export async function fetchVerifiedNearbyOrganizations(
   countryCode?: string | null,
 ): Promise<Organization[]> {
   const [hdx, gdho] = await Promise.all([
-    fetchHdxOrganizationsForCountry(country, countryCode),
-    fetchGdhoOrganizationsForCountry(country),
+    fetchWithSourceTimeout(
+      "HDX",
+      () => fetchHdxOrganizationsForCountry(country, countryCode),
+      [],
+    ),
+    fetchWithSourceTimeout(
+      "GDHO",
+      () => fetchGdhoOrganizationsForCountry(country),
+      [],
+    ),
   ]);
 
-  const merged = mergeHdxAndGdho(hdx, gdho);
+  const merged = mergeVerifiedCatalog([hdx, gdho]);
   if (merged.length === 0) return [];
 
   const geocoded = await geocodeOrganizations(merged);
