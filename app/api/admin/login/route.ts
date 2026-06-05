@@ -7,7 +7,7 @@ import {
   verifyAdminPassword,
 } from "@/lib/adminAuth";
 
-export const runtime = "nodejs";
+export const runtime = "edge";
 export const dynamic = "force-dynamic";
 
 export async function POST(request: Request) {
@@ -27,7 +27,7 @@ export async function POST(request: Request) {
     }
 
     const cookieStore = await cookies();
-    cookieStore.set(ADMIN_COOKIE_NAME, adminSessionCookieValue(), {
+    cookieStore.set(ADMIN_COOKIE_NAME, await adminSessionCookieValue(), {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
       sameSite: "lax",

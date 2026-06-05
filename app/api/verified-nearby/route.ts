@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { NEARBY_RADIUS_METERS } from "@/lib/constants";
 import { fetchVerifiedNearbyOrganizations } from "@/lib/verifiedNearby.server";
 
-export const runtime = "nodejs";
+export const runtime = "edge";
 export const dynamic = "force-dynamic";
 
 export async function GET(request: Request) {

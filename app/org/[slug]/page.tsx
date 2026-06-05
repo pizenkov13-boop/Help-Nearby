@@ -3,6 +3,8 @@ import { notFound } from "next/navigation";
 import { OrganizationDetailPage } from "@/components/pages/OrganizationDetailPage";
 import { fetchOrganizationBySlug } from "@/lib/data";
 
+export const runtime = "edge";
+
 interface OrgPageProps {
   params: Promise<{ slug: string }>;
 }
