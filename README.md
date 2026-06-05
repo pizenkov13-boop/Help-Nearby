@@ -23,10 +23,11 @@ The project was built by **Pavel Izenkin**, 15, from Prokopyevsk, Russia — wit
 
 | | |
 |---|---|
-| **Development** | April 16 – June 4, 2026 (7 weeks) |
-| **Production** | [help-nearby.org](https://help-nearby.org) |
+| **Initial prototype (Webflow)** | April 16 – May 12, 2026 |
+| **Production platform (Next.js)** | May 17, 2026 – present · [help-nearby.org](https://help-nearby.org) |
 | **Prize submission** | Zayed Sustainability Prize **2027** — Global High Schools category |
-| **Analytics** | Used in **24 countries** in the first month after launch (April 2026), tracked via PostHog |
+| **Prototype reach (Webflow, April–May 2026)** | Users from **24 countries** in the first month (Webflow analytics) |
+| **Production analytics (Next.js, since May 17, 2026)** | PostHog on help-nearby.org — early-stage traffic; exact visitor and country counts are in the PostHog dashboard (not duplicated here to avoid stale figures) |
 
 ---
 
@@ -36,7 +37,7 @@ These organizations are seeded in Supabase with `verified = true` and official s
 
 | Region / source | Organizations | Seed file | Official source |
 |-----------------|---------------|---------|-----------------|
-| Russia (Nochelezhka / homeless.ru) | **70** | `supabase/RUN_NOCHELEZHKa.sql` | [nochelezhka.ru](https://nochelezhka.ru) · [homeless.ru](https://homeless.ru) |
+| Russia (Nochlezhka / homeless.ru) | **70** | `supabase/RUN_NOCHLEZHKA.sql` | [ночлежка.рф](https://ночлежка.рф) · [homeless.ru](https://homeless.ru) |
 | Sudan (Sudanese Red Crescent) | **18** | `supabase/RUN_SUDAN_RED_CRESCENT.sql` | [srcs.sd](https://www.srcs.sd) |
 | Kazakhstan (Red Crescent) | **16** | `supabase/RUN_KAZAKHSTAN_RED_CRESCENT.sql` | [redcrescent.kz](https://redcrescent.kz) |
 | UAE (Emirates Red Crescent) | **10** | `supabase/RUN_UAE_RED_CRESCENT.sql` | [emiratesrc.ae](https://emiratesrc.ae) |
@@ -59,9 +60,9 @@ Community submissions via `/submit` are stored as **unverified** until approved 
 | **Turn-by-turn routing** | OSRM routing via `/api/route` |
 | **7 languages** | English, Russian, Spanish, French, German, Chinese, Arabic (RTL) |
 | **Lite mode** | List-only view (no map tiles) for slow networks and low-connectivity regions |
-| **Adaptive theme** | Auto light theme in sunny regions; manual dark/light toggle |
-| **AI assistant** | Groq (Llama 3.3 70B) chat for help finding nearby services |
-| **PWA** | Installable; offline fallback page via service worker |
+| **Adaptive theme** | Auto light theme in sunny regions (browser geolocation + country lookup); manual dark/light toggle |
+| **AI assistant** | Groq (Llama 3.3 70B) chat — **experimental** |
+| **PWA** | Progressive Web App — **experimental** (manifest + partial service worker; offline page only, not full offline app) |
 | **Admin moderation** | Password-protected `/admin` for org and review approval |
 | **Impact counter** | Tracks Call / Directions clicks in Supabase (usage signal, not aid delivery proof) |
 
@@ -174,7 +175,7 @@ supabase/migrations/20250319000001_seed_organizations.sql
 Quick regional seeds (run in Supabase SQL Editor):
 
 ```
-supabase/RUN_NOCHELEZHKa.sql
+supabase/RUN_NOCHLEZHKA.sql
 supabase/RUN_SUDAN_RED_CRESCENT.sql
 supabase/RUN_KAZAKHSTAN_RED_CRESCENT.sql
 supabase/RUN_UAE_RED_CRESCENT.sql
@@ -253,8 +254,7 @@ Community partner: [Kindness Corporation](https://www.kindnesscorporation.ru/)
 
 ## License
 
-No `LICENSE` file is present in this repository at this time.  
-If you plan to use, fork, or redistribute this project, please contact the maintainer for terms.
+Licensed under the MIT License — see [LICENSE](LICENSE) file.
 
 ---
 

@@ -59,13 +59,12 @@ export function getOrganizationSource(org: SourceInput): OrganizationSource | nu
     org.country === "Russia" ||
     slug.includes("nochlezhka") ||
     website.includes("homeless.ru") ||
-    website.includes("nochelezhka.ru")
+    website.includes("nochelezhka.ru") ||
+    website.includes("ночлежка.рф")
   ) {
     return {
-      label: "Nochelezhka",
-      url: website.includes("homeless.ru")
-        ? "https://homeless.ru"
-        : "https://nochelezhka.ru",
+      label: "Nochlezhka",
+      url: "https://homeless.ru",
     };
   }
 

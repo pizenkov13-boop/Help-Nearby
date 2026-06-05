@@ -30,5 +30,5 @@ const out =
   "\n\n-- === координаты (UPDATE) ===\n\n" +
   geoOnly;
 
-fs.writeFileSync("c:/Help Nearby/supabase/RUN_NOCHELEZHKa.sql", out);
+fs.writeFileSync("c:/Help Nearby/supabase/RUN_NOCHLEZHKA.sql", out);
 console.log("OK:", out.split("\n").length, "lines");
