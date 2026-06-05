@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { getAdminPassword, isAdminAuthenticated } from "@/lib/adminAuth";
 import { getSupabaseAdmin } from "@/lib/supabaseAdmin";
 
-export const runtime = "edge";
+export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
 export async function GET() {

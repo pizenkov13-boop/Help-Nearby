@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { deleteReviewById } from "@/lib/admin";
 import { isAdminAuthenticated } from "@/lib/adminAuth";
 
-export const runtime = "edge";
+export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
 export async function POST(request: Request) {

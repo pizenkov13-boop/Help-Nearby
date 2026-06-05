@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { isAdminAuthenticated } from "@/lib/adminAuth";
 import { fetchPendingReviews } from "@/lib/admin";
 
-export const runtime = "edge";
+export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
 export async function GET() {
