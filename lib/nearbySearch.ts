@@ -276,7 +276,6 @@ export async function fetchMergedNearbyParallel(
   );
 
   const catalog = await catalogPromise;
-  callbacks?.onOrganizationsUpdate?.(mergeOrganizations(catalog, []));
 
   const [externalResult, verifiedResult] = await Promise.all([
     externalPromise,
@@ -340,7 +339,6 @@ export async function searchNearbyWithSmartRadius(
   const fetchAtRadius = async (radiusMeters: number) => {
     const catalogAtMax = await catalogAtMaxPromise;
     const catalog = filterByRadius(catalogAtMax, location, radiusMeters);
-    callbacks?.onOrganizationsUpdate?.(mergeOrganizations(catalog, []));
 
     const [overpassResult, verifiedResult] = await Promise.all([
       overpassAtMaxPromise,

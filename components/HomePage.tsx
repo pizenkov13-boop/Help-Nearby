@@ -104,6 +104,14 @@ export function HomePage() {
   const shouldScrollRef = useRef(false);
   const findTriggeredRef = useRef(false);
   const liteAutoOpenedRef = useRef(false);
+  const searchRunIdRef = useRef(0);
+  const lastSearchAreaRef = useRef<string | null>(null);
+
+  const searchAreaKey = useCallback(
+    (location: UserLocation, lite: boolean) =>
+      `${location.lat.toFixed(2)},${location.lng.toFixed(2)},${lite}`,
+    [],
+  );
 
   const detectedSlowConnection =
     slowByNetworkInfo || slowByCountryFallback || slowByMeasuredSpeed;
@@ -200,6 +208,8 @@ export function HomePage() {
       const location = userLocation;
       if (!location) return;
 
+      const runId = ++searchRunIdRef.current;
+
       const cached = readNearbyCache(
         location.lat,
         location.lng,
@@ -235,16 +245,20 @@ export function HomePage() {
           },
           {
             onOrganizationsUpdate: (organizations) => {
+              if (runId !== searchRunIdRef.current) return;
               setAllOrganizations(organizations);
               if (organizations.length > 0) {
                 setOrgsLoading(false);
               }
             },
             onExternalTimeout: () => {
+              if (runId !== searchRunIdRef.current) return;
               setVerifiedOnlyNotice(true);
             },
           },
         );
+
+        if (runId !== searchRunIdRef.current) return;
 
         applySearchResult(result.organizations, {
           activeRadiusMeters: result.activeRadiusMeters,
@@ -266,12 +280,14 @@ export function HomePage() {
           nearestFallbackKm: result.farthestKm,
         });
       } catch (error) {
+        if (runId !== searchRunIdRef.current) return;
         console.error("[HomePage] Smart radius search failed:", error);
         if (!hadCachedResults) {
           setAllOrganizations([]);
         }
         setCanExpandSearch(false);
       } finally {
+        if (runId !== searchRunIdRef.current) return;
         setOrgsLoading(false);
         setSourcesLoading(false);
       }
@@ -280,11 +296,14 @@ export function HomePage() {
   );
 
   useEffect(() => {
-    if (liteModeActive && !userLocation) return;
-    if (!liteModeActive && !userLocation) return;
+    if (!userLocation || !mapExpanded) return;
+
+    const areaKey = searchAreaKey(userLocation, liteModeActive);
+    if (lastSearchAreaRef.current === areaKey) return;
+    lastSearchAreaRef.current = areaKey;
 
     void runNearbySearch({ autoExpand: true });
-  }, [userLocation, liteModeActive, runNearbySearch]);
+  }, [userLocation, mapExpanded, liteModeActive, runNearbySearch, searchAreaKey]);
 
   const handleExpandSearch = useCallback(() => {
     if (!userLocation || searchRadiusMeters == null) return;
