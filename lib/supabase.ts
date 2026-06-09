@@ -109,6 +109,7 @@ export function isSupabaseFetchError(error: unknown): boolean {
   return (
     message.includes("fetch failed") ||
     message.includes("Failed to fetch") ||
+    message.includes("NetworkError") ||
     message.includes("ENOTFOUND") ||
     message.includes("ERR_NAME_NOT_RESOLVED") ||
     message.includes("getaddrinfo") ||

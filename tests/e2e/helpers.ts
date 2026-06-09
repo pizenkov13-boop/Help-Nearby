@@ -79,6 +79,14 @@ export async function mockNearbyApi(page: Page) {
     });
   });
 
+  await page.route(/\/api\/organizations/, async (route) => {
+    await route.fulfill({
+      status: 200,
+      contentType: "application/json",
+      body: JSON.stringify(orgs),
+    });
+  });
+
   await page.route(/\/rest\/v1\/organizations/, async (route) => {
     await route.fulfill({
       status: 200,

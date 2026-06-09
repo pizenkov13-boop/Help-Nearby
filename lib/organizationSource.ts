@@ -47,6 +47,9 @@ export function getOrganizationSource(org: SourceInput): OrganizationSource | nu
       url: "https://humanitarianoutcomes.org/gdho",
     };
   }
+  if (slug.startsWith("rw-") || id.startsWith("rw-")) {
+    return { label: "ReliefWeb", url: "https://reliefweb.int" };
+  }
 
   if (slug.startsWith("srcs-") && slug.endsWith("-sudan")) {
     return { label: "srcs.sd", url: "https://www.srcs.sd" };

@@ -1,4 +1,3 @@
-import { fetchOrganizations } from "@/lib/data";
 import { geocodeVerifiedCatalog } from "@/lib/geocodeVerifiedCatalog";
 import { validateOrganizationForNearby } from "@/lib/organizationCoordinates";
 import { mergeOrganizations } from "@/lib/mergeOrganizations";
@@ -52,20 +51,42 @@ function filterByRadius(
     .filter((org): org is Organization => org !== null);
 }
 
-/** Supabase verified catalog: Nominatim first when lat/lng missing, then radius filter. */
+/** Supabase catalog via server API (avoids browser → supabase.co blocks). */
 async function fetchSupabaseCatalog(
   location: UserLocation,
   country: string | undefined,
   radiusMeters: number,
   liteMode = false,
 ): Promise<Organization[]> {
-  if (!country) {
-    return fetchOrganizations(location, { country, radiusMeters });
+  const params = new URLSearchParams();
+  if (country) {
+    params.set("country", country);
+  } else {
+    params.set("lat", String(location.lat));
+    params.set("lng", String(location.lng));
+    params.set("radius", String(radiusMeters));
   }
 
-  let catalog = await fetchOrganizations(null, { country });
-  catalog = await geocodeVerifiedCatalog(catalog, { liteMode });
-  return filterByRadius(catalog, location, radiusMeters);
+  try {
+    const res = await fetch(`/api/organizations?${params}`);
+    const data = (await res.json()) as unknown;
+    if (!res.ok || !Array.isArray(data)) {
+      console.warn("[nearbySearch] /api/organizations status:", res.status);
+      return [];
+    }
+
+    let catalog = data as Organization[];
+
+    if (country) {
+      catalog = await geocodeVerifiedCatalog(catalog, { liteMode });
+      return filterByRadius(catalog, location, radiusMeters);
+    }
+
+    return catalog;
+  } catch (error) {
+    console.warn("[nearbySearch] Supabase catalog fetch failed:", error);
+    return [];
+  }
 }
 
 async function fetchOverpassNearby(
@@ -162,11 +183,11 @@ async function fetchVerifiedNearbyWithTimeout(
   } catch (error) {
     if (controller.signal.aborted) {
       console.warn(
-        `[nearbySearch] HDX/GDHO timed out after ${VERIFIED_FETCH_TIMEOUT_MS / 1000}s`,
+        `[nearbySearch] verified sources timed out after ${VERIFIED_FETCH_TIMEOUT_MS / 1000}s`,
       );
       return { organizations: [], timedOut: true };
     }
-    console.error("[nearbySearch] HDX/GDHO fetch failed:", error);
+    console.error("[nearbySearch] verified sources fetch failed:", error);
     return { organizations: [], timedOut: false };
   } finally {
     clearTimeout(timeoutId);
