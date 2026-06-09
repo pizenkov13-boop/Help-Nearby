@@ -109,6 +109,18 @@ Verified from `package.json` and project source:
 
 ---
 
+## 🌍 UN OCHA Integration
+
+HelpNearby integrates with three United Nations OCHA humanitarian databases:
+
+- **HDX (Humanitarian Data Exchange)** — verified organization data
+- **GDHO (Global Directory of Humanitarian Organizations)** — comprehensive NGO directory  
+- **ReliefWeb API** — *officially approved access* — real-time disaster alerts, country reports, and humanitarian situation updates
+
+This makes HelpNearby one of the few independently-built humanitarian platforms with direct integration into the UN's humanitarian data ecosystem.
+
+---
+
 ## Live deployment
 
 | Environment | URL |
