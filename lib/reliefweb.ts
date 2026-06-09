@@ -1,6 +1,7 @@
 import "server-only";
 
 import { ensureEnvLoaded } from "@/lib/env.server";
+import { ochaFetch } from "@/lib/ochaHttp.server";
 import { slugify } from "@/lib/orgUtils";
 import type { Category, Organization } from "@/lib/types";
 
@@ -15,17 +16,17 @@ interface ReliefWebCountry {
   name?: string;
   iso3?: string;
   shortname?: string;
+  location?: { lat?: number; lon?: number };
 }
 
 interface ReliefWebSourceFields {
-  name?: string[];
-  shortname?: string[];
-  longname?: string[];
-  homepage?: string[];
-  description?: string[];
+  name?: string | string[];
+  shortname?: string | string[];
+  longname?: string | string[];
+  homepage?: string | string[];
+  description?: string | string[];
   country?: ReliefWebCountry[];
-  type?: Array<{ id?: number; name?: string }>;
-  city?: Array<{ name?: string }>;
+  type?: { name?: string } | Array<{ id?: number; name?: string }>;
 }
 
 interface ReliefWebSourceItem {
@@ -54,8 +55,17 @@ function getReliefWebAppName(): string {
   return fromEnv && fromEnv.length > 0 ? fromEnv : DEFAULT_APPNAME;
 }
 
-function fieldText(value: string[] | undefined): string {
+function fieldText(value: string | string[] | undefined): string {
+  if (typeof value === "string") return value.trim();
   return value?.[0]?.trim() ?? "";
+}
+
+function typeNameFromFields(
+  type: ReliefWebSourceFields["type"],
+): string {
+  if (!type) return "";
+  if (Array.isArray(type)) return type[0]?.name?.trim() ?? "";
+  return type.name?.trim() ?? "";
 }
 
 function inferCategory(description: string, name: string, typeName: string): Category {
@@ -77,14 +87,17 @@ function mapReliefWebSource(item: ReliefWebSourceItem, country: string): Organiz
     fieldText(fields.shortname);
   if (!name) return null;
 
-  const typeName = fields.type?.[0]?.name ?? "";
+  const typeName = typeNameFromFields(fields.type);
   const description =
     fieldText(fields.description) ||
     `Humanitarian organization listed on ReliefWeb${typeName ? ` (${typeName})` : ""}.`;
   const category = inferCategory(description, name, typeName);
-  const cityName = fields.city?.[0]?.name?.trim() ?? "";
   const homepage = fieldText(fields.homepage);
   const rwId = item.id.replace(/\D/g, "") || item.id;
+  const countryLat = fields.country?.[0]?.location?.lat;
+  const countryLng = fields.country?.[0]?.location?.lon;
+  const lat = Number.isFinite(countryLat) ? (countryLat as number) : 0;
+  const lng = Number.isFinite(countryLng) ? (countryLng as number) : 0;
 
   return {
     id: `rw-${rwId}`,
@@ -93,12 +106,12 @@ function mapReliefWebSource(item: ReliefWebSourceItem, country: string): Organiz
     category,
     categories: [category],
     country,
-    city: cityName,
-    lat: 0,
-    lng: 0,
+    city: "",
+    lat,
+    lng,
     distance: "",
     rating: 0,
-    address: cityName,
+    address: "",
     phone: "",
     email: "",
     website: homepage,
@@ -151,21 +164,18 @@ async function reliefWebListSources(
           "description",
           "country",
           "type.name",
-          "city.name",
         ],
       },
     };
 
     try {
-      const response = await fetch(url, {
+      const response = await ochaFetch(url, {
         method: "POST",
         headers: {
-          Accept: "application/json",
           "Content-Type": "application/json",
         },
         body: JSON.stringify(body),
         signal: AbortSignal.timeout(RELIEFWEB_TIMEOUT_MS),
-        next: { revalidate: 3600 },
       });
 
       if (!response.ok) {

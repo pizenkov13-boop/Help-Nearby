@@ -1,5 +1,6 @@
 import "server-only";
 
+import { ochaFetch } from "@/lib/ochaHttp.server";
 import { slugify } from "@/lib/orgUtils";
 import type { Category, Organization } from "@/lib/types";
 
@@ -45,10 +46,8 @@ async function hdxGet<T>(action: string, params: Record<string, string>): Promis
   }
 
   try {
-    const response = await fetch(url.toString(), {
-      headers: { Accept: "application/json" },
+    const response = await ochaFetch(url.toString(), {
       signal: AbortSignal.timeout(HDX_TIMEOUT_MS),
-      next: { revalidate: 3600 },
     });
 
     if (!response.ok) {
