@@ -3,12 +3,18 @@ import "server-only";
 import { distanceMiles, formatDistanceMiles } from "@/lib/geo";
 import { fetchGdhoOrganizationsForCountry } from "@/lib/gdho";
 import { fetchHdxOrganizationsForCountry } from "@/lib/hdx";
+import { fetchReliefWebOrganizationsForCountry } from "@/lib/reliefweb";
 import { nominatimSearch } from "@/lib/nominatim.server";
 import type { Organization, UserLocation } from "@/lib/types";
 
 const SOURCE_TIMEOUT_MS = 5000;
 const GEOCODE_DELAY_MS = 1100;
 const MAX_GEOCODE = 12;
+
+function isUkraine(country: string, countryCode?: string | null): boolean {
+  if (countryCode?.trim().toUpperCase() === "UA") return true;
+  return country.trim().toLowerCase() === "ukraine";
+}
 
 function normalizeName(name: string): string {
   return name
@@ -21,14 +27,15 @@ async function fetchWithSourceTimeout<T>(
   label: string,
   fetcher: () => Promise<T>,
   fallback: T,
+  timeoutMs = SOURCE_TIMEOUT_MS,
 ): Promise<T> {
   try {
     return await Promise.race([
       fetcher(),
       new Promise<never>((_, reject) => {
         setTimeout(
-          () => reject(new Error(`${label} timed out after ${SOURCE_TIMEOUT_MS}ms`)),
-          SOURCE_TIMEOUT_MS,
+          () => reject(new Error(`${label} timed out after ${timeoutMs}ms`)),
+          timeoutMs,
         );
       }),
     ]);
@@ -56,7 +63,11 @@ function mergeVerifiedCatalog(
 }
 
 function buildGeocodeQuery(org: Organization): string {
-  if (org.id.startsWith("gdho-") || org.id.startsWith("hdx-")) {
+  if (
+    org.id.startsWith("gdho-") ||
+    org.id.startsWith("hdx-") ||
+    org.id.startsWith("rw-")
+  ) {
     return [org.name, org.country].filter(Boolean).join(", ");
   }
   const parts = [org.name, org.address, org.city, org.country].filter(Boolean);
@@ -126,7 +137,7 @@ function sortByDistance(
 }
 
 /**
- * HDX + GDHO organizations for a country, geocoded and filtered by radius.
+ * HDX + GDHO + ReliefWeb organizations for a country, geocoded and filtered by radius.
  */
 export async function fetchVerifiedNearbyOrganizations(
   location: UserLocation,
@@ -134,7 +145,9 @@ export async function fetchVerifiedNearbyOrganizations(
   country: string,
   countryCode?: string | null,
 ): Promise<Organization[]> {
-  const [hdx, gdho] = await Promise.all([
+  const skipReliefWeb = isUkraine(country, countryCode);
+
+  const [hdx, gdho, reliefweb] = await Promise.all([
     fetchWithSourceTimeout(
       "HDX",
       () => fetchHdxOrganizationsForCountry(country, countryCode),
@@ -145,9 +158,17 @@ export async function fetchVerifiedNearbyOrganizations(
       () => fetchGdhoOrganizationsForCountry(country),
       [],
     ),
+    skipReliefWeb
+      ? Promise.resolve([])
+      : fetchWithSourceTimeout(
+          "ReliefWeb",
+          () => fetchReliefWebOrganizationsForCountry(country, countryCode),
+          [],
+          15_000,
+        ),
   ]);
 
-  const merged = mergeVerifiedCatalog([hdx, gdho]);
+  const merged = mergeVerifiedCatalog([hdx, gdho, reliefweb]);
   if (merged.length === 0) return [];
 
   const geocoded = await geocodeOrganizations(merged);

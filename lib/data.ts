@@ -122,7 +122,13 @@ async function queryOrganizations(country?: string): Promise<DbOrganization[]> {
     const { data, error } = await query;
 
     if (error) {
-      console.error("[fetchOrganizations]", error.message);
+      if (isSupabaseFetchError(error)) {
+        console.warn(
+          "[fetchOrganizations] Supabase unreachable — using empty catalog",
+        );
+      } else {
+        console.error("[fetchOrganizations]", error.message);
+      }
       return [];
     }
 

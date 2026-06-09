@@ -54,7 +54,7 @@ Community submissions via `/submit` are stored as **unverified** until approved 
 | Feature | Description |
 |---------|-------------|
 | **Interactive map** | Leaflet map with category markers, verified badge, and source labels |
-| **Multi-source data** | Supabase verified catalog + HDX + GDHO + live Overpass OSM queries |
+| **Multi-source data** | Supabase verified catalog + HDX + GDHO + ReliefWeb + live Overpass OSM queries |
 | **Emergency mode** | One-tap list of 24/7 organizations (hospitals, pharmacies, shelters) |
 | **Smart radius search** | Auto-expands search radius until results are found |
 | **Turn-by-turn routing** | OSRM routing via `/api/route` |
@@ -78,16 +78,11 @@ Community submissions via `/submit` are stored as **unverified** until approved 
 | **OpenStreetMap / Overpass** | Live POI search worldwide | `lib/overpass.server.ts` → `/api/nearby` |
 | **HDX** (UN OCHA Humanitarian Data Exchange) | Country-level humanitarian orgs | `lib/hdx.ts` → `lib/verifiedNearby.server.ts` → `/api/verified-nearby` |
 | **GDHO** (Global Directory of Humanitarian Organizations) | Country-level humanitarian orgs | `lib/gdho.ts` → `lib/verifiedNearby.server.ts` → `/api/verified-nearby` |
+| **ReliefWeb** (OCHA) | Country-level humanitarian sources | `lib/reliefweb.ts` → `lib/verifiedNearby.server.ts` → `/api/verified-nearby` |
 | **Nominatim** | Forward/reverse geocoding for addresses | `lib/nominatim.server.ts` → `/api/geocode` |
 | **OSRM** | Turn-by-turn routing | `lib/osrmRouting.server.ts` → `/api/route` |
 
-HDX and GDHO results merge with Supabase + Overpass in `lib/nearbySearch.ts` (deduplicated by name). Each source has a 5-second timeout; failures do not block other results.
-
-### Not deployed
-
-| Source | File | Status |
-|--------|------|--------|
-| **ReliefWeb** | `lib/reliefweb.ts` | Local branch only · **not deployed** (API approval pending) |
+HDX, GDHO, and ReliefWeb results merge with Supabase + Overpass in `lib/nearbySearch.ts` (deduplicated by name). HDX and GDHO have a 5-second timeout; ReliefWeb allows 15 seconds. ReliefWeb is skipped for Ukraine (local catalog + HDX/GDHO cover that region). Failures do not block other results.
 
 ---
 
@@ -155,6 +150,9 @@ SUPABASE_SERVICE_ROLE_KEY=your-service-role-key
 # AI chat (optional)
 GROQ_API_KEY=your-groq-api-key
 
+# ReliefWeb humanitarian sources (optional — set after appname approval)
+RELIEFWEB_APPNAME=help-nearby-sources-a4p8n1QSR
+
 # Analytics (optional)
 NEXT_PUBLIC_POSTHOG_KEY=your-posthog-key
 NEXT_PUBLIC_POSTHOG_HOST=https://us.i.posthog.com
@@ -217,7 +215,7 @@ scripts/             # Geocoding and build utilities
 | Route | Purpose |
 |-------|---------|
 | `/api/nearby` | Overpass organizations near coordinates |
-| `/api/verified-nearby` | HDX + GDHO organizations for a country (geocoded, radius-filtered) |
+| `/api/verified-nearby` | HDX + GDHO + ReliefWeb organizations for a country (geocoded, radius-filtered) |
 | `/api/emergency` | 24/7 Supabase + Overpass emergency list |
 | `/api/route` | OSRM turn-by-turn routing |
 | `/api/geocode` | Nominatim address → coordinates |
