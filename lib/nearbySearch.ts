@@ -51,6 +51,11 @@ function filterByRadius(
     .filter((org): org is Organization => org !== null);
 }
 
+/** `/api/verified-nearby` already applies radius + country-wide OCHA rules on the server. */
+function verifiedNearbyResults(orgs: Organization[]): Organization[] {
+  return orgs;
+}
+
 /** Supabase catalog via server API (avoids browser → supabase.co blocks). */
 async function fetchSupabaseCatalog(
   location: UserLocation,
@@ -285,7 +290,7 @@ export async function fetchMergedNearbyParallel(
   const organizations = mergeAllNearbySources(
     catalog,
     filterByRadius(externalResult.organizations, location, radiusMeters),
-    filterByRadius(verifiedResult.organizations, location, radiusMeters),
+    verifiedNearbyResults(verifiedResult.organizations),
   );
   callbacks?.onOrganizationsUpdate?.(organizations);
 
@@ -352,11 +357,7 @@ export async function searchNearbyWithSmartRadius(
       location,
       radiusMeters,
     );
-    const verified = filterByRadius(
-      verifiedResult.organizations,
-      location,
-      radiusMeters,
-    );
+    const verified = verifiedNearbyResults(verifiedResult.organizations);
 
     const merged = mergeAllNearbySources(catalog, overpass, verified);
     callbacks?.onOrganizationsUpdate?.(merged);
