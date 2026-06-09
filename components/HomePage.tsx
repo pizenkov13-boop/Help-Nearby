@@ -13,6 +13,7 @@ import { reverseGeocodeCountry } from "@/lib/geocode";
 import {
   getOrganizationCoordinates,
   organizationHasTrustedCoordinates,
+  validateOrganizationForDisplay,
   validateOrganizationForNearby,
 } from "@/lib/organizationCoordinates";
 import { resolveOrganizationCoordinates } from "@/lib/resolveOrganizationCoordinates";
@@ -298,7 +299,7 @@ export function HomePage() {
     if (!userLocation) return allOrganizations;
     return allOrganizations
       .map((org) =>
-        validateOrganizationForNearby(org, userLocation, maxSearchRadiusMeters),
+        validateOrganizationForDisplay(org, userLocation, maxSearchRadiusMeters),
       )
       .filter((org): org is Organization => org !== null);
   }, [allOrganizations, userLocation, maxSearchRadiusMeters]);

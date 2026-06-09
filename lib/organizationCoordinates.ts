@@ -12,6 +12,14 @@ export function isOverpassOrganization(org: Organization): boolean {
   return org.id.startsWith("overpass-");
 }
 
+export function isOchaOrganization(org: Organization): boolean {
+  return (
+    org.id.startsWith("rw-") ||
+    org.id.startsWith("hdx-") ||
+    org.id.startsWith("gdho-")
+  );
+}
+
 export function isPlausibleCoordinate(lat: number, lng: number): boolean {
   if (!Number.isFinite(lat) || !Number.isFinite(lng)) return false;
   if (Math.abs(lat) > 90 || Math.abs(lng) > 180) return false;
@@ -141,6 +149,22 @@ export function snapIsAcceptable(
  * Validate and normalize an organization for nearby list/map/routing.
  * Returns null when coordinates are missing, implausible, or outside search radius.
  */
+/**
+ * Country-wide OCHA catalogs are already curated server-side; keep them visible
+ * with distance labels even when outside the local search radius.
+ */
+export function validateOrganizationForDisplay(
+  org: Organization,
+  userLocation: UserLocation,
+  maxRadiusMeters: number,
+): Organization | null {
+  if (isOchaOrganization(org)) {
+    if (!hasValidMapCoordinates(org)) return null;
+    return withDistanceFromUser(org, userLocation, formatDistanceMiles);
+  }
+  return validateOrganizationForNearby(org, userLocation, maxRadiusMeters);
+}
+
 export function validateOrganizationForNearby(
   org: Organization,
   userLocation: UserLocation,
