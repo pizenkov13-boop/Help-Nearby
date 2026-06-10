@@ -45,6 +45,10 @@ import {
   formatSearchNearestOrgs,
   formatSearchRadiusWithin,
 } from "@/lib/i18n/translations";
+import {
+  formatSearchLocation,
+  trackSearchPerformed,
+} from "@/lib/analytics.client";
 import { SiteLayout } from "@/components/layout/SiteLayout";
 import { cn } from "@/lib/utils";
 import { Filters } from "./Filters";
@@ -583,6 +587,19 @@ export function HomePage() {
     setFilters((prev) => ({ ...prev, searchQuery }));
   }, []);
 
+  const handleSearchSubmit = useCallback(
+    (query: string) => {
+      const trimmed = query.trim();
+      if (!trimmed) return;
+      trackSearchPerformed({
+        query: trimmed,
+        location: formatSearchLocation(userLocation),
+        results_count: filtered.length,
+      });
+    },
+    [userLocation, filtered],
+  );
+
   return (
     <SiteLayout>
       <Hero
@@ -670,6 +687,7 @@ export function HomePage() {
                   <SearchBar
                     value={filters.searchQuery}
                     onChange={updateSearchQuery}
+                    onSubmit={handleSearchSubmit}
                   />
                   <Filters filters={filters} onChange={setFilters} />
                   <button

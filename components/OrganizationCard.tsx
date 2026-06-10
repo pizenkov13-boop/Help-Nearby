@@ -13,8 +13,8 @@ import { CategoryIcon } from "@/components/icons/CategoryIcon";
 import { CATEGORY_CONFIG } from "@/lib/categories";
 import { useLanguage } from "@/lib/i18n/LanguageProvider";
 import {
-  trackCallOrganization,
-  trackGetDirections,
+  trackDirectionsClicked,
+  trackPhoneClicked,
 } from "@/lib/analytics.client";
 import { recordImpactClick } from "@/lib/impact.client";
 import {
@@ -50,13 +50,13 @@ export function OrganizationCard({
   const hasPhone = Boolean(org.phone?.trim());
 
   const handleCallClick = () => {
-    trackCallOrganization(org);
+    trackPhoneClicked(org);
     recordImpactClick(org.id, "call");
     onImpactRecorded?.();
   };
 
   const handleDirectionsClick = () => {
-    trackGetDirections(org);
+    trackDirectionsClicked(org);
     recordImpactClick(org.id, "directions");
     onImpactRecorded?.();
     onGetDirections?.(org);
@@ -229,7 +229,7 @@ export function OrganizationCard({
             target="_blank"
             rel="noopener noreferrer"
             onClick={() => {
-              trackGetDirections(org);
+              trackDirectionsClicked(org);
               recordImpactClick(org.id, "directions");
               onImpactRecorded?.();
             }}

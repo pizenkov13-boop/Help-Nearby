@@ -1,19 +1,26 @@
 "use client";
 
+import type { FormEvent } from "react";
 import { Search, X } from "lucide-react";
 import { useLanguage } from "@/lib/i18n/LanguageProvider";
 
 interface SearchBarProps {
   value: string;
   onChange: (value: string) => void;
+  onSubmit?: (value: string) => void;
 }
 
-export function SearchBar({ value, onChange }: SearchBarProps) {
+export function SearchBar({ value, onChange, onSubmit }: SearchBarProps) {
   const { t } = useLanguage();
   const hasValue = value.length > 0;
 
+  const handleSubmit = (e: FormEvent) => {
+    e.preventDefault();
+    onSubmit?.(value);
+  };
+
   return (
-    <div className="mb-4">
+    <form className="mb-4" onSubmit={handleSubmit}>
       <label htmlFor="org-search" className="sr-only">
         {t("searchPlaceholder")}
       </label>
@@ -39,6 +46,6 @@ export function SearchBar({ value, onChange }: SearchBarProps) {
           </button>
         )}
       </div>
-    </div>
+    </form>
   );
 }
