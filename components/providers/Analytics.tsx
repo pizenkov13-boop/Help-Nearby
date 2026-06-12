@@ -2,35 +2,31 @@
 
 import { usePathname } from "next/navigation";
 import { useEffect, useRef } from "react";
+import {
+  capturePageView,
+  ensurePostHog,
+  isPostHogEnabled,
+} from "@/lib/posthog.client";
 
 /** Runs PostHog after mount only — no SSR, no extra webpack chunk in layout. */
 export function Analytics() {
   const pathname = usePathname();
-  const key = process.env.NEXT_PUBLIC_POSTHOG_KEY;
   const initialized = useRef(false);
 
   useEffect(() => {
-    if (!key || process.env.NODE_ENV !== "production") return;
-    const apiKey = key;
+    if (!isPostHogEnabled()) return;
 
-    void import("posthog-js").then(({ default: posthog }) => {
+    void ensurePostHog().then((posthog) => {
+      if (!posthog) return;
+
       if (!initialized.current) {
-        posthog.init(apiKey, {
-          api_host: process.env.NEXT_PUBLIC_POSTHOG_HOST,
-          ui_host: "https://us.posthog.com",
-          capture_pageview: false,
-          capture_pageleave: true,
-          disable_surveys: true,
-          advanced_disable_decide: true,
-        });
         initialized.current = true;
+        return;
       }
 
-      if (posthog.__loaded) {
-        posthog.capture("$pageview", { $current_url: window.location.href });
-      }
+      capturePageView(posthog);
     });
-  }, [key, pathname]);
+  }, [pathname]);
 
   return null;
 }
