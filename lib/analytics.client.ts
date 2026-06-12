@@ -1,4 +1,5 @@
 import { readCachedDetectedCountry } from "@/lib/detectedCountry";
+import { ensurePostHog } from "@/lib/posthog.client";
 import type { Organization, UserLocation } from "@/lib/types";
 
 export type OrganizationEventProperties = {
@@ -8,37 +9,13 @@ export type OrganizationEventProperties = {
   service_type: string;
 };
 
-function getPostHogKey(): string | undefined {
-  return process.env.NEXT_PUBLIC_POSTHOG_KEY?.trim() || undefined;
-}
-
-type PostHogClient = {
-  capture: (event: string, properties?: Record<string, unknown>) => void;
-};
-
-let posthogPromise: Promise<PostHogClient | null> | null = null;
-
-function loadPostHog(): Promise<PostHogClient | null> {
-  if (typeof window === "undefined") return Promise.resolve(null);
-  if (process.env.NODE_ENV !== "production") return Promise.resolve(null);
-  const key = getPostHogKey();
-  if (!key) return Promise.resolve(null);
-
-  if (!posthogPromise) {
-    posthogPromise = import("posthog-js").then(
-      ({ default: posthog }) => posthog as PostHogClient,
-    );
-  }
-  return posthogPromise;
-}
-
 /** Fire-and-forget named PostHog event (client-only). */
 export function capturePostHogEvent(
   event: string,
   properties?: Record<string, string | number | boolean>,
 ): void {
-  void loadPostHog()
-    ?.then((posthog) => {
+  void ensurePostHog()
+    .then((posthog) => {
       if (!posthog) return;
       posthog.capture(event, properties);
     })
