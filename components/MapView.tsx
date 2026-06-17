@@ -17,7 +17,10 @@ import {
   categoryIconMarkup,
   verifiedCheckMarkup,
 } from "@/lib/categoryIconMarkup";
-import { trackMapInteraction } from "@/lib/analytics.client";
+import {
+  trackMapInteraction,
+  trackOrganizationCardOpened,
+} from "@/lib/analytics.client";
 import { getOrganizationSource } from "@/lib/organizationSource";
 
 const DefaultIcon = L.icon({
@@ -391,6 +394,9 @@ export default function MapView({
       L.marker([lat, lng], {
         icon: createCategoryIcon(org.category, org.verified),
       })
+        .on("click", () => {
+          trackOrganizationCardOpened(org);
+        })
         .bindPopup(buildOrganizationPopup(org))
         .addTo(markersLayer);
     }
