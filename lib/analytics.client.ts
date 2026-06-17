@@ -9,10 +9,12 @@ export type OrganizationEventProperties = {
   service_type: string;
 };
 
+type Primitive = string | number | boolean;
+
 /** Fire-and-forget named PostHog event (client-only). */
 export function capturePostHogEvent(
   event: string,
-  properties?: Record<string, string | number | boolean>,
+  properties?: Record<string, Primitive | Primitive[]>,
 ): void {
   void ensurePostHog()
     .then((posthog) => {
@@ -43,7 +45,11 @@ export function formatSearchLocation(
 }
 
 export function trackDirectionsClicked(org: Organization): void {
-  capturePostHogEvent("directions_clicked", organizationEventProperties(org));
+  capturePostHogEvent("directions_requested", {
+    org_name: org.name,
+    country: org.country ?? "",
+    distance: org.distance ?? "",
+  });
 }
 
 export function trackPhoneClicked(org: Organization): void {
@@ -73,4 +79,50 @@ export function trackMapInteraction(properties: {
 
 export function trackEmergencyOpened(): void {
   capturePostHogEvent("emergency_opened");
+}
+
+export function trackFindHelpClicked(language: string): void {
+  capturePostHogEvent("find_help_clicked", { language });
+}
+
+export function trackGeolocationGranted(properties: {
+  country: string;
+  lat: number;
+  lng: number;
+}): void {
+  capturePostHogEvent("geolocation_granted", properties);
+}
+
+export function trackGeolocationDenied(language: string): void {
+  capturePostHogEvent("geolocation_denied", { language });
+}
+
+export function trackOrganizationsLoaded(properties: {
+  count: number;
+  country: string;
+  radius: number;
+}): void {
+  capturePostHogEvent("organizations_loaded", properties);
+}
+
+export function trackOrganizationCardOpened(org: Organization): void {
+  capturePostHogEvent("organization_card_opened", {
+    org_name: org.name,
+    country: org.country ?? "",
+    services:
+      org.categories && org.categories.length > 0
+        ? org.categories.join(",")
+        : org.category,
+  });
+}
+
+export function trackLanguageChanged(fromLanguage: string, toLanguage: string): void {
+  capturePostHogEvent("language_changed", {
+    from_lang: fromLanguage,
+    to_lang: toLanguage,
+  });
+}
+
+export function trackReviewSubmitted(country: string, rating: number): void {
+  capturePostHogEvent("review_submitted", { country, rating });
 }

@@ -6,6 +6,7 @@ import { PageHero } from "@/components/layout/PageHero";
 import { ReviewCard } from "@/components/ReviewCard";
 import { SiteLayout } from "@/components/layout/SiteLayout";
 import { useLanguage } from "@/lib/i18n/LanguageProvider";
+import { trackReviewSubmitted } from "@/lib/analytics.client";
 import type { Review } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
@@ -74,6 +75,7 @@ export function ReviewsPage() {
       }
 
       setSubmitted(true);
+      trackReviewSubmitted(country.trim(), rating);
       setName("");
       setCountry("");
       setRating(5);

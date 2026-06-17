@@ -9,6 +9,7 @@ import { AnchorNavLink } from "@/components/navigation/AnchorNavLink";
 import { useLanguage } from "@/lib/i18n/LanguageProvider";
 import { LANGUAGES } from "@/lib/i18n/translations";
 import { openEmergencyHelp } from "@/lib/emergencyEvents";
+import { trackLanguageChanged } from "@/lib/analytics.client";
 import type { LanguageCode } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
@@ -261,6 +262,9 @@ export function Header() {
                     role="menuitem"
                     className={cn("lang-item", language === code && "on")}
                     onClick={() => {
+                      if (code !== language) {
+                        trackLanguageChanged(language, code);
+                      }
                       setLanguage(code as LanguageCode);
                       setLangOpen(false);
                     }}

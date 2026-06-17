@@ -13,6 +13,7 @@ import { CategoryIcon } from "@/components/icons/CategoryIcon";
 import { CATEGORY_CONFIG } from "@/lib/categories";
 import { useLanguage } from "@/lib/i18n/LanguageProvider";
 import {
+  trackOrganizationCardOpened,
   trackDirectionsClicked,
   trackPhoneClicked,
 } from "@/lib/analytics.client";
@@ -60,6 +61,11 @@ export function OrganizationCard({
     recordImpactClick(org.id, "directions");
     onImpactRecorded?.();
     onGetDirections?.(org);
+  };
+
+  const handleCardOpen = () => {
+    trackOrganizationCardOpened(org);
+    onSelect?.(org);
   };
 
   const metaBlock = (
@@ -178,7 +184,7 @@ export function OrganizationCard({
       {org.verified ? (
         <Link
           href={`/org/${org.slug}`}
-          onClick={() => onSelect?.(org)}
+          onClick={handleCardOpen}
           className="block cursor-pointer p-3 md:p-4"
         >
           {cardBody}
@@ -186,7 +192,7 @@ export function OrganizationCard({
       ) : (
         <button
           type="button"
-          onClick={() => onSelect?.(org)}
+          onClick={handleCardOpen}
           className="block w-full min-w-0 cursor-pointer p-3 text-left md:p-4"
         >
           {cardBody}
