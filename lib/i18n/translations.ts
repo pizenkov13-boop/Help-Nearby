@@ -85,6 +85,11 @@ export type TranslationKey =
   | "footerCopyright"
   | "footerMadeWith"
   | "footerForCommunities"
+  | "footerSubmitOrg"
+  | "footerShareProject"
+  | "footerShareText"
+  | "footerShareCopied"
+  | "footerGitHub"
   | "aboutPageTitle"
   | "aboutPageSubtitle"
   | "aboutOurStory"
@@ -313,6 +318,12 @@ const en: Record<TranslationKey, string> = {
   footerCopyright: "© 2026 Help Nearby · Helping find assistance worldwide",
   footerMadeWith: "Made with",
   footerForCommunities: "for communities in need",
+  footerSubmitOrg: "Submit an organization",
+  footerShareProject: "Share Help Nearby",
+  footerShareText:
+    "Help Nearby — find free humanitarian assistance near you on one map.",
+  footerShareCopied: "Link copied!",
+  footerGitHub: "GitHub",
   aboutPageTitle: "Connecting People with Help",
   aboutPageHeading: "Connecting People with Help",
   aboutPageSubtitle:
@@ -578,6 +589,12 @@ const ru: Record<TranslationKey, string> = {
   footerCopyright: "© 2026 Help Nearby · Помогаем находить помощь по всему миру",
   footerMadeWith: "Сделано с любовью",
   footerForCommunities: "для сообществ, которым нужна помощь",
+  footerSubmitOrg: "Добавить организацию",
+  footerShareProject: "Рассказать о Help Nearby",
+  footerShareText:
+    "Help Nearby — бесплатная карта гуманитарной помощи рядом с вами.",
+  footerShareCopied: "Ссылка скопирована!",
+  footerGitHub: "GitHub",
   aboutPageTitle: "Соединяем людей с помощью",
   aboutPageHeading: "Соединяем людей с помощью",
   aboutPageSubtitle:
@@ -849,6 +866,12 @@ const es: Record<TranslationKey, string> = {
     "© 2026 Help Nearby · Ayudando a encontrar asistencia en todo el mundo",
   footerMadeWith: "Hecho con",
   footerForCommunities: "para comunidades que lo necesitan",
+  footerSubmitOrg: "Enviar una organización",
+  footerShareProject: "Compartir Help Nearby",
+  footerShareText:
+    "Help Nearby — encuentra ayuda humanitaria gratuita cerca de ti en un mapa.",
+  footerShareCopied: "¡Enlace copiado!",
+  footerGitHub: "GitHub",
   aboutPageTitle: "Conectando a las personas con ayuda",
   aboutPageHeading: "Conectando a las personas con ayuda",
   aboutPageSubtitle:
@@ -1125,6 +1148,12 @@ const fr: Record<TranslationKey, string> = {
     "© 2026 Help Nearby · Aider à trouver de l'assistance dans le monde entier",
   footerMadeWith: "Fait avec",
   footerForCommunities: "pour les communautés dans le besoin",
+  footerSubmitOrg: "Proposer une organisation",
+  footerShareProject: "Partager Help Nearby",
+  footerShareText:
+    "Help Nearby — trouvez une aide humanitaire gratuite près de chez vous sur une carte.",
+  footerShareCopied: "Lien copié !",
+  footerGitHub: "GitHub",
   aboutPageTitle: "Relier les personnes à l'aide",
   aboutPageHeading: "Relier les personnes à l'aide",
   aboutPageSubtitle:
@@ -1401,6 +1430,12 @@ const de: Record<TranslationKey, string> = {
     "© 2026 Help Nearby · Hilfe weltweit leichter auffindbar machen",
   footerMadeWith: "Gemacht mit",
   footerForCommunities: "für Gemeinschaften in Not",
+  footerSubmitOrg: "Organisation einreichen",
+  footerShareProject: "Help Nearby teilen",
+  footerShareText:
+    "Help Nearby — finden Sie kostenlose humanitäre Hilfe in Ihrer Nähe auf einer Karte.",
+  footerShareCopied: "Link kopiert!",
+  footerGitHub: "GitHub",
   aboutPageTitle: "Menschen mit Hilfe verbinden",
   aboutPageHeading: "Menschen mit Hilfe verbinden",
   aboutPageSubtitle:
@@ -1675,6 +1710,11 @@ const zh: Record<TranslationKey, string> = {
   footerCopyright: "© 2026 Help Nearby · 帮助在全球范围内找到援助",
   footerMadeWith: "用爱制作",
   footerForCommunities: "献给需要帮助的社区",
+  footerSubmitOrg: "提交组织信息",
+  footerShareProject: "分享 Help Nearby",
+  footerShareText: "Help Nearby — 在一张地图上找到您附近的人道主义援助。",
+  footerShareCopied: "链接已复制！",
+  footerGitHub: "GitHub",
   aboutPageTitle: "连接人与帮助",
   aboutPageHeading: "连接人与帮助",
   aboutPageSubtitle:
@@ -1926,6 +1966,12 @@ const ar: Record<TranslationKey, string> = {
   footerCopyright: "© 2026 Help Nearby · نساعد في إيجاد الدعم حول العالم",
   footerMadeWith: "صُنع بـ",
   footerForCommunities: "من أجل المجتمعات المحتاجة",
+  footerSubmitOrg: "إضافة منظمة",
+  footerShareProject: "شارك Help Nearby",
+  footerShareText:
+    "Help Nearby — اعثر على مساعدة إنسانية مجانية بالقرب منك على خريطة واحدة.",
+  footerShareCopied: "تم نسخ الرابط!",
+  footerGitHub: "GitHub",
   aboutPageTitle: "ربط الناس بالمساعدة",
   aboutPageHeading: "ربط الناس بالمساعدة",
   aboutPageSubtitle:

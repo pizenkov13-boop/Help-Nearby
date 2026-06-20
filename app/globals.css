@@ -971,6 +971,10 @@ body {
       width: 100%;
       text-align: center;
     }
+    button.contact-btn {
+      cursor: pointer;
+      font-family: inherit;
+    }
     .contact-btn:hover { border-color: var(--border-soft); background: var(--hover-bg); color: var(--hover-text); }
     .contact-list { display: flex; flex-direction: column; gap: 10px; }
     .partner-label {
