@@ -131,7 +131,7 @@ export function SiteFooter() {
           <span className="heart-red">
             <HeartIcon />
           </span>
-          {" "}for communities in need
+          {" "}{t("footerForCommunities")}
         </p>
       </div>
     </footer>
