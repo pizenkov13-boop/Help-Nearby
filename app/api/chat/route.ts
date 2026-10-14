@@ -3,7 +3,6 @@ import { aiComplete, isAiConfigured, type AiMessage } from "@/lib/aiProvider.ser
 import {
   findOrganizationsForChat,
   formatChatReply,
-  formatFollowUpFallback,
 } from "@/lib/chatContext.server";
 import { resolveSearchIntent } from "@/lib/chatIntent.server";
 import {
@@ -129,16 +128,25 @@ export async function POST(request: Request) {
         ? payload.context.country.slice(0, 60)
         : "";
 
-    const fallback = () =>
-      dbOrganizations.length > 0
-        ? formatChatReply(dbOrganizations, userQuery, intent)
-        : null;
+    // Plain-text answer used only when the LLM is unavailable.
+    const fallback = (): string | null => {
+      if (dbOrganizations.length > 0) {
+        return formatChatReply(dbOrganizations, userQuery, intent);
+      }
+      if (contextOrgs.length === 0) return null;
+      const lines = contextOrgs
+        .slice(0, 5)
+        .map((o) => `• ${[o.name, o.city, o.phone].filter(Boolean).join(" — ")}`);
+      const header =
+        language === "ru" ? "Помощь рядом:" : "Help nearby:";
+      return [header, ...lines].join("\n");
+    };
 
     if (!isAiConfigured()) {
-      return NextResponse.json({
-        message:
-          fallback() ?? formatFollowUpFallback(userQuery, dbOrganizations),
-      });
+      console.error("[chat] fallback: no api key");
+      const direct = fallback();
+      if (direct) return NextResponse.json({ message: direct });
+      return errorResponse("chatError", language, 502);
     }
 
     const aiMessages: AiMessage[] = [
@@ -153,6 +161,7 @@ export async function POST(request: Request) {
 
     if (reply) return NextResponse.json({ message: reply });
 
+    // The provider-level reason was already logged by aiComplete.
     const direct = fallback();
     if (direct) return NextResponse.json({ message: direct });
     return errorResponse("chatError", language, 502);
