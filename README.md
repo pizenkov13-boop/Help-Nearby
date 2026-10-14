@@ -165,6 +165,10 @@ AITUNNEL_API_KEY=your-aitunnel-api-key
 AITUNNEL_BASE_URL=https://api.aitunnel.ru/v1/
 AITUNNEL_MODEL=gpt-6-luna
 
+# Map tiles (optional — defaults to OpenStreetMap standard tiles)
+# NEXT_PUBLIC_MAP_TILES_URL=https://api.maptiler.com/maps/streets-v2/{z}/{x}/{y}.png?key=your-key
+# NEXT_PUBLIC_MAP_TILES_ATTRIBUTION=&copy; MapTiler &copy; OpenStreetMap contributors
+
 # ReliefWeb humanitarian sources (optional — set after appname approval)
 RELIEFWEB_APPNAME=help-nearby-sources-a4p8n1QSR
 
