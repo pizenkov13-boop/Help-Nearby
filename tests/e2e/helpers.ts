@@ -1,5 +1,6 @@
 import type { Page } from "@playwright/test";
 import { expect } from "@playwright/test";
+import { APP_CACHE_VERSION, APP_CACHE_VERSION_KEY } from "@/lib/appCacheVersion";
 import type { Organization } from "@/lib/types";
 
 export const NYC_GEO = { latitude: 40.7128, longitude: -74.006 };
@@ -52,12 +53,17 @@ export const MOCK_NEARBY_ORGS: Organization[] = [
 ];
 
 export async function preferFullMode(page: Page) {
-  await page.addInitScript(() => {
-    sessionStorage.setItem("help-nearby-view-mode", "full");
-    localStorage.clear();
-    sessionStorage.clear();
-    sessionStorage.setItem("help-nearby-view-mode", "full");
-  });
+  await page.addInitScript(
+    ([cacheKey, cacheVersion]) => {
+      sessionStorage.setItem("help-nearby-view-mode", "full");
+      localStorage.clear();
+      sessionStorage.clear();
+      sessionStorage.setItem("help-nearby-view-mode", "full");
+      // Production builds reload the page when this key is missing; keep it set.
+      localStorage.setItem(cacheKey, cacheVersion);
+    },
+    [APP_CACHE_VERSION_KEY, APP_CACHE_VERSION],
+  );
 }
 
 export async function mockNearbyApi(page: Page) {
