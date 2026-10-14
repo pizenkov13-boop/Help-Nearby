@@ -1,31 +1,44 @@
-import { geocodeVerifiedCatalog } from "@/lib/geocodeVerifiedCatalog";
-import { validateOrganizationForNearby } from "@/lib/organizationCoordinates";
 import { mergeOrganizations } from "@/lib/mergeOrganizations";
+import { hasValidMapCoordinates } from "@/lib/mapCoordinates";
+import { organizationNeedsGeocoding } from "@/lib/nominatimGeocode";
+import { validateOrganizationForNearby } from "@/lib/organizationCoordinates";
 import {
   readOverpassClientCache,
   writeOverpassClientCache,
 } from "@/lib/overpassClientCache";
-import { OVERPASS_TIMEOUT_MS } from "@/lib/overpassCache";
+import { resolveOrganizationCoordinates } from "@/lib/resolveOrganizationCoordinates";
+import { readSessionCache, writeSessionCache } from "@/lib/sessionCache";
 import {
   getMaxRadiusMeters,
+  getRadiusTiers,
   runSmartRadiusSearch,
   type SmartRadiusSearchResult,
 } from "@/lib/smartRadius";
+import { searchCacheKey } from "@/lib/ttlCache";
 import type { Organization, UserLocation } from "@/lib/types";
 
 export type { SmartRadiusSearchResult };
 
-const EXTERNAL_FETCH_TIMEOUT_MS = OVERPASS_TIMEOUT_MS;
-const VERIFIED_FETCH_TIMEOUT_MS = 20_000;
+/** Client-side budgets (slightly above the server's so the server's answer wins). */
+export const SUPABASE_FETCH_TIMEOUT_MS = 5_000;
+export const OVERPASS_FETCH_TIMEOUT_MS = 9_000;
+export const OCHA_FETCH_TIMEOUT_MS = 7_000;
 
-export interface MergedNearbyResult {
-  organizations: Organization[];
-  externalTimedOut: boolean;
-}
+const MAX_BACKGROUND_GEOCODE_OCHA = 12;
+const MAX_BACKGROUND_GEOCODE_CATALOG = 8;
+const GEOCODE_DELAY_MS = 1100;
+const OCHA_GEOCODE_PER_SOURCE = 4;
+
+export type SourceKey = "supabase" | "osm" | "ocha";
+export type SourceStatus = "pending" | "done" | "failed" | "timeout";
+export type NearbySourceStates = Record<SourceKey, SourceStatus>;
 
 export interface NearbySearchCallbacks {
-  /** Fired when Supabase catalog is ready (before Overpass). */
+  /** Fired every time any source finishes, with everything known so far. */
   onOrganizationsUpdate?: (organizations: Organization[]) => void;
+  /** Fired as background geocoding adds coordinates to already-listed entries. */
+  onOrganizationsPatch?: (patched: Organization[]) => void;
+  onSourceStatus?: (states: NearbySourceStates) => void;
   onExternalTimeout?: () => void;
 }
 
@@ -35,11 +48,18 @@ export interface SmartRadiusSearchOptions {
   countryCode?: string | null;
   startTierIndex?: number;
   autoExpand?: boolean;
+  /** Aborts background geocoding when a newer search starts. */
+  signal?: AbortSignal;
 }
 
 export type SmartRadiusSearchResultWithMeta = SmartRadiusSearchResult & {
   externalTimedOut: boolean;
 };
+
+interface SourceResult {
+  organizations: Organization[];
+  status: Exclude<SourceStatus, "pending">;
+}
 
 function filterByRadius(
   orgs: Organization[],
@@ -51,9 +71,32 @@ function filterByRadius(
     .filter((org): org is Organization => org !== null);
 }
 
-/** `/api/verified-nearby` already applies radius + country-wide OCHA rules on the server. */
-function verifiedNearbyResults(orgs: Organization[]): Organization[] {
-  return orgs;
+function mergeAllNearbySources(
+  catalog: Organization[],
+  overpass: Organization[],
+  verified: Organization[],
+): Organization[] {
+  return mergeOrganizations(mergeOrganizations(catalog, overpass), verified);
+}
+
+/** Fetches JSON with an abort timeout; distinguishes timeout from other failures. */
+async function fetchJsonWithTimeout(
+  url: string,
+  timeoutMs: number,
+): Promise<{ ok: true; data: unknown } | { ok: false; timedOut: boolean }> {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), timeoutMs);
+  try {
+    const res = await fetch(url, { signal: controller.signal });
+    if (!res.ok) {
+      return { ok: false, timedOut: res.status === 504 };
+    }
+    return { ok: true, data: await res.json() };
+  } catch {
+    return { ok: false, timedOut: controller.signal.aborted };
+  } finally {
+    clearTimeout(timer);
+  }
 }
 
 /** Supabase catalog via server API (avoids browser → supabase.co blocks). */
@@ -61,8 +104,18 @@ async function fetchSupabaseCatalog(
   location: UserLocation,
   country: string | undefined,
   radiusMeters: number,
-  liteMode = false,
-): Promise<Organization[]> {
+): Promise<SourceResult> {
+  const cacheKey = searchCacheKey(
+    "catalog",
+    location.lat,
+    location.lng,
+    radiusMeters,
+    "all",
+    country ?? "",
+  );
+  const cached = readSessionCache<Organization[]>(cacheKey);
+  if (cached) return { organizations: cached, status: "done" };
+
   const params = new URLSearchParams();
   if (country) {
     params.set("country", country);
@@ -72,41 +125,28 @@ async function fetchSupabaseCatalog(
     params.set("radius", String(radiusMeters));
   }
 
-  try {
-    const res = await fetch(`/api/organizations?${params}`);
-    const data = (await res.json()) as unknown;
-    if (!res.ok || !Array.isArray(data)) {
-      console.warn("[nearbySearch] /api/organizations status:", res.status);
-      return [];
-    }
-
-    let catalog = data as Organization[];
-
-    if (country) {
-      catalog = await geocodeVerifiedCatalog(catalog, { liteMode });
-      return filterByRadius(catalog, location, radiusMeters);
-    }
-
-    return catalog;
-  } catch (error) {
-    console.warn("[nearbySearch] Supabase catalog fetch failed:", error);
-    return [];
+  const result = await fetchJsonWithTimeout(
+    `/api/organizations?${params}`,
+    SUPABASE_FETCH_TIMEOUT_MS,
+  );
+  if (!result.ok || !Array.isArray(result.data)) {
+    return {
+      organizations: [],
+      status: result.ok ? "failed" : result.timedOut ? "timeout" : "failed",
+    };
   }
+
+  const organizations = result.data as Organization[];
+  if (organizations.length > 0) writeSessionCache(cacheKey, organizations);
+  return { organizations, status: "done" };
 }
 
 async function fetchOverpassNearby(
   location: UserLocation,
   radiusMeters: number,
-  signal?: AbortSignal,
-): Promise<Organization[]> {
-  const cached = readOverpassClientCache(
-    location.lat,
-    location.lng,
-    radiusMeters,
-  );
-  if (cached) {
-    return cached;
-  }
+): Promise<SourceResult> {
+  const cached = readOverpassClientCache(location.lat, location.lng, radiusMeters);
+  if (cached) return { organizations: cached, status: "done" };
 
   const params = new URLSearchParams({
     lat: String(location.lat),
@@ -114,253 +154,189 @@ async function fetchOverpassNearby(
     radius: String(radiusMeters),
   });
 
-  const res = await fetch(`/api/nearby?${params}`, { signal });
-  const data = (await res.json()) as unknown;
-  if (!res.ok) {
-    console.warn("[nearbySearch] /api/nearby status:", res.status);
-    return [];
+  const result = await fetchJsonWithTimeout(
+    `/api/nearby?${params}`,
+    OVERPASS_FETCH_TIMEOUT_MS,
+  );
+  if (!result.ok) {
+    const stale = readOverpassClientCache(location.lat, location.lng, radiusMeters);
+    return {
+      organizations: stale ?? [],
+      status: result.timedOut ? "timeout" : "failed",
+    };
   }
 
-  const organizations = Array.isArray(data) ? (data as Organization[]) : [];
+  const organizations = Array.isArray(result.data)
+    ? (result.data as Organization[])
+    : [];
   if (organizations.length > 0) {
-    writeOverpassClientCache(
-      location.lat,
-      location.lng,
-      radiusMeters,
-      organizations,
-    );
+    writeOverpassClientCache(location.lat, location.lng, radiusMeters, organizations);
   }
-  return organizations;
+  return { organizations, status: "done" };
 }
 
-async function fetchVerifiedNearby(
-  location: UserLocation,
-  radiusMeters: number,
-  country: string,
-  countryCode: string | null | undefined,
-  signal?: AbortSignal,
-): Promise<Organization[]> {
-  const params = new URLSearchParams({
-    lat: String(location.lat),
-    lng: String(location.lng),
-    radius: String(radiusMeters),
-    country,
-  });
-  if (countryCode) {
-    params.set("countryCode", countryCode);
-  }
-
-  const res = await fetch(`/api/verified-nearby?${params}`, { signal });
-  const data = (await res.json()) as unknown;
-  if (!res.ok) {
-    console.warn("[nearbySearch] /api/verified-nearby status:", res.status);
-    return [];
-  }
-
-  return Array.isArray(data) ? (data as Organization[]) : [];
-}
-
-async function fetchVerifiedNearbyWithTimeout(
-  location: UserLocation,
-  radiusMeters: number,
+/** Country-level OCHA directory (no coordinates) — fast, geocoded later in the background. */
+async function fetchOchaDirectory(
   country: string | undefined,
-  countryCode?: string | null,
-): Promise<{ organizations: Organization[]; timedOut: boolean }> {
-  if (!country?.trim()) {
-    return { organizations: [], timedOut: false };
-  }
+  countryCode: string | null | undefined,
+): Promise<SourceResult> {
+  if (!country?.trim()) return { organizations: [], status: "done" };
 
-  const controller = new AbortController();
-  const timeoutId = setTimeout(
-    () => controller.abort(),
-    VERIFIED_FETCH_TIMEOUT_MS,
+  const cacheKey = `ocha:${country.toLowerCase()}:${countryCode ?? ""}`;
+  const cached = readSessionCache<Organization[]>(cacheKey);
+  if (cached) return { organizations: cached, status: "done" };
+
+  const params = new URLSearchParams({ country, stage: "directory" });
+  if (countryCode) params.set("countryCode", countryCode);
+
+  const result = await fetchJsonWithTimeout(
+    `/api/verified-nearby?${params}`,
+    OCHA_FETCH_TIMEOUT_MS,
   );
-
-  try {
-    const organizations = await fetchVerifiedNearby(
-      location,
-      radiusMeters,
-      country,
-      countryCode,
-      controller.signal,
-    );
-    return { organizations, timedOut: false };
-  } catch (error) {
-    if (controller.signal.aborted) {
-      console.warn(
-        `[nearbySearch] verified sources timed out after ${VERIFIED_FETCH_TIMEOUT_MS / 1000}s`,
-      );
-      return { organizations: [], timedOut: true };
-    }
-    console.error("[nearbySearch] verified sources fetch failed:", error);
-    return { organizations: [], timedOut: false };
-  } finally {
-    clearTimeout(timeoutId);
+  if (!result.ok || !Array.isArray(result.data)) {
+    return {
+      organizations: [],
+      status: result.ok ? "failed" : result.timedOut ? "timeout" : "failed",
+    };
   }
+
+  const organizations = result.data as Organization[];
+  if (organizations.length > 0) writeSessionCache(cacheKey, organizations);
+  return { organizations, status: "done" };
 }
 
-async function fetchOverpassWithTimeout(
-  location: UserLocation,
-  radiusMeters: number,
-): Promise<{ organizations: Organization[]; timedOut: boolean }> {
-  const controller = new AbortController();
-  const timeoutId = setTimeout(
-    () => controller.abort(),
-    EXTERNAL_FETCH_TIMEOUT_MS,
-  );
+const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
-  try {
-    const organizations = await fetchOverpassNearby(
-      location,
-      radiusMeters,
-      controller.signal,
-    );
-    return { organizations, timedOut: false };
-  } catch (error) {
-    if (controller.signal.aborted) {
-      console.warn(
-        `[nearbySearch] Overpass timed out after ${EXTERNAL_FETCH_TIMEOUT_MS / 1000}s`,
-      );
-      const stale = readOverpassClientCache(
-        location.lat,
-        location.lng,
-        radiusMeters,
-      );
-      return { organizations: stale ?? [], timedOut: true };
-    }
-    console.error("[nearbySearch] Overpass fetch failed:", error);
-    return { organizations: [], timedOut: false };
-  } finally {
-    clearTimeout(timeoutId);
+/** A few entries per OCHA source first, so one source cannot use up the whole budget. */
+function pickOchaForGeocoding(orgs: Organization[]): Organization[] {
+  const bySource = (prefix: string) =>
+    orgs.filter((org) => org.id.startsWith(prefix)).slice(0, OCHA_GEOCODE_PER_SOURCE);
+  const picked = [...bySource("rw-"), ...bySource("hdx-"), ...bySource("gdho-")];
+  const rest = orgs.filter((org) => !picked.includes(org));
+  return [...picked, ...rest].slice(0, MAX_BACKGROUND_GEOCODE_OCHA);
+}
+
+/** Nominatim-limited (≥1.1 s apart), cancellable, never blocks the search. */
+async function geocodeInBackground(
+  orgs: Organization[],
+  max: number,
+  signal: AbortSignal | undefined,
+  onResolved: (org: Organization) => void,
+): Promise<void> {
+  let attempted = 0;
+  for (const org of orgs) {
+    if (signal?.aborted || attempted >= max) return;
+    if (!organizationNeedsGeocoding(org)) continue;
+
+    const resolved = await resolveOrganizationCoordinates(org);
+    attempted += 1;
+    if (signal?.aborted) return;
+    if (hasValidMapCoordinates(resolved)) onResolved(resolved);
+    if (attempted < max) await sleep(GEOCODE_DELAY_MS);
   }
 }
 
 /**
- * Fetch Supabase catalog and Overpass in parallel.
- * Catalog results surface immediately; Overpass merges when ready.
+ * Starts all sources at once and surfaces each as it finishes:
+ * Supabase first, then OSM and the OCHA directory, merged without resetting the list.
  */
-function mergeAllNearbySources(
-  catalog: Organization[],
-  overpass: Organization[],
-  verified: Organization[],
-): Organization[] {
-  return mergeOrganizations(
-    mergeOrganizations(catalog, overpass),
-    verified,
-  );
-}
-
-export async function fetchMergedNearbyParallel(
-  location: UserLocation,
-  radiusMeters: number,
-  country?: string,
-  callbacks?: Pick<
-    NearbySearchCallbacks,
-    "onOrganizationsUpdate" | "onExternalTimeout"
-  >,
-  externalOrgs?: Organization[],
-  countryCode?: string | null,
-): Promise<MergedNearbyResult> {
-  const catalogPromise = fetchSupabaseCatalog(location, country, radiusMeters);
-
-  const externalPromise =
-    externalOrgs !== undefined
-      ? Promise.resolve({ organizations: externalOrgs, timedOut: false })
-      : fetchOverpassWithTimeout(location, radiusMeters);
-
-  const verifiedPromise = fetchVerifiedNearbyWithTimeout(
-    location,
-    radiusMeters,
-    country,
-    countryCode,
-  );
-
-  const catalog = await catalogPromise;
-
-  const [externalResult, verifiedResult] = await Promise.all([
-    externalPromise,
-    verifiedPromise,
-  ]);
-
-  if (externalResult.timedOut || verifiedResult.timedOut) {
-    callbacks?.onExternalTimeout?.();
-  }
-
-  const organizations = mergeAllNearbySources(
-    catalog,
-    filterByRadius(externalResult.organizations, location, radiusMeters),
-    verifiedNearbyResults(verifiedResult.organizations),
-  );
-  callbacks?.onOrganizationsUpdate?.(organizations);
-
-  return {
-    organizations,
-    externalTimedOut: externalResult.timedOut || verifiedResult.timedOut,
-  };
-}
-
-/** @deprecated Use fetchMergedNearbyParallel */
-export async function fetchMergedNearby(
-  location: UserLocation,
-  radiusMeters: number,
-  country?: string,
-): Promise<Organization[]> {
-  const result = await fetchMergedNearbyParallel(
-    location,
-    radiusMeters,
-    country,
-  );
-  return result.organizations;
-}
-
 export async function searchNearbyWithSmartRadius(
   location: UserLocation,
   options: SmartRadiusSearchOptions,
   callbacks?: NearbySearchCallbacks,
 ): Promise<SmartRadiusSearchResultWithMeta> {
-  let externalTimedOut = false;
+  const tiers = getRadiusTiers(options.liteMode);
   const maxRadius = getMaxRadiusMeters(options.liteMode);
+  let activeRadius = tiers[options.startTierIndex ?? 0] ?? tiers[0]!;
 
-  const catalogAtMaxPromise = fetchSupabaseCatalog(
-    location,
-    options.country,
-    maxRadius,
-    options.liteMode,
-  );
+  const states: NearbySourceStates = {
+    supabase: "pending",
+    osm: "pending",
+    ocha: options.country?.trim() ? "pending" : "done",
+  };
+  let catalog: Organization[] = [];
+  let overpass: Organization[] = [];
+  let ocha: Organization[] = [];
+  let externalTimedOut = false;
 
-  const overpassAtMaxPromise = fetchOverpassWithTimeout(location, maxRadius);
-  const verifiedAtMaxPromise = fetchVerifiedNearbyWithTimeout(
-    location,
-    maxRadius,
-    options.country,
-    options.countryCode,
-  );
+  const emitStatus = () => callbacks?.onSourceStatus?.({ ...states });
+  const mergedAt = (radius: number) =>
+    mergeAllNearbySources(
+      filterByRadius(catalog, location, radius),
+      filterByRadius(overpass, location, radius),
+      ocha,
+    );
+  const emitOrganizations = () =>
+    callbacks?.onOrganizationsUpdate?.(mergedAt(activeRadius));
 
-  const fetchAtRadius = async (radiusMeters: number) => {
-    const catalogAtMax = await catalogAtMaxPromise;
-    const catalog = filterByRadius(catalogAtMax, location, radiusMeters);
-
-    const [overpassResult, verifiedResult] = await Promise.all([
-      overpassAtMaxPromise,
-      verifiedAtMaxPromise,
-    ]);
-
-    if (overpassResult.timedOut || verifiedResult.timedOut) {
+  const settle = (key: SourceKey, result: SourceResult) => {
+    states[key] = result.status;
+    if (result.status === "timeout") {
       externalTimedOut = true;
       callbacks?.onExternalTimeout?.();
     }
+    emitStatus();
+  };
 
-    const overpass = filterByRadius(
-      overpassResult.organizations,
-      location,
-      radiusMeters,
-    );
-    const verified = verifiedNearbyResults(verifiedResult.organizations);
+  const patchOrganization = (resolved: Organization, target: "catalog" | "ocha") => {
+    const replace = (list: Organization[]) =>
+      list.map((org) => (org.id === resolved.id ? resolved : org));
+    if (target === "ocha") ocha = replace(ocha);
+    else catalog = replace(catalog);
+    callbacks?.onOrganizationsPatch?.([resolved]);
+  };
 
-    const merged = mergeAllNearbySources(catalog, overpass, verified);
-    callbacks?.onOrganizationsUpdate?.(merged);
+  emitStatus();
 
-    return merged;
+  const catalogPromise = fetchSupabaseCatalog(location, options.country, maxRadius).then(
+    (result) => {
+      catalog = result.organizations;
+      settle("supabase", result);
+      emitOrganizations();
+      if (!options.liteMode) {
+        void geocodeInBackground(
+          result.organizations.filter((org) => !hasValidMapCoordinates(org)),
+          MAX_BACKGROUND_GEOCODE_CATALOG,
+          options.signal,
+          (org) => patchOrganization(org, "catalog"),
+        );
+      }
+      return result;
+    },
+  );
+
+  const overpassPromise = fetchOverpassNearby(location, maxRadius).then((result) => {
+    overpass = result.organizations;
+    settle("osm", result);
+    emitOrganizations();
+    return result;
+  });
+
+  const ochaPromise = fetchOchaDirectory(options.country, options.countryCode).then(
+    (result) => {
+      ocha = result.organizations;
+      if (options.country?.trim()) settle("ocha", result);
+      emitOrganizations();
+      if (!options.liteMode) {
+        void geocodeInBackground(
+          pickOchaForGeocoding(result.organizations),
+          MAX_BACKGROUND_GEOCODE_OCHA,
+          options.signal,
+          (org) => patchOrganization(org, "ocha"),
+        );
+      }
+      return result;
+    },
+  );
+
+  const fetchAtRadius = async (radiusMeters: number) => {
+    activeRadius = radiusMeters;
+    await Promise.all([catalogPromise, overpassPromise, ochaPromise]);
+
+    // Radius expansion is driven by mappable results; list-only OCHA entries are added at the end.
+    const mappable = mergedAt(radiusMeters).filter(hasValidMapCoordinates);
+    callbacks?.onOrganizationsUpdate?.(mergedAt(radiusMeters));
+    return mappable;
   };
 
   const searchResult = await runSmartRadiusSearch(fetchAtRadius, {
@@ -369,5 +345,10 @@ export async function searchNearbyWithSmartRadius(
     autoExpand: options.autoExpand,
   });
 
-  return { ...searchResult, externalTimedOut };
+  const organizations = mergeOrganizations(
+    searchResult.organizations,
+    ocha.filter((org) => !hasValidMapCoordinates(org)),
+  );
+
+  return { ...searchResult, organizations, externalTimedOut };
 }

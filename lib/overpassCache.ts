@@ -1,7 +1,8 @@
 /** Shared Overpass cache settings (client localStorage + server memory). */
 export const OVERPASS_CACHE_TTL_MS = 60 * 60 * 1000;
 
-export const OVERPASS_TIMEOUT_MS = 20_000;
+/** Total server budget per Overpass query (first mirror + one retry on a second mirror). */
+export const OVERPASS_TIMEOUT_MS = 8_000;
 
 /** ~2.2 km at equator — same bucket as nearby list cache. */
 export const OVERPASS_LOCATION_ROUND_DEG = 0.02;

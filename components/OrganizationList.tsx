@@ -1,5 +1,6 @@
 "use client";
 
+import type { ReactNode } from "react";
 import { Building2 } from "lucide-react";
 import { useLanguage } from "@/lib/i18n/LanguageProvider";
 import { formatSearchNoResults } from "@/lib/i18n/translations";
@@ -12,6 +13,8 @@ interface OrganizationListProps {
   searchQuery?: string;
   /** Shown when the list is empty and no search query is active. */
   emptyMessage?: string;
+  /** Optional action rendered under the empty message (e.g. a retry button). */
+  emptyAction?: ReactNode;
   selectedId?: string;
   onSelect: (org: Organization) => void;
   onGetDirections?: (org: Organization) => void;
@@ -23,6 +26,7 @@ export function OrganizationList({
   organizations,
   searchQuery = "",
   emptyMessage,
+  emptyAction,
   selectedId,
   onSelect,
   onGetDirections,
@@ -54,6 +58,7 @@ export function OrganizationList({
               ? formatSearchNoResults(language, trimmedSearch)
               : (emptyMessage ?? t("noResults"))}
           </p>
+          {emptyAction}
         </div>
       ) : (
         <div className="grid w-full min-w-0 max-w-full gap-3 md:gap-4">

@@ -304,3 +304,27 @@ export async function fetchVerifiedCountryDirectory(
 
   return { hdx, gdho, reliefweb };
 }
+
+/** Per-source cap for the fast country-level list shown before geocoding. */
+const MAX_DIRECTORY_PER_SOURCE = MAX_OCHA_COUNTRY_WIDE_PER_SOURCE;
+
+/**
+ * Country-level OCHA entries without coordinates, returned first (list only).
+ * The client geocodes them in the background and adds them to the map when ready.
+ */
+export async function fetchVerifiedDirectory(
+  country: string,
+  countryCode?: string | null,
+  timeoutMs = 5500,
+): Promise<Organization[]> {
+  const { hdx, gdho, reliefweb } = await fetchVerifiedCountryDirectory(
+    country,
+    countryCode,
+    timeoutMs,
+  );
+  return mergeVerifiedCatalog([
+    reliefweb.slice(0, MAX_DIRECTORY_PER_SOURCE),
+    hdx.slice(0, MAX_DIRECTORY_PER_SOURCE),
+    gdho.slice(0, MAX_DIRECTORY_PER_SOURCE),
+  ]);
+}
