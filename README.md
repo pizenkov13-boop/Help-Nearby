@@ -42,8 +42,9 @@ These organizations are seeded in Supabase with `verified = true` and official s
 | Kazakhstan (Red Crescent) | **16** | `supabase/RUN_KAZAKHSTAN_RED_CRESCENT.sql` | [redcrescent.kz](https://redcrescent.kz) |
 | UAE (Emirates Red Crescent) | **10** | `supabase/RUN_UAE_RED_CRESCENT.sql` | [emiratesrc.ae](https://emiratesrc.ae) |
 | Belarus (Red Cross) | **9** | `supabase/RUN_BELARUS_RED_CROSS.sql` | [redcross.by](https://redcross.by) |
+| France (Croix-Rouge française) | **60** | `supabase/RUN_CROIX_ROUGE_FRANCE.sql` | [croix-rouge.fr/annuaire](https://www.croix-rouge.fr/annuaire) |
 | Demo seed (New York, US) | **3** | `supabase/migrations/20250319000001_seed_organizations.sql` | Example data |
-| **Total (all seeds)** | **126** | | |
+| **Total (verified, excl. demo seed)** | **183** | | |
 
 Community submissions via `/submit` are stored as **unverified** until approved in `/admin`.
 
@@ -61,7 +62,7 @@ Community submissions via `/submit` are stored as **unverified** until approved 
 | **7 languages** | English, Russian, Spanish, French, German, Chinese, Arabic (RTL) |
 | **Lite mode** | List-only view (no map tiles) for slow networks and low-connectivity regions |
 | **Adaptive theme** | Auto light theme in sunny regions (browser geolocation + country lookup); manual dark/light toggle |
-| **AI assistant** | Groq (Llama 3.3 70B) chat — **experimental** |
+| **AI assistant** | AITunnel (OpenAI-compatible) chat, scoped to humanitarian help — **experimental** |
 | **PWA** | Progressive Web App — **experimental** (manifest + partial service worker; offline page only, not full offline app) |
 | **Admin moderation** | Password-protected `/admin` for org and review approval |
 | **Impact counter** | Tracks Call / Directions clicks in Supabase (usage signal, not aid delivery proof) |
@@ -102,7 +103,7 @@ Verified from `package.json` and project source:
 | Geocoding | [Nominatim](https://nominatim.org/) | via `/api/geocode` |
 | POI data | [Overpass API](https://wiki.openstreetmap.org/wiki/Overpass_API) | via `/api/nearby` |
 | Routing | [OSRM](http://project-osrm.org/) | via `/api/route` |
-| AI chat | [Groq](https://groq.com/) — `llama-3.3-70b-versatile` | via `/api/chat` |
+| AI chat | [AITunnel](https://aitunnel.ru/) (OpenAI-compatible API) | via `/api/chat` |
 | Analytics | [PostHog](https://posthog.com/) (`posthog-js`) | **1.374.3** |
 | Hosting | [Vercel](https://vercel.com/) | Production + preview deploys |
 | E2E tests | [Playwright](https://playwright.dev/) | **1.60.0** |
@@ -159,8 +160,10 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key
 ADMIN_PASSWORD=your-secure-admin-password
 SUPABASE_SERVICE_ROLE_KEY=your-service-role-key
 
-# AI chat (optional)
-GROQ_API_KEY=your-groq-api-key
+# AI chat (optional, server-side only — never expose to the client)
+AITUNNEL_API_KEY=your-aitunnel-api-key
+AITUNNEL_BASE_URL=https://api.aitunnel.ru/v1/
+AITUNNEL_MODEL=gpt-6-luna
 
 # ReliefWeb humanitarian sources (optional — set after appname approval)
 RELIEFWEB_APPNAME=help-nearby-sources-a4p8n1QSR
@@ -169,6 +172,17 @@ RELIEFWEB_APPNAME=help-nearby-sources-a4p8n1QSR
 NEXT_PUBLIC_POSTHOG_KEY=your-posthog-key
 NEXT_PUBLIC_POSTHOG_HOST=https://us.i.posthog.com
 ```
+
+### GitHub Actions secrets
+
+The `Supabase keepalive` workflow (`.github/workflows/keepalive.yml`) runs every 3 days (and on demand) to keep the Supabase project from being paused. Add these repository secrets under **Settings → Secrets and variables → Actions**:
+
+| Secret | Value |
+|--------|-------|
+| `NEXT_PUBLIC_SUPABASE_URL` | Your Supabase project URL |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Your Supabase anon (public) key |
+
+The job fails if the REST request does not return HTTP 200.
 
 > Never commit `.env.local` or secret keys to Git.
 
@@ -234,7 +248,7 @@ scripts/             # Geocoding and build utilities
 | `/api/geocode/reverse` | Coordinates → country |
 | `/api/submit` | Public organization submissions |
 | `/api/reviews` | Approved reviews (GET) / new review (POST) |
-| `/api/chat` | Groq AI assistant |
+| `/api/chat` | AI assistant (AITunnel) |
 | `/api/impact` | Impact click tracking |
 | `/api/admin/*` | Admin auth, verify orgs, moderate reviews |
 
@@ -257,7 +271,7 @@ Please do not include API keys or `.env.local` in submissions.
 
 **Pavel Izenkin** — 15 years old, Prokopyevsk, Russia.
 
-Built with support from the open-source community, OpenStreetMap contributors, Supabase, and Groq.
+Built with support from the open-source community, OpenStreetMap contributors, Supabase, and AITunnel.
 
 Community partner: [Kindness Corporation](https://www.kindnesscorporation.ru/)
 
