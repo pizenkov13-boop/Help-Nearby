@@ -27,7 +27,7 @@ import {
   formatWeeklyHours,
   getDirectionsUrl,
   getPhoneTelUrl,
-  isOrganizationOpen,
+  getOrganizationOpenStatus,
 } from "@/lib/orgUtils";
 import { getOrganizationSource } from "@/lib/organizationSource";
 import type { Organization } from "@/lib/types";
@@ -68,7 +68,8 @@ export function OrganizationDetailPage({ org }: OrganizationDetailPageProps) {
   const { t } = useLanguage();
   const cfg = CATEGORY_CONFIG[org.category];
   const source = getOrganizationSource(org);
-  const open = isOrganizationOpen(org);
+  const openStatus = getOrganizationOpenStatus(org);
+  const open = openStatus === "open";
   const [copied, setCopied] = useState(false);
 
   const handleShare = useCallback(async () => {
@@ -122,17 +123,19 @@ export function OrganizationDetailPage({ org }: OrganizationDetailPageProps) {
                 {t("verified")}
               </span>
             )}
-            <span
-              className={cn(
-                "inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-sm font-medium",
-                open
-                  ? "bg-emerald-500/20 text-emerald-400"
-                  : "bg-gray-700/80 text-gray-400",
-              )}
-            >
-              <Clock className="h-4 w-4" />
-              {open ? t("openNow") : t("closed")}
-            </span>
+            {openStatus !== "unknown" && (
+              <span
+                className={cn(
+                  "inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-sm font-medium",
+                  open
+                    ? "bg-emerald-500/20 text-emerald-400"
+                    : "bg-gray-700/80 text-gray-400",
+                )}
+              >
+                <Clock className="h-4 w-4" />
+                {open ? t("openNow") : t("closed")}
+              </span>
+            )}
           </div>
 
           <h1 className="text-3xl font-extrabold tracking-tight text-gray-900 dark:text-white sm:text-4xl">
