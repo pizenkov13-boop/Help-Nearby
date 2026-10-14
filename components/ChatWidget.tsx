@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Bot, Loader2, MessageCircle, Send, X } from "lucide-react";
+import { ChatMessageText } from "@/components/ChatMessageText";
 import { getChatContext } from "@/lib/chatClientContext";
 import { useLanguage } from "@/lib/i18n/LanguageProvider";
 import { cn } from "@/lib/utils";
@@ -131,7 +132,11 @@ export function ChatWidget() {
                     : "bg-slate-100 text-slate-800 dark:bg-gray-800 dark:text-gray-200",
                 )}
               >
-                {msg.text}
+                {msg.role === "assistant" ? (
+                  <ChatMessageText text={msg.text} />
+                ) : (
+                  msg.text
+                )}
               </div>
             ))}
             {isLoading && (

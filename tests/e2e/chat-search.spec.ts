@@ -78,8 +78,9 @@ test.describe("AI chat server-side search", () => {
 
     const prompt = buildSystemPrompt(result.organizations, "France", result.searched);
     expect(prompt).toContain("CRF Nice Aide alimentaire");
-    expect(prompt).toContain("source: Supabase");
-    expect(prompt).toContain("source: OSM");
+    expect(prompt).toContain("source: Help Nearby verified directory");
+    expect(prompt).not.toMatch(/source: Supabase/);
+    expect(prompt).toContain("source: OpenStreetMap");
   });
 
   test("country with only OCHA results (Sudan): flagged as country-level directory", async () => {
