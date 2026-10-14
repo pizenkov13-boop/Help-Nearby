@@ -1,6 +1,6 @@
 import { distanceMiles } from "@/lib/geo";
 import { hasValidMapCoordinates } from "@/lib/mapCoordinates";
-import { isOchaOrganization } from "@/lib/organizationCoordinates";
+import { isApproximateLocation } from "@/lib/organizationCoordinates";
 import type { Organization } from "@/lib/types";
 
 const DUPLICATE_RADIUS_MILES = 0.05;
@@ -56,15 +56,14 @@ export function mergeOrganizations(
 }
 
 /**
- * List order: entries with coordinates first, nearest first within each group
+ * List order: entries with exact coordinates first, nearest first within each group
  *   0. verified catalog entries,
  *   1. unverified OSM entries,
- *   2. country-level OCHA entries that were geocoded (approximate position),
- * then entries without coordinates at the very end (no distance is shown for them).
+ * then, at the very end, entries without exact coordinates (no coordinates, or approximate
+ * country-level OCHA entries). No distance is shown for those.
  */
 function listRank(org: Organization): number {
-  if (!hasValidMapCoordinates(org)) return 3;
-  if (isOchaOrganization(org)) return 2;
+  if (isApproximateLocation(org) || !hasValidMapCoordinates(org)) return 2;
   return org.verified ? 0 : 1;
 }
 

@@ -18,10 +18,9 @@ import {
   type TrackedUserLocation,
 } from "@/lib/geolocation";
 import { reverseGeocodeCountry } from "@/lib/geocode";
-import { hasValidMapCoordinates } from "@/lib/mapCoordinates";
 import {
   getOrganizationCoordinates,
-  isOchaOrganization,
+  isApproximateLocation,
   organizationHasTrustedCoordinates,
   validateOrganizationForDisplay,
   validateOrganizationForNearby,
@@ -417,12 +416,9 @@ export function HomePage() {
     );
   }, [coordinateValidated, filters.searchQuery]);
 
-  // List-only OCHA entries (no coordinates yet) stay off the map until geocoded.
+  // Approximate (country-level OCHA) entries are list-only: no marker, no influence on map bounds.
   const mapOrganizations = useMemo(
-    () =>
-      filtered.filter(
-        (org) => !isOchaOrganization(org) || hasValidMapCoordinates(org),
-      ),
+    () => filtered.filter((org) => !isApproximateLocation(org)),
     [filtered],
   );
 

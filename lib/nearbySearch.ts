@@ -1,7 +1,10 @@
 import { mergeOrganizations } from "@/lib/mergeOrganizations";
 import { hasValidMapCoordinates } from "@/lib/mapCoordinates";
 import { organizationNeedsGeocoding } from "@/lib/nominatimGeocode";
-import { validateOrganizationForNearby } from "@/lib/organizationCoordinates";
+import {
+  isApproximateLocation,
+  validateOrganizationForNearby,
+} from "@/lib/organizationCoordinates";
 import {
   readOverpassClientCache,
   writeOverpassClientCache,
@@ -24,10 +27,8 @@ export const SUPABASE_FETCH_TIMEOUT_MS = 5_000;
 export const OVERPASS_FETCH_TIMEOUT_MS = 10_000;
 export const OCHA_FETCH_TIMEOUT_MS = 7_000;
 
-const MAX_BACKGROUND_GEOCODE_OCHA = 12;
 const MAX_BACKGROUND_GEOCODE_CATALOG = 8;
 const GEOCODE_DELAY_MS = 1100;
-const OCHA_GEOCODE_PER_SOURCE = 4;
 
 export type SourceKey = "supabase" | "osm" | "ocha";
 export type SourceStatus = "pending" | "done" | "failed" | "timeout";
@@ -36,7 +37,7 @@ export type NearbySourceStates = Record<SourceKey, SourceStatus>;
 export interface NearbySearchCallbacks {
   /** Fired every time any source finishes, with everything known so far. */
   onOrganizationsUpdate?: (organizations: Organization[]) => void;
-  /** Fired as background geocoding adds coordinates to already-listed entries. */
+  /** Fired as background geocoding adds coordinates to already-listed catalog entries. */
   onOrganizationsPatch?: (patched: Organization[]) => void;
   onSourceStatus?: (states: NearbySourceStates) => void;
   onExternalTimeout?: () => void;
@@ -207,15 +208,6 @@ async function fetchOchaDirectory(
 
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
-/** A few entries per OCHA source first, so one source cannot use up the whole budget. */
-function pickOchaForGeocoding(orgs: Organization[]): Organization[] {
-  const bySource = (prefix: string) =>
-    orgs.filter((org) => org.id.startsWith(prefix)).slice(0, OCHA_GEOCODE_PER_SOURCE);
-  const picked = [...bySource("rw-"), ...bySource("hdx-"), ...bySource("gdho-")];
-  const rest = orgs.filter((org) => !picked.includes(org));
-  return [...picked, ...rest].slice(0, MAX_BACKGROUND_GEOCODE_OCHA);
-}
-
 /** Nominatim-limited (≥1.1 s apart), cancellable, never blocks the search. */
 async function geocodeInBackground(
   orgs: Organization[],
@@ -280,11 +272,10 @@ export async function searchNearbyWithSmartRadius(
     emitStatus();
   };
 
-  const patchOrganization = (resolved: Organization, target: "catalog" | "ocha") => {
+  const patchOrganization = (resolved: Organization, target: "catalog") => {
     const replace = (list: Organization[]) =>
       list.map((org) => (org.id === resolved.id ? resolved : org));
-    if (target === "ocha") ocha = replace(ocha);
-    else catalog = replace(catalog);
+    if (target === "catalog") catalog = replace(catalog);
     callbacks?.onOrganizationsPatch?.([resolved]);
   };
 
@@ -334,14 +325,6 @@ export async function searchNearbyWithSmartRadius(
       ocha = result.organizations;
       if (options.country?.trim()) settle("ocha", result);
       emitOrganizations();
-      if (!options.liteMode) {
-        void geocodeInBackground(
-          pickOchaForGeocoding(result.organizations),
-          MAX_BACKGROUND_GEOCODE_OCHA,
-          options.signal,
-          (org) => patchOrganization(org, "ocha"),
-        );
-      }
       return result;
     },
   );
@@ -351,7 +334,9 @@ export async function searchNearbyWithSmartRadius(
     await Promise.all([catalogPromise, overpassAt(radiusMeters), ochaPromise]);
 
     // Radius expansion is driven by mappable results; list-only OCHA entries are added at the end.
-    const mappable = mergedAt(radiusMeters).filter(hasValidMapCoordinates);
+    const mappable = mergedAt(radiusMeters).filter(
+      (org) => hasValidMapCoordinates(org) && !isApproximateLocation(org),
+    );
     callbacks?.onOrganizationsUpdate?.(mergedAt(radiusMeters));
     return mappable;
   };
@@ -362,10 +347,8 @@ export async function searchNearbyWithSmartRadius(
     autoExpand: options.autoExpand,
   });
 
-  const organizations = mergeOrganizations(
-    searchResult.organizations,
-    ocha.filter((org) => !hasValidMapCoordinates(org)),
-  );
+  // Country-level OCHA entries are listed after the exact results and never drive the radius.
+  const organizations = mergeOrganizations(searchResult.organizations, ocha);
 
   return { ...searchResult, organizations, externalTimedOut };
 }
