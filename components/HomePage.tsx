@@ -1,5 +1,6 @@
 "use client";
 
+import { MapPin } from "lucide-react";
 import { useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { DEFAULT_LOCATION } from "@/lib/constants";
@@ -9,6 +10,8 @@ import {
 } from "@/lib/detectedCountry";
 import { setChatContext } from "@/lib/chatClientContext";
 import { filterOrganizations } from "@/lib/filterOrganizations";
+import { limitOsmOrganizations } from "@/lib/osmRelevance";
+import { fetchPlaces, type PlaceResult } from "@/lib/placeSearch";
 import { getOrganizationSource } from "@/lib/organizationSource";
 import {
   watchUserLocation,
@@ -92,6 +95,11 @@ export function HomePage() {
     null,
   );
   const [usingDefaultLocation, setUsingDefaultLocation] = useState(false);
+  // Place search: when set, this place (not browser geolocation) is the active search location.
+  const [searchPlace, setSearchPlace] = useState<PlaceResult | null>(null);
+  const [placeError, setPlaceError] = useState<string | null>(null);
+  const [placeSearching, setPlaceSearching] = useState(false);
+  const [flyTarget, setFlyTarget] = useState<{ lat: number; lng: number; key: number } | null>(null);
   const [isLocating, setIsLocating] = useState(false);
   const [allOrganizations, setAllOrganizations] = useState<Organization[]>([]);
   const [orgsLoading, setOrgsLoading] = useState(true);
@@ -392,9 +400,22 @@ export function HomePage() {
   }, [allOrganizations, userLocation, maxSearchRadiusMeters]);
 
   const filtered = useMemo(
-    () => filterOrganizations(coordinateValidated, filters),
+    () => limitOsmOrganizations(filterOrganizations(coordinateValidated, filters)),
     [coordinateValidated, filters],
   );
+
+  // Loaded organizations matching the search text (shown first in the suggestions).
+  const localMatches = useMemo(() => {
+    const query = filters.searchQuery.trim().toLowerCase();
+    if (!query) return [];
+    return coordinateValidated.filter((org) =>
+      [org.name, org.country, org.city, org.address]
+        .filter(Boolean)
+        .join(" ")
+        .toLowerCase()
+        .includes(query),
+    );
+  }, [coordinateValidated, filters.searchQuery]);
 
   // List-only OCHA entries (no coordinates yet) stay off the map until geocoded.
   const mapOrganizations = useMemo(
@@ -549,13 +570,13 @@ export function HomePage() {
   userLocationRef.current = userLocation;
 
   useEffect(() => {
-    if (!mapExpanded || liteModeActive || usingDefaultLocation) return;
+    if (!mapExpanded || liteModeActive || usingDefaultLocation || searchPlace) return;
 
     return watchUserLocation((location) => {
       setUserLocation(location);
       setUsingDefaultLocation(false);
     });
-  }, [mapExpanded, liteModeActive, usingDefaultLocation]);
+  }, [mapExpanded, liteModeActive, usingDefaultLocation, searchPlace]);
 
   useEffect(() => {
     if (liteModeActive || !routeDestination) {
@@ -715,6 +736,81 @@ export function HomePage() {
     setFilters((prev) => ({ ...prev, searchQuery }));
   }, []);
 
+  const activatePlace = useCallback(
+    (place: PlaceResult) => {
+      setPlaceError(null);
+      setSearchPlace(place);
+      setFilters((prev) => ({ ...prev, searchQuery: "" }));
+      setSelected(null);
+      setRouteDestination(null);
+      // Force the area-change effect to search even if this area was searched before.
+      lastSearchAreaRef.current = null;
+      setFlyTarget({ lat: place.lat, lng: place.lng, key: Date.now() });
+
+      if (mapExpanded) {
+        setUserLocation({ lat: place.lat, lng: place.lng });
+        setUsingDefaultLocation(true);
+      } else {
+        openMapAccordion({ lat: place.lat, lng: place.lng }, true);
+      }
+    },
+    [mapExpanded, openMapAccordion],
+  );
+
+  const handleSearchPlace = useCallback(
+    async (text: string) => {
+      const query = text.trim();
+      if (!query) return;
+      setPlaceSearching(true);
+      setPlaceError(null);
+      try {
+        const outcome = await fetchPlaces(query, 1, language);
+        const place = outcome.status === "ok" ? outcome.places[0] : undefined;
+        if (!place) {
+          setPlaceError(t("placeNotFound"));
+          return;
+        }
+        activatePlace(place);
+      } finally {
+        setPlaceSearching(false);
+      }
+    },
+    [language, t, activatePlace],
+  );
+
+  const handleUseMyLocation = useCallback(() => {
+    setSearchPlace(null);
+    setPlaceError(null);
+    lastSearchAreaRef.current = null;
+
+    const useDefault = () => {
+      setUserLocation(DEFAULT_LOCATION);
+      setUsingDefaultLocation(true);
+      setFlyTarget({ lat: DEFAULT_LOCATION.lat, lng: DEFAULT_LOCATION.lng, key: Date.now() });
+    };
+
+    if (!navigator.geolocation) {
+      useDefault();
+      return;
+    }
+    setIsLocating(true);
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        const lat = position.coords.latitude;
+        const lng = position.coords.longitude;
+        setUserLocation({ lat, lng, accuracy: position.coords.accuracy });
+        setUsingDefaultLocation(false);
+        setFlyTarget({ lat, lng, key: Date.now() });
+        setIsLocating(false);
+      },
+      () => {
+        useDefault();
+        setIsLocating(false);
+      },
+      { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 },
+    );
+  }, []);
+
   const handleSearchSubmit = useCallback(
     (query: string) => {
       const trimmed = query.trim();
@@ -774,7 +870,7 @@ export function HomePage() {
                         {t("liteModeNotice")}
                       </span>
                     )}
-                    {usingDefaultLocation && !liteModeActive && (
+                    {usingDefaultLocation && !liteModeActive && !searchPlace && (
                       <span className="map-badge amber">
                         {t("defaultLocationNotice")}
                       </span>
@@ -847,6 +943,12 @@ export function HomePage() {
                     value={filters.searchQuery}
                     onChange={updateSearchQuery}
                     onSubmit={handleSearchSubmit}
+                    localMatches={localMatches}
+                    onSelectOrganization={setSelected}
+                    onSearchPlace={(text) => void handleSearchPlace(text)}
+                    onSelectPlace={activatePlace}
+                    placeSearching={placeSearching}
+                    placeError={placeError}
                   />
                   <Filters filters={filters} onChange={setFilters} />
                   <button
@@ -872,7 +974,8 @@ export function HomePage() {
                       organizations={mapOrganizations}
                       selected={selected}
                       userLocation={userLocation}
-                      yourLocationLabel={t("yourLocation")}
+                      yourLocationLabel={searchPlace?.name ?? t("yourLocation")}
+                      flyTarget={flyTarget}
                       route={route}
                       routeDestination={routeDestination}
                       routeLoading={routeLoading}
@@ -888,7 +991,8 @@ export function HomePage() {
                       organizations={mapOrganizations}
                       selected={selected}
                       userLocation={userLocation}
-                      yourLocationLabel={t("yourLocation")}
+                      yourLocationLabel={searchPlace?.name ?? t("yourLocation")}
+                      flyTarget={flyTarget}
                       liteMode
                       route={route}
                       routeDestination={routeDestination}
@@ -905,6 +1009,25 @@ export function HomePage() {
                   )}
                 >
                   <div className="min-w-0 flex-1 overflow-x-hidden overflow-y-auto p-3 md:p-4">
+                    {searchPlace && (
+                      <div
+                        className="mb-3 flex flex-wrap items-center gap-x-2 gap-y-1 rounded-full border border-blue-500/30 bg-blue-500/10 px-3 py-1.5 text-xs text-blue-800 dark:text-blue-200"
+                        data-testid="place-chip"
+                      >
+                        <MapPin className="h-3.5 w-3.5 shrink-0" aria-hidden />
+                        <span className="min-w-0 break-words font-medium">
+                          {t("placeSearchingNear").replace("{place}", searchPlace.name)}
+                        </span>
+                        <span aria-hidden>·</span>
+                        <button
+                          type="button"
+                          onClick={handleUseMyLocation}
+                          className="font-semibold underline underline-offset-2 hover:no-underline"
+                        >
+                          {t("placeUseMyLocation")}
+                        </button>
+                      </div>
+                    )}
                     <OrganizationList
                       organizations={filtered}
                       isLoading={orgsLoading && filtered.length === 0}

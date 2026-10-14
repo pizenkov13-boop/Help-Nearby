@@ -47,6 +47,8 @@ export interface Organization {
   verified: boolean;
   /** ISO timestamp from organizations.created_at, when available. */
   createdAt?: string;
+  /** OSM feature kind for Overpass results: "pharmacy", "shop:<type>", or the amenity/social_facility value. */
+  osmKind?: string;
 }
 
 export interface FilterState {
