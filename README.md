@@ -269,7 +269,7 @@ Please do not include API keys or `.env.local` in submissions.
 
 ## Founder
 
-**Pavel Izenkin** — 15 years old.
+**Pavel Izenkin** — 16 years old.
 
 Built with support from the open-source community, OpenStreetMap contributors, Supabase, and AITunnel.
 
