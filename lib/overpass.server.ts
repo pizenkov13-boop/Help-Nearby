@@ -17,12 +17,19 @@ import {
 } from "@/lib/organizationCoordinates";
 import type { Category, Organization, UserLocation } from "@/lib/types";
 
+/**
+ * Fallback chain, tried in this order. overpass-api.de is often overloaded and kumi /
+ * private.coffee may be unreachable from some hosts, so openstreetmap.fr sits second.
+ */
 const OVERPASS_URLS = [
   "https://overpass-api.de/api/interpreter",
-  "https://overpass.kumi.systems/api/interpreter",
   "https://overpass.openstreetmap.fr/api/interpreter",
-  "https://maps.mail.ru/osm/tools/overpass/api/interpreter",
+  "https://overpass.private.coffee/api/interpreter",
+  "https://overpass.kumi.systems/api/interpreter",
 ] as const;
+
+/** A further mirror is started this long after the previous one (or as soon as it fails). */
+const OVERPASS_HEDGE_DELAY_MS = 2000;
 
 const OVERPASS_USER_AGENT = "HelpNearby/1.0 (help-nearby.app)";
 
@@ -173,21 +180,25 @@ out center tags;
 `.trim();
 }
 
-/** First mirror gets part of the budget, then one retry on a second mirror (8 s total). */
+/**
+ * Hedged mirror chain: the first mirror starts immediately, the next one starts after
+ * OVERPASS_HEDGE_DELAY_MS (or right away when the previous one fails). The first
+ * successful response wins and the rest are aborted; everything stops at the deadline.
+ */
 async function queryOverpass(query: string): Promise<OverpassResponse> {
   const deadline = Date.now() + OVERPASS_TIMEOUT_MS;
-  const mirrors = OVERPASS_URLS.slice(0, 2);
-  let lastError: unknown;
+  const controllers: AbortController[] = [];
+  const errors: string[] = [];
 
-  for (const [index, url] of mirrors.entries()) {
-    const remaining = deadline - Date.now();
-    if (remaining <= 500) break;
-    // Leave time for the retry when the first attempt hangs.
-    const budget = index === 0 ? Math.min(remaining, 4500) : remaining;
-
+  const attempt = async (url: string): Promise<OverpassResponse> => {
+    const controller = new AbortController();
+    controllers.push(controller);
+    const timer = setTimeout(
+      () => controller.abort(),
+      Math.max(deadline - Date.now(), 1),
+    );
     try {
       console.log(`[overpass] Trying ${url}`);
-
       const response = await fetch(url, {
         method: "POST",
         headers: {
@@ -196,31 +207,67 @@ async function queryOverpass(query: string): Promise<OverpassResponse> {
           "User-Agent": OVERPASS_USER_AGENT,
         },
         body: `data=${encodeURIComponent(query)}`,
-        signal: AbortSignal.timeout(budget),
+        signal: controller.signal,
       });
-
       if (!response.ok) {
-        const body = await response.text().catch(() => "");
-        throw new Error(
-          `HTTP ${response.status} from ${url}: ${body.slice(0, 200)}`,
-        );
+        throw new Error(`HTTP ${response.status} from ${new URL(url).host}`);
       }
-
       const data = (await response.json()) as OverpassResponse;
       console.log(
         `[overpass] Success from ${url} (${data.elements?.length ?? 0} elements)`,
       );
       return data;
     } catch (error) {
-      lastError = error;
       const message = error instanceof Error ? error.message : String(error);
+      errors.push(`${new URL(url).host}: ${message}`);
       console.error(`[overpass] Failed ${url}:`, message);
+      throw error;
+    } finally {
+      clearTimeout(timer);
     }
-  }
+  };
 
-  throw lastError instanceof Error
-    ? lastError
-    : new Error("Overpass endpoints failed");
+  return new Promise<OverpassResponse>((resolve, reject) => {
+    let started = 0;
+    let failed = 0;
+    let settled = false;
+    let hedgeTimer: ReturnType<typeof setTimeout> | undefined;
+
+    const finish = (fn: () => void) => {
+      if (settled) return;
+      settled = true;
+      if (hedgeTimer) clearTimeout(hedgeTimer);
+      controllers.forEach((controller) => controller.abort());
+      fn();
+    };
+
+    const startNext = () => {
+      if (settled || started >= OVERPASS_URLS.length) return;
+      if (deadline - Date.now() <= 300) return;
+      const url = OVERPASS_URLS[started++]!;
+      attempt(url).then(
+        (data) => finish(() => resolve(data)),
+        () => {
+          failed += 1;
+          if (settled) return;
+          if (failed >= OVERPASS_URLS.length || (started >= OVERPASS_URLS.length && failed >= started)) {
+            finish(() => reject(new Error(`All Overpass mirrors failed: ${errors.join("; ")}`)));
+            return;
+          }
+          startNext(); // previous attempt failed: do not wait for the hedge delay
+        },
+      );
+      if (started < OVERPASS_URLS.length) {
+        hedgeTimer = setTimeout(startNext, OVERPASS_HEDGE_DELAY_MS);
+      }
+    };
+
+    startNext();
+    setTimeout(
+      () => finish(() => reject(new Error(`Overpass timeout: ${errors.join("; ") || "no response"}`))),
+      Math.max(deadline - Date.now(), 1),
+    );
+  });
 }
 
 function getElementGeometryCoordinates(
@@ -523,4 +570,36 @@ export async function fetchEmergencyOverpassOrganizations(
     buildEmergencyOverpassQuery,
     { emergency: true },
   );
+}
+
+/** Diagnostics: one tiny query per mirror (host, status or error type, duration). No bodies. */
+export async function probeOverpassMirrors(): Promise<
+  { host: string; ok: boolean; status: number | string; ms: number }[]
+> {
+  const results: { host: string; ok: boolean; status: number | string; ms: number }[] = [];
+  for (const url of OVERPASS_URLS) {
+    const started = Date.now();
+    const host = new URL(url).host;
+    try {
+      const response = await fetch(url, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded",
+          Accept: "application/json",
+          "User-Agent": OVERPASS_USER_AGENT,
+        },
+        body: `data=${encodeURIComponent("[out:json][timeout:5];node(1);out;")}`,
+        signal: AbortSignal.timeout(4000),
+      });
+      results.push({ host, ok: response.ok, status: response.status, ms: Date.now() - started });
+    } catch (error) {
+      results.push({
+        host,
+        ok: false,
+        status: error instanceof Error && error.name === "TimeoutError" ? "timeout" : "network error",
+        ms: Date.now() - started,
+      });
+    }
+  }
+  return results;
 }

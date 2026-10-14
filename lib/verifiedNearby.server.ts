@@ -315,7 +315,8 @@ const MAX_DIRECTORY_PER_SOURCE = MAX_OCHA_COUNTRY_WIDE_PER_SOURCE;
 export async function fetchVerifiedDirectory(
   country: string,
   countryCode?: string | null,
-  timeoutMs = 5500,
+  // Below the route's 6 s limit, so slow HDX/GDHO never discard what ReliefWeb returned.
+  timeoutMs = 4500,
 ): Promise<Organization[]> {
   const { hdx, gdho, reliefweb } = await fetchVerifiedCountryDirectory(
     country,

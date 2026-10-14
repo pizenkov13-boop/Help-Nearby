@@ -23,6 +23,7 @@ import {
   getPhoneTelUrl,
   getOrganizationOpenStatus,
 } from "@/lib/orgUtils";
+import { isOverpassOrganization } from "@/lib/organizationCoordinates";
 import { getOrganizationSource } from "@/lib/organizationSource";
 import type { Organization } from "@/lib/types";
 import { cn } from "@/lib/utils";
@@ -102,6 +103,14 @@ export function OrganizationCard({
         <span className="inline-flex items-center gap-0.5 rounded-full bg-emerald-500/20 px-2 py-0.5 text-xs font-semibold text-emerald-400 ring-1 ring-emerald-500/30">
           <BadgeCheck className="h-3 w-3 shrink-0" aria-hidden />
           {t("verified")}
+        </span>
+      )}
+      {!org.verified && isOverpassOrganization(org) && (
+        <span
+          className="inline-flex items-center rounded-full bg-amber-500/15 px-2 py-0.5 text-xs font-medium text-amber-700 ring-1 ring-amber-500/30 dark:text-amber-300"
+          data-testid="unverified-osm-badge"
+        >
+          {t("unverifiedOsmBadge")}
         </span>
       )}
       {source && (
