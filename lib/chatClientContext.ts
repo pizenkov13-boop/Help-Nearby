@@ -10,6 +10,8 @@ export interface ChatContextOrganization {
 
 export interface ChatClientContext {
   country: string;
+  /** The user's current search location, when known. */
+  location?: { lat: number; lng: number } | null;
   organizations: ChatContextOrganization[];
 }
 

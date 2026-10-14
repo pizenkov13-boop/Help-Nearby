@@ -195,3 +195,62 @@ export async function resolvePlaceCoordinates(
 
   return lookupKnownCity(candidates[0] ?? placeQuery);
 }
+
+let nextSlot = 0;
+
+/** Serialises calls so we stay under Nominatim's 1 request/second policy. */
+async function waitForNominatimSlot(): Promise<void> {
+  const now = Date.now();
+  const slot = Math.max(now, nextSlot);
+  nextSlot = slot + 1100;
+  if (slot > now) await new Promise((resolve) => setTimeout(resolve, slot - now));
+}
+
+/** Forward geocode with country details (used by the AI chat). */
+export async function nominatimSearchDetailed(
+  query: string,
+  timeoutMs: number,
+): Promise<{
+  lat: number;
+  lng: number;
+  country: string | null;
+  countryCode: string | null;
+  isCountry: boolean;
+} | null> {
+  if (!query.trim()) return null;
+  await waitForNominatimSlot();
+
+  const url = new URL("https://nominatim.openstreetmap.org/search");
+  url.searchParams.set("q", query.trim());
+  url.searchParams.set("format", "json");
+  url.searchParams.set("limit", "1");
+  url.searchParams.set("addressdetails", "1");
+  url.searchParams.set("accept-language", "en");
+
+  const response = await fetch(url.toString(), {
+    headers: { "User-Agent": "HelpNearby/1.0 (help-nearby.app)" },
+    signal: AbortSignal.timeout(timeoutMs),
+  });
+  if (!response.ok) return null;
+
+  const data = (await response.json()) as {
+    lat: string;
+    lon: string;
+    addresstype?: string;
+    address?: { country?: string; country_code?: string };
+  }[];
+  const first = data[0];
+  if (!first) return null;
+
+  const lat = Number(first.lat);
+  const lng = Number(first.lon);
+  if (!Number.isFinite(lat) || !Number.isFinite(lng)) return null;
+
+  return {
+    lat,
+    lng,
+    country: first.address?.country ?? null,
+    countryCode: first.address?.country_code?.toUpperCase() ?? null,
+    isCountry: first.addresstype === "country",
+  };
+}

@@ -346,6 +346,7 @@ export function HomePage() {
   useEffect(() => {
     setChatContext({
       country: readCachedDetectedCountry()?.country ?? "",
+      location: userLocation ? { lat: userLocation.lat, lng: userLocation.lng } : null,
       organizations: filtered.slice(0, 10).map((org) => ({
         name: org.name,
         category: org.category,
@@ -355,7 +356,7 @@ export function HomePage() {
         verified: org.verified,
       })),
     });
-  }, [filtered]);
+  }, [filtered, userLocation]);
 
   useEffect(() => {
     if (selected && !filtered.some((org) => org.id === selected.id)) {

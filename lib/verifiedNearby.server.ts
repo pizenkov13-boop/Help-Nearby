@@ -264,3 +264,43 @@ export async function fetchVerifiedNearbyOrganizations(
   const filtered = filterForNearbySearch(geocoded, location, radiusMeters);
   return sortByDistance(filtered, location);
 }
+
+/**
+ * Country-level HDX / GDHO / ReliefWeb directories as separate batches, without
+ * the per-organization geocoding that fetchVerifiedNearbyOrganizations does
+ * (too slow for the chat's time budget). Same sources and skip rules.
+ */
+export async function fetchVerifiedCountryDirectory(
+  country: string,
+  countryCode?: string | null,
+  timeoutMs = 5500,
+): Promise<{
+  hdx: Organization[];
+  gdho: Organization[];
+  reliefweb: Organization[];
+}> {
+  const [hdx, gdho, reliefweb] = await Promise.all([
+    fetchWithSourceTimeout(
+      "HDX",
+      () => fetchHdxOrganizationsForCountry(country, countryCode),
+      [] as Organization[],
+      timeoutMs,
+    ),
+    fetchWithSourceTimeout(
+      "GDHO",
+      () => fetchGdhoOrganizationsForCountry(country),
+      [] as Organization[],
+      timeoutMs,
+    ),
+    isUkraine(country, countryCode)
+      ? Promise.resolve([] as Organization[])
+      : fetchWithSourceTimeout(
+          "ReliefWeb",
+          () => fetchReliefWebOrganizationsForCountry(country, countryCode),
+          [] as Organization[],
+          timeoutMs,
+        ),
+  ]);
+
+  return { hdx, gdho, reliefweb };
+}

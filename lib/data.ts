@@ -234,6 +234,49 @@ export async function fetchCountries(): Promise<string[]> {
   }
 }
 
+export interface ChatCatalogQuery {
+  country: string | null;
+  city: string | null;
+  category: Category | null;
+  location: UserLocation | null;
+}
+
+/** Verified catalog rows for the AI chat, nearest first when coordinates are known. */
+export async function fetchCatalogForChat(
+  query: ChatCatalogQuery,
+  limit = 30,
+): Promise<Organization[]> {
+  const supabase = getSupabase();
+  if (!supabase) return [];
+
+  let request = supabase
+    .from("organizations")
+    .select("*")
+    .eq("verified", true)
+    .limit(1000);
+  if (query.country) request = request.ilike("country", query.country);
+  else if (query.city) request = request.ilike("city", `%${query.city}%`);
+  if (query.category) request = request.contains("category", [query.category]);
+
+  const { data, error } = await request;
+  if (error) throw new Error(error.message);
+
+  const orgs = ((data as DbOrganization[]) ?? []).map((row) =>
+    mapDbOrganization(row, query.location),
+  );
+  if (!query.location) return orgs.slice(0, limit);
+
+  const here = query.location;
+  return orgs
+    .map((org) => ({
+      org,
+      miles: distanceMiles(here.lat, here.lng, org.lat, org.lng),
+    }))
+    .sort((a, b) => a.miles - b.miles)
+    .slice(0, limit)
+    .map(({ org }) => org);
+}
+
 export const RECENT_PAGE_SIZE = 30;
 
 export interface FetchRecentOptions {

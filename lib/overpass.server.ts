@@ -94,6 +94,59 @@ out center tags;
 `.trim();
 }
 
+const CHAT_CATEGORY_SELECTORS: Record<Category, string[]> = {
+  food: [
+    '["amenity"="food_bank"]',
+    '["social_facility"="food_bank"]',
+    '["social_facility"="soup_kitchen"]',
+    '["social_facility"="nutrition_center"]',
+    '["social_facility:for"="food"]',
+    '["amenity"="give_box"]',
+  ],
+  shelter: ['["amenity"="shelter"]', '["social_facility"="shelter"]'],
+  // Pharmacies are only searched for the medical category.
+  medical: [
+    '["amenity"="clinic"]',
+    '["amenity"="hospital"]',
+    '["amenity"="pharmacy"]',
+  ],
+  clothing: ['["social_facility"="clothing_bank"]', '["amenity"="give_box"]'],
+  volunteer: [
+    '["charity"="yes"]',
+    '["amenity"="community_centre"]["community_centre:for"="social_facility"]',
+  ],
+};
+
+function buildChatCategoryQuery(category: Category) {
+  return (lat: number, lng: number, radius: number): string => {
+    const around = `(around:${radius},${lat},${lng})`;
+    const lines = CHAT_CATEGORY_SELECTORS[category].map(
+      (selector) => `  nwr${selector}${around};`,
+    );
+    return ["[out:json][timeout:25];", "(", ...lines, ");", "out center tags;"].join(
+      "\n",
+    );
+  };
+}
+
+/** AI chat search restricted to one category (no pharmacies/shops unless medical). */
+export async function fetchChatOverpassForCategory(
+  lat: number,
+  lng: number,
+  radius: number,
+  category: Category,
+): Promise<Organization[]> {
+  const userLocation: UserLocation = { lat, lng };
+  const cacheKey = `${buildOverpassCacheKey(lat, lng, radius)}:chat:${category}`;
+  const cached = readServerCache(cacheKey);
+  if (cached) return cached;
+
+  const data = await queryOverpass(buildChatCategoryQuery(category)(lat, lng, radius));
+  const organizations = parseOverpassElements(data, userLocation, radius);
+  writeServerCache(cacheKey, organizations);
+  return organizations;
+}
+
 export function buildEmergencyOverpassQuery(
   lat: number,
   lng: number,
