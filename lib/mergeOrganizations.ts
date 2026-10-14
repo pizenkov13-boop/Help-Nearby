@@ -1,4 +1,6 @@
 import { distanceMiles } from "@/lib/geo";
+import { hasValidMapCoordinates } from "@/lib/mapCoordinates";
+import { isOchaOrganization } from "@/lib/organizationCoordinates";
 import type { Organization } from "@/lib/types";
 
 const DUPLICATE_RADIUS_MILES = 0.05;
@@ -50,11 +52,27 @@ export function mergeOrganizations(
     }
   }
 
-  return merged.sort((a, b) => {
-    if (a.verified !== b.verified) return a.verified ? -1 : 1;
-    const distA = parseDistanceValue(a.distance);
-    const distB = parseDistanceValue(b.distance);
-    return distA - distB;
+  return sortOrganizationsForList(merged);
+}
+
+/**
+ * List order: entries with coordinates first, nearest first within each group
+ *   0. verified catalog entries,
+ *   1. unverified OSM entries,
+ *   2. country-level OCHA entries that were geocoded (approximate position),
+ * then entries without coordinates at the very end (no distance is shown for them).
+ */
+function listRank(org: Organization): number {
+  if (!hasValidMapCoordinates(org)) return 3;
+  if (isOchaOrganization(org)) return 2;
+  return org.verified ? 0 : 1;
+}
+
+export function sortOrganizationsForList(orgs: Organization[]): Organization[] {
+  return [...orgs].sort((a, b) => {
+    const rank = listRank(a) - listRank(b);
+    if (rank !== 0) return rank;
+    return parseDistanceValue(a.distance) - parseDistanceValue(b.distance);
   });
 }
 

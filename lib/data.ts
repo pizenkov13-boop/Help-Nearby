@@ -56,6 +56,17 @@ function toIsoTimestamp(value: string): string {
   return /(?:Z|[+-]\d{2}:?\d{2})$/.test(value) ? value : `${value.replace(" ", "T")}Z`;
 }
 
+function isUsableCoordinate(lat: number, lng: number): boolean {
+  return (
+    Number.isFinite(lat) &&
+    Number.isFinite(lng) &&
+    Math.abs(lat) <= 90 &&
+    Math.abs(lng) <= 180 &&
+    Math.abs(lat) >= 0.001 &&
+    Math.abs(lng) >= 0.001
+  );
+}
+
 export function mapDbOrganization(
   row: DbOrganization,
   userLocation?: UserLocation | null,
@@ -89,7 +100,8 @@ export function mapDbOrganization(
     ...(row.created_at ? { createdAt: toIsoTimestamp(row.created_at) } : {}),
   };
 
-  if (userLocation) {
+  // Rows without real coordinates (null or 0,0) get no distance instead of a distance to (0,0).
+  if (userLocation && isUsableCoordinate(lat, lng)) {
     org.distance = formatDistanceMiles(
       userLocation.lat,
       userLocation.lng,

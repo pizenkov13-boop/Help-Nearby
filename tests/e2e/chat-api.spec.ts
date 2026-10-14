@@ -1,16 +1,9 @@
 import { test, expect } from "@playwright/test";
 
 test.describe("Chat API without an AI key", () => {
-  test("health reports no key and never exposes one", async ({ request }) => {
+  test("the public health route no longer exists (it could spend provider balance)", async ({ request }) => {
     const res = await request.get("/api/chat/health");
-    expect(res.ok()).toBe(true);
-    const body = await res.json();
-    expect(Object.keys(body).sort()).toEqual(
-      ["baseUrl", "hasKey", "model", "reachable", "status"].sort(),
-    );
-    expect(body.hasKey).toBe(false);
-    expect(body.reachable).toBe(false);
-    expect(typeof body.model).toBe("string");
+    expect(res.status()).toBe(404);
   });
 
   test("list follow-ups are not treated as a place name", async ({ request }) => {
