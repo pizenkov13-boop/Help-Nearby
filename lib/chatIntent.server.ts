@@ -1,5 +1,6 @@
 import "server-only";
 
+import { aiComplete, isAiConfigured } from "@/lib/aiProvider.server";
 import {
   detectCategory,
   extractPlaceQuery,
@@ -8,8 +9,6 @@ import {
 } from "@/lib/chatContext.server";
 
 export type { SearchIntent };
-
-const GROQ_MODEL = "llama-3.3-70b-versatile";
 
 const VALID_CATEGORIES = new Set([
   "food",
@@ -59,24 +58,12 @@ function buildIntentPrompt(priorUser: string[], currentQuery: string): string {
   return `Earlier user messages: ${priorUser.join(" | ")}\nCurrent message: ${currentQuery}`;
 }
 
-async function parseIntentWithGroq(
-  query: string,
-  apiKey: string,
-): Promise<SearchIntent | null> {
-  const groqResponse = await fetch(
-    "https://api.groq.com/openai/v1/chat/completions",
-    {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${apiKey}`,
-      },
-      body: JSON.stringify({
-        model: GROQ_MODEL,
-        messages: [
-          {
-            role: "system",
-            content: `You extract search intent for a humanitarian help finder app.
+async function parseIntentWithAi(query: string): Promise<SearchIntent | null> {
+  const content = await aiComplete(
+    [
+      {
+        role: "system",
+        content: `You extract search intent for a humanitarian help finder app.
 Reply with ONLY valid JSON, no markdown:
 {"category":"food|shelter|medical|clothing|volunteer|null","place":"city or null"}
 
@@ -86,28 +73,12 @@ Rules:
 - category = type of help; null only if truly unclear.
 - place = city/area if mentioned in current OR earlier messages; null if none.
 - Never invent a place.`,
-          },
-          { role: "user", content: query },
-        ],
-        temperature: 0,
-        max_tokens: 100,
-      }),
-    },
+      },
+      { role: "user", content: query },
+    ],
+    { temperature: 0, maxTokens: 100, timeoutMs: 8000 },
   );
-
-  if (!groqResponse.ok) {
-    console.error("[chat/intent] Groq error:", await groqResponse.text());
-    return null;
-  }
-
-  const data = (await groqResponse.json()) as {
-    choices?: { message?: { content?: string } }[];
-  };
-
-  const content = data.choices?.[0]?.message?.content?.trim();
-  if (!content) return null;
-
-  return parseIntentJson(content);
+  return content ? parseIntentJson(content) : null;
 }
 
 function inheritCategoryFromHistory(
@@ -144,11 +115,10 @@ function mergeIntentWithKeywords(
   return { category, place };
 }
 
-/** Groq + conversation context; keywords as fallback. */
+/** AI + conversation context; keywords as fallback. */
 export async function resolveSearchIntent(
   priorMessages: ChatTurn[],
   currentQuery: string,
-  apiKey?: string,
 ): Promise<SearchIntent> {
   const priorUser = priorMessages
     .filter((message) => message.role === "user")
@@ -156,10 +126,10 @@ export async function resolveSearchIntent(
 
   const prompt = buildIntentPrompt(priorUser, currentQuery);
 
-  if (apiKey) {
-    const groqIntent = await parseIntentWithGroq(prompt, apiKey);
-    if (groqIntent) {
-      return mergeIntentWithKeywords(groqIntent, priorUser, currentQuery);
+  if (isAiConfigured()) {
+    const aiIntent = await parseIntentWithAi(prompt);
+    if (aiIntent) {
+      return mergeIntentWithKeywords(aiIntent, priorUser, currentQuery);
     }
   }
 

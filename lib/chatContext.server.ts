@@ -338,7 +338,7 @@ export function isHelpSearchQuery(query: string): boolean {
   return Boolean(extractPlaceQuery(query) || detectCategory(query));
 }
 
-/** Database list when user asks for help or names a place; Groq only for detail questions. */
+/** Database list when user asks for help or names a place; AI for everything else. */
 export function shouldUseDirectSearch(
   messages: ChatTurn[],
   currentQuery: string,
@@ -382,43 +382,6 @@ export function buildContextSearchQuery(
   if (place) parts.push(place);
 
   return parts.length > 0 ? parts.join(" ") : lastSearch;
-}
-
-function formatOrganizationsForPrompt(organizations: Organization[]): string {
-  if (organizations.length === 0) return "(none in database)";
-
-  return organizations
-    .slice(0, 8)
-    .map((org, index) => {
-      const parts = [
-        `${index + 1}. ${org.name}`,
-        org.category,
-        [org.city, org.country].filter(Boolean).join(", "),
-        org.address,
-        org.phone ? `tel: ${org.phone}` : "",
-        org.website ? `web: ${org.website}` : "",
-      ].filter(Boolean);
-      return parts.join(" | ");
-    })
-    .join("\n");
-}
-
-export function buildFollowUpSystemPrompt(
-  organizations: Organization[],
-  contextQuery: string,
-): string {
-  return `You are the Help Nearby assistant. The user already saw nearby help locations. Answer their follow-up using ONLY ORGANIZATIONS below.
-
-RULES:
-- Reply in the same language as the user.
-- Max 3 short sentences OR up to 4 bullet points.
-- No greetings, no filler, no invented addresses or phone numbers.
-- If the data does not contain the answer, say so in one sentence and suggest the homepage map.
-
-SEARCH CONTEXT: ${contextQuery}
-
-ORGANIZATIONS:
-${formatOrganizationsForPrompt(organizations)}`;
 }
 
 export function formatFollowUpFallback(

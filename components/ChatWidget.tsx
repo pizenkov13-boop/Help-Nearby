@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Bot, Loader2, MessageCircle, Send, X } from "lucide-react";
+import { getChatContext } from "@/lib/chatClientContext";
 import { useLanguage } from "@/lib/i18n/LanguageProvider";
 import { cn } from "@/lib/utils";
 
@@ -12,7 +13,7 @@ interface Message {
 }
 
 export function ChatWidget() {
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   const [open, setOpen] = useState(false);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -63,7 +64,11 @@ export function ChatWidget() {
       const res = await fetch("/api/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ messages: apiMessages }),
+        body: JSON.stringify({
+          messages: apiMessages,
+          language,
+          context: getChatContext(),
+        }),
       });
 
       const data = (await res.json()) as { message?: string; error?: string };
@@ -94,7 +99,7 @@ export function ChatWidget() {
     } finally {
       setIsLoading(false);
     }
-  }, [input, isLoading, messages, t]);
+  }, [input, isLoading, language, messages, t]);
 
   return (
     <>
@@ -145,6 +150,7 @@ export function ChatWidget() {
                 onChange={(e) => setInput(e.target.value)}
                 onKeyDown={(e) => e.key === "Enter" && !e.shiftKey && sendMessage()}
                 placeholder={t("chatPlaceholder")}
+                maxLength={1000}
                 disabled={isLoading}
                 className="flex-1 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 placeholder:text-slate-400 focus:border-blue-500 focus:outline-none disabled:opacity-60 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-200 dark:placeholder:text-gray-500"
               />
@@ -162,6 +168,9 @@ export function ChatWidget() {
                 )}
               </button>
             </div>
+            <p className="mt-2 text-[11px] leading-snug text-slate-500 dark:text-gray-500">
+              {t("chatDisclaimer")}
+            </p>
           </div>
         </div>
       )}
