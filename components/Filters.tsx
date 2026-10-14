@@ -81,7 +81,7 @@ export function Filters({ filters, onChange }: FiltersProps) {
   );
 }
 
-function CategoryPill({
+export function CategoryPill({
   active,
   onClick,
   label,

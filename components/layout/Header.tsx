@@ -234,6 +234,14 @@ export function Header() {
             >
               {t("navReviewsShort")}
             </Link>
+
+            <Link
+              href="/recent"
+              className={cn("nav-link", pathname === "/recent" && "active")}
+              onClick={closeAll}
+            >
+              {t("navRecent")}
+            </Link>
           </nav>
 
           <div className="header-toolbar">
@@ -344,6 +352,9 @@ export function Header() {
         ))}
         <Link href="/reviews" className="nav-link" onClick={closeAll}>
           {t("navReviews")}
+        </Link>
+        <Link href="/recent" className="nav-link" onClick={closeAll}>
+          {t("navRecent")}
         </Link>
       </nav>
     </header>

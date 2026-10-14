@@ -45,6 +45,8 @@ export interface Organization {
   hoursRaw: string;
   openNow: boolean;
   verified: boolean;
+  /** ISO timestamp from organizations.created_at, when available. */
+  createdAt?: string;
 }
 
 export interface FilterState {
