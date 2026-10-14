@@ -71,6 +71,15 @@ export function mergeResultsWithClientContext(
   return merged.slice(0, limit);
 }
 
+/** User-facing source names; the word "Supabase" must never reach the user. */
+export const SOURCE_DISPLAY_NAMES: Record<string, string> = {
+  Supabase: "Help Nearby verified directory",
+  OSM: "OpenStreetMap",
+  HDX: "UN OCHA directory (HDX/GDHO/ReliefWeb)",
+  GDHO: "UN OCHA directory (HDX/GDHO/ReliefWeb)",
+  ReliefWeb: "UN OCHA directory (HDX/GDHO/ReliefWeb)",
+};
+
 function formatOrgs(orgs: ChatSearchOrg[]): string {
   if (orgs.length === 0) return "(no results from any source)";
   return orgs
@@ -83,7 +92,9 @@ function formatOrgs(orgs: ChatSearchOrg[]): string {
         o.phone ? `tel: ${o.phone}` : "",
         o.website ? `web: ${o.website}` : "",
         o.verified ? "verified" : "unverified",
-        fromPage ? "source: shown on the app map (origin not tracked)" : `source: ${o.source}`,
+        fromPage
+          ? "source: Help Nearby map results"
+          : `source: ${SOURCE_DISPLAY_NAMES[o.source] ?? o.source}`,
         o.distance ? `distance: ${o.distance}` : "",
         o.countryLevel
           ? "country-level directory, exact office address not confirmed"
@@ -107,7 +118,9 @@ Anything else (homework, coding, politics, jokes, etc.): decline politely in ONE
 
 STYLE
 - Always reply in the language of the user's latest message (en, ru, es, fr, de, zh, ar). For Arabic, write plain text that reads well right-to-left.
-- Be short, calm and practical: at most 5 sentences or a short list, with concrete next steps.
+- Be short, calm and practical: at most about 6 lines in total, with concrete next steps.
+- Formatting: you may use **bold**, bullet lines starting with "- ", and [text](https://...) links. No headings, tables, code blocks or HTML.
+- When several organizations are listed under RESULTS, recommend the 3-5 nearest as short bullets instead of picking just one. Each bullet: **name** (city) — one line on what they offer; phone if known; a [source](url) link only when a web address is given; and the data source name. Never invent a URL.
 
 SAFETY
 - If the user is in danger or has a medical emergency, say FIRST: call the local emergency number (112 in the EU, 911 in the US/Canada, 103 or 112 in Russia, 999 in the UK, 122 or 123 in the Egypt/Sudan region if known) and use Emergency mode in the app.
@@ -117,7 +130,7 @@ SAFETY
 
 DATA
 - Never invent organizations, addresses, phone numbers or opening hours. Mention only organizations listed under RESULTS below.
-- For every organization you recommend, say which source it comes from (the "source" field: Supabase = Help Nearby verified catalog, OSM = OpenStreetMap, HDX / GDHO / ReliefWeb = UN OCHA humanitarian data).
+- For every organization you recommend, say which data source it comes from, using exactly the "source" text given in RESULTS ("Help Nearby verified directory", "OpenStreetMap" or "UN OCHA directory (HDX/GDHO/ReliefWeb)"). Never use the words "Supabase", "database" or other technical terms.
 - For entries marked "country-level directory, exact office address not confirmed", say exactly that: it is a country-level directory entry and the exact office address is not confirmed. Do not give it an address or opening hours.
 - Hours are unknown unless stated; tell the user to check hours by phone.
 - If RESULTS is empty ${searched ? "(the app searched all sources)" : "(no place or country was known)"}, say so plainly and suggest the next step: try a larger area or another city, ask for a different type of help, or use Emergency mode and the map.

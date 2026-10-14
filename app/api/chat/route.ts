@@ -5,6 +5,7 @@ import { resolveSearchIntent } from "@/lib/chatIntent.server";
 import {
   buildSystemPrompt,
   mergeResultsWithClientContext,
+  SOURCE_DISPLAY_NAMES,
   sanitizeContextOrganizations,
 } from "@/lib/chatPrompt.server";
 import { consumeChatQuota, getClientIp } from "@/lib/chatRateLimit.server";
@@ -77,7 +78,7 @@ function formatFallback(orgs: ChatSearchOrg[], language: LanguageCode): string {
         ? " (справочник по стране, точный адрес не подтверждён)"
         : " (country-level directory, exact office address not confirmed)"
       : "";
-    return `• ${o.name}${details ? ` — ${details}` : ""} [${o.source}]${note}`;
+    return `• ${o.name}${details ? ` — ${details}` : ""} [${SOURCE_DISPLAY_NAMES[o.source] ?? o.source}]${note}`;
   });
   return [ru ? "Помощь рядом:" : "Help nearby:", ...lines].join("\n");
 }
