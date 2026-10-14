@@ -21,7 +21,7 @@ import { recordImpactClick } from "@/lib/impact.client";
 import {
   getDirectionsUrl,
   getPhoneTelUrl,
-  isOrganizationOpen,
+  getOrganizationOpenStatus,
 } from "@/lib/orgUtils";
 import { getOrganizationSource } from "@/lib/organizationSource";
 import type { Organization } from "@/lib/types";
@@ -48,7 +48,8 @@ export function OrganizationCard({
   const { t } = useLanguage();
   const cfg = CATEGORY_CONFIG[org.category];
   const source = getOrganizationSource(org);
-  const open = isOrganizationOpen(org);
+  const openStatus = getOrganizationOpenStatus(org);
+  const open = openStatus === "open";
   const directionsUrl = getDirectionsUrl(org);
   const telUrl = getPhoneTelUrl(org.phone);
   const hasPhone = Boolean(org.phone?.trim());
@@ -123,7 +124,7 @@ export function OrganizationCard({
           )}
         </span>
       )}
-      {org.verified && (
+      {org.verified && openStatus !== "unknown" && (
         <span
           className={cn(
             "inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-medium",
