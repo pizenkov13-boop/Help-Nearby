@@ -37,7 +37,7 @@ test.describe("Chat API without an AI key", () => {
         language: "ru",
         messages: [{ role: "user", content: "дай список рядом" }],
         context: {
-          country: "Russia",
+          country: "",
           organizations: [
             { name: "E2E Context Pantry", category: "food", city: "Moscow", phone: "+70000000000", source_url: "", verified: true },
           ],

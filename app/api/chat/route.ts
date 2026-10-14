@@ -1,17 +1,15 @@
 import { NextResponse } from "next/server";
 import { aiComplete, isAiConfigured, type AiMessage } from "@/lib/aiProvider.server";
-import {
-  findOrganizationsForChat,
-  formatChatReply,
-} from "@/lib/chatContext.server";
+import { detectCategory, extractPlaceQuery } from "@/lib/chatContext.server";
 import { resolveSearchIntent } from "@/lib/chatIntent.server";
 import {
   buildSystemPrompt,
-  MAX_CONTEXT_ORGS,
-  organizationToContext,
+  mergeResultsWithClientContext,
   sanitizeContextOrganizations,
 } from "@/lib/chatPrompt.server";
 import { consumeChatQuota, getClientIp } from "@/lib/chatRateLimit.server";
+import type { ChatSearchOrg } from "@/lib/chatSearch";
+import { searchForChat } from "@/lib/chatSearch.server";
 import { LANGUAGES, translations } from "@/lib/i18n/translations";
 import type { LanguageCode } from "@/lib/types";
 
@@ -48,6 +46,42 @@ function errorResponse(
   return NextResponse.json({ error: translations[language][key] }, { status });
 }
 
+function parseLocation(value: unknown): { lat: number; lng: number } | null {
+  if (!value || typeof value !== "object") return null;
+  const { lat, lng } = value as { lat?: unknown; lng?: unknown };
+  if (
+    typeof lat !== "number" ||
+    typeof lng !== "number" ||
+    !Number.isFinite(lat) ||
+    !Number.isFinite(lng) ||
+    Math.abs(lat) > 90 ||
+    Math.abs(lng) > 180
+  ) {
+    return null;
+  }
+  return { lat, lng };
+}
+
+/** Plain-text answer used only when the LLM is unavailable. */
+function formatFallback(orgs: ChatSearchOrg[], language: LanguageCode): string {
+  const ru = language === "ru";
+  if (orgs.length === 0) {
+    return ru
+      ? "Ничего не найдено ни в одном источнике. Попробуйте другой город или больший район, либо откройте карту и режим «Экстренная помощь»."
+      : "Nothing was found in any source. Try another city or a larger area, or open the map and Emergency mode.";
+  }
+  const lines = orgs.slice(0, 5).map((o) => {
+    const details = [o.city, o.phone, o.website].filter(Boolean).join(", ");
+    const note = o.countryLevel
+      ? ru
+        ? " (справочник по стране, точный адрес не подтверждён)"
+        : " (country-level directory, exact office address not confirmed)"
+      : "";
+    return `• ${o.name}${details ? ` — ${details}` : ""} [${o.source}]${note}`;
+  });
+  return [ru ? "Помощь рядом:" : "Help nearby:", ...lines].join("\n");
+}
+
 export async function POST(request: Request) {
   if (!consumeChatQuota(getClientIp(request))) {
     return errorResponse("chatErrorRateLimit", "en", 429);
@@ -63,7 +97,11 @@ export async function POST(request: Request) {
   const payload = body as {
     messages?: ChatMessage[];
     language?: unknown;
-    context?: { country?: unknown; organizations?: unknown };
+    context?: {
+      country?: unknown;
+      location?: unknown;
+      organizations?: unknown;
+    };
   };
 
   const messages = payload.messages;
@@ -107,50 +145,41 @@ export async function POST(request: Request) {
 
   try {
     const intent = await resolveSearchIntent(priorMessages, userQuery);
+    const category = intent.category ?? detectCategory(userQuery);
+    const place = intent.place ?? extractPlaceQuery(userQuery);
 
-    const dbOrganizations =
-      intent.place || intent.category
-        ? await findOrganizationsForChat(userQuery, 6, intent)
-        : [];
-
-    // Client-side search results first (what the user currently sees), then DB matches.
-    const contextOrgs = sanitizeContextOrganizations(payload.context?.organizations);
-    const seen = new Set(contextOrgs.map((o) => o.name.toLowerCase()));
-    for (const org of dbOrganizations) {
-      if (contextOrgs.length >= MAX_CONTEXT_ORGS) break;
-      if (seen.has(org.name.toLowerCase())) continue;
-      seen.add(org.name.toLowerCase());
-      contextOrgs.push(organizationToContext(org));
-    }
-
-    const country =
+    const clientCountry =
       typeof payload.context?.country === "string"
         ? payload.context.country.slice(0, 60)
         : "";
 
-    // Plain-text answer used only when the LLM is unavailable.
-    const fallback = (): string | null => {
-      if (dbOrganizations.length > 0) {
-        return formatChatReply(dbOrganizations, userQuery, intent);
-      }
-      if (contextOrgs.length === 0) return null;
-      const lines = contextOrgs
-        .slice(0, 5)
-        .map((o) => `• ${[o.name, o.city, o.phone].filter(Boolean).join(" — ")}`);
-      const header =
-        language === "ru" ? "Помощь рядом:" : "Help nearby:";
-      return [header, ...lines].join("\n");
-    };
+    // The server searches every source itself, independent of the page's own search.
+    const search = await searchForChat({
+      place,
+      category,
+      clientLocation: parseLocation(payload.context?.location),
+      clientCountry: clientCountry || null,
+    });
+
+    const results = mergeResultsWithClientContext(
+      search.organizations,
+      sanitizeContextOrganizations(payload.context?.organizations),
+    );
 
     if (!isAiConfigured()) {
       console.error("[chat] fallback: no api key");
-      const direct = fallback();
-      if (direct) return NextResponse.json({ message: direct });
-      return errorResponse("chatError", language, 502);
+      return NextResponse.json({ message: formatFallback(results, language) });
     }
 
     const aiMessages: AiMessage[] = [
-      { role: "system", content: buildSystemPrompt(contextOrgs, country) },
+      {
+        role: "system",
+        content: buildSystemPrompt(
+          results,
+          search.country ?? clientCountry,
+          search.searched,
+        ),
+      },
       ...history,
     ];
     const reply = await aiComplete(aiMessages, {
@@ -162,9 +191,7 @@ export async function POST(request: Request) {
     if (reply) return NextResponse.json({ message: reply });
 
     // The provider-level reason was already logged by aiComplete.
-    const direct = fallback();
-    if (direct) return NextResponse.json({ message: direct });
-    return errorResponse("chatError", language, 502);
+    return NextResponse.json({ message: formatFallback(results, language) });
   } catch (error) {
     console.error(
       "[chat] Failed:",
