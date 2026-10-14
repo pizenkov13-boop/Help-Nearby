@@ -7,7 +7,9 @@ import {
   cacheDetectedCountry,
   readCachedDetectedCountry,
 } from "@/lib/detectedCountry";
+import { setChatContext } from "@/lib/chatClientContext";
 import { filterOrganizations } from "@/lib/filterOrganizations";
+import { getOrganizationSource } from "@/lib/organizationSource";
 import {
   watchUserLocation,
   type TrackedUserLocation,
@@ -339,6 +341,21 @@ export function HomePage() {
     () => filterOrganizations(coordinateValidated, filters),
     [coordinateValidated, filters],
   );
+
+  // Share the current results with the chat assistant (nearest 10, truncated server-side too).
+  useEffect(() => {
+    setChatContext({
+      country: readCachedDetectedCountry()?.country ?? "",
+      organizations: filtered.slice(0, 10).map((org) => ({
+        name: org.name,
+        category: org.category,
+        city: org.city,
+        phone: org.phone,
+        source_url: getOrganizationSource(org)?.url ?? org.website,
+        verified: org.verified,
+      })),
+    });
+  }, [filtered]);
 
   useEffect(() => {
     if (selected && !filtered.some((org) => org.id === selected.id)) {

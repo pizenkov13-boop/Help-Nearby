@@ -1,11 +1,19 @@
 import { test, expect } from "@playwright/test";
 import { preferFullMode } from "./helpers";
 
+let lastChatRequest: {
+  language?: string;
+  messages?: { role: string; content: string }[];
+  context?: { organizations?: unknown[] };
+} | null = null;
+
 test.describe("Chat widget", () => {
   test.beforeEach(async ({ page }) => {
     await preferFullMode(page);
 
+    // The AI endpoint is always mocked: tests never reach the real provider.
     await page.route(/\/api\/chat/, async (route) => {
+      lastChatRequest = route.request().postDataJSON();
       await route.fulfill({
         status: 200,
         contentType: "application/json",
@@ -43,7 +51,23 @@ test.describe("Chat widget", () => {
     await expect(reply).toBeVisible({ timeout: 10_000 });
     expect((await reply.textContent())?.length ?? 0).toBeGreaterThan(20);
 
+    await expect(panel.getByText(/AI can make mistakes/i)).toBeVisible();
+    expect(lastChatRequest?.language).toBe("en");
+    expect(lastChatRequest?.messages?.at(-1)?.content).toBe("food in New York");
+    expect(Array.isArray(lastChatRequest?.context?.organizations)).toBe(true);
+
     await panel.getByLabel("Close chat").click();
     await expect(panel).toBeHidden();
+  });
+
+  test("shows localized welcome and disclaimer in Russian", async ({ page }) => {
+    await page.goto("/");
+    await page.getByRole("button", { name: /language/i }).click();
+    await page.getByRole("menuitem", { name: "RU" }).click();
+    await page.getByRole("button", { name: "ИИ-помощник" }).click();
+
+    const panel = page.locator(".fixed.bottom-24");
+    await expect(panel.getByText(/помощник Help Nearby/i)).toBeVisible();
+    await expect(panel.getByText(/ИИ может ошибаться/)).toBeVisible();
   });
 });
