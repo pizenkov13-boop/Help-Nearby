@@ -23,7 +23,10 @@ import {
   getPhoneTelUrl,
   getOrganizationOpenStatus,
 } from "@/lib/orgUtils";
-import { isOverpassOrganization } from "@/lib/organizationCoordinates";
+import {
+  isApproximateLocation,
+  isOverpassOrganization,
+} from "@/lib/organizationCoordinates";
 import { getOrganizationSource } from "@/lib/organizationSource";
 import type { Organization } from "@/lib/types";
 import { cn } from "@/lib/utils";
@@ -54,6 +57,8 @@ export function OrganizationCard({
   const directionsUrl = getDirectionsUrl(org);
   const telUrl = getPhoneTelUrl(org.phone);
   const hasPhone = Boolean(org.phone?.trim());
+  // Country-level OCHA entries have no confirmed address, so no directions are offered.
+  const approximate = isApproximateLocation(org);
 
   const handleCallClick = () => {
     trackPhoneClicked(org);
@@ -227,56 +232,62 @@ export function OrganizationCard({
         </button>
       )}
 
-      <div className="flex flex-col gap-2 border-t border-slate-200 px-3 pb-3 pt-2.5 dark:border-gray-700/50 md:flex-row md:px-4 md:pb-4 md:pt-3">
-        {hasPhone && (
-          <a
-            href={telUrl}
-            onClick={handleCallClick}
-            className="group/call relative inline-flex min-w-0 flex-1 items-center justify-center gap-2 rounded-lg bg-emerald-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm shadow-emerald-600/25 transition-all hover:bg-emerald-500 active:bg-emerald-700"
-            aria-label={`${t("callNow")}: ${org.phone}`}
-          >
-            <span
-              role="tooltip"
-              className="pointer-events-none absolute bottom-full left-1/2 z-10 mb-2 hidden -translate-x-1/2 whitespace-nowrap rounded-lg border border-emerald-500/30 bg-gray-950 px-3 py-1.5 text-xs font-medium text-emerald-300 opacity-0 shadow-xl transition-opacity group-hover/call:opacity-100 md:block"
+      {(hasPhone || !approximate) && (
+        <div className="flex flex-col gap-2 border-t border-slate-200 px-3 pb-3 pt-2.5 dark:border-gray-700/50 md:flex-row md:px-4 md:pb-4 md:pt-3">
+          {hasPhone && (
+            <a
+              href={telUrl}
+              onClick={handleCallClick}
+              className="group/call relative inline-flex min-w-0 flex-1 items-center justify-center gap-2 rounded-lg bg-emerald-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm shadow-emerald-600/25 transition-all hover:bg-emerald-500 active:bg-emerald-700"
+              aria-label={`${t("callNow")}: ${org.phone}`}
             >
-              {org.phone}
-            </span>
-            <Phone className="h-4 w-4 shrink-0" aria-hidden />
-            {t("callNow")}
-          </a>
-        )}
-        {onGetDirections ? (
-          <button
-            type="button"
-            onClick={handleDirectionsClick}
-            className={cn(
-              "inline-flex min-w-0 flex-1 items-center justify-center gap-2 rounded-lg bg-gradient-to-r from-blue-600/80 to-emerald-600/80 px-4 py-2.5 text-sm font-medium text-white transition-all hover:from-blue-500 hover:to-emerald-500",
-              !hasPhone && "w-full",
-            )}
-          >
-            <Navigation className="h-4 w-4 shrink-0" aria-hidden />
-            {t("getDirections")}
-          </button>
-        ) : (
-          <a
-            href={directionsUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            onClick={() => {
-              trackDirectionsClicked(org);
-              recordImpactClick(org.id, "directions");
-              onImpactRecorded?.();
-            }}
-            className={cn(
-              "inline-flex min-w-0 flex-1 items-center justify-center gap-2 rounded-lg bg-gradient-to-r from-blue-600/80 to-emerald-600/80 px-4 py-2.5 text-sm font-medium text-white transition-all hover:from-blue-500 hover:to-emerald-500",
-              !hasPhone && "w-full",
-            )}
-          >
-            <Navigation className="h-4 w-4 shrink-0" aria-hidden />
-            {t("getDirections")}
-          </a>
-        )}
-      </div>
+              <span
+                role="tooltip"
+                className="pointer-events-none absolute bottom-full left-1/2 z-10 mb-2 hidden -translate-x-1/2 whitespace-nowrap rounded-lg border border-emerald-500/30 bg-gray-950 px-3 py-1.5 text-xs font-medium text-emerald-300 opacity-0 shadow-xl transition-opacity group-hover/call:opacity-100 md:block"
+              >
+                {org.phone}
+              </span>
+              <Phone className="h-4 w-4 shrink-0" aria-hidden />
+              {t("callNow")}
+            </a>
+          )}
+          {!approximate && (
+            <>
+              {onGetDirections ? (
+                <button
+                  type="button"
+                  onClick={handleDirectionsClick}
+                  className={cn(
+                    "inline-flex min-w-0 flex-1 items-center justify-center gap-2 rounded-lg bg-gradient-to-r from-blue-600/80 to-emerald-600/80 px-4 py-2.5 text-sm font-medium text-white transition-all hover:from-blue-500 hover:to-emerald-500",
+                    !hasPhone && "w-full",
+                  )}
+                >
+                  <Navigation className="h-4 w-4 shrink-0" aria-hidden />
+                  {t("getDirections")}
+                </button>
+              ) : (
+                <a
+                  href={directionsUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  onClick={() => {
+                    trackDirectionsClicked(org);
+                    recordImpactClick(org.id, "directions");
+                    onImpactRecorded?.();
+                  }}
+                  className={cn(
+                    "inline-flex min-w-0 flex-1 items-center justify-center gap-2 rounded-lg bg-gradient-to-r from-blue-600/80 to-emerald-600/80 px-4 py-2.5 text-sm font-medium text-white transition-all hover:from-blue-500 hover:to-emerald-500",
+                    !hasPhone && "w-full",
+                  )}
+                >
+                  <Navigation className="h-4 w-4 shrink-0" aria-hidden />
+                  {t("getDirections")}
+                </a>
+              )}
+            </>
+          )}
+        </div>
+      )}
     </article>
   );
 }

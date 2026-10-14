@@ -76,6 +76,17 @@ test.describe("Approximate (country-level) locations", () => {
     expect(titles.at(-1)).toBe("E2E Centroid Relief Org");
     await expect(centroidCard).not.toContainText(/\d+(\.\d+)?\s*(mi|ft)\b/);
 
+    // No route button or link for the approximate entry; the exact entry still has one.
+    await expect(centroidCard.getByRole("button", { name: /Get Directions/i })).toHaveCount(0);
+    await expect(centroidCard.getByRole("link", { name: /Get Directions/i })).toHaveCount(0);
+    await expect(centroidCard.locator('a[href*="google.com/maps"]')).toHaveCount(0);
+    await expect(
+      list.filter({ hasText: "E2E Exact Pantry" }).getByRole("button", { name: /Get Directions/i }),
+    ).toHaveCount(1);
+    // Name, country and a link to the source stay.
+    await expect(centroidCard).toContainText("United States");
+    await expect(centroidCard.getByRole("link").first()).toBeVisible();
+
     // Exactly one place marker (the exact pantry); none for the centroid entry.
     await expect(page.locator(".leaflet-marker-icon.custom-marker")).toHaveCount(1);
 
