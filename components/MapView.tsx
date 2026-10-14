@@ -8,7 +8,10 @@ import { organizationNeedsGeocoding } from "@/lib/nominatimGeocode";
 import type { RouteData } from "@/lib/routing";
 import { distanceMiles } from "@/lib/geo";
 import { hasValidMapCoordinates } from "@/lib/mapCoordinates";
-import { getOrganizationCoordinates } from "@/lib/organizationCoordinates";
+import {
+  getOrganizationCoordinates,
+  isApproximateLocation,
+} from "@/lib/organizationCoordinates";
 import { resolveOrganizationsForMap } from "@/lib/resolveOrganizationCoordinates";
 import type { Organization, UserLocation } from "@/lib/types";
 import type { TrackedUserLocation } from "@/lib/geolocation";
@@ -233,12 +236,12 @@ export default function MapView({
   selectedRef.current = selected;
 
   useEffect(() => {
-    const withStoredCoords = organizations.filter(hasValidMapCoordinates);
-    const needsNominatim = organizations.filter(organizationNeedsGeocoding);
+    // Approximate (country-level) entries never get a marker or influence the map bounds.
+    const exact = organizations.filter((org) => !isApproximateLocation(org));
+    const withStoredCoords = exact.filter(hasValidMapCoordinates);
+    const needsNominatim = exact.filter(organizationNeedsGeocoding);
 
-    setMapOrganizations(
-      withStoredCoords.length > 0 ? withStoredCoords : organizations,
-    );
+    setMapOrganizations(withStoredCoords);
     setMarkerGeneration((g) => g + 1);
 
     if (liteMode || needsNominatim.length === 0) {

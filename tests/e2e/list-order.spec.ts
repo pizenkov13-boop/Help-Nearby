@@ -15,12 +15,12 @@ const make = (overrides: Partial<Organization>): Organization => ({
 });
 
 test.describe("List order", () => {
-  test("coordinates first by distance; entries without coordinates last with no distance", () => {
+  test("exact coordinates first by distance; approximate and coordinate-less entries last", () => {
     const rw = make({ id: "rw-1", name: "ReliefWeb no coords", lat: 0, lng: 0, distance: "" });
     const far = make({ id: "11", name: "Verified far", distance: "40 mi" });
     const near = make({ id: "12", name: "Verified near", distance: "1.2 mi" });
     const osmNear = make({ id: "overpass-node-1", name: "OSM near", verified: false, distance: "0.3 mi" });
-    const hdxGeocoded = make({ id: "hdx-2", name: "HDX geocoded", distance: "362 mi" });
+    const hdxGeocoded = make({ id: "hdx-2", name: "HDX approximate", distance: "" });
     const noCoordsCatalog = make({ id: "13", name: "Catalog no coords", lat: 0, lng: 0, distance: "" });
 
     const sorted = sortOrganizationsForList([
@@ -32,16 +32,19 @@ test.describe("List order", () => {
       near,
     ]);
 
-    expect(sorted.map((o) => o.name)).toEqual([
+    expect(sorted.slice(0, 3).map((o) => o.name)).toEqual([
       "Verified near",
       "Verified far",
       "OSM near",
-      "HDX geocoded",
-      // no coordinates: always last
-      "ReliefWeb no coords",
-      "Catalog no coords",
     ]);
-    for (const o of sorted.slice(-2)) expect(o.distance).toBe("");
+    // approximate (OCHA) and coordinate-less entries: always last, no distance
+    expect(
+      sorted
+        .slice(3)
+        .map((o) => o.name)
+        .sort(),
+    ).toEqual(["Catalog no coords", "HDX approximate", "ReliefWeb no coords"]);
+    for (const o of sorted.slice(-3)) expect(o.distance).toBe("");
   });
 
   test("catalog rows without coordinates get no distance (not a distance to 0,0)", () => {

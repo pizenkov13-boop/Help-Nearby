@@ -20,6 +20,15 @@ export function isOchaOrganization(org: Organization): boolean {
   );
 }
 
+/**
+ * OCHA directory entries (ReliefWeb / HDX / GDHO) are country-level: even when they carry
+ * coordinates these are a country centroid or a guess from the name, not an address.
+ * They stay in the list (last, without distance) but never get a map marker.
+ */
+export function isApproximateLocation(org: Organization): boolean {
+  return isOchaOrganization(org);
+}
+
 export function isPlausibleCoordinate(lat: number, lng: number): boolean {
   if (!Number.isFinite(lat) || !Number.isFinite(lng)) return false;
   if (Math.abs(lat) > 90 || Math.abs(lng) > 180) return false;
@@ -158,11 +167,9 @@ export function validateOrganizationForDisplay(
   userLocation: UserLocation,
   maxRadiusMeters: number,
 ): Organization | null {
-  if (isOchaOrganization(org)) {
-    // Country-level entries without coordinates stay in the list (not on the map)
-    // until background geocoding finds a position.
-    if (!hasValidMapCoordinates(org)) return { ...org, distance: "" };
-    return withDistanceFromUser(org, userLocation, formatDistanceMiles);
+  if (isApproximateLocation(org)) {
+    // No distance for approximate positions, whatever coordinates they carry.
+    return { ...org, distance: "" };
   }
   return validateOrganizationForNearby(org, userLocation, maxRadiusMeters);
 }
