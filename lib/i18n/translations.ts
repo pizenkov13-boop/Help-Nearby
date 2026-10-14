@@ -228,6 +228,10 @@ export type TranslationKey =
   | "verifiedOnlyNotice"
   | "searchRadiusWithin"
   | "searchExpand"
+  | "sourceCatalogPending"
+  | "sourceOsmPending"
+  | "sourceOchaPending"
+  | "searchLargerRadius"
   | "searchNearestOrgs"
   | "routeWalking"
   | "routeDriving"
@@ -506,6 +510,10 @@ const en: Record<TranslationKey, string> = {
   verifiedOnlyNotice: "Showing verified organizations only",
   searchRadiusWithin: "Showing results within {km} km",
   searchExpand: "Expand search",
+  sourceCatalogPending: "Help Nearby directory…",
+  sourceOsmPending: "OpenStreetMap…",
+  sourceOchaPending: "UN OCHA directory…",
+  searchLargerRadius: "Try a larger radius",
   searchNearestOrgs: "Nearest organizations ({km} km away)",
   routeWalking: "Walking",
   routeDriving: "Driving",
@@ -794,6 +802,10 @@ const ru: Record<TranslationKey, string> = {
   verifiedOnlyNotice: "Показываются только проверенные организации",
   searchRadiusWithin: "Показаны результаты в радиусе {km} км",
   searchExpand: "Расширить поиск",
+  sourceCatalogPending: "Каталог Help Nearby…",
+  sourceOsmPending: "OpenStreetMap…",
+  sourceOchaPending: "Справочник ООН OCHA…",
+  searchLargerRadius: "Попробовать больший радиус",
   searchNearestOrgs: "Ближайшие организации (в {km} км)",
   routeWalking: "Пешком",
   routeDriving: "На машине",
@@ -1089,6 +1101,10 @@ const es: Record<TranslationKey, string> = {
   verifiedOnlyNotice: "Mostrando solo organizaciones verificadas",
   searchRadiusWithin: "Mostrando resultados dentro de {km} km",
   searchExpand: "Ampliar búsqueda",
+  sourceCatalogPending: "Directorio Help Nearby…",
+  sourceOsmPending: "OpenStreetMap…",
+  sourceOchaPending: "Directorio ONU OCHA…",
+  searchLargerRadius: "Probar un radio mayor",
   searchNearestOrgs: "Organizaciones más cercanas (a {km} km)",
   routeWalking: "A pie",
   routeDriving: "En coche",
@@ -1385,6 +1401,10 @@ const fr: Record<TranslationKey, string> = {
   verifiedOnlyNotice: "Affichage des organisations vérifiées uniquement",
   searchRadiusWithin: "Résultats affichés dans un rayon de {km} km",
   searchExpand: "Élargir la recherche",
+  sourceCatalogPending: "Annuaire Help Nearby…",
+  sourceOsmPending: "OpenStreetMap…",
+  sourceOchaPending: "Annuaire ONU OCHA…",
+  searchLargerRadius: "Essayer un rayon plus large",
   searchNearestOrgs: "Organisations les plus proches (à {km} km)",
   routeWalking: "À pied",
   routeDriving: "En voiture",
@@ -1683,6 +1703,10 @@ const de: Record<TranslationKey, string> = {
   verifiedOnlyNotice: "Es werden nur verifizierte Organisationen angezeigt",
   searchRadiusWithin: "Ergebnisse innerhalb von {km} km",
   searchExpand: "Suche erweitern",
+  sourceCatalogPending: "Help-Nearby-Verzeichnis…",
+  sourceOsmPending: "OpenStreetMap…",
+  sourceOchaPending: "UN-OCHA-Verzeichnis…",
+  searchLargerRadius: "Größeren Radius versuchen",
   searchNearestOrgs: "Nächste Organisationen ({km} km entfernt)",
   routeWalking: "Zu Fuß",
   routeDriving: "Auto",
@@ -1957,6 +1981,10 @@ const zh: Record<TranslationKey, string> = {
   verifiedOnlyNotice: "仅显示已验证组织",
   searchRadiusWithin: "显示 {km} 公里范围内结果",
   searchExpand: "扩大搜索范围",
+  sourceCatalogPending: "Help Nearby 名录…",
+  sourceOsmPending: "OpenStreetMap…",
+  sourceOchaPending: "联合国 OCHA 名录…",
+  searchLargerRadius: "尝试更大的半径",
   searchNearestOrgs: "最近组织（距离 {km} 公里）",
   routeWalking: "步行",
   routeDriving: "驾车",
@@ -2242,6 +2270,10 @@ const ar: Record<TranslationKey, string> = {
   verifiedOnlyNotice: "عرض المنظمات الموثقة فقط",
   searchRadiusWithin: "عرض النتائج ضمن {km} كم",
   searchExpand: "توسيع البحث",
+  sourceCatalogPending: "دليل Help Nearby…",
+  sourceOsmPending: "OpenStreetMap…",
+  sourceOchaPending: "دليل الأمم المتحدة OCHA…",
+  searchLargerRadius: "جرّب نطاقًا أكبر",
   searchNearestOrgs: "أقرب المنظمات (على بعد {km} كم)",
   routeWalking: "مشياً",
   routeDriving: "بالسيارة",

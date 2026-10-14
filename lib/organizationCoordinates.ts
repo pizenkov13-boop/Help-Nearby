@@ -159,7 +159,9 @@ export function validateOrganizationForDisplay(
   maxRadiusMeters: number,
 ): Organization | null {
   if (isOchaOrganization(org)) {
-    if (!hasValidMapCoordinates(org)) return null;
+    // Country-level entries without coordinates stay in the list (not on the map)
+    // until background geocoding finds a position.
+    if (!hasValidMapCoordinates(org)) return { ...org, distance: "" };
     return withDistanceFromUser(org, userLocation, formatDistanceMiles);
   }
   return validateOrganizationForNearby(org, userLocation, maxRadiusMeters);

@@ -15,8 +15,10 @@ import {
   type TrackedUserLocation,
 } from "@/lib/geolocation";
 import { reverseGeocodeCountry } from "@/lib/geocode";
+import { hasValidMapCoordinates } from "@/lib/mapCoordinates";
 import {
   getOrganizationCoordinates,
+  isOchaOrganization,
   organizationHasTrustedCoordinates,
   validateOrganizationForDisplay,
   validateOrganizationForNearby,
@@ -37,9 +39,13 @@ import {
   type RouteData,
 } from "@/lib/routing";
 import { readNearbyCache, writeNearbyCache } from "@/lib/nearbyCache";
-import { searchNearbyWithSmartRadius } from "@/lib/nearbySearch";
+import {
+  searchNearbyWithSmartRadius,
+  type NearbySourceStates,
+} from "@/lib/nearbySearch";
 import {
   getMaxRadiusMeters,
+  getRadiusTiers,
   getTierIndex,
   metersToDisplayKm,
   type SearchRadiusMode,
@@ -90,6 +96,7 @@ export function HomePage() {
   const [allOrganizations, setAllOrganizations] = useState<Organization[]>([]);
   const [orgsLoading, setOrgsLoading] = useState(true);
   const [sourcesLoading, setSourcesLoading] = useState(false);
+  const [sourceStates, setSourceStates] = useState<NearbySourceStates | null>(null);
   const [routeDestination, setRouteDestination] = useState<Organization | null>(
     null,
   );
@@ -118,6 +125,7 @@ export function HomePage() {
   const findTriggeredRef = useRef(false);
   const liteAutoOpenedRef = useRef(false);
   const searchRunIdRef = useRef(0);
+  const searchAbortRef = useRef<AbortController | null>(null);
   const lastSearchAreaRef = useRef<string | null>(null);
   const lastOrganizationsLoadedRef = useRef<string | null>(null);
 
@@ -223,6 +231,9 @@ export function HomePage() {
       if (!location) return;
 
       const runId = ++searchRunIdRef.current;
+      searchAbortRef.current?.abort();
+      const abortController = new AbortController();
+      searchAbortRef.current = abortController;
 
       const cached = readNearbyCache(
         location.lat,
@@ -241,6 +252,7 @@ export function HomePage() {
 
       setOrgsLoading(!hadCachedResults);
       setSourcesLoading(true);
+      setSourceStates({ supabase: "pending", osm: "pending", ocha: "pending" });
       setVerifiedOnlyNotice(false);
 
       try {
@@ -256,12 +268,28 @@ export function HomePage() {
             countryCode: geo?.countryCode ?? null,
             startTierIndex: options?.startTierIndex,
             autoExpand: options?.autoExpand,
+            signal: abortController.signal,
           },
           {
             onOrganizationsUpdate: (organizations) => {
               if (runId !== searchRunIdRef.current) return;
+              // Progressive merge: later sources add to the list without resetting it.
               setAllOrganizations(organizations);
               if (organizations.length > 0) {
+                setOrgsLoading(false);
+              }
+            },
+            onOrganizationsPatch: (patched) => {
+              if (runId !== searchRunIdRef.current) return;
+              const byId = new Map(patched.map((org) => [org.id, org]));
+              setAllOrganizations((prev) =>
+                prev.map((org) => byId.get(org.id) ?? org),
+              );
+            },
+            onSourceStatus: (states) => {
+              if (runId !== searchRunIdRef.current) return;
+              setSourceStates(states);
+              if (!Object.values(states).includes("pending")) {
                 setOrgsLoading(false);
               }
             },
@@ -300,6 +328,15 @@ export function HomePage() {
           setAllOrganizations([]);
         }
         setCanExpandSearch(false);
+        setSourceStates((prev) =>
+          prev
+            ? {
+                supabase: prev.supabase === "pending" ? "failed" : prev.supabase,
+                osm: prev.osm === "pending" ? "failed" : prev.osm,
+                ocha: prev.ocha === "pending" ? "failed" : prev.ocha,
+              }
+            : prev,
+        );
       } finally {
         if (runId !== searchRunIdRef.current) return;
         setOrgsLoading(false);
@@ -326,6 +363,23 @@ export function HomePage() {
     void runNearbySearch({ startTierIndex: nextIndex, autoExpand: false });
   }, [userLocation, searchRadiusMeters, liteModeActive, runNearbySearch]);
 
+  const anySourcePending =
+    sourceStates !== null && Object.values(sourceStates).includes("pending");
+
+  const handleTryLargerRadius = useCallback(() => {
+    if (!userLocation) return;
+    const nextIndex =
+      searchRadiusMeters == null
+        ? 0
+        : getTierIndex(searchRadiusMeters, liteModeActive) + 1;
+    const maxIndex = getRadiusTiers(liteModeActive).length - 1;
+    // At the widest tier nothing larger exists: retry it (sources may just have failed).
+    void runNearbySearch({
+      startTierIndex: Math.min(nextIndex, maxIndex),
+      autoExpand: false,
+    });
+  }, [userLocation, searchRadiusMeters, liteModeActive, runNearbySearch]);
+
   const maxSearchRadiusMeters = getMaxRadiusMeters(liteModeActive);
 
   const coordinateValidated = useMemo(() => {
@@ -340,6 +394,15 @@ export function HomePage() {
   const filtered = useMemo(
     () => filterOrganizations(coordinateValidated, filters),
     [coordinateValidated, filters],
+  );
+
+  // List-only OCHA entries (no coordinates yet) stay off the map until geocoded.
+  const mapOrganizations = useMemo(
+    () =>
+      filtered.filter(
+        (org) => !isOchaOrganization(org) || hasValidMapCoordinates(org),
+      ),
+    [filtered],
   );
 
   // Share the current results with the chat assistant (nearest 10, truncated server-side too).
@@ -716,9 +779,24 @@ export function HomePage() {
                         {t("defaultLocationNotice")}
                       </span>
                     )}
-                    {sourcesLoading && (
-                      <span className="map-badge blue">
+                    {anySourcePending && (
+                      <span className="map-badge blue" data-testid="loading-nearby">
                         {t("loadingNearby")}
+                      </span>
+                    )}
+                    {anySourcePending && sourceStates?.supabase === "pending" && (
+                      <span className="map-badge blue" data-testid="source-supabase">
+                        {t("sourceCatalogPending")}
+                      </span>
+                    )}
+                    {anySourcePending && sourceStates?.osm === "pending" && (
+                      <span className="map-badge blue" data-testid="source-osm">
+                        {t("sourceOsmPending")}
+                      </span>
+                    )}
+                    {anySourcePending && sourceStates?.ocha === "pending" && (
+                      <span className="map-badge blue" data-testid="source-ocha">
+                        {t("sourceOchaPending")}
                       </span>
                     )}
                     {verifiedOnlyNotice && (
@@ -791,7 +869,7 @@ export function HomePage() {
                     <MapView
                       key="full-map"
                       mapVisible={mapExpanded}
-                      organizations={filtered}
+                      organizations={mapOrganizations}
                       selected={selected}
                       userLocation={userLocation}
                       yourLocationLabel={t("yourLocation")}
@@ -807,7 +885,7 @@ export function HomePage() {
                     <MapView
                       key="lite-map"
                       mapVisible={mapExpanded}
-                      organizations={filtered}
+                      organizations={mapOrganizations}
                       selected={selected}
                       userLocation={userLocation}
                       yourLocationLabel={t("yourLocation")}
@@ -839,6 +917,22 @@ export function HomePage() {
                         !filters.openNow
                           ? t("noVerifiedNearby")
                           : undefined
+                      }
+                      emptyAction={
+                        !orgsLoading &&
+                        !anySourcePending &&
+                        allOrganizations.length === 0 &&
+                        !filters.searchQuery.trim() &&
+                        filters.category === "all" &&
+                        !filters.openNow ? (
+                          <button
+                            type="button"
+                            onClick={handleTryLargerRadius}
+                            className="mt-4 rounded-full border border-blue-500/40 bg-blue-500/10 px-4 py-2 text-sm font-semibold text-blue-700 transition-colors hover:bg-blue-500/20 dark:text-blue-300"
+                          >
+                            {t("searchLargerRadius")}
+                          </button>
+                        ) : undefined
                       }
                       selectedId={selected?.id}
                       onSelect={setSelected}

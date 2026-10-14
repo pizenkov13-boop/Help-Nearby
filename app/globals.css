@@ -1380,6 +1380,14 @@ section[id], .scroll-anchor { scroll-margin-top: 92px; }
 /* Dark theme: tint the raster tiles only — markers, popups and controls are untouched. */
 .dark .leaflet-container:not(.map-tiles-keep-light) .leaflet-tile-pane {
   filter: invert(1) hue-rotate(180deg) brightness(0.95) contrast(0.9);
+  /* Own compositing layer: avoids hairline seams between filtered tiles. */
+  transform: translateZ(0);
+  will-change: transform;
+}
+
+.dark .leaflet-container:not(.map-tiles-keep-light) .leaflet-tile {
+  outline: 1px solid transparent;
+  image-rendering: auto;
 }
 
 .leaflet-popup-content-wrapper {

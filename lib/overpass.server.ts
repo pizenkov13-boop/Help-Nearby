@@ -173,10 +173,18 @@ out center tags;
 `.trim();
 }
 
+/** First mirror gets part of the budget, then one retry on a second mirror (8 s total). */
 async function queryOverpass(query: string): Promise<OverpassResponse> {
+  const deadline = Date.now() + OVERPASS_TIMEOUT_MS;
+  const mirrors = OVERPASS_URLS.slice(0, 2);
   let lastError: unknown;
 
-  for (const url of OVERPASS_URLS) {
+  for (const [index, url] of mirrors.entries()) {
+    const remaining = deadline - Date.now();
+    if (remaining <= 500) break;
+    // Leave time for the retry when the first attempt hangs.
+    const budget = index === 0 ? Math.min(remaining, 4500) : remaining;
+
     try {
       console.log(`[overpass] Trying ${url}`);
 
@@ -188,7 +196,7 @@ async function queryOverpass(query: string): Promise<OverpassResponse> {
           "User-Agent": OVERPASS_USER_AGENT,
         },
         body: `data=${encodeURIComponent(query)}`,
-        signal: AbortSignal.timeout(OVERPASS_TIMEOUT_MS),
+        signal: AbortSignal.timeout(budget),
       });
 
       if (!response.ok) {
@@ -212,7 +220,7 @@ async function queryOverpass(query: string): Promise<OverpassResponse> {
 
   throw lastError instanceof Error
     ? lastError
-    : new Error("All Overpass endpoints failed");
+    : new Error("Overpass endpoints failed");
 }
 
 function getElementGeometryCoordinates(
