@@ -51,6 +51,7 @@ function isNextJsCodeAsset(pathname) {
 
 function shouldBypassServiceWorker(request, url) {
   if (request.method !== "GET") return true;
+  // Cross-origin requests (map tiles, etc.) are never cached by this worker.
   if (url.origin !== self.location.origin) return true;
   if (isApiRequest(url)) return true;
   if (isNextJsCodeAsset(url.pathname)) return true;

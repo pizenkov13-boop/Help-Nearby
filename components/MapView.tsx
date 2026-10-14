@@ -1,6 +1,5 @@
 "use client";
 
-import { useTheme } from "next-themes";
 import { useEffect, useMemo, useRef, useState } from "react";
 import L from "leaflet";
 import { Loader2, X } from "lucide-react";
@@ -21,6 +20,7 @@ import {
   trackMapInteraction,
   trackOrganizationCardOpened,
 } from "@/lib/analytics.client";
+import { getMapTileConfig } from "@/lib/mapTiles";
 import { getOrganizationSource } from "@/lib/organizationSource";
 
 const DefaultIcon = L.icon({
@@ -120,13 +120,7 @@ function splitRouteWithConnector(
   };
 }
 
-const MAP_TILE_ATTRIBUTION =
-  "© OpenStreetMap contributors © CARTO";
-
-const TILE_URL_LIGHT =
-  "https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png";
-const TILE_URL_DARK =
-  "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png";
+const TILE_CONFIG = getMapTileConfig();
 
 /** Plain-text Leaflet prefix — no default logo/flag link. */
 function applyNeutralMapAttribution(map: L.Map) {
@@ -221,7 +215,6 @@ export default function MapView({
   mapVisible = true,
 }: MapViewProps) {
   const { t } = useLanguage();
-  const { resolvedTheme } = useTheme();
   const mapHostRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<L.Map | null>(null);
   const skipZoomTrackingRef = useRef(0);
@@ -299,18 +292,6 @@ export default function MapView({
     [userLocation.lat, userLocation.lng],
   );
 
-  const isDarkTheme =
-    resolvedTheme === "dark" ||
-    (resolvedTheme === undefined &&
-      typeof document !== "undefined" &&
-      document.documentElement.classList.contains("dark"));
-
-  const tileUrl = liteMode
-    ? TILE_URL_LIGHT
-    : isDarkTheme
-      ? TILE_URL_DARK
-      : TILE_URL_LIGHT;
-
   useEffect(() => {
     const container = mapHostRef.current;
     if (!container) return;
@@ -325,8 +306,14 @@ export default function MapView({
 
     applyNeutralMapAttribution(map);
 
-    L.tileLayer(tileUrl, {
-      attribution: MAP_TILE_ATTRIBUTION,
+    // Lite mode keeps the plain light tiles; otherwise dark mode filters the tile pane (CSS).
+    container.classList.toggle("map-tiles-keep-light", liteMode);
+
+    L.tileLayer(TILE_CONFIG.url, {
+      attribution: TILE_CONFIG.attribution,
+      maxZoom: TILE_CONFIG.maxZoom,
+      // Send a normal Referer (origin) — required by the OSM tile usage policy.
+      referrerPolicy: "strict-origin-when-cross-origin",
     }).addTo(map);
 
     map.on("zoomend", () => {
@@ -362,7 +349,7 @@ export default function MapView({
       mapRef.current = null;
       clearLeafletContainer(container);
     };
-  }, [tileUrl]);
+  }, [liteMode]);
 
   useEffect(() => {
     const map = mapRef.current;

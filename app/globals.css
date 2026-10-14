@@ -1377,6 +1377,11 @@ section[id], .scroll-anchor { scroll-margin-top: 92px; }
   transition: background-color 0.3s ease;
 }
 
+/* Dark theme: tint the raster tiles only — markers, popups and controls are untouched. */
+.dark .leaflet-container:not(.map-tiles-keep-light) .leaflet-tile-pane {
+  filter: invert(1) hue-rotate(180deg) brightness(0.95) contrast(0.9);
+}
+
 .leaflet-popup-content-wrapper {
   @apply rounded-brand bg-surface-card text-foreground shadow-xl;
   transition: background-color 0.3s ease, color 0.3s ease;
