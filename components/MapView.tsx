@@ -200,6 +200,8 @@ interface MapViewProps {
   routeLoading: boolean;
   onClearRoute: () => void;
   mapVisible?: boolean;
+  /** Changing `key` recenters the map with an animated flyTo (e.g. after a place search). */
+  flyTarget?: { lat: number; lng: number; key: number } | null;
 }
 
 export default function MapView({
@@ -213,6 +215,7 @@ export default function MapView({
   routeLoading,
   onClearRoute,
   mapVisible = true,
+  flyTarget = null,
 }: MapViewProps) {
   const { t } = useLanguage();
   const mapHostRef = useRef<HTMLDivElement>(null);
@@ -336,6 +339,13 @@ export default function MapView({
       });
     });
 
+    const publishCenter = () => {
+      const c = map.getCenter();
+      container.dataset.center = `${c.lat.toFixed(3)},${c.lng.toFixed(3)}`;
+    };
+    map.on("moveend", publishCenter);
+    publishCenter();
+
     markersLayerRef.current = L.layerGroup().addTo(map);
     mapRef.current = map;
     setMapReady(true);
@@ -350,6 +360,14 @@ export default function MapView({
       clearLeafletContainer(container);
     };
   }, [liteMode]);
+
+  const flyKey = flyTarget?.key;
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map || !mapReady || !flyTarget) return;
+    map.flyTo([flyTarget.lat, flyTarget.lng], 14, { duration: 0.8 });
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- only a new key triggers a flight
+  }, [flyKey, mapReady]);
 
   useEffect(() => {
     const map = mapRef.current;

@@ -424,6 +424,12 @@ function mapElementToOrganization(
 
   const category = mapTagsToCategory(tags);
   const slug = `osm-${el.type}-${el.id}-${slugify(name)}`;
+  const osmKind =
+    tags.amenity === "pharmacy"
+      ? "pharmacy"
+      : tags.shop
+        ? `shop:${tags.shop}`
+        : (tags.amenity ?? tags.social_facility ?? tags.healthcare ?? "other");
 
   return {
     id: `overpass-${el.type}-${el.id}`,
@@ -457,6 +463,7 @@ function mapElementToOrganization(
       : buildHoursRaw(tags),
     openNow: false,
     verified: false,
+    osmKind,
   };
 }
 

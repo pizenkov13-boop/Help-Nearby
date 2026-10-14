@@ -104,6 +104,15 @@ export async function mockNearbyApi(page: Page) {
     });
   });
 
+  // Place search / autocomplete never reaches the real Nominatim in tests.
+  await page.route(/\/api\/geocode(?!\/reverse)/, async (route) => {
+    await route.fulfill({
+      status: 200,
+      contentType: "application/json",
+      body: JSON.stringify({ results: [] }),
+    });
+  });
+
   await page.route(/\/api\/geocode\/reverse/, async (route) => {
     await route.fulfill({
       status: 200,

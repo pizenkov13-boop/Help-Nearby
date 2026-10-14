@@ -1,5 +1,7 @@
 import "server-only";
 
+import { createTtlCache } from "@/lib/ttlCache";
+
 /** Nominatim search — server-side only (Nominatim usage policy). */
 export async function nominatimSearch(
   query: string,
@@ -253,4 +255,76 @@ export async function nominatimSearchDetailed(
     countryCode: first.address?.country_code?.toUpperCase() ?? null,
     isCountry: first.addresstype === "country",
   };
+}
+
+export interface PlaceSuggestion {
+  name: string;
+  lat: number;
+  lng: number;
+  country: string | null;
+  countryCode: string | null;
+}
+
+const placeCache = createTtlCache<PlaceSuggestion[]>(60 * 60 * 1000, 500);
+
+/**
+ * Place autocomplete / forward geocoding with up to `limit` results.
+ * Cached for an hour and serialised to Nominatim's 1 request/second policy.
+ */
+export async function nominatimSearchPlaces(
+  query: string,
+  limit: number,
+  language = "en",
+  timeoutMs = 4000,
+): Promise<PlaceSuggestion[] | null> {
+  const q = query.trim().slice(0, 120);
+  if (q.length < 2) return [];
+
+  const count = Math.min(Math.max(limit, 1), 5);
+  const key = `${language}|${count}|${q.toLowerCase()}`;
+  const cached = placeCache.get(key);
+  if (cached) return cached;
+
+  await waitForNominatimSlot();
+
+  const url = new URL("https://nominatim.openstreetmap.org/search");
+  url.searchParams.set("q", q);
+  url.searchParams.set("format", "json");
+  url.searchParams.set("limit", String(count));
+  url.searchParams.set("addressdetails", "1");
+  url.searchParams.set("accept-language", language);
+
+  const response = await fetch(url.toString(), {
+    headers: { "User-Agent": "HelpNearby/1.0 (help-nearby.app)" },
+    signal: AbortSignal.timeout(timeoutMs),
+  });
+  if (!response.ok) return null;
+
+  const data = (await response.json()) as {
+    lat: string;
+    lon: string;
+    name?: string;
+    display_name?: string;
+    address?: { country?: string; country_code?: string };
+  }[];
+
+  const results: PlaceSuggestion[] = [];
+  for (const item of data) {
+    const lat = Number(item.lat);
+    const lng = Number(item.lon);
+    if (!Number.isFinite(lat) || !Number.isFinite(lng)) continue;
+    const head = item.name || item.display_name?.split(",")[0]?.trim() || q;
+    const country = item.address?.country ?? null;
+    results.push({
+      name: country && !head.includes(country) ? `${head}, ${country}` : head,
+      lat,
+      lng,
+      country,
+      countryCode: item.address?.country_code?.toUpperCase() ?? null,
+    });
+  }
+
+  // Cache empty answers too (short-lived by the cache TTL) so repeated typos stay cheap.
+  placeCache.set(key, results);
+  return results;
 }
