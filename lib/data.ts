@@ -51,6 +51,11 @@ function parseHours(hours: string | null | undefined): WeeklyHours {
   }
 }
 
+/** Postgres `timestamp` (no tz) values are UTC; normalise so clients parse them consistently. */
+function toIsoTimestamp(value: string): string {
+  return /(?:Z|[+-]\d{2}:?\d{2})$/.test(value) ? value : `${value.replace(" ", "T")}Z`;
+}
+
 export function mapDbOrganization(
   row: DbOrganization,
   userLocation?: UserLocation | null,
@@ -81,6 +86,7 @@ export function mapDbOrganization(
     hoursRaw: row.hours ?? "",
     openNow: false,
     verified: Boolean(row.verified),
+    ...(row.created_at ? { createdAt: toIsoTimestamp(row.created_at) } : {}),
   };
 
   if (userLocation) {
@@ -224,6 +230,92 @@ export async function fetchCountries(): Promise<string[]> {
     } else {
       console.error("[fetchCountries]", error);
     }
+    return [];
+  }
+}
+
+export const RECENT_PAGE_SIZE = 30;
+
+export interface FetchRecentOptions {
+  offset?: number;
+  limit?: number;
+  country?: string;
+  category?: Category;
+}
+
+export interface RecentOrganizationsPage {
+  organizations: Organization[];
+  hasMore: boolean;
+  error: boolean;
+}
+
+/** Verified organizations, newest first, paginated with range(). */
+export async function fetchRecentOrganizations(
+  options: FetchRecentOptions = {},
+): Promise<RecentOrganizationsPage> {
+  const limit = Math.min(Math.max(options.limit ?? RECENT_PAGE_SIZE, 1), 100);
+  const offset = Math.max(options.offset ?? 0, 0);
+  const supabase = getSupabase();
+  if (!supabase) return { organizations: [], hasMore: false, error: false };
+
+  try {
+    let query = supabase
+      .from("organizations")
+      .select("*")
+      .eq("verified", true)
+      .order("created_at", { ascending: false })
+      .order("id", { ascending: false });
+
+    if (options.country) query = query.eq("country", options.country);
+    if (options.category) query = query.contains("category", [options.category]);
+
+    // Fetch one extra row to know whether another page exists.
+    const { data, error } = await query.range(offset, offset + limit);
+
+    if (error) {
+      console.error("[fetchRecentOrganizations]", error.message);
+      return { organizations: [], hasMore: false, error: true };
+    }
+
+    const rows = (data as DbOrganization[]) ?? [];
+    return {
+      organizations: rows.slice(0, limit).map((row) => mapDbOrganization(row)),
+      hasMore: rows.length > limit,
+      error: false,
+    };
+  } catch (error) {
+    if (isSupabaseFetchError(error)) {
+      console.warn("[fetchRecentOrganizations] Supabase unreachable");
+    } else {
+      console.error("[fetchRecentOrganizations]", error);
+    }
+    return { organizations: [], hasMore: false, error: true };
+  }
+}
+
+export async function fetchVerifiedCountries(): Promise<string[]> {
+  const supabase = getSupabase();
+  if (!supabase) return [];
+
+  try {
+    const { data, error } = await supabase
+      .from("organizations")
+      .select("country")
+      .eq("verified", true)
+      .not("country", "is", null);
+
+    if (error) {
+      console.error("[fetchVerifiedCountries]", error.message);
+      return [];
+    }
+
+    return Array.from(
+      new Set(
+        (data as { country: string }[]).map((row) => row.country).filter(Boolean),
+      ),
+    ).sort();
+  } catch (error) {
+    if (!isSupabaseFetchError(error)) console.error("[fetchVerifiedCountries]", error);
     return [];
   }
 }

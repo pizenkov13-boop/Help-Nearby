@@ -62,6 +62,9 @@ export type TranslationKey =
   | "chatSend"
   | "chatWelcome"
   | "chatHint"
+  | "chatDisclaimer"
+  | "chatErrorTooLong"
+  | "chatErrorRateLimit"
   | "locating"
   | "locationError"
   | "yourLocation"
@@ -69,6 +72,16 @@ export type TranslationKey =
   | "navWhy"
   | "navReviews"
   | "navReviewsShort"
+  | "navRecent"
+  | "recentTitle"
+  | "recentSubtitle"
+  | "recentLoading"
+  | "recentLoadMore"
+  | "recentEmpty"
+  | "recentError"
+  | "recentRetry"
+  | "recentAdded"
+  | "recentAddedUnknown"
   | "footerTagline"
   | "footerQuickLinks"
   | "footerContact"
@@ -90,6 +103,7 @@ export type TranslationKey =
   | "footerShareText"
   | "footerShareCopied"
   | "footerGitHub"
+  | "footerUnSdg"
   | "aboutPageTitle"
   | "aboutPageSubtitle"
   | "aboutOurStory"
@@ -291,10 +305,13 @@ const en: Record<TranslationKey, string> = {
   getDirections: "Get Directions",
   mapTitle: "Nearby map",
   chatTitle: "AI Assistant",
-  chatPlaceholder: "Ask about help nearby…",
   chatSend: "Send",
-  chatWelcome: "Hi! I can help you find assistance nearby.",
-  chatHint: "Ask me about food, shelter, medical aid, and more.",
+  chatPlaceholder: "Ask about food, shelter, medical aid…",
+  chatWelcome: "Hi! I'm the Help Nearby assistant. I can help you find food, shelter, medical aid, clothing and other humanitarian help, or explain how to use the app.",
+  chatHint: "Ask me where to find help, how to contact an organization, or how to use Help Nearby.",
+  chatDisclaimer: "AI can make mistakes. Check hours by phone. In an emergency call your local emergency number.",
+  chatErrorTooLong: "Your message is too long. Please keep it under 1000 characters.",
+  chatErrorRateLimit: "Too many requests. Please wait a few minutes and try again.",
   locating: "Getting your location…",
   locationError: "Unable to get your location. Please enable location access.",
   yourLocation: "You are here",
@@ -302,6 +319,16 @@ const en: Record<TranslationKey, string> = {
   navWhy: "Why It Matters",
   navReviews: "Reviews & Suggestions",
   navReviewsShort: "Reviews",
+  navRecent: "Recently added",
+  recentTitle: "Recently added organizations",
+  recentSubtitle: "Newly verified organizations added to Help Nearby, newest first.",
+  recentLoading: "Loading…",
+  recentLoadMore: "Load more",
+  recentEmpty: "No recently added organizations match these filters.",
+  recentError: "Could not load organizations. Please try again.",
+  recentRetry: "Try again",
+  recentAdded: "Added {date}",
+  recentAddedUnknown: "Recently added",
   footerTagline: "Connecting people to the help they need. Fast, free, accessible.",
   footerQuickLinks: "Quick Links",
   footerContact: "Social media",
@@ -324,6 +351,7 @@ const en: Record<TranslationKey, string> = {
     "Help Nearby — find free humanitarian assistance near you on one map.",
   footerShareCopied: "Link copied!",
   footerGitHub: "GitHub",
+  footerUnSdg: "UN SDG Actions Platform",
   aboutPageTitle: "Connecting People with Help",
   aboutPageHeading: "Connecting People with Help",
   aboutPageSubtitle:
@@ -553,10 +581,13 @@ const ru: Record<TranslationKey, string> = {
   callNow: "Позвонить",
   mapTitle: "Карта рядом",
   chatTitle: "ИИ-помощник",
-  chatPlaceholder: "Спросите о помощи рядом…",
   chatSend: "Отправить",
-  chatWelcome: "Привет! Я помогу найти помощь рядом.",
-  chatHint: "Спросите о еде, приюте, медицине и другом.",
+  chatPlaceholder: "Спросите о еде, приюте, медицинской помощи…",
+  chatWelcome: "Привет! Я помощник Help Nearby. Помогу найти еду, приют, медицинскую помощь, одежду и другую гуманитарную помощь или объясню, как пользоваться приложением.",
+  chatHint: "Спросите, где найти помощь, как связаться с организацией или как пользоваться Help Nearby.",
+  chatDisclaimer: "ИИ может ошибаться. Уточняйте часы работы по телефону. В экстренной ситуации звоните по местному номеру экстренной помощи.",
+  chatErrorTooLong: "Сообщение слишком длинное. Пожалуйста, уложитесь в 1000 символов.",
+  chatErrorRateLimit: "Слишком много запросов. Подождите несколько минут и попробуйте снова.",
   locating: "Определяем ваше местоположение…",
   locationError:
     "Не удалось определить ваше местоположение. Пожалуйста, включите доступ к геолокации.",
@@ -565,6 +596,16 @@ const ru: Record<TranslationKey, string> = {
   navWhy: "Почему это важно",
   navReviews: "Отзывы и предложения",
   navReviewsShort: "Отзывы",
+  navRecent: "Недавно добавлены",
+  recentTitle: "Недавно добавленные организации",
+  recentSubtitle: "Новые проверенные организации в Help Nearby — сначала самые свежие.",
+  recentLoading: "Загрузка…",
+  recentLoadMore: "Показать ещё",
+  recentEmpty: "Нет недавно добавленных организаций по этим фильтрам.",
+  recentError: "Не удалось загрузить организации. Попробуйте ещё раз.",
+  recentRetry: "Повторить",
+  recentAdded: "Добавлено {date}",
+  recentAddedUnknown: "Недавно добавлено",
   navOurStory: "Наша история",
   navHowItWorks: "Как это работает",
   navTheProblem: "Проблема",
@@ -595,6 +636,7 @@ const ru: Record<TranslationKey, string> = {
     "Help Nearby — бесплатная карта гуманитарной помощи рядом с вами.",
   footerShareCopied: "Ссылка скопирована!",
   footerGitHub: "GitHub",
+  footerUnSdg: "Платформа действий ООН по ЦУР",
   aboutPageTitle: "Соединяем людей с помощью",
   aboutPageHeading: "Соединяем людей с помощью",
   aboutPageSubtitle:
@@ -829,10 +871,13 @@ const es: Record<TranslationKey, string> = {
   callNow: "Llamar ahora",
   mapTitle: "Mapa cercano",
   chatTitle: "Asistente IA",
-  chatPlaceholder: "Pregunta sobre ayuda cercana…",
   chatSend: "Enviar",
-  chatWelcome: "¡Hola! Puedo ayudarte a encontrar asistencia cercana.",
-  chatHint: "Pregúntame sobre comida, refugio, ayuda médica y más.",
+  chatPlaceholder: "Pregunta sobre comida, refugio, ayuda médica…",
+  chatWelcome: "¡Hola! Soy el asistente de Help Nearby. Puedo ayudarte a encontrar comida, refugio, ayuda médica, ropa y otra ayuda humanitaria, o explicarte cómo usar la app.",
+  chatHint: "Pregúntame dónde encontrar ayuda, cómo contactar a una organización o cómo usar Help Nearby.",
+  chatDisclaimer: "La IA puede cometer errores. Confirma los horarios por teléfono. En una emergencia llama al número de emergencias local.",
+  chatErrorTooLong: "Tu mensaje es demasiado largo. Usa menos de 1000 caracteres.",
+  chatErrorRateLimit: "Demasiadas solicitudes. Espera unos minutos e inténtalo de nuevo.",
   locating: "Obteniendo tu ubicación…",
   locationError:
     "No se pudo obtener tu ubicación. Habilita el acceso a la ubicación.",
@@ -841,6 +886,16 @@ const es: Record<TranslationKey, string> = {
   navWhy: "Por qué importa",
   navReviews: "Reseñas y sugerencias",
   navReviewsShort: "Reseñas",
+  navRecent: "Añadidas recientemente",
+  recentTitle: "Organizaciones añadidas recientemente",
+  recentSubtitle: "Organizaciones recién verificadas en Help Nearby, las más nuevas primero.",
+  recentLoading: "Cargando…",
+  recentLoadMore: "Cargar más",
+  recentEmpty: "Ninguna organización reciente coincide con estos filtros.",
+  recentError: "No se pudieron cargar las organizaciones. Inténtalo de nuevo.",
+  recentRetry: "Reintentar",
+  recentAdded: "Añadida {date}",
+  recentAddedUnknown: "Añadida recientemente",
   navOurStory: "Nuestra historia",
   navHowItWorks: "Cómo funciona",
   navTheProblem: "El problema",
@@ -872,6 +927,7 @@ const es: Record<TranslationKey, string> = {
     "Help Nearby — encuentra ayuda humanitaria gratuita cerca de ti en un mapa.",
   footerShareCopied: "¡Enlace copiado!",
   footerGitHub: "GitHub",
+  footerUnSdg: "Plataforma de Acciones de los ODS de la ONU",
   aboutPageTitle: "Conectando a las personas con ayuda",
   aboutPageHeading: "Conectando a las personas con ayuda",
   aboutPageSubtitle:
@@ -1110,10 +1166,13 @@ const fr: Record<TranslationKey, string> = {
   callNow: "Appeler",
   mapTitle: "Carte à proximité",
   chatTitle: "Assistant IA",
-  chatPlaceholder: "Demandez de l'aide à proximité…",
   chatSend: "Envoyer",
-  chatWelcome: "Bonjour ! Je peux vous aider à trouver de l'aide.",
-  chatHint: "Demandez-moi nourriture, abri, aide médicale, etc.",
+  chatPlaceholder: "Posez une question sur la nourriture, l'abri, l'aide médicale…",
+  chatWelcome: "Bonjour ! Je suis l'assistant Help Nearby. Je peux vous aider à trouver nourriture, abri, aide médicale, vêtements et autre aide humanitaire, ou vous expliquer comment utiliser l'application.",
+  chatHint: "Demandez-moi où trouver de l'aide, comment contacter une organisation ou comment utiliser Help Nearby.",
+  chatDisclaimer: "L'IA peut se tromper. Vérifiez les horaires par téléphone. En cas d'urgence, appelez le numéro d'urgence local.",
+  chatErrorTooLong: "Votre message est trop long. Veuillez rester sous 1000 caractères.",
+  chatErrorRateLimit: "Trop de requêtes. Veuillez patienter quelques minutes et réessayer.",
   locating: "Récupération de votre position…",
   locationError:
     "Impossible d'obtenir votre position. Veuillez autoriser l'accès à la localisation.",
@@ -1122,6 +1181,16 @@ const fr: Record<TranslationKey, string> = {
   navWhy: "Pourquoi c'est important",
   navReviews: "Avis et suggestions",
   navReviewsShort: "Avis",
+  navRecent: "Ajouts récents",
+  recentTitle: "Organisations récemment ajoutées",
+  recentSubtitle: "Organisations nouvellement vérifiées sur Help Nearby, les plus récentes d'abord.",
+  recentLoading: "Chargement…",
+  recentLoadMore: "Voir plus",
+  recentEmpty: "Aucune organisation récente ne correspond à ces filtres.",
+  recentError: "Impossible de charger les organisations. Veuillez réessayer.",
+  recentRetry: "Réessayer",
+  recentAdded: "Ajoutée {date}",
+  recentAddedUnknown: "Ajoutée récemment",
   navOurStory: "Notre histoire",
   navHowItWorks: "Comment ça marche",
   navTheProblem: "Le problème",
@@ -1154,6 +1223,7 @@ const fr: Record<TranslationKey, string> = {
     "Help Nearby — trouvez une aide humanitaire gratuite près de chez vous sur une carte.",
   footerShareCopied: "Lien copié !",
   footerGitHub: "GitHub",
+  footerUnSdg: "Plateforme d'actions ODD de l'ONU",
   aboutPageTitle: "Relier les personnes à l'aide",
   aboutPageHeading: "Relier les personnes à l'aide",
   aboutPageSubtitle:
@@ -1392,10 +1462,13 @@ const de: Record<TranslationKey, string> = {
   callNow: "Jetzt anrufen",
   mapTitle: "Karte in der Nähe",
   chatTitle: "KI-Assistent",
-  chatPlaceholder: "Fragen Sie nach Hilfe in der Nähe…",
   chatSend: "Senden",
-  chatWelcome: "Hallo! Ich helfe Ihnen, Hilfe in der Nähe zu finden.",
-  chatHint: "Fragen Sie nach Essen, Unterkunft, medizinischer Hilfe usw.",
+  chatPlaceholder: "Fragen Sie nach Essen, Unterkunft, medizinischer Hilfe…",
+  chatWelcome: "Hallo! Ich bin der Help-Nearby-Assistent. Ich helfe Ihnen, Essen, Unterkunft, medizinische Hilfe, Kleidung und andere humanitäre Hilfe zu finden, oder erkläre die App.",
+  chatHint: "Fragen Sie mich, wo es Hilfe gibt, wie Sie eine Organisation kontaktieren oder wie Help Nearby funktioniert.",
+  chatDisclaimer: "KI kann Fehler machen. Öffnungszeiten telefonisch prüfen. Im Notfall wählen Sie den örtlichen Notruf.",
+  chatErrorTooLong: "Ihre Nachricht ist zu lang. Bitte bleiben Sie unter 1000 Zeichen.",
+  chatErrorRateLimit: "Zu viele Anfragen. Bitte warten Sie einige Minuten und versuchen Sie es erneut.",
   locating: "Ihr Standort wird ermittelt…",
   locationError:
     "Ihr Standort konnte nicht ermittelt werden. Bitte erlauben Sie den Standortzugriff.",
@@ -1404,6 +1477,16 @@ const de: Record<TranslationKey, string> = {
   navWhy: "Warum es wichtig ist",
   navReviews: "Bewertungen und Vorschläge",
   navReviewsShort: "Reviews",
+  navRecent: "Neu hinzugefügt",
+  recentTitle: "Kürzlich hinzugefügte Organisationen",
+  recentSubtitle: "Neu verifizierte Organisationen bei Help Nearby, die neuesten zuerst.",
+  recentLoading: "Wird geladen…",
+  recentLoadMore: "Mehr laden",
+  recentEmpty: "Keine kürzlich hinzugefügten Organisationen für diese Filter.",
+  recentError: "Organisationen konnten nicht geladen werden. Bitte erneut versuchen.",
+  recentRetry: "Erneut versuchen",
+  recentAdded: "Hinzugefügt {date}",
+  recentAddedUnknown: "Kürzlich hinzugefügt",
   navOurStory: "Unsere Geschichte",
   navHowItWorks: "So funktioniert es",
   navTheProblem: "Das Problem",
@@ -1436,6 +1519,7 @@ const de: Record<TranslationKey, string> = {
     "Help Nearby — finden Sie kostenlose humanitäre Hilfe in Ihrer Nähe auf einer Karte.",
   footerShareCopied: "Link kopiert!",
   footerGitHub: "GitHub",
+  footerUnSdg: "UN-SDG-Aktionsplattform",
   aboutPageTitle: "Menschen mit Hilfe verbinden",
   aboutPageHeading: "Menschen mit Hilfe verbinden",
   aboutPageSubtitle:
@@ -1676,10 +1760,13 @@ const zh: Record<TranslationKey, string> = {
   callNow: "立即拨打",
   mapTitle: "附近地图",
   chatTitle: "AI 助手",
-  chatPlaceholder: "询问附近的帮助…",
   chatSend: "发送",
-  chatWelcome: "您好！我可以帮您找到附近的援助。",
-  chatHint: "询问食物、庇护所、医疗援助等。",
+  chatPlaceholder: "询问食物、庇护所、医疗援助…",
+  chatWelcome: "您好！我是 Help Nearby 助手。我可以帮您寻找食物、庇护所、医疗援助、衣物等人道主义帮助，也可以说明如何使用本应用。",
+  chatHint: "问我哪里能找到帮助、如何联系机构，或如何使用 Help Nearby。",
+  chatDisclaimer: "AI 可能出错。请通过电话确认营业时间。紧急情况下请拨打当地急救电话。",
+  chatErrorTooLong: "消息过长，请控制在 1000 个字符以内。",
+  chatErrorRateLimit: "请求过多，请等待几分钟后再试。",
   locating: "正在获取您的位置…",
   locationError: "无法获取您的位置。请启用位置访问权限。",
   yourLocation: "您在这里",
@@ -1687,6 +1774,16 @@ const zh: Record<TranslationKey, string> = {
   navWhy: "为何重要",
   navReviews: "评价与建议",
   navReviewsShort: "评价",
+  navRecent: "最新添加",
+  recentTitle: "最近添加的组织",
+  recentSubtitle: "Help Nearby 上新近验证的组织，按最新排序。",
+  recentLoading: "加载中…",
+  recentLoadMore: "加载更多",
+  recentEmpty: "没有符合这些筛选条件的最新组织。",
+  recentError: "无法加载组织，请重试。",
+  recentRetry: "重试",
+  recentAdded: "添加于 {date}",
+  recentAddedUnknown: "最近添加",
   navOurStory: "我们的故事",
   navHowItWorks: "运作方式",
   navTheProblem: "问题所在",
@@ -1715,6 +1812,7 @@ const zh: Record<TranslationKey, string> = {
   footerShareText: "Help Nearby — 在一张地图上找到您附近的人道主义援助。",
   footerShareCopied: "链接已复制！",
   footerGitHub: "GitHub",
+  footerUnSdg: "联合国可持续发展目标行动平台",
   aboutPageTitle: "连接人与帮助",
   aboutPageHeading: "连接人与帮助",
   aboutPageSubtitle:
@@ -1932,10 +2030,13 @@ const ar: Record<TranslationKey, string> = {
   callNow: "اتصل الآن",
   mapTitle: "خريطة قريبة",
   chatTitle: "مساعد الذكاء الاصطناعي",
-  chatPlaceholder: "اسأل عن المساعدة القريبة…",
   chatSend: "إرسال",
-  chatWelcome: "مرحباً! يمكنني مساعدتك في إيجاد المساعدة القريبة.",
-  chatHint: "اسألني عن الطعام والمأوى والمساعدة الطبية والمزيد.",
+  chatPlaceholder: "اسأل عن الطعام أو المأوى أو المساعدة الطبية…",
+  chatWelcome: "مرحباً! أنا مساعد Help Nearby. يمكنني مساعدتك في العثور على الطعام والمأوى والمساعدة الطبية والملابس وغيرها من المساعدات الإنسانية، أو شرح كيفية استخدام التطبيق.",
+  chatHint: "اسألني أين تجد المساعدة، أو كيف تتواصل مع منظمة، أو كيف تستخدم Help Nearby.",
+  chatDisclaimer: "قد يخطئ الذكاء الاصطناعي. تحقق من ساعات العمل عبر الهاتف. في حالات الطوارئ اتصل برقم الطوارئ المحلي.",
+  chatErrorTooLong: "رسالتك طويلة جداً. يرجى ألا تتجاوز 1000 حرف.",
+  chatErrorRateLimit: "طلبات كثيرة جداً. يرجى الانتظار بضع دقائق ثم المحاولة مرة أخرى.",
   locating: "جارٍ تحديد موقعك…",
   locationError: "تعذر الحصول على موقعك. يرجى تفعيل الوصول إلى الموقع.",
   yourLocation: "موقعك هنا",
@@ -1943,6 +2044,16 @@ const ar: Record<TranslationKey, string> = {
   navWhy: "لماذا هذا مهم",
   navReviews: "التقييمات والاقتراحات",
   navReviewsShort: "التقييمات",
+  navRecent: "أُضيفت حديثًا",
+  recentTitle: "المنظمات المضافة حديثًا",
+  recentSubtitle: "منظمات تم التحقق منها حديثًا على Help Nearby، الأحدث أولًا.",
+  recentLoading: "جارٍ التحميل…",
+  recentLoadMore: "تحميل المزيد",
+  recentEmpty: "لا توجد منظمات مضافة حديثًا تطابق هذه المرشحات.",
+  recentError: "تعذّر تحميل المنظمات. يرجى المحاولة مرة أخرى.",
+  recentRetry: "إعادة المحاولة",
+  recentAdded: "أُضيفت {date}",
+  recentAddedUnknown: "أُضيفت حديثًا",
   navOurStory: "قصتنا",
   navHowItWorks: "كيف يعمل",
   navTheProblem: "المشكلة",
@@ -1972,6 +2083,7 @@ const ar: Record<TranslationKey, string> = {
     "Help Nearby — اعثر على مساعدة إنسانية مجانية بالقرب منك على خريطة واحدة.",
   footerShareCopied: "تم نسخ الرابط!",
   footerGitHub: "GitHub",
+  footerUnSdg: "منصة إجراءات أهداف التنمية المستدامة للأمم المتحدة",
   aboutPageTitle: "ربط الناس بالمساعدة",
   aboutPageHeading: "ربط الناس بالمساعدة",
   aboutPageSubtitle:

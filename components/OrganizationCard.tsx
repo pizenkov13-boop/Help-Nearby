@@ -33,6 +33,8 @@ interface OrganizationCardProps {
   onGetDirections?: (org: Organization) => void;
   onImpactRecorded?: () => void;
   selected?: boolean;
+  /** Show city, description and an "Added …" line (used on /recent). */
+  addedLabel?: string;
 }
 
 export function OrganizationCard({
@@ -41,6 +43,7 @@ export function OrganizationCard({
   onGetDirections,
   onImpactRecorded,
   selected,
+  addedLabel,
 }: OrganizationCardProps) {
   const { t } = useLanguage();
   const cfg = CATEGORY_CONFIG[org.category];
@@ -145,9 +148,11 @@ export function OrganizationCard({
           <h3 className="text-base font-semibold leading-snug text-slate-900 break-words break-anywhere md:truncate md:text-lg group-hover:text-blue-600 dark:text-white dark:group-hover:text-blue-300">
             {org.name}
           </h3>
-          {org.country && (
+          {(org.country || (addedLabel && org.city)) && (
             <p className="mt-0.5 text-sm text-slate-500 break-words break-anywhere dark:text-gray-500">
-              {org.country}
+              {addedLabel
+                ? [org.city, org.country].filter(Boolean).join(", ")
+                : org.country}
             </p>
           )}
         </div>
@@ -162,6 +167,19 @@ export function OrganizationCard({
         <p className="order-2 flex min-w-0 items-start gap-2 text-sm text-slate-600 md:order-3 dark:text-gray-400">
           <MapPin className="mt-0.5 h-4 w-4 shrink-0 text-slate-400 dark:text-gray-500" aria-hidden />
           <span className="min-w-0 break-words break-anywhere">{org.address}</span>
+        </p>
+      )}
+
+      {addedLabel && org.description && (
+        <p className="order-2 line-clamp-3 text-sm text-slate-600 md:order-3 dark:text-gray-400">
+          {org.description}
+        </p>
+      )}
+
+      {addedLabel && (
+        <p className="order-3 flex items-center gap-1.5 text-xs text-slate-500 md:order-4 dark:text-gray-500">
+          <Clock className="h-3.5 w-3.5 shrink-0" aria-hidden />
+          {addedLabel}
         </p>
       )}
 
