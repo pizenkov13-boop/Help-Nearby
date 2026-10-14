@@ -15,7 +15,7 @@ const SDG_GOALS = [
 
 const INSTAGRAM_URL =
   "https://www.instagram.com/help.nearby1?igsh=MWx4ZzYxMnA2MXR5Mg%3D%3D&utm_source=qr";
-const CONTACT_EMAIL = "contact@help-nearby.org";
+const UN_SDG_URL = "https://sdgs.un.org/partnerships/helpnearby";
 const SITE_URL = "https://help-nearby.org";
 const GITHUB_URL = "https://github.com/pizenkov13-boop/Help-Nearby";
 
@@ -45,15 +45,6 @@ function HeartIcon() {
   );
 }
 
-function EmailIcon() {
-  return (
-    <svg className="tg-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
-      <rect x="2" y="4" width="20" height="16" rx="2" />
-      <path d="m2 7 10 7 10-7" />
-    </svg>
-  );
-}
-
 function ShareIcon() {
   return (
     <svg className="tg-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
@@ -61,6 +52,15 @@ function ShareIcon() {
       <circle cx="6" cy="12" r="3" />
       <circle cx="18" cy="19" r="3" />
       <path d="m8.59 13.51 6.83 3.98M15.41 6.51l-6.82 3.98" />
+    </svg>
+  );
+}
+
+function GlobeIcon() {
+  return (
+    <svg className="tg-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+      <circle cx="12" cy="12" r="9" />
+      <path d="M3 12h18M12 3c2.5 2.7 3.8 5.7 3.8 9s-1.3 6.3-3.8 9c-2.5-2.7-3.8-5.7-3.8-9S9.5 5.7 12 3z" />
     </svg>
   );
 }
@@ -153,6 +153,15 @@ export function SiteFooter() {
               </Link>
             </li>
             <li>
+              <Link href="/recent">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+                  <circle cx="12" cy="12" r="9" />
+                  <path d="M12 7v5l3 2" />
+                </svg>
+                {t("navRecent")}
+              </Link>
+            </li>
+            <li>
               <Link href="/submit">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
                   <path d="M12 5v14M5 12h14" />
@@ -166,10 +175,6 @@ export function SiteFooter() {
         <div>
           <h4>{t("footerContact")}</h4>
           <div className="contact-list">
-            <a className="contact-btn" href={`mailto:${CONTACT_EMAIL}`}>
-              <EmailIcon />
-              {CONTACT_EMAIL}
-            </a>
             <a className="contact-btn" href={INSTAGRAM_URL} target="_blank" rel="noopener noreferrer">
               <InstagramIcon />
               {t("footerInstagram")}
@@ -181,6 +186,10 @@ export function SiteFooter() {
             <a className="contact-btn" href={GITHUB_URL} target="_blank" rel="noopener noreferrer">
               <GitHubIcon />
               {t("footerGitHub")}
+            </a>
+            <a className="contact-btn" href={UN_SDG_URL} target="_blank" rel="noopener noreferrer">
+              <GlobeIcon />
+              {t("footerUnSdg")}
             </a>
             <p className="partner-label">{t("footerOurPartner")}</p>
             <a className="contact-btn" href="https://t.me/kindnesscorp" target="_blank" rel="noopener noreferrer">
