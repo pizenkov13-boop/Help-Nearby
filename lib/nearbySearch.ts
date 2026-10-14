@@ -21,7 +21,7 @@ export type { SmartRadiusSearchResult };
 
 /** Client-side budgets (slightly above the server's so the server's answer wins). */
 export const SUPABASE_FETCH_TIMEOUT_MS = 5_000;
-export const OVERPASS_FETCH_TIMEOUT_MS = 9_000;
+export const OVERPASS_FETCH_TIMEOUT_MS = 10_000;
 export const OCHA_FETCH_TIMEOUT_MS = 7_000;
 
 const MAX_BACKGROUND_GEOCODE_OCHA = 12;
@@ -258,6 +258,8 @@ export async function searchNearbyWithSmartRadius(
   let overpass: Organization[] = [];
   let ocha: Organization[] = [];
   let externalTimedOut = false;
+  // OSM is fetched per radius tier: the small first tier answers fast, wider ones only when needed.
+  const overpassByRadius = new Map<number, Promise<SourceResult>>();
 
   const emitStatus = () => callbacks?.onSourceStatus?.({ ...states });
   const mergedAt = (radius: number) =>
@@ -305,12 +307,27 @@ export async function searchNearbyWithSmartRadius(
     },
   );
 
-  const overpassPromise = fetchOverpassNearby(location, maxRadius).then((result) => {
-    overpass = result.organizations;
-    settle("osm", result);
-    emitOrganizations();
-    return result;
-  });
+  const overpassAt = (radiusMeters: number): Promise<SourceResult> => {
+    const existing = overpassByRadius.get(radiusMeters);
+    if (existing) return existing;
+
+    if (overpassByRadius.size > 0) {
+      states.osm = "pending";
+      emitStatus();
+    }
+    const promise = fetchOverpassNearby(location, radiusMeters).then((result) => {
+      // A wider radius always contains the narrower one; never replace results with a failure.
+      if (result.status === "done" || overpass.length === 0) {
+        overpass = result.organizations;
+      }
+      settle("osm", result);
+      emitOrganizations();
+      return result;
+    });
+    overpassByRadius.set(radiusMeters, promise);
+    return promise;
+  };
+  void overpassAt(activeRadius);
 
   const ochaPromise = fetchOchaDirectory(options.country, options.countryCode).then(
     (result) => {
@@ -331,7 +348,7 @@ export async function searchNearbyWithSmartRadius(
 
   const fetchAtRadius = async (radiusMeters: number) => {
     activeRadius = radiusMeters;
-    await Promise.all([catalogPromise, overpassPromise, ochaPromise]);
+    await Promise.all([catalogPromise, overpassAt(radiusMeters), ochaPromise]);
 
     // Radius expansion is driven by mappable results; list-only OCHA entries are added at the end.
     const mappable = mergedAt(radiusMeters).filter(hasValidMapCoordinates);

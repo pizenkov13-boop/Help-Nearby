@@ -33,6 +33,6 @@ export default defineConfig({
         reuseExistingServer: !process.env.CI,
         timeout: 600_000,
         // Never let e2e reach the real AI provider, even if .env.local holds a key.
-        env: { AITUNNEL_API_KEY: "" },
+        env: { AITUNNEL_API_KEY: "", DEBUG_TOKEN: "" },
       },
 });

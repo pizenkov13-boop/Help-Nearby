@@ -228,6 +228,7 @@ export type TranslationKey =
   | "verifiedOnlyNotice"
   | "searchRadiusWithin"
   | "searchExpand"
+  | "unverifiedOsmBadge"
   | "sourceCatalogPending"
   | "sourceOsmPending"
   | "sourceOchaPending"
@@ -510,6 +511,7 @@ const en: Record<TranslationKey, string> = {
   verifiedOnlyNotice: "Showing verified organizations only",
   searchRadiusWithin: "Showing results within {km} km",
   searchExpand: "Expand search",
+  unverifiedOsmBadge: "Unverified · OpenStreetMap",
   sourceCatalogPending: "Help Nearby directory…",
   sourceOsmPending: "OpenStreetMap…",
   sourceOchaPending: "UN OCHA directory…",
@@ -802,6 +804,7 @@ const ru: Record<TranslationKey, string> = {
   verifiedOnlyNotice: "Показываются только проверенные организации",
   searchRadiusWithin: "Показаны результаты в радиусе {km} км",
   searchExpand: "Расширить поиск",
+  unverifiedOsmBadge: "Не проверено · OpenStreetMap",
   sourceCatalogPending: "Каталог Help Nearby…",
   sourceOsmPending: "OpenStreetMap…",
   sourceOchaPending: "Справочник ООН OCHA…",
@@ -1101,6 +1104,7 @@ const es: Record<TranslationKey, string> = {
   verifiedOnlyNotice: "Mostrando solo organizaciones verificadas",
   searchRadiusWithin: "Mostrando resultados dentro de {km} km",
   searchExpand: "Ampliar búsqueda",
+  unverifiedOsmBadge: "Sin verificar · OpenStreetMap",
   sourceCatalogPending: "Directorio Help Nearby…",
   sourceOsmPending: "OpenStreetMap…",
   sourceOchaPending: "Directorio ONU OCHA…",
@@ -1401,6 +1405,7 @@ const fr: Record<TranslationKey, string> = {
   verifiedOnlyNotice: "Affichage des organisations vérifiées uniquement",
   searchRadiusWithin: "Résultats affichés dans un rayon de {km} km",
   searchExpand: "Élargir la recherche",
+  unverifiedOsmBadge: "Non vérifié · OpenStreetMap",
   sourceCatalogPending: "Annuaire Help Nearby…",
   sourceOsmPending: "OpenStreetMap…",
   sourceOchaPending: "Annuaire ONU OCHA…",
@@ -1703,6 +1708,7 @@ const de: Record<TranslationKey, string> = {
   verifiedOnlyNotice: "Es werden nur verifizierte Organisationen angezeigt",
   searchRadiusWithin: "Ergebnisse innerhalb von {km} km",
   searchExpand: "Suche erweitern",
+  unverifiedOsmBadge: "Nicht verifiziert · OpenStreetMap",
   sourceCatalogPending: "Help-Nearby-Verzeichnis…",
   sourceOsmPending: "OpenStreetMap…",
   sourceOchaPending: "UN-OCHA-Verzeichnis…",
@@ -1981,6 +1987,7 @@ const zh: Record<TranslationKey, string> = {
   verifiedOnlyNotice: "仅显示已验证组织",
   searchRadiusWithin: "显示 {km} 公里范围内结果",
   searchExpand: "扩大搜索范围",
+  unverifiedOsmBadge: "未验证 · OpenStreetMap",
   sourceCatalogPending: "Help Nearby 名录…",
   sourceOsmPending: "OpenStreetMap…",
   sourceOchaPending: "联合国 OCHA 名录…",
@@ -2270,6 +2277,7 @@ const ar: Record<TranslationKey, string> = {
   verifiedOnlyNotice: "عرض المنظمات الموثقة فقط",
   searchRadiusWithin: "عرض النتائج ضمن {km} كم",
   searchExpand: "توسيع البحث",
+  unverifiedOsmBadge: "غير موثّق · OpenStreetMap",
   sourceCatalogPending: "دليل Help Nearby…",
   sourceOsmPending: "OpenStreetMap…",
   sourceOchaPending: "دليل الأمم المتحدة OCHA…",

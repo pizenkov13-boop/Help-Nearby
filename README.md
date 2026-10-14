@@ -169,6 +169,9 @@ AITUNNEL_MODEL=gpt-6-luna
 # NEXT_PUBLIC_MAP_TILES_URL=https://api.maptiler.com/maps/streets-v2/{z}/{x}/{y}.png?key=your-key
 # NEXT_PUBLIC_MAP_TILES_ATTRIBUTION=&copy; MapTiler &copy; OpenStreetMap contributors
 
+# Diagnostics (optional) — enables GET /api/debug/sources?token=...; the route returns 404 when unset
+# DEBUG_TOKEN=a-long-random-string
+
 # ReliefWeb humanitarian sources (optional — set after appname approval)
 RELIEFWEB_APPNAME=help-nearby-sources-a4p8n1QSR
 

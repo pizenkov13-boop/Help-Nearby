@@ -103,13 +103,25 @@ test.describe("Progressive nearby search", () => {
     // OSM merges in; the Supabase card is still there (list was not reset).
     await expect(card(page, "E2E Overpass Kitchen")).toBeVisible({ timeout: 6_000 });
     await expect(card(page, "E2E Supabase Pantry")).toBeVisible();
+    // Unverified OSM results are shown (not hidden) with a provenance badge, below verified ones.
+    await expect(
+      card(page, "E2E Overpass Kitchen").getByTestId("unverified-osm-badge"),
+    ).toHaveText("Unverified · OpenStreetMap");
+    await expect(
+      card(page, "E2E Supabase Pantry").getByTestId("unverified-osm-badge"),
+    ).toHaveCount(0);
+    const order = await page.locator("article h3").allTextContents();
+    expect(order.indexOf("E2E Supabase Pantry")).toBeLessThan(
+      order.indexOf("E2E Overpass Kitchen"),
+    );
     await expect(page.getByTestId("source-osm")).toHaveCount(0);
     await expect(page.getByTestId("loading-nearby")).toBeVisible(); // OCHA still pending
 
     // OCHA arrives as a list-only country-level entry; then the badge goes away.
     await expect(card(page, "E2E OCHA Relief Org")).toBeVisible({ timeout: 6_000 });
     await expect(card(page, "E2E Supabase Pantry")).toBeVisible();
-    await expect(page.getByTestId("loading-nearby")).toHaveCount(0);
+    // Few results make the search widen its radius, which re-queries OSM for a moment.
+    await expect(page.getByTestId("loading-nearby")).toHaveCount(0, { timeout: 20_000 });
   });
 
   test("a source that never answers does not block the others and the spinner stops", async ({ page }) => {
