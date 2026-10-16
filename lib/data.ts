@@ -182,10 +182,42 @@ export async function fetchOrganizations(
   return orgs;
 }
 
+/**
+ * Test-only fixture (inert unless E2E_FIXTURE_ORGS=1, which only Playwright's web server sets):
+ * a Croix-Rouge-style entry with no hours, phone or e-mail, for the organization-page e2e test.
+ */
+export const E2E_FIXTURE_SLUG = "e2e-croix-rouge-moulins";
+
+function e2eFixtureOrganization(slug: string): Organization | null {
+  if (process.env.E2E_FIXTURE_ORGS !== "1" || slug !== E2E_FIXTURE_SLUG) return null;
+  return mapDbOrganization({
+    id: 990001,
+    name: "Croix-Rouge française – Unité locale de Moulins",
+    slug: E2E_FIXTURE_SLUG,
+    category: ["food"],
+    description: "Aide alimentaire.",
+    address: "12 Rue de la Paix, 03000 Moulins",
+    city: "Moulins",
+    country: "France",
+    lat: 46.5667,
+    lng: 3.3333,
+    phone: null,
+    email: null,
+    website: "https://www.croix-rouge.fr/annuaire/moulins",
+    hours: null,
+    rating: null,
+    verified: true,
+    created_at: null,
+  });
+}
+
 export async function fetchOrganizationBySlug(
   slug: string,
   userLocation?: UserLocation | null,
 ): Promise<Organization | null> {
+  const fixture = e2eFixtureOrganization(slug);
+  if (fixture) return fixture;
+
   const supabase = getSupabase();
   if (!supabase) return null;
 

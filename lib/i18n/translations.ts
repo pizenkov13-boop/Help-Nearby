@@ -239,6 +239,7 @@ export type TranslationKey =
   | "verifiedOnlyNotice"
   | "searchRadiusWithin"
   | "searchExpand"
+  | "hoursNotListed"
   | "mapTwoFingerHint"
   | "closeLabel"
   | "placeSearchRow"
@@ -531,6 +532,7 @@ const en: Record<TranslationKey, string> = {
   verifiedOnlyNotice: "Showing verified organizations only",
   searchRadiusWithin: "Showing results within {km} km",
   searchExpand: "Expand search",
+  hoursNotListed: "Opening hours not listed. Check the source website or call before you go.",
   mapTwoFingerHint: "Use two fingers to move the map",
   closeLabel: "Close",
   placeSearchRow: "Search places for “{text}”",
@@ -833,6 +835,7 @@ const ru: Record<TranslationKey, string> = {
   verifiedOnlyNotice: "Показываются только проверенные организации",
   searchRadiusWithin: "Показаны результаты в радиусе {km} км",
   searchExpand: "Расширить поиск",
+  hoursNotListed: "Часы работы не указаны. Проверьте сайт источника или позвоните перед визитом.",
   mapTwoFingerHint: "Двигайте карту двумя пальцами",
   closeLabel: "Закрыть",
   placeSearchRow: "Искать места: «{text}»",
@@ -1142,6 +1145,7 @@ const es: Record<TranslationKey, string> = {
   verifiedOnlyNotice: "Mostrando solo organizaciones verificadas",
   searchRadiusWithin: "Mostrando resultados dentro de {km} km",
   searchExpand: "Ampliar búsqueda",
+  hoursNotListed: "Horario no disponible. Consulta el sitio web de la fuente o llama antes de ir.",
   mapTwoFingerHint: "Usa dos dedos para mover el mapa",
   closeLabel: "Cerrar",
   placeSearchRow: "Buscar lugares para “{text}”",
@@ -1452,6 +1456,7 @@ const fr: Record<TranslationKey, string> = {
   verifiedOnlyNotice: "Affichage des organisations vérifiées uniquement",
   searchRadiusWithin: "Résultats affichés dans un rayon de {km} km",
   searchExpand: "Élargir la recherche",
+  hoursNotListed: "Horaires non renseignés. Consultez le site source ou appelez avant de vous déplacer.",
   mapTwoFingerHint: "Utilisez deux doigts pour déplacer la carte",
   closeLabel: "Fermer",
   placeSearchRow: "Rechercher des lieux pour « {text} »",
@@ -1764,6 +1769,7 @@ const de: Record<TranslationKey, string> = {
   verifiedOnlyNotice: "Es werden nur verifizierte Organisationen angezeigt",
   searchRadiusWithin: "Ergebnisse innerhalb von {km} km",
   searchExpand: "Suche erweitern",
+  hoursNotListed: "Öffnungszeiten nicht angegeben. Prüfen Sie die Website der Quelle oder rufen Sie vorher an.",
   mapTwoFingerHint: "Mit zwei Fingern die Karte bewegen",
   closeLabel: "Schließen",
   placeSearchRow: "Orte suchen für „{text}“",
@@ -2052,6 +2058,7 @@ const zh: Record<TranslationKey, string> = {
   verifiedOnlyNotice: "仅显示已验证组织",
   searchRadiusWithin: "显示 {km} 公里范围内结果",
   searchExpand: "扩大搜索范围",
+  hoursNotListed: "未提供营业时间。出发前请查看来源网站或先致电确认。",
   mapTwoFingerHint: "请用双指移动地图",
   closeLabel: "关闭",
   placeSearchRow: "搜索地点“{text}”",
@@ -2351,6 +2358,7 @@ const ar: Record<TranslationKey, string> = {
   verifiedOnlyNotice: "عرض المنظمات الموثقة فقط",
   searchRadiusWithin: "عرض النتائج ضمن {km} كم",
   searchExpand: "توسيع البحث",
+  hoursNotListed: "ساعات العمل غير مذكورة. تحقق من موقع المصدر أو اتصل قبل الذهاب.",
   mapTwoFingerHint: "استخدم إصبعين لتحريك الخريطة",
   closeLabel: "إغلاق",
   placeSearchRow: "البحث عن أماكن لـ «{text}»",

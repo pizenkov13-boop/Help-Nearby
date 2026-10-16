@@ -6,25 +6,21 @@ import {
   ArrowLeft,
   BadgeCheck,
   Clock,
-  Globe,
-  Mail,
-  MapPin,
   Navigation,
   Phone,
   Share2,
   Star,
 } from "lucide-react";
 import { SiteLayout } from "@/components/layout/SiteLayout";
+import { OrganizationContactSection } from "@/components/pages/OrganizationContactSection";
 import {
   trackDirectionsClicked,
   trackPhoneClicked,
-  trackWebsiteClicked,
 } from "@/lib/analytics.client";
 import { CategoryIcon } from "@/components/icons/CategoryIcon";
 import { CATEGORY_CONFIG } from "@/lib/categories";
 import { useLanguage } from "@/lib/i18n/LanguageProvider";
 import {
-  formatWeeklyHours,
   getDirectionsUrl,
   getPhoneTelUrl,
   getOrganizationOpenStatus,
@@ -85,7 +81,6 @@ export function OrganizationDetailPage({ org }: OrganizationDetailPageProps) {
 
   const directionsUrl = getDirectionsUrl(org);
   const telUrl = getPhoneTelUrl(org.phone);
-  const hoursLines = formatWeeklyHours(org.hours);
 
   return (
     <SiteLayout>
@@ -182,14 +177,16 @@ export function OrganizationDetailPage({ org }: OrganizationDetailPageProps) {
 
       <div className="mx-auto max-w-3xl px-4 py-8 sm:px-6">
         <div className="flex flex-col gap-3 sm:flex-row">
-          <a
-            href={telUrl}
-            onClick={() => trackPhoneClicked(org)}
-            className="inline-flex flex-1 items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-emerald-500 to-emerald-600 px-6 py-4 text-lg font-semibold text-white shadow-lg shadow-emerald-500/25 transition-all hover:from-emerald-400 hover:to-emerald-500"
-          >
-            <Phone className="h-5 w-5" />
-            {t("callNow")}
-          </a>
+          {org.phone?.trim() && (
+            <a
+              href={telUrl}
+              onClick={() => trackPhoneClicked(org)}
+              className="inline-flex flex-1 items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-emerald-500 to-emerald-600 px-6 py-4 text-lg font-semibold text-white shadow-lg shadow-emerald-500/25 transition-all hover:from-emerald-400 hover:to-emerald-500"
+            >
+              <Phone className="h-5 w-5" />
+              {t("callNow")}
+            </a>
+          )}
           <a
             href={directionsUrl}
             target="_blank"
@@ -221,58 +218,7 @@ export function OrganizationDetailPage({ org }: OrganizationDetailPageProps) {
           </section>
         )}
 
-        <section className="mt-8 rounded-xl border border-gray-200 bg-white p-6 dark:border-gray-800 dark:bg-gray-800/40">
-          <h2 className="mb-4 text-lg font-semibold text-gray-900 dark:text-white">
-            {t("contactDetails")}
-          </h2>
-          <ul className="space-y-4 text-sm">
-            <li className="flex gap-3">
-              <MapPin className="mt-0.5 h-5 w-5 shrink-0 text-gray-500" />
-              <span className="text-gray-600 dark:text-gray-300">{org.address}</span>
-            </li>
-            <li className="flex gap-3">
-              <Phone className="h-5 w-5 shrink-0 text-gray-500" />
-              <a
-                href={telUrl}
-                onClick={() => trackPhoneClicked(org)}
-                className="text-gray-600 hover:text-emerald-400 dark:text-gray-300"
-              >
-                {org.phone}
-              </a>
-            </li>
-            <li className="flex gap-3">
-              <Mail className="h-5 w-5 shrink-0 text-gray-500" />
-              <a
-                href={`mailto:${org.email}`}
-                className="break-all text-gray-600 hover:text-blue-400 dark:text-gray-300"
-              >
-                {org.email}
-              </a>
-            </li>
-            {org.website && (
-              <li className="flex gap-3">
-                <Globe className="h-5 w-5 shrink-0 text-gray-500" />
-                <a
-                  href={org.website}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  onClick={() => trackWebsiteClicked(org)}
-                  className="break-all text-blue-500 hover:text-blue-400 dark:text-blue-400"
-                >
-                  {org.website.replace(/^https?:\/\//, "")}
-                </a>
-              </li>
-            )}
-            <li className="flex gap-3">
-              <Clock className="mt-0.5 h-5 w-5 shrink-0 text-gray-500" />
-              <ul className="space-y-1 text-gray-600 dark:text-gray-300">
-                {hoursLines.map((line) => (
-                  <li key={line}>{line}</li>
-                ))}
-              </ul>
-            </li>
-          </ul>
-        </section>
+        <OrganizationContactSection org={org} />
       </div>
     </SiteLayout>
   );
