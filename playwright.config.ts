@@ -21,7 +21,15 @@ export default defineConfig({
   projects: [
     {
       name: "chromium",
+      testIgnore: /\.webkit\.spec\.ts$/,
       use: { ...devices["Desktop Chrome"] },
+    },
+    // iOS Safari engine: the phone menu bug only reproduced on WebKit.
+    {
+      name: "webkit-iphone-14",
+      testMatch: /\.webkit\.spec\.ts$/,
+      // Video capture makes WebKit workers hang on teardown on Windows.
+      use: { ...devices["iPhone 14"], video: "off" },
     },
   ],
   webServer: process.env.PLAYWRIGHT_BASE_URL
