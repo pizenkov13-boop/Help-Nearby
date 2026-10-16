@@ -23,12 +23,30 @@ const newsreader = Newsreader({
   adjustFontFallback: false,
 });
 
+const SITE_URL = "https://help-nearby.org";
+const SITE_TITLE = "Help Nearby — Find Help Near You";
+const SITE_DESCRIPTION =
+  "Discover food banks, shelters, medical aid, clothing donations, and volunteer opportunities near you.";
+
 export const metadata: Metadata = {
-  title: "Help Nearby — Find Help Near You",
-  description:
-    "Discover food banks, shelters, medical aid, clothing donations, and volunteer opportunities near you.",
+  metadataBase: new URL(SITE_URL),
+  title: SITE_TITLE,
+  description: SITE_DESCRIPTION,
   applicationName: "Help Nearby",
-  manifest: "/manifest.json",
+  manifest: "/manifest.webmanifest",
+  openGraph: {
+    type: "website",
+    siteName: "Help Nearby",
+    title: SITE_TITLE,
+    description: SITE_DESCRIPTION,
+    images: [{ url: "/og-image.png", width: 1200, height: 630, alt: "Help Nearby" }],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: SITE_TITLE,
+    description: SITE_DESCRIPTION,
+    images: ["/og-image.png"],
+  },
   appleWebApp: {
     capable: true,
     title: "Help Nearby",
@@ -37,6 +55,10 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  // Lets env(safe-area-inset-*) work on notched iPhones.
+  viewportFit: "cover",
   themeColor: [
     { media: "(prefers-color-scheme: light)", color: "#ffffff" },
     { media: "(prefers-color-scheme: dark)", color: "#0a0f1f" },

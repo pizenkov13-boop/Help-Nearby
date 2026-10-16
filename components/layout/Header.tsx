@@ -2,52 +2,17 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { ChevronDown, Menu, Siren, X } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { BrandLogo } from "@/components/BrandLogo";
+import { LanguageMenu } from "@/components/layout/LanguageMenu";
 import { AnchorNavLink } from "@/components/navigation/AnchorNavLink";
 import { useLanguage } from "@/lib/i18n/LanguageProvider";
-import { LANGUAGES } from "@/lib/i18n/translations";
 import { openEmergencyHelp } from "@/lib/emergencyEvents";
 import { trackLanguageChanged } from "@/lib/analytics.client";
 import type { LanguageCode } from "@/lib/types";
 import { cn } from "@/lib/utils";
-
-function ChevronIcon() {
-  return (
-    <svg
-      className="chev"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2.5"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      aria-hidden
-    >
-      <polyline points="6 9 12 15 18 9" />
-    </svg>
-  );
-}
-
-function GlobeIcon() {
-  return (
-    <svg
-      className="globe"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      aria-hidden
-    >
-      <circle cx="12" cy="12" r="10" />
-      <path d="M2 12h20" />
-      <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
-    </svg>
-  );
-}
 
 interface NavSectionMenuProps {
   href: string;
@@ -90,7 +55,7 @@ function NavSectionMenu({
             onToggle();
           }}
         >
-          <ChevronIcon />
+          <ChevronDown className="chev" aria-hidden />
         </button>
       )}
       {items.length > 0 && (
@@ -144,9 +109,6 @@ export function Header() {
   const isWhyActive =
     pathname === "/why-it-matters" || pathname.startsWith("/why-it-matters/");
 
-  const currentLangLabel =
-    LANGUAGES.find((l) => l.code === language)?.label ?? "EN";
-
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 12);
     onScroll();
@@ -157,12 +119,11 @@ export function Header() {
   useEffect(() => {
     const onDocClick = (e: MouseEvent) => {
       const target = e.target as Element | null;
-      if (target?.closest("[data-dd]") || target?.closest(".lang-wrap")) {
+      if (target?.closest("[data-dd]")) {
         return;
       }
       setAboutOpen(false);
       setWhyOpen(false);
-      setLangOpen(false);
     };
     document.addEventListener("click", onDocClick);
     return () => document.removeEventListener("click", onDocClick);
@@ -245,65 +206,53 @@ export function Header() {
           </nav>
 
           <div className="header-toolbar">
-            <div className={cn("lang-wrap", langOpen && "open")}>
-              <button
-                type="button"
-                className="lang-btn"
-                aria-label={t("languageMenu")}
-                aria-haspopup="true"
-                aria-expanded={langOpen}
-                onClick={() => {
+            <button
+              type="button"
+              className="emergency-icon-btn"
+              aria-label={t("emergencyHelp")}
+              onClick={() => {
+                closeAll();
+                openEmergencyHelp();
+              }}
+            >
+              <Siren aria-hidden />
+            </button>
+
+            <LanguageMenu
+              language={language}
+              label={t("languageMenu")}
+              closeLabel={t("closeLabel")}
+              open={langOpen}
+              onOpenChange={(open) => {
+                if (open) {
                   setAboutOpen(false);
                   setWhyOpen(false);
-                  setLangOpen((o) => !o);
-                }}
-              >
-                <GlobeIcon />
-                <span className="current">{currentLangLabel}</span>
-                <ChevronIcon />
-              </button>
-              <div className="lang-menu" role="menu" aria-label={t("languageMenu")}>
-                {LANGUAGES.map(({ code, label }) => (
-                  <button
-                    key={code}
-                    type="button"
-                    role="menuitem"
-                    className={cn("lang-item", language === code && "on")}
-                    onClick={() => {
-                      if (code !== language) {
-                        trackLanguageChanged(language, code);
-                      }
-                      setLanguage(code as LanguageCode);
-                      setLangOpen(false);
-                    }}
-                  >
-                    {label}
-                  </button>
-                ))}
-              </div>
-            </div>
+                  setMenuOpen(false);
+                }
+                setLangOpen(open);
+              }}
+              onSelect={(code) => {
+                if (code !== language) {
+                  trackLanguageChanged(language, code);
+                }
+                setLanguage(code as LanguageCode);
+              }}
+            />
 
-            <ThemeToggle />
+            <ThemeToggle className="theme-btn-desktop" />
 
             <button
               type="button"
               className="mobile-toggle"
               aria-label={t("openMenu")}
-              onClick={() => setMenuOpen((o) => !o)}
+              aria-expanded={menuOpen}
+              aria-controls="mmenu"
+              onClick={() => {
+                setLangOpen(false);
+                setMenuOpen((o) => !o);
+              }}
             >
-              <svg
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                aria-hidden
-              >
-                <line x1="3" y1="6" x2="21" y2="6" />
-                <line x1="3" y1="12" x2="21" y2="12" />
-                <line x1="3" y1="18" x2="21" y2="18" />
-              </svg>
+              {menuOpen ? <X aria-hidden /> : <Menu aria-hidden />}
             </button>
           </div>
         </div>
@@ -356,6 +305,9 @@ export function Header() {
         <Link href="/recent" className="nav-link" onClick={closeAll}>
           {t("navRecent")}
         </Link>
+        <div className="m-theme-row">
+          <ThemeToggle />
+        </div>
       </nav>
     </header>
   );

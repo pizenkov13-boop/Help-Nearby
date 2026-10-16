@@ -4,7 +4,7 @@ const OFFLINE_URL = "/offline.html";
 /** Static assets only — do not precache HTML routes (Next.js RSC pages are not cache-safe). */
 const PRECACHE_URLS = [
   OFFLINE_URL,
-  "/manifest.json",
+  "/manifest.webmanifest",
   "/favicon.ico",
   "/icons/icon-192.png",
 ];

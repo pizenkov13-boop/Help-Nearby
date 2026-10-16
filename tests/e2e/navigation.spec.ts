@@ -35,7 +35,7 @@ test.describe("Navigation", () => {
     await page.goto("/");
 
     await page.getByRole("button", { name: /language/i }).click();
-    await page.getByRole("menuitem", { name: "RU" }).click();
+    await page.getByRole("menuitem", { name: "Русский" }).click();
 
     await expect(headerNav(page).getByRole("link", { name: "Главная" })).toBeVisible();
     await expect(

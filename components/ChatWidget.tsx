@@ -26,6 +26,31 @@ export function ChatWidget() {
     },
   ]);
   const scrollRef = useRef<HTMLDivElement>(null);
+  // Phones: the panel is full-screen and follows the visual viewport (keyboard-aware).
+  const [viewport, setViewport] = useState<{ height: number; top: number } | null>(null);
+
+  useEffect(() => {
+    if (!open) return;
+    const vv = window.visualViewport;
+    const phone = window.matchMedia("(max-width: 639px)");
+    const update = () => {
+      setViewport(vv && phone.matches ? { height: vv.height, top: vv.offsetTop } : null);
+    };
+    update();
+    vv?.addEventListener("resize", update);
+    vv?.addEventListener("scroll", update);
+    phone.addEventListener("change", update);
+
+    const previousOverflow = document.body.style.overflow;
+    if (phone.matches) document.body.style.overflow = "hidden";
+    return () => {
+      vv?.removeEventListener("resize", update);
+      vv?.removeEventListener("scroll", update);
+      phone.removeEventListener("change", update);
+      document.body.style.overflow = previousOverflow;
+      setViewport(null);
+    };
+  }, [open]);
 
   useEffect(() => {
     setMessages((prev) =>
@@ -105,8 +130,15 @@ export function ChatWidget() {
   return (
     <>
       {open && (
-        <div className="fixed bottom-24 right-4 z-50 flex h-[min(480px,70vh)] w-[min(380px,calc(100vw-2rem))] flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-2xl shadow-blue-500/10 animate-fade-in dark:border-gray-700 dark:bg-gray-900 sm:right-6">
-          <div className="flex items-center justify-between border-b border-slate-200 bg-gradient-to-r from-blue-600/10 to-teal-500/10 px-4 py-3 dark:border-gray-800 dark:from-blue-600/20 dark:to-emerald-600/20">
+        <div
+          className="fixed bottom-24 right-4 z-50 flex h-[min(480px,70vh)] w-[min(380px,calc(100vw-2rem))] flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-2xl shadow-blue-500/10 animate-fade-in dark:border-gray-700 dark:bg-gray-900 sm:right-6 max-sm:inset-x-0 max-sm:bottom-0 max-sm:top-0 max-sm:h-dvh max-sm:w-full max-sm:rounded-none max-sm:border-0"
+          style={
+            viewport
+              ? { height: viewport.height, top: viewport.top, bottom: "auto" }
+              : undefined
+          }
+        >
+          <div className="flex items-center justify-between border-b border-slate-200 bg-gradient-to-r from-blue-600/10 to-teal-500/10 px-4 py-3 pt-[max(0.75rem,env(safe-area-inset-top))] dark:border-gray-800 dark:from-blue-600/20 dark:to-emerald-600/20">
             <div className="flex items-center gap-2">
               <Bot className="h-5 w-5 text-teal-600 dark:text-emerald-400" />
               <span className="font-semibold text-slate-900 dark:text-white">{t("chatTitle")}</span>
@@ -114,19 +146,19 @@ export function ChatWidget() {
             <button
               type="button"
               onClick={() => setOpen(false)}
-              className="rounded-lg p-1 text-slate-500 hover:bg-slate-100 hover:text-slate-900 dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-white"
+              className="flex h-11 w-11 items-center justify-center rounded-lg text-slate-500 hover:bg-slate-100 hover:text-slate-900 dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-white max-sm:-mr-2"
               aria-label="Close chat"
             >
               <X className="h-5 w-5" />
             </button>
           </div>
 
-          <div ref={scrollRef} className="flex-1 space-y-3 overflow-y-auto p-4">
+          <div ref={scrollRef} className="flex-1 space-y-3 overflow-y-auto overscroll-contain p-4">
             {messages.map((msg) => (
               <div
                 key={msg.id}
                 className={cn(
-                  "max-w-[85%] rounded-xl px-3 py-2 text-sm",
+                  "max-w-[88%] rounded-xl px-3 py-2 text-[15px] leading-snug sm:max-w-[85%] sm:text-sm",
                   msg.role === "user"
                     ? "ml-auto bg-blue-600 text-white"
                     : "bg-slate-100 text-slate-800 dark:bg-gray-800 dark:text-gray-200",
@@ -147,7 +179,7 @@ export function ChatWidget() {
             )}
           </div>
 
-          <div className="border-t border-slate-200 p-3 dark:border-gray-800">
+          <div className="border-t border-slate-200 p-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] pl-[max(0.75rem,env(safe-area-inset-left))] pr-[max(0.75rem,env(safe-area-inset-right))] dark:border-gray-800">
             <div className="flex gap-2">
               <input
                 type="text"
@@ -157,13 +189,13 @@ export function ChatWidget() {
                 placeholder={t("chatPlaceholder")}
                 maxLength={1000}
                 disabled={isLoading}
-                className="flex-1 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 placeholder:text-slate-400 focus:border-blue-500 focus:outline-none disabled:opacity-60 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-200 dark:placeholder:text-gray-500"
+                className="min-h-11 flex-1 rounded-lg border border-slate-200 bg-white px-3 py-2 text-base text-slate-900 sm:text-sm placeholder:text-slate-400 focus:border-blue-500 focus:outline-none disabled:opacity-60 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-200 dark:placeholder:text-gray-500"
               />
               <button
                 type="button"
                 onClick={sendMessage}
                 disabled={isLoading || !input.trim()}
-                className="rounded-lg bg-gradient-to-r from-blue-500 to-emerald-500 p-2 text-white transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
+                className="flex h-11 w-11 items-center justify-center rounded-lg bg-gradient-to-r from-blue-500 to-emerald-500 text-white transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
                 aria-label={t("chatSend")}
               >
                 {isLoading ? (
@@ -173,7 +205,7 @@ export function ChatWidget() {
                 )}
               </button>
             </div>
-            <p className="mt-2 text-[11px] leading-snug text-slate-500 dark:text-gray-500">
+            <p className="mt-2 text-xs leading-snug text-slate-500 dark:text-gray-500">
               {t("chatDisclaimer")}
             </p>
           </div>
@@ -184,8 +216,9 @@ export function ChatWidget() {
         type="button"
         onClick={() => setOpen((o) => !o)}
         className={cn(
-          "fixed bottom-6 right-4 z-50 flex h-14 w-14 items-center justify-center rounded-full bg-gradient-to-r from-blue-500 to-emerald-500 text-white shadow-lg transition-all hover:scale-110 animate-pulse-soft sm:right-6",
-          open && "scale-95",
+          "fixed bottom-[max(1.5rem,calc(env(safe-area-inset-bottom)+0.75rem))] right-4 z-50 flex h-14 w-14 items-center justify-center rounded-full bg-gradient-to-r from-blue-500 to-emerald-500 text-white shadow-lg transition-all hover:scale-110 animate-pulse-soft sm:bottom-6 sm:right-6",
+          // On phones the open chat is full-screen and has its own close button.
+          open && "scale-95 max-sm:hidden",
         )}
         aria-label={t("chatTitle")}
       >

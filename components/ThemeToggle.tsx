@@ -5,7 +5,7 @@ import { useTheme } from "next-themes";
 import { useEffect, useState } from "react";
 import { cn } from "@/lib/utils";
 
-export function ThemeToggle() {
+export function ThemeToggle({ className }: { className?: string }) {
   const { resolvedTheme, setTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
 
@@ -13,7 +13,7 @@ export function ThemeToggle() {
 
   if (!mounted) {
     return (
-      <div className="theme-btn" aria-hidden />
+      <div className={cn("theme-btn", className)} aria-hidden />
     );
   }
 
@@ -23,7 +23,7 @@ export function ThemeToggle() {
     <button
       type="button"
       onClick={() => setTheme(isDark ? "light" : "dark")}
-      className={cn("theme-btn")}
+      className={cn("theme-btn", className)}
       aria-label={isDark ? "Switch to light mode" : "Switch to dark mode"}
       title={isDark ? "Light mode" : "Dark mode"}
     >
