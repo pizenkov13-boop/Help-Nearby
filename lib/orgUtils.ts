@@ -71,10 +71,8 @@ function evaluateStructuredHours(
   }
 
   const schedule = org.hours[weekday];
-  if (!schedule) {
-    const anyDayDefined = Object.keys(org.hours).length > 0;
-    return anyDayDefined ? "closed" : "unknown";
-  }
+  // Today is simply not in the data (not explicitly null): unknown, never "closed".
+  if (!schedule) return "unknown";
 
   return isOpenForSchedule(schedule, date) ? "open" : "closed";
 }
@@ -129,11 +127,34 @@ export function formatDaySchedule(schedule: DaySchedule | null | undefined): str
   return `${formatTime12h(schedule.open)} – ${formatTime12h(schedule.close)}`;
 }
 
+/**
+ * One line per day that is present in the data. A day that is simply absent is not listed
+ * (it is unknown, not closed); "Closed" appears only when the day is explicitly null.
+ */
 export function formatWeeklyHours(hours: WeeklyHours): string[] {
-  return (Object.keys(WEEKDAY_LABELS) as Weekday[]).map((day) => {
-    const schedule = hours[day];
-    return `${WEEKDAY_LABELS[day]}: ${formatDaySchedule(schedule ?? null)}`;
-  });
+  return (Object.keys(WEEKDAY_LABELS) as Weekday[])
+    .filter((day) => hours[day] !== undefined)
+    .map((day) => `${WEEKDAY_LABELS[day]}: ${formatDaySchedule(hours[day] ?? null)}`);
+}
+
+export type HoursDisplay =
+  | { kind: "listed"; lines: string[] }
+  | { kind: "unknown" };
+
+/**
+ * What the organization page may show for opening hours:
+ * structured per-day hours, or the raw text when it can be parsed; otherwise "unknown".
+ */
+export function getHoursDisplay(org: Organization): HoursDisplay {
+  if (hasStructuredHours(org)) {
+    const lines = formatWeeklyHours(org.hours);
+    if (lines.length > 0) return { kind: "listed", lines };
+  }
+  const raw = org.hoursRaw?.trim();
+  if (raw && getOrganizationOpenStatus(org) !== "unknown") {
+    return { kind: "listed", lines: [raw] };
+  }
+  return { kind: "unknown" };
 }
 
 export function getDirectionsUrl(org: Organization): string {

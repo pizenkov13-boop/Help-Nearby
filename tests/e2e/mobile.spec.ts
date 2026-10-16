@@ -142,12 +142,19 @@ for (const phone of PHONES) {
       ).toBe("nowrap");
 
       // The search box stays in view while the list scrolls.
-      await page.evaluate(() => window.scrollBy(0, 700));
+      // (The accordion releases overflow:hidden a moment after opening, then the bar can stick.)
       const search = page.locator("#org-search");
+      await expect
+        .poll(
+          async () => {
+            await page.evaluate(() => window.scrollBy(0, 700));
+            return search.evaluate((el) => Math.round(el.getBoundingClientRect().top));
+          },
+          { timeout: 8_000 },
+        )
+        .toBeLessThan(120);
       await expect(search).toBeInViewport();
-      const top = await search.evaluate((el) => el.getBoundingClientRect().top);
-      expect(top).toBeGreaterThanOrEqual(0);
-      expect(top).toBeLessThan(120);
+      expect(await search.evaluate((el) => el.getBoundingClientRect().top)).toBeGreaterThanOrEqual(0);
 
       expect(await noHorizontalScroll(page)).toBeLessThanOrEqual(0);
     });
