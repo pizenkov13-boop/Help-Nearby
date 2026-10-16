@@ -90,6 +90,17 @@ export function HomePage() {
   const [filters, setFilters] = useState<FilterState>(defaultFilters);
   const [selected, setSelected] = useState<Organization | null>(null);
   const [mapExpanded, setMapExpanded] = useState(false);
+  // overflow:hidden is only needed while the accordion animates; afterwards it would stop
+  // the sticky search bar from sticking to the viewport.
+  const [accordionSettled, setAccordionSettled] = useState(false);
+  useEffect(() => {
+    if (!mapExpanded) {
+      setAccordionSettled(false);
+      return;
+    }
+    const timer = window.setTimeout(() => setAccordionSettled(true), ACCORDION_DURATION_MS + 60);
+    return () => window.clearTimeout(timer);
+  }, [mapExpanded]);
   const [userLocation, setUserLocation] = useState<TrackedUserLocation | null>(
     null,
   );
@@ -848,8 +859,12 @@ export function HomePage() {
         id="map-section"
         ref={mapSectionRef}
         className={cn(
-          "overflow-hidden transition-[max-height] ease-in-out",
-          mapExpanded ? "max-h-[2400px]" : "max-h-0",
+          "transition-[max-height] ease-in-out",
+          mapExpanded && accordionSettled
+            ? "max-h-none overflow-visible"
+            : mapExpanded
+              ? "max-h-[2400px] overflow-hidden"
+              : "max-h-0 overflow-hidden",
         )}
         style={{ transitionDuration: `${ACCORDION_DURATION_MS}ms` }}
         aria-hidden={!mapExpanded}
@@ -857,7 +872,7 @@ export function HomePage() {
         {(userLocation || liteModeActive) && (
           <section className="map-panel">
             <div className="container">
-              <div className="mb-6 flex flex-col gap-3">
+              <div className="mb-3 flex flex-col gap-3 md:mb-6">
                 <div className="flex flex-wrap items-center gap-3">
                   <h2>
                     {t("mapTitle")}
@@ -934,7 +949,8 @@ export function HomePage() {
                     : "lg:grid-cols-[260px_1fr_340px]",
                 )}
               >
-                <div className="min-w-0">
+                <div className="min-w-0 max-lg:contents">
+                  <div className="sticky top-[calc(72px+env(safe-area-inset-top,0px))] z-30 bg-[var(--surface-card)] pb-1 pt-2 max-md:-mx-4 max-md:px-4 md:max-lg:-mx-7 md:max-lg:px-7 max-lg:order-1 lg:static lg:bg-transparent lg:p-0">
                   <SearchBar
                     value={filters.searchQuery}
                     onChange={updateSearchQuery}
@@ -946,7 +962,10 @@ export function HomePage() {
                     placeSearching={placeSearching}
                     placeError={placeError}
                   />
-                  <Filters filters={filters} onChange={setFilters} />
+                  </div>
+                  <div className="min-w-0 max-lg:order-2">
+                    <Filters filters={filters} onChange={setFilters} />
+                  </div>
                   <button
                     type="button"
                     onClick={
@@ -954,7 +973,7 @@ export function HomePage() {
                         ? handleSwitchToFullVersion
                         : handleSwitchToLiteVersion
                     }
-                    className="mt-4 w-full rounded-lg border border-blue-500/40 bg-blue-500/10 px-4 py-2.5 text-sm font-medium text-blue-300 transition-colors hover:bg-blue-500/20"
+                    className="mt-4 min-h-11 w-full rounded-lg border border-blue-500/40 bg-blue-500/10 px-4 py-2.5 text-sm font-medium text-blue-700 transition-colors hover:bg-blue-500/20 max-lg:order-5 max-lg:mt-0 dark:text-blue-300"
                   >
                     {liteModeActive
                       ? t("switchToFullVersion")
@@ -963,7 +982,7 @@ export function HomePage() {
                 </div>
 
                 {!liteModeActive && userLocation && mapExpanded && (
-                  <div className="h-[400px] overflow-hidden rounded-brand border border-slate-200 shadow-lg dark:border-white/10 lg:h-[520px]">
+                  <div className="isolate h-[45dvh] max-h-[420px] min-h-[260px] overflow-hidden rounded-brand border border-slate-200 shadow-lg dark:border-white/10 max-lg:order-3 lg:h-[520px] lg:max-h-none">
                     <MapView
                       key="full-map"
                       mapVisible={mapExpanded}
@@ -980,7 +999,7 @@ export function HomePage() {
                   </div>
                 )}
                 {liteModeActive && userLocation && liteMapVisible && mapExpanded && (
-                  <div className="h-[280px] overflow-hidden rounded-brand border border-slate-200 shadow-lg dark:border-white/10 lg:h-[320px]">
+                  <div className="isolate h-[280px] overflow-hidden rounded-brand border border-slate-200 shadow-lg dark:border-white/10 max-lg:order-3 lg:h-[320px]">
                     <MapView
                       key="lite-map"
                       mapVisible={mapExpanded}
@@ -1001,7 +1020,8 @@ export function HomePage() {
                 <div
                   className={cn(
                     "flex w-full min-w-0 max-w-full flex-col overflow-hidden rounded-brand border border-slate-200 bg-white/80 dark:border-white/10 dark:bg-surface-card",
-                    liteModeActive ? "min-h-[320px]" : "max-h-[520px] lg:max-h-[520px]",
+                    "max-lg:order-4",
+                    liteModeActive ? "min-h-[320px]" : "lg:max-h-[520px]",
                   )}
                 >
                   <div className="min-w-0 flex-1 overflow-x-hidden overflow-y-auto p-3 md:p-4">

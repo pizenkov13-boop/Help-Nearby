@@ -10,6 +10,17 @@ export const LANGUAGES: { code: LanguageCode; label: string }[] = [
   { code: "ar", label: "AR" },
 ];
 
+/** Language names in their own language, for the language switcher. */
+export const LANGUAGE_NATIVE_NAMES: Record<LanguageCode, string> = {
+  en: "English",
+  ru: "Русский",
+  es: "Español",
+  fr: "Français",
+  de: "Deutsch",
+  zh: "中文",
+  ar: "العربية",
+};
+
 export type TranslationKey =
   | "brand"
   | "navHome"
@@ -228,6 +239,8 @@ export type TranslationKey =
   | "verifiedOnlyNotice"
   | "searchRadiusWithin"
   | "searchExpand"
+  | "mapTwoFingerHint"
+  | "closeLabel"
   | "placeSearchRow"
   | "placeOrgsHeading"
   | "placePlacesHeading"
@@ -518,6 +531,8 @@ const en: Record<TranslationKey, string> = {
   verifiedOnlyNotice: "Showing verified organizations only",
   searchRadiusWithin: "Showing results within {km} km",
   searchExpand: "Expand search",
+  mapTwoFingerHint: "Use two fingers to move the map",
+  closeLabel: "Close",
   placeSearchRow: "Search places for “{text}”",
   placeOrgsHeading: "Matching organizations",
   placePlacesHeading: "Places",
@@ -818,6 +833,8 @@ const ru: Record<TranslationKey, string> = {
   verifiedOnlyNotice: "Показываются только проверенные организации",
   searchRadiusWithin: "Показаны результаты в радиусе {km} км",
   searchExpand: "Расширить поиск",
+  mapTwoFingerHint: "Двигайте карту двумя пальцами",
+  closeLabel: "Закрыть",
   placeSearchRow: "Искать места: «{text}»",
   placeOrgsHeading: "Подходящие организации",
   placePlacesHeading: "Места",
@@ -1125,6 +1142,8 @@ const es: Record<TranslationKey, string> = {
   verifiedOnlyNotice: "Mostrando solo organizaciones verificadas",
   searchRadiusWithin: "Mostrando resultados dentro de {km} km",
   searchExpand: "Ampliar búsqueda",
+  mapTwoFingerHint: "Usa dos dedos para mover el mapa",
+  closeLabel: "Cerrar",
   placeSearchRow: "Buscar lugares para “{text}”",
   placeOrgsHeading: "Organizaciones coincidentes",
   placePlacesHeading: "Lugares",
@@ -1433,6 +1452,8 @@ const fr: Record<TranslationKey, string> = {
   verifiedOnlyNotice: "Affichage des organisations vérifiées uniquement",
   searchRadiusWithin: "Résultats affichés dans un rayon de {km} km",
   searchExpand: "Élargir la recherche",
+  mapTwoFingerHint: "Utilisez deux doigts pour déplacer la carte",
+  closeLabel: "Fermer",
   placeSearchRow: "Rechercher des lieux pour « {text} »",
   placeOrgsHeading: "Organisations correspondantes",
   placePlacesHeading: "Lieux",
@@ -1743,6 +1764,8 @@ const de: Record<TranslationKey, string> = {
   verifiedOnlyNotice: "Es werden nur verifizierte Organisationen angezeigt",
   searchRadiusWithin: "Ergebnisse innerhalb von {km} km",
   searchExpand: "Suche erweitern",
+  mapTwoFingerHint: "Mit zwei Fingern die Karte bewegen",
+  closeLabel: "Schließen",
   placeSearchRow: "Orte suchen für „{text}“",
   placeOrgsHeading: "Passende Organisationen",
   placePlacesHeading: "Orte",
@@ -2029,6 +2052,8 @@ const zh: Record<TranslationKey, string> = {
   verifiedOnlyNotice: "仅显示已验证组织",
   searchRadiusWithin: "显示 {km} 公里范围内结果",
   searchExpand: "扩大搜索范围",
+  mapTwoFingerHint: "请用双指移动地图",
+  closeLabel: "关闭",
   placeSearchRow: "搜索地点“{text}”",
   placeOrgsHeading: "匹配的组织",
   placePlacesHeading: "地点",
@@ -2326,6 +2351,8 @@ const ar: Record<TranslationKey, string> = {
   verifiedOnlyNotice: "عرض المنظمات الموثقة فقط",
   searchRadiusWithin: "عرض النتائج ضمن {km} كم",
   searchExpand: "توسيع البحث",
+  mapTwoFingerHint: "استخدم إصبعين لتحريك الخريطة",
+  closeLabel: "إغلاق",
   placeSearchRow: "البحث عن أماكن لـ «{text}»",
   placeOrgsHeading: "منظمات مطابقة",
   placePlacesHeading: "أماكن",

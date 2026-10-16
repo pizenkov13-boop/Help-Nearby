@@ -87,7 +87,7 @@ test.describe("Recently added organizations", () => {
   test("localizes and switches to RTL for Arabic", async ({ page }) => {
     await page.goto("/recent");
     await page.getByRole("button", { name: /language/i }).click();
-    await page.getByRole("menuitem", { name: "AR" }).click();
+    await page.getByRole("menuitem", { name: "العربية" }).click();
 
     await expect(
       page.getByRole("heading", { name: "المنظمات المضافة حديثًا" }),

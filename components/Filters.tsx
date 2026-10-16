@@ -12,6 +12,10 @@ interface FiltersProps {
   onChange: (filters: FilterState) => void;
 }
 
+/**
+ * Desktop: a sidebar card. Phones: one horizontally scrollable row of chips
+ * (categories + "Open now") so the filters take a single line instead of a tall block.
+ */
 export function Filters({ filters, onChange }: FiltersProps) {
   const { t } = useLanguage();
 
@@ -27,8 +31,14 @@ export function Filters({ filters, onChange }: FiltersProps) {
   };
 
   return (
-    <aside className="rounded-brand border border-slate-200 bg-white p-4 shadow-lg transition-colors duration-300 dark:border-white/10 dark:bg-surface-card lg:sticky lg:top-20">
-      <div className="mb-4 flex items-center gap-2 text-slate-900 dark:text-white">
+    <aside
+      className={cn(
+        "transition-colors duration-300",
+        "lg:sticky lg:top-20 lg:rounded-brand lg:border lg:border-slate-200 lg:bg-white lg:p-4 lg:shadow-lg",
+        "dark:lg:border-white/10 dark:lg:bg-surface-card",
+      )}
+    >
+      <div className="mb-4 hidden items-center gap-2 text-slate-900 dark:text-white lg:flex">
         <Filter
           className="size-5 shrink-0 text-blue-500 dark:text-blue-400"
           aria-hidden
@@ -36,12 +46,20 @@ export function Filters({ filters, onChange }: FiltersProps) {
         <h2 className="m-0 text-base font-semibold leading-5">{t("filtersTitle")}</h2>
       </div>
 
-      <div className="space-y-5">
-        <div>
-          <span className="mb-2 block text-sm font-medium text-slate-600 dark:text-gray-400">
+      <div
+        className={cn(
+          "-mx-4 flex flex-nowrap items-center gap-2 overflow-x-auto px-4 pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden",
+          "md:-mx-7 md:px-7",
+          "lg:mx-0 lg:flex-col lg:items-stretch lg:gap-5 lg:overflow-visible lg:p-0",
+        )}
+        role="group"
+        aria-label={t("filtersTitle")}
+      >
+        <div className="contents lg:block">
+          <span className="sr-only lg:not-sr-only lg:mb-2 lg:block lg:text-sm lg:font-medium lg:text-slate-600 dark:lg:text-gray-400">
             {t("filterCategory")}
           </span>
-          <div className="flex flex-wrap gap-2">
+          <div className="contents lg:flex lg:flex-wrap lg:gap-2">
             <CategoryPill
               active={filters.category === "all"}
               onClick={() => onChange({ ...filters, category: "all" })}
@@ -63,7 +81,13 @@ export function Filters({ filters, onChange }: FiltersProps) {
           </div>
         </div>
 
-        <label className="flex cursor-pointer items-center gap-3 rounded-lg border border-slate-200 bg-slate-50 px-3 py-2.5 transition-colors hover:border-teal-500/40 dark:border-gray-700 dark:bg-gray-900/50 dark:hover:border-emerald-500/40">
+        <label
+          className={cn(
+            "flex shrink-0 cursor-pointer items-center gap-2 whitespace-nowrap rounded-full border border-slate-200 bg-slate-50 px-3 transition-colors hover:border-teal-500/40",
+            "min-h-11 dark:border-gray-700 dark:bg-gray-900/50 dark:hover:border-emerald-500/40",
+            "lg:gap-3 lg:rounded-lg lg:py-2.5",
+          )}
+        >
           <input
             type="checkbox"
             checked={filters.openNow}
@@ -98,12 +122,15 @@ export function CategoryPill({
     <button
       type="button"
       onClick={onClick}
+      aria-pressed={active}
       className={cn(
-        "inline-flex items-center gap-1 rounded-full border border-slate-200 px-3 py-1 text-xs font-medium text-slate-600 transition-all hover:border-slate-300 dark:border-gray-700 dark:text-gray-300 dark:hover:border-gray-600",
+        "inline-flex min-h-11 shrink-0 items-center gap-1.5 whitespace-nowrap rounded-full border border-slate-200 px-4 text-sm font-medium text-slate-600 transition-all hover:border-slate-300",
+        "dark:border-gray-700 dark:text-gray-300 dark:hover:border-gray-600",
+        "lg:min-h-0 lg:gap-1 lg:px-3 lg:py-1 lg:text-xs",
         active && (activeClass ?? "border-blue-500/50 bg-blue-500/15 text-blue-700 dark:bg-blue-500/20 dark:text-blue-300"),
       )}
     >
-      {category && <CategoryIcon category={category} />}
+      {category && <CategoryIcon category={category} className="h-4 w-4 lg:h-3.5 lg:w-3.5" />}
       {label}
     </button>
   );

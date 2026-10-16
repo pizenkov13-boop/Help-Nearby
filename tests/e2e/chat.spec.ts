@@ -63,7 +63,7 @@ test.describe("Chat widget", () => {
   test("shows localized welcome and disclaimer in Russian", async ({ page }) => {
     await page.goto("/");
     await page.getByRole("button", { name: /language/i }).click();
-    await page.getByRole("menuitem", { name: "RU" }).click();
+    await page.getByRole("menuitem", { name: "Русский" }).click();
     await page.getByRole("button", { name: "ИИ-помощник" }).click();
 
     const panel = page.locator(".fixed.bottom-24");

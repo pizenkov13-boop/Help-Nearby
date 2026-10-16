@@ -31,6 +31,10 @@ import { getOrganizationSource } from "@/lib/organizationSource";
 import type { Organization } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
+/** Makes the title link/button cover the whole card body (an overlay, not a wrapper). */
+const STRETCH =
+  "after:absolute after:inset-0 after:rounded-xl after:content-[''] focus-visible:outline-none focus-visible:after:ring-2 focus-visible:after:ring-blue-500";
+
 interface OrganizationCardProps {
   org: Organization;
   onSelect?: (org: Organization) => void;
@@ -120,8 +124,8 @@ export function OrganizationCard({
       )}
       {source && (
         <span className="inline-flex max-w-full items-center rounded-full bg-slate-100 px-2 py-0.5 text-xs font-medium text-slate-600 dark:bg-gray-700/60 dark:text-gray-300">
-          <span className="shrink-0 text-slate-400 dark:text-gray-500">
-            {t("citySourceLabel")}{" "}
+          <span className="mr-1 shrink-0 text-slate-400 dark:text-gray-500">
+            {t("citySourceLabel")}
           </span>
           {source.url ? (
             <a
@@ -129,7 +133,7 @@ export function OrganizationCard({
               target="_blank"
               rel="noopener noreferrer"
               onClick={(e) => e.stopPropagation()}
-              className="truncate text-blue-600 hover:underline dark:text-blue-400"
+              className="relative z-10 truncate text-blue-600 hover:underline dark:text-blue-400"
             >
               {source.label}
             </a>
@@ -161,7 +165,23 @@ export function OrganizationCard({
       <div className="order-1 min-w-0 md:order-2 md:flex md:items-start md:justify-between md:gap-3">
         <div className="min-w-0 flex-1">
           <h3 className="text-base font-semibold leading-snug text-slate-900 break-words break-anywhere md:truncate md:text-lg group-hover:text-blue-600 dark:text-white dark:group-hover:text-blue-300">
-            {org.name}
+            {org.verified ? (
+              <Link
+                href={`/org/${org.slug}`}
+                onClick={handleCardOpen}
+                className={STRETCH}
+              >
+                {org.name}
+              </Link>
+            ) : (
+              <button
+                type="button"
+                onClick={handleCardOpen}
+                className={cn(STRETCH, "text-left")}
+              >
+                {org.name}
+              </button>
+            )}
           </h3>
           {(org.country || (addedLabel && org.city)) && (
             <p className="mt-0.5 text-sm text-slate-500 break-words break-anywhere dark:text-gray-500">
@@ -214,31 +234,15 @@ export function OrganizationCard({
         org.verified && "border-blue-500/20",
       )}
     >
-      {org.verified ? (
-        <Link
-          href={`/org/${org.slug}`}
-          onClick={handleCardOpen}
-          className="block cursor-pointer p-3 md:p-4"
-        >
-          {cardBody}
-        </Link>
-      ) : (
-        <button
-          type="button"
-          onClick={handleCardOpen}
-          className="block w-full min-w-0 cursor-pointer p-3 text-left md:p-4"
-        >
-          {cardBody}
-        </button>
-      )}
+      <div className="relative min-w-0 cursor-pointer p-3 md:p-4">{cardBody}</div>
 
       {(hasPhone || !approximate) && (
-        <div className="flex flex-col gap-2 border-t border-slate-200 px-3 pb-3 pt-2.5 dark:border-gray-700/50 md:flex-row md:px-4 md:pb-4 md:pt-3">
+        <div className="flex flex-row gap-2 border-t border-slate-200 px-3 pb-3 pt-2.5 dark:border-gray-700/50 md:px-4 md:pb-4 md:pt-3">
           {hasPhone && (
             <a
               href={telUrl}
               onClick={handleCallClick}
-              className="group/call relative inline-flex min-w-0 flex-1 items-center justify-center gap-2 rounded-lg bg-emerald-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm shadow-emerald-600/25 transition-all hover:bg-emerald-500 active:bg-emerald-700"
+              className="group/call relative inline-flex min-h-11 min-w-0 flex-1 items-center justify-center gap-1.5 whitespace-nowrap rounded-lg bg-emerald-600 px-3 py-2.5 text-sm font-semibold text-white sm:gap-2 sm:px-4 shadow-sm shadow-emerald-600/25 transition-all hover:bg-emerald-500 active:bg-emerald-700"
               aria-label={`${t("callNow")}: ${org.phone}`}
             >
               <span
@@ -258,7 +262,7 @@ export function OrganizationCard({
                   type="button"
                   onClick={handleDirectionsClick}
                   className={cn(
-                    "inline-flex min-w-0 flex-1 items-center justify-center gap-2 rounded-lg bg-gradient-to-r from-blue-600/80 to-emerald-600/80 px-4 py-2.5 text-sm font-medium text-white transition-all hover:from-blue-500 hover:to-emerald-500",
+                    "inline-flex min-h-11 min-w-0 flex-1 items-center justify-center gap-1.5 whitespace-nowrap rounded-lg bg-gradient-to-r from-blue-600/80 to-emerald-600/80 px-3 py-2.5 text-sm font-medium text-white sm:gap-2 sm:px-4 transition-all hover:from-blue-500 hover:to-emerald-500",
                     !hasPhone && "w-full",
                   )}
                 >
@@ -276,7 +280,7 @@ export function OrganizationCard({
                     onImpactRecorded?.();
                   }}
                   className={cn(
-                    "inline-flex min-w-0 flex-1 items-center justify-center gap-2 rounded-lg bg-gradient-to-r from-blue-600/80 to-emerald-600/80 px-4 py-2.5 text-sm font-medium text-white transition-all hover:from-blue-500 hover:to-emerald-500",
+                    "inline-flex min-h-11 min-w-0 flex-1 items-center justify-center gap-1.5 whitespace-nowrap rounded-lg bg-gradient-to-r from-blue-600/80 to-emerald-600/80 px-3 py-2.5 text-sm font-medium text-white sm:gap-2 sm:px-4 transition-all hover:from-blue-500 hover:to-emerald-500",
                     !hasPhone && "w-full",
                   )}
                 >

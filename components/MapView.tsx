@@ -232,6 +232,7 @@ export default function MapView({
   const [markerGeneration, setMarkerGeneration] = useState(0);
   const [geocoding, setGeocoding] = useState(false);
   const [mapReady, setMapReady] = useState(false);
+  const [showTouchHint, setShowTouchHint] = useState(false);
 
   selectedRef.current = selected;
 
@@ -304,11 +305,24 @@ export default function MapView({
 
     clearLeafletContainer(container);
 
+    // Cooperative gestures on touch screens: one finger scrolls the page, two fingers move/zoom the map.
+    const touchScreen = window.matchMedia("(pointer: coarse)").matches;
     const map = L.map(container, {
       center,
       zoom: 14,
       scrollWheelZoom: true,
+      dragging: !touchScreen,
+      touchZoom: true,
     });
+
+    let hintTimer: ReturnType<typeof setTimeout> | undefined;
+    const onTouchMove = (event: TouchEvent) => {
+      if (!touchScreen || event.touches.length !== 1) return;
+      setShowTouchHint(true);
+      clearTimeout(hintTimer);
+      hintTimer = setTimeout(() => setShowTouchHint(false), 1600);
+    };
+    container.addEventListener("touchmove", onTouchMove, { passive: true });
 
     applyNeutralMapAttribution(map);
 
@@ -354,6 +368,8 @@ export default function MapView({
     setMapReady(true);
 
     return () => {
+      container.removeEventListener("touchmove", onTouchMove);
+      clearTimeout(hintTimer);
       setMapReady(false);
       routeLayerRef.current = null;
       routeConnectorLayerRef.current = null;
@@ -496,6 +512,15 @@ export default function MapView({
       {!mapReady && (
         <div className="absolute inset-0 flex items-center justify-center rounded-xl bg-surface-card text-sm text-slate-400">
           {t("mapLoading")}
+        </div>
+      )}
+
+      {showTouchHint && (
+        <div
+          className="pointer-events-none absolute inset-0 z-[1000] flex items-center justify-center rounded-xl bg-slate-900/45 px-6 text-center text-sm font-medium text-white"
+          role="status"
+        >
+          {t("mapTwoFingerHint")}
         </div>
       )}
 
