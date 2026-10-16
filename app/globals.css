@@ -1492,7 +1492,10 @@ section[id], .scroll-anchor { scroll-margin-top: 92px; }
   .contact-btn { min-height: 44px; }
 
   /* ---- map controls ---- */
-  .leaflet-touch .leaflet-bar a { width: 44px; height: 44px; line-height: 44px; font-size: 20px; }
+  /* Touch screens: 44px zoom buttons (WebKit does not always add .leaflet-touch). */
+  @media (pointer: coarse), (max-width: 768px) {
+    .leaflet-bar a { width: 44px; height: 44px; line-height: 44px; font-size: 20px; }
+  }
   .leaflet-popup-content { max-width: min(260px, calc(100vw - 96px)); overflow-wrap: anywhere; }
   .leaflet-popup-content-wrapper { max-width: calc(100vw - 48px); }
 
@@ -1515,6 +1518,15 @@ section[id], .scroll-anchor { scroll-margin-top: 92px; }
 
     footer { padding: 40px max(20px, env(safe-area-inset-left)) calc(24px + env(safe-area-inset-bottom, 0px)) max(20px, env(safe-area-inset-right)); }
 
+    /* Phone reading sizes: nothing below 13px, body-like text 14px+. */
+    .brand { min-height: 44px; }
+    .lang-btn { font-size: 14px; }
+    footer h4 { font-size: 14px; }
+    .contact-btn { font-size: 14px; }
+    .partner-label, .partner-name { font-size: 13px; }
+    .sdg-block .small, .sdg-block p.small { font-size: 13px; }
+    .hero-live { font-size: 13px; }
+    .badge, .city-row-label, .city-source, .city-source strong { font-size: 13px; }
   }
 
   @media (max-width: 820px) {

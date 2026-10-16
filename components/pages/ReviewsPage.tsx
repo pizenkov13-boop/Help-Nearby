@@ -148,7 +148,7 @@ export function ReviewsPage() {
                       key={n}
                       type="button"
                       onClick={() => setRating(n)}
-                      className="rounded p-1 transition-colors hover:bg-slate-100 dark:hover:bg-white/10"
+                      className="flex h-11 w-11 items-center justify-center rounded transition-colors hover:bg-slate-100 dark:hover:bg-white/10"
                       aria-label={`${n} stars`}
                     >
                       <Star

@@ -932,7 +932,7 @@ export function HomePage() {
                         type="button"
                         onClick={handleExpandSearch}
                         disabled={sourcesLoading}
-                        className="rounded-full border border-blue-500/40 bg-blue-500/10 px-3 py-1 text-xs font-semibold text-blue-700 transition-colors hover:bg-blue-500/20 disabled:opacity-50 dark:text-blue-300"
+                        className="min-h-11 rounded-full border border-blue-500/40 bg-blue-500/10 px-4 py-1 text-sm font-semibold text-blue-700 transition-colors hover:bg-blue-500/20 disabled:opacity-50 md:min-h-0 md:px-3 md:text-xs dark:text-blue-300"
                       >
                         {t("searchExpand")}
                       </button>
@@ -1027,7 +1027,7 @@ export function HomePage() {
                   <div className="min-w-0 flex-1 overflow-x-hidden overflow-y-auto p-3 md:p-4">
                     {searchPlace && (
                       <div
-                        className="mb-3 flex flex-wrap items-center gap-x-2 gap-y-1 rounded-full border border-blue-500/30 bg-blue-500/10 px-3 py-1.5 text-xs text-blue-800 dark:text-blue-200"
+                        className="mb-3 flex flex-wrap items-center gap-x-2 gap-y-1 rounded-full border border-blue-500/30 bg-blue-500/10 px-3 py-2 text-sm text-blue-800 md:text-xs dark:text-blue-200"
                         data-testid="place-chip"
                       >
                         <MapPin className="h-3.5 w-3.5 shrink-0" aria-hidden />
@@ -1067,7 +1067,7 @@ export function HomePage() {
                           <button
                             type="button"
                             onClick={handleTryLargerRadius}
-                            className="mt-4 rounded-full border border-blue-500/40 bg-blue-500/10 px-4 py-2 text-sm font-semibold text-blue-700 transition-colors hover:bg-blue-500/20 dark:text-blue-300"
+                            className="mt-4 min-h-11 rounded-full border border-blue-500/40 bg-blue-500/10 px-4 py-2 text-sm font-semibold text-blue-700 transition-colors hover:bg-blue-500/20 dark:text-blue-300"
                           >
                             {t("searchLargerRadius")}
                           </button>

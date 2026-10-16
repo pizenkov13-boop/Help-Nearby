@@ -304,7 +304,7 @@ export function SubmitPage() {
                     )}
                   </Button>
 
-                  <p className="text-center text-xs text-gray-500">
+                  <p className="text-center text-sm text-gray-500">
                     Submissions are saved as unverified and reviewed by our team.
                   </p>
                 </form>

@@ -70,7 +70,7 @@ export function OrganizationContactSection({ org }: { org: Organization }) {
               target="_blank"
               rel="noopener noreferrer"
               onClick={() => trackWebsiteClicked(org)}
-              className="break-all text-blue-500 hover:text-blue-400 dark:text-blue-400"
+              className="inline-flex min-h-11 items-center break-all text-blue-500 hover:text-blue-400 dark:text-blue-400"
             >
               {website.replace(/^https?:\/\//, "")}
             </a>
@@ -94,7 +94,7 @@ export function OrganizationContactSection({ org }: { org: Organization }) {
                     href={sourceUrl}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="break-all text-blue-500 hover:text-blue-400 dark:text-blue-400"
+                    className="inline-flex min-h-11 items-center break-all text-blue-500 hover:text-blue-400 dark:text-blue-400"
                   >
                     {displayHost(sourceUrl)}
                   </a>
