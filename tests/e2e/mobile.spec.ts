@@ -103,9 +103,12 @@ for (const phone of PHONES) {
       const toggle = page.locator(".mobile-toggle");
       expect((await toggle.boundingBox())!.height).toBeGreaterThanOrEqual(44);
       await toggle.click();
-      await expect(page.locator("#mmenu")).toBeVisible();
-      await expect(page.locator("#mmenu").getByRole("link", { name: "Recently added" })).toBeVisible();
-      await toggle.click();
+      const menu = page.locator("#mmenu");
+      await expect(menu).toBeVisible();
+      await expect(menu.getByRole("link", { name: "Recently added" })).toBeVisible();
+      // The menu is a full-screen layer above the header; it has its own close button.
+      await menu.getByRole("button", { name: "Close" }).click();
+      await expect(menu).toBeHidden();
     });
 
     test("home: sticky search, one-row filter chips, ~45vh map, one-line card buttons", async ({ page }) => {

@@ -7,6 +7,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { BrandLogo } from "@/components/BrandLogo";
 import { LanguageMenu } from "@/components/layout/LanguageMenu";
+import { MobileMenu } from "@/components/layout/MobileMenu";
 import { AnchorNavLink } from "@/components/navigation/AnchorNavLink";
 import { useLanguage } from "@/lib/i18n/LanguageProvider";
 import { openEmergencyHelp } from "@/lib/emergencyEvents";
@@ -92,6 +93,8 @@ export function Header() {
     setAboutOpen(false);
     setWhyOpen(false);
   }, []);
+
+  const closeMenu = useCallback(() => setMenuOpen(false), []);
 
   const aboutItems = [
     { label: t("navOurStory"), href: "/about#our-story" },
@@ -246,7 +249,8 @@ export function Header() {
               className="mobile-toggle"
               aria-label={t("openMenu")}
               aria-expanded={menuOpen}
-              aria-controls="mmenu"
+              aria-haspopup="dialog"
+              aria-controls={menuOpen ? "mmenu" : undefined}
               onClick={() => {
                 setLangOpen(false);
                 setMenuOpen((o) => !o);
@@ -258,57 +262,7 @@ export function Header() {
         </div>
       </div>
 
-      <nav className={cn("mobile-menu", menuOpen && "open")} id="mmenu">
-        <button
-          type="button"
-          className="nav-emergency"
-          style={{ marginBottom: 8, width: "100%", justifyContent: "center" }}
-          onClick={() => {
-            closeAll();
-            openEmergencyHelp();
-          }}
-        >
-          {t("emergencyHelp")}
-        </button>
-        <Link href="/" className="nav-link" onClick={closeAll}>
-          {t("navHome")}
-        </Link>
-        <Link href="/about" className="nav-link" onClick={closeAll}>
-          {t("navAbout")}
-        </Link>
-        {aboutItems.map((item) => (
-          <AnchorNavLink
-            key={item.href}
-            href={item.href}
-            className="nav-link m-sub"
-            onNavigate={closeAll}
-          >
-            {item.label}
-          </AnchorNavLink>
-        ))}
-        <Link href="/why-it-matters" className="nav-link" onClick={closeAll}>
-          {t("navWhy")}
-        </Link>
-        {whyItems.map((item) => (
-          <AnchorNavLink
-            key={item.href}
-            href={item.href}
-            className="nav-link m-sub"
-            onNavigate={closeAll}
-          >
-            {item.label}
-          </AnchorNavLink>
-        ))}
-        <Link href="/reviews" className="nav-link" onClick={closeAll}>
-          {t("navReviews")}
-        </Link>
-        <Link href="/recent" className="nav-link" onClick={closeAll}>
-          {t("navRecent")}
-        </Link>
-        <div className="m-theme-row">
-          <ThemeToggle />
-        </div>
-      </nav>
+      <MobileMenu open={menuOpen} onClose={closeMenu} />
     </header>
   );
 }
