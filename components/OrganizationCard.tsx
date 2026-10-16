@@ -100,7 +100,7 @@ export function OrganizationCard({
     <div className="flex flex-wrap items-center gap-2">
       <span
         className={cn(
-          "inline-flex max-w-full items-center gap-1 rounded-full px-2 py-0.5 text-xs font-medium",
+          "inline-flex max-w-full items-center gap-1 rounded-full px-2 py-0.5 text-[13px] md:text-xs font-medium",
           cfg.bg,
           cfg.color,
         )}
@@ -109,21 +109,21 @@ export function OrganizationCard({
         <span className="break-words">{org.category}</span>
       </span>
       {org.verified && (
-        <span className="inline-flex items-center gap-0.5 rounded-full bg-emerald-500/20 px-2 py-0.5 text-xs font-semibold text-emerald-400 ring-1 ring-emerald-500/30">
+        <span className="inline-flex items-center gap-0.5 rounded-full bg-emerald-500/20 px-2 py-0.5 text-[13px] md:text-xs font-semibold text-emerald-400 ring-1 ring-emerald-500/30">
           <BadgeCheck className="h-3 w-3 shrink-0" aria-hidden />
           {t("verified")}
         </span>
       )}
       {!org.verified && isOverpassOrganization(org) && (
         <span
-          className="inline-flex items-center rounded-full bg-amber-500/15 px-2 py-0.5 text-xs font-medium text-amber-700 ring-1 ring-amber-500/30 dark:text-amber-300"
+          className="inline-flex items-center rounded-full bg-amber-500/15 px-2 py-0.5 text-[13px] md:text-xs font-medium text-amber-700 ring-1 ring-amber-500/30 dark:text-amber-300"
           data-testid="unverified-osm-badge"
         >
           {t("unverifiedOsmBadge")}
         </span>
       )}
       {source && (
-        <span className="inline-flex max-w-full items-center rounded-full bg-slate-100 px-2 py-0.5 text-xs font-medium text-slate-600 dark:bg-gray-700/60 dark:text-gray-300">
+        <span className="inline-flex max-w-full items-center rounded-full bg-slate-100 px-2 py-0.5 text-[13px] md:text-xs font-medium text-slate-600 dark:bg-gray-700/60 dark:text-gray-300">
           <span className="mr-1 shrink-0 text-slate-400 dark:text-gray-500">
             {t("citySourceLabel")}
           </span>
@@ -133,7 +133,7 @@ export function OrganizationCard({
               target="_blank"
               rel="noopener noreferrer"
               onClick={(e) => e.stopPropagation()}
-              className="relative z-10 truncate text-blue-600 hover:underline dark:text-blue-400"
+              className="relative z-10 -my-3 truncate py-3 text-blue-600 hover:underline dark:text-blue-400"
             >
               {source.label}
             </a>
@@ -145,7 +145,7 @@ export function OrganizationCard({
       {org.verified && openStatus !== "unknown" && (
         <span
           className={cn(
-            "inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-medium",
+            "inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[13px] md:text-xs font-medium",
             open
               ? "bg-emerald-500/20 text-emerald-400"
               : "bg-slate-200 text-slate-600 dark:bg-gray-700 dark:text-gray-400",
@@ -212,7 +212,7 @@ export function OrganizationCard({
       )}
 
       {addedLabel && (
-        <p className="order-3 flex items-center gap-1.5 text-xs text-slate-500 md:order-4 dark:text-gray-500">
+        <p className="order-3 flex items-center gap-1.5 text-[13px] md:text-xs text-slate-500 md:order-4 dark:text-gray-500">
           <Clock className="h-3.5 w-3.5 shrink-0" aria-hidden />
           {addedLabel}
         </p>
@@ -247,7 +247,7 @@ export function OrganizationCard({
             >
               <span
                 role="tooltip"
-                className="pointer-events-none absolute bottom-full left-1/2 z-10 mb-2 hidden -translate-x-1/2 whitespace-nowrap rounded-lg border border-emerald-500/30 bg-gray-950 px-3 py-1.5 text-xs font-medium text-emerald-300 opacity-0 shadow-xl transition-opacity group-hover/call:opacity-100 md:block"
+                className="pointer-events-none absolute bottom-full left-1/2 z-10 mb-2 hidden -translate-x-1/2 whitespace-nowrap rounded-lg border border-emerald-500/30 bg-gray-950 px-3 py-1.5 text-[13px] md:text-xs font-medium text-emerald-300 opacity-0 shadow-xl transition-opacity group-hover/call:opacity-100 md:block"
               >
                 {org.phone}
               </span>

@@ -16,6 +16,28 @@ interface Message {
 export function ChatWidget() {
   const { t, language } = useLanguage();
   const [open, setOpen] = useState(false);
+  // Phones: hide the round chat button while scrolling down (it would sit on top of card
+  // buttons) and bring it back on scroll up, at the very top and at the bottom of the page.
+  const [fabHidden, setFabHidden] = useState(false);
+
+  useEffect(() => {
+    const phone = window.matchMedia("(max-width: 639px)");
+    let lastY = window.scrollY;
+    const onScroll = () => {
+      if (!phone.matches) {
+        setFabHidden(false);
+        return;
+      }
+      const y = window.scrollY;
+      const nearBottom = y + window.innerHeight >= document.documentElement.scrollHeight - 40;
+      const delta = y - lastY;
+      if (y < 80 || nearBottom || delta < -6) setFabHidden(false);
+      else if (delta > 6) setFabHidden(true);
+      lastY = y;
+    };
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [messages, setMessages] = useState<Message[]>([
@@ -216,11 +238,15 @@ export function ChatWidget() {
         type="button"
         onClick={() => setOpen((o) => !o)}
         className={cn(
-          "fixed bottom-[max(1.5rem,calc(env(safe-area-inset-bottom)+0.75rem))] right-4 z-50 flex h-14 w-14 items-center justify-center rounded-full bg-gradient-to-r from-blue-500 to-emerald-500 text-white shadow-lg transition-all hover:scale-110 animate-pulse-soft sm:bottom-6 sm:right-6",
+          "fixed bottom-[max(1rem,calc(env(safe-area-inset-bottom)+0.5rem))] right-3 z-50 flex h-12 w-12 items-center justify-center rounded-full bg-gradient-to-r from-blue-500 to-emerald-500 text-white shadow-lg transition-all hover:scale-110 animate-pulse-soft sm:bottom-6 sm:right-6 sm:h-14 sm:w-14",
           // On phones the open chat is full-screen and has its own close button.
           open && "scale-95 max-sm:hidden",
+          // animate-pulse-soft would otherwise keep the opacity animated and override the fade-out.
+          fabHidden && !open && "max-sm:pointer-events-none max-sm:translate-y-24 max-sm:animate-none max-sm:opacity-0",
         )}
         aria-label={t("chatTitle")}
+        aria-hidden={fabHidden && !open ? true : undefined}
+        tabIndex={fabHidden && !open ? -1 : undefined}
       >
         {open ? (
           <X className="h-6 w-6" />

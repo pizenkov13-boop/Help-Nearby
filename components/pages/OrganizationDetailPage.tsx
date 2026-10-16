@@ -88,7 +88,7 @@ export function OrganizationDetailPage({ org }: OrganizationDetailPageProps) {
         <div className="mx-auto max-w-3xl px-4 py-4 sm:px-6">
           <Link
             href="/"
-            className="inline-flex items-center gap-2 text-sm text-gray-600 transition-colors hover:text-gray-900 dark:text-gray-400 dark:hover:text-white"
+            className="inline-flex min-h-11 items-center gap-2 text-sm text-gray-600 transition-colors hover:text-gray-900 dark:text-gray-400 dark:hover:text-white"
           >
             <ArrowLeft className="h-4 w-4" />
             {t("backToHome")}
