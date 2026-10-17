@@ -51,9 +51,23 @@ test.describe("OSM cleanup", () => {
     expect(dedupeOsmOrganizations(branches)).toHaveLength(3);
   });
 
-  test("names shorter than 4 characters are hidden", () => {
-    const orgs = [osm("1", "TAS"), osm("2", "АНЦ"), osm("3", " ab "), osm("4", "Café")];
-    expect(removeJunkOsmOrganizations(orgs).map((o) => o.name)).toEqual(["Café"]);
+  test("a short name is junk only without contacts and without CJK characters", () => {
+    const hospitalWithAddress = osm("1", "医院", { address: "1 Test Road" });
+    const hospitalNoContacts = osm("2", "医院");
+    const zoeWithPhone = osm("3", "Zoe", { phone: "+33100000000" });
+    const tasNoContacts = osm("4", "TAS");
+    const kept = removeJunkOsmOrganizations([
+      hospitalWithAddress,
+      hospitalNoContacts,
+      zoeWithPhone,
+      tasNoContacts,
+      osm("5", "АНЦ"),
+      osm("6", " ab "),
+      osm("7", "Café"),
+    ]).map((o) => o.name);
+
+    expect(kept).toEqual(["医院", "医院", "Zoe", "Café"]);
+    expect(kept).not.toContain("TAS");
   });
 
   test("a name repeated 5+ times is hidden only for records without phone, website and address", () => {
@@ -80,7 +94,7 @@ test.describe("OSM cleanup", () => {
     const orgs = [
       osm("1", "Good Clinic", { phone: "+33100000000" }),
       osm("2", "Good Clinic", { lat: 48.8566 + 0.0001 }), // duplicate
-      osm("3", "XY"), // junk
+      osm("3", "XY"), // junk: short name, no contacts
     ];
     const { organizations, stats } = cleanOsmOrganizations(orgs, 2);
     expect(organizations.map((o) => o.id)).toEqual(["overpass-node-1"]);

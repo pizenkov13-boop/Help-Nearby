@@ -64,9 +64,18 @@ export function dedupeOsmOrganizations(orgs: Organization[]): Organization[] {
   return orgs.filter((_, index) => keptIndexes.has(index));
 }
 
+/** Chinese, Japanese or Korean characters: a 2-character name is a normal name there. */
+const CJK = /[぀-ヿ㐀-䶿一-鿿가-힯豈-﫿]/;
+
+export function hasCjk(name: string): boolean {
+  return CJK.test(name);
+}
+
 /**
- * Junk: a name under 4 characters, or a name repeated 5+ times in the result set
- * where the record has no phone, website or address.
+ * Junk, only for records with no phone, website or address:
+ * - a name under 4 characters (unless it contains CJK characters);
+ * - a name repeated 5+ times in the result set.
+ * Records with any contact data are never hidden by these rules.
  */
 export function removeJunkOsmOrganizations(orgs: Organization[]): Organization[] {
   const counts = new Map<string, number>();
@@ -76,10 +85,12 @@ export function removeJunkOsmOrganizations(orgs: Organization[]): Organization[]
   }
 
   return orgs.filter((org) => {
-    const key = normalizeOsmName(org.name);
-    if (key.length < MIN_NAME_LENGTH) return false;
     const noContacts = !filled(org.phone) && !filled(org.website) && !filled(org.address);
-    return !(noContacts && (counts.get(key) ?? 0) >= REPEATED_NAME_LIMIT);
+    if (!noContacts) return true;
+
+    const key = normalizeOsmName(org.name);
+    if (key.length < MIN_NAME_LENGTH && !hasCjk(key)) return false;
+    return (counts.get(key) ?? 0) < REPEATED_NAME_LIMIT;
   });
 }
 
