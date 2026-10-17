@@ -56,7 +56,7 @@ test.describe("OSM cleanup", () => {
     const hospitalNoContacts = osm("2", "医院");
     const zoeWithPhone = osm("3", "Zoe", { phone: "+33100000000" });
     const tasNoContacts = osm("4", "TAS");
-    const kept = removeJunkOsmOrganizations([
+    const kept = removeJunkOsmOrganizations([ // "TAS" without contacts is removed
       hospitalWithAddress,
       hospitalNoContacts,
       zoeWithPhone,
@@ -70,16 +70,62 @@ test.describe("OSM cleanup", () => {
     expect(kept).not.toContain("TAS");
   });
 
-  test("a name repeated 5+ times is hidden only for records without phone, website and address", () => {
-    const repeated = Array.from({ length: 5 }, (_, i) =>
-      osm(String(i), "Rental houses", { lat: 48.8566 + i * 0.01 }),
+  test("a repeated name without contacts is NOT junk (pharmacy chains stay)", () => {
+    const chain = Array.from({ length: 8 }, (_, i) =>
+      osm(String(i), "Подорожник", { lat: 48.8566 + i * 0.01 }),
     );
-    const withContact = osm("9", "Rental houses", { lat: 48.99, phone: "+33100000000" });
-    const result = removeJunkOsmOrganizations([...repeated, withContact]);
-    expect(result.map((o) => o.id)).toEqual([withContact.id]);
+    expect(removeJunkOsmOrganizations(chain)).toHaveLength(8);
+    expect(dedupeOsmOrganizations(chain)).toHaveLength(8);
+  });
 
-    // four repeats stay
-    expect(removeJunkOsmOrganizations(repeated.slice(0, 4))).toHaveLength(4);
+  test("same name within 100 m but different phones or addresses are different organizations", () => {
+    const mini = [
+      osm("1", "Міні ЕКЗ Центр", { phone: "+380 66 083 6099", address: "10/7 Кирилівська вулиця" }),
+      osm("2", "Міні ЕКЗ Центр", {
+        lat: 48.8566 + 0.0003,
+        phone: "+380 44 339 9415;+380 44 332 8158",
+        website: "https://www.mini-eco.com/",
+      }),
+    ];
+    expect(dedupeOsmOrganizations(mini)).toHaveLength(2);
+
+    const podorozhnik = [
+      osm("3", "Подорожник", { address: "5 Спаська вулиця" }),
+      osm("4", "Подорожник", { lat: 48.8566 + 0.0003, address: "3/7 Межигірська вулиця" }),
+    ];
+    expect(dedupeOsmOrganizations(podorozhnik)).toHaveLength(2);
+  });
+
+  test("same place with the same phone or a longer form of the same address is still merged", () => {
+    const samePhone = [
+      osm("1", "Clinic B", { phone: "+380 44 339 9415" }),
+      osm("2", "Clinic B", { lat: 48.8566 + 0.0002, phone: "044 339 94 15", website: "https://b.example" }),
+    ];
+    expect(dedupeOsmOrganizations(samePhone)).toHaveLength(1);
+
+    const sameAddress = [
+      osm("3", "Clinic C", { address: "10/7 Кирилівська вулиця" }),
+      osm("4", "Clinic C", { lat: 48.8566 + 0.0002, address: "10/7 Кирилівська вулиця, 04071" }),
+    ];
+    expect(dedupeOsmOrganizations(sameAddress)).toHaveLength(1);
+  });
+
+  test("hospitals are never merged as duplicates nor dropped as junk", () => {
+    const hospitals = [
+      osm("1", "City Hospital", { osmKind: "hospital" }),
+      osm("2", "City Hospital", { lat: 48.8566 + 0.0001, osmKind: "hospital" }),
+      osm("3", "ЦМЛ", { osmKind: "hospital" }), // short name, no contacts
+    ];
+    const { organizations, stats } = cleanOsmOrganizations(hospitals);
+    expect(organizations).toHaveLength(3);
+    expect(stats).toMatchObject({ duplicates: 0, junk: 0 });
+  });
+
+  test("closed lifecycle tags hide a hospital as well", () => {
+    expect(
+      hasClosedLifecycleTag({ amenity: "hospital", name: "Old Hospital", "disused:healthcare": "hospital" }),
+    ).toBe(true);
+    expect(hasClosedLifecycleTag({ amenity: "hospital", name: "Open Hospital", emergency: "yes" })).toBe(false);
   });
 
   test("closed lifecycle tags are recognised", () => {
