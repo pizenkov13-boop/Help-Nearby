@@ -188,8 +188,38 @@ export async function fetchOrganizations(
  */
 export const E2E_FIXTURE_SLUG = "e2e-croix-rouge-moulins";
 
+export const E2E_APPROX_FIXTURE_SLUG = "e2e-hdx-approximate";
+
 function e2eFixtureOrganization(slug: string): Organization | null {
-  if (process.env.E2E_FIXTURE_ORGS !== "1" || slug !== E2E_FIXTURE_SLUG) return null;
+  if (process.env.E2E_FIXTURE_ORGS !== "1") return null;
+
+  if (slug === E2E_APPROX_FIXTURE_SLUG) {
+    // Country-level directory entry: carries country-centroid coordinates and no hours.
+    return {
+      ...mapDbOrganization({
+        id: 990002,
+        name: "E2E Approximate Relief Org",
+        slug: E2E_APPROX_FIXTURE_SLUG,
+        category: ["volunteer"],
+        description: "Humanitarian organization active in the country.",
+        address: null,
+        city: null,
+        country: "Sudan",
+        lat: 15.5,
+        lng: 32.5,
+        phone: null,
+        email: null,
+        website: "https://example.org/relief",
+        hours: null,
+        rating: null,
+        verified: true,
+        created_at: null,
+      }),
+      id: "hdx-e2e-approx",
+    };
+  }
+
+  if (slug !== E2E_FIXTURE_SLUG) return null;
   return mapDbOrganization({
     id: 990001,
     name: "Croix-Rouge française – Unité locale de Moulins",
@@ -209,6 +239,60 @@ function e2eFixtureOrganization(slug: string): Organization | null {
     verified: true,
     created_at: null,
   });
+}
+
+/** Verified organizations for the sitemap (slug + created_at), in a stable order. */
+export async function fetchSitemapOrganizations(
+  offset: number,
+  limit: number,
+): Promise<{ slug: string; lastModified: string | null }[]> {
+  const supabase = getSupabase();
+  if (!supabase) return [];
+
+  const PAGE = 1000; // PostgREST returns at most 1000 rows per request
+  const rows: { slug: string; lastModified: string | null }[] = [];
+
+  try {
+    for (let from = offset; from < offset + limit; from += PAGE) {
+      const to = Math.min(from + PAGE, offset + limit) - 1;
+      const { data, error } = await supabase
+        .from("organizations")
+        .select("slug, created_at")
+        .eq("verified", true)
+        .order("id", { ascending: true })
+        .range(from, to);
+
+      if (error) {
+        console.error("[fetchSitemapOrganizations]", error.message);
+        break;
+      }
+      for (const row of (data ?? []) as { slug: string; created_at: string | null }[]) {
+        rows.push({ slug: row.slug, lastModified: row.created_at });
+      }
+      if ((data?.length ?? 0) < to - from + 1) break;
+    }
+  } catch (error) {
+    console.error("[fetchSitemapOrganizations]", error instanceof Error ? error.message : "failed");
+  }
+  return rows;
+}
+
+export async function countSitemapOrganizations(): Promise<number> {
+  const supabase = getSupabase();
+  if (!supabase) return 0;
+  try {
+    const { count, error } = await supabase
+      .from("organizations")
+      .select("id", { count: "exact", head: true })
+      .eq("verified", true);
+    if (error) {
+      console.error("[countSitemapOrganizations]", error.message);
+      return 0;
+    }
+    return count ?? 0;
+  } catch {
+    return 0;
+  }
 }
 
 export async function fetchOrganizationBySlug(
