@@ -47,14 +47,38 @@ test.describe("Opening hours rules (unit)", () => {
     });
   });
 
-  test("raw text hours are shown only when they can be parsed (24/7)", () => {
+  test("catalog entries show their raw hours text as written, even when it cannot be parsed", () => {
     expect(getHoursDisplay({ ...moulins, hoursRaw: "24/7" })).toEqual({
       kind: "listed",
       lines: ["24/7"],
     });
-    expect(getHoursDisplay({ ...moulins, hoursRaw: "ask at the desk" })).toEqual({
-      kind: "unknown",
+    const nochlezhka = { ...moulins, hoursRaw: "Пн–Чт 19:00–20:00" };
+    expect(getHoursDisplay(nochlezhka)).toEqual({ kind: "listed", lines: ["Пн–Чт 19:00–20:00"] });
+    // the open/closed status stays unknown, so "Open now" never hides them
+    expect(getOrganizationOpenStatus(nochlezhka)).toBe("unknown");
+    expect(getHoursDisplay({ ...moulins, hoursRaw: "  ask at the desk " })).toEqual({
+      kind: "listed",
+      lines: ["ask at the desk"],
     });
+  });
+
+  test("OSM raw metadata and JSON-looking text are never shown as hours", () => {
+    const osm: Organization = {
+      ...moulins,
+      id: "overpass-node-1",
+      hoursRaw: "emergency:yes; amenity:hospital",
+    };
+    expect(getHoursDisplay(osm)).toEqual({ kind: "unknown" });
+    // even a non-OSM id never shows serialized tag metadata
+    for (const raw of [
+      "emergency:yes; amenity:hospital",
+      "healthcare:counselling;oncology; amenity:clinic",
+      "по записи; emergency:no; healthcare:clinic; amenity:clinic",
+    ]) {
+      expect(getHoursDisplay({ ...moulins, hoursRaw: raw })).toEqual({ kind: "unknown" });
+    }
+    expect(getHoursDisplay({ ...moulins, hoursRaw: "{}" })).toEqual({ kind: "unknown" });
+    expect(getHoursDisplay({ ...moulins, hoursRaw: "" })).toEqual({ kind: "unknown" });
   });
 
   test("a day missing from structured hours is unknown, never closed", () => {
