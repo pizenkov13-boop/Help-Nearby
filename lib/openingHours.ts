@@ -180,3 +180,94 @@ export function extractOsmOpeningHours(hoursRaw: string): string | null {
   const cleaned = cleanOsmString(hoursRaw);
   return cleaned || null;
 }
+
+// ---------------------------------------------------------------------------
+// Russian weekday schedules of catalog entries, e.g. "Пн–Пт 19:00–19:30; Вс 9:30–11:00".
+// Only strings that are entirely "days + time range" segments are understood. Anything else
+// (extra words, a single time, no days, seasons, several services) returns null and stays raw text.
+// ---------------------------------------------------------------------------
+
+export interface RussianScheduleRule {
+  /** Date.getDay() numbers: 0 = Sunday. */
+  days: number[];
+  /** Minutes from midnight; close <= open means the window crosses midnight. */
+  open: number;
+  close: number;
+}
+
+const RU_DAY_NUMBER: Record<string, number> = { пн: 1, вт: 2, ср: 3, чт: 4, пт: 5, сб: 6, вс: 0 };
+/** Monday-first, so "Сб–Пн" walks Sat, Sun, Mon. */
+const RU_WEEK = [1, 2, 3, 4, 5, 6, 0];
+const RU_DAY = "(?:пн|вт|ср|чт|пт|сб|вс)";
+const RU_DASH = "[-–—]";
+const RU_DAYS = `(?:ежедневно|${RU_DAY}${RU_DASH}${RU_DAY}|${RU_DAY}(?:\\s*,\\s*${RU_DAY})*)`;
+const RU_SEGMENT = new RegExp(
+  `^(${RU_DAYS})\\s+(\\d{1,2}):(\\d{2})\\s*${RU_DASH}\\s*(\\d{1,2}):(\\d{2})$`,
+  "i",
+);
+
+function expandRussianDays(spec: string): number[] | null {
+  const s = spec.toLowerCase();
+  if (s === "ежедневно") return [...RU_WEEK];
+
+  const range = s.match(new RegExp(`^(${RU_DAY})${RU_DASH}(${RU_DAY})$`));
+  if (range) {
+    const from = RU_WEEK.indexOf(RU_DAY_NUMBER[range[1]!]!);
+    const to = RU_WEEK.indexOf(RU_DAY_NUMBER[range[2]!]!);
+    const days: number[] = [];
+    for (let i = from; ; i = (i + 1) % 7) {
+      days.push(RU_WEEK[i]!);
+      if (i === to) break;
+    }
+    return days;
+  }
+
+  const days = s.split(/\s*,\s*/).map((d) => RU_DAY_NUMBER[d]);
+  return days.every((d) => d !== undefined) ? (days as number[]) : null;
+}
+
+function validMinutes(hours: string, minutes: string): number | null {
+  const h = Number(hours);
+  const m = Number(minutes);
+  return h <= 23 && m <= 59 ? h * 60 + m : null;
+}
+
+/** Fully understood schedule, or null when any part of the text is not "days + time range". */
+export function parseRussianSchedule(text: string | null | undefined): RussianScheduleRule[] | null {
+  const raw = text?.trim();
+  if (!raw) return null;
+
+  const rules: RussianScheduleRule[] = [];
+  for (const part of raw.split(";")) {
+    const match = part.trim().match(RU_SEGMENT);
+    if (!match) return null;
+    const days = expandRussianDays(match[1]!);
+    const open = validMinutes(match[2]!, match[3]!);
+    const close = validMinutes(match[4]!, match[5]!);
+    if (!days || open === null || close === null || open === close) return null;
+    rules.push({ days, open, close });
+  }
+  return rules.length > 0 ? rules : null;
+}
+
+/**
+ * "open" inside a listed window (a window that crosses midnight also covers the morning after),
+ * otherwise "unknown": a catalog schedule is a statement of when help is given, never proof that
+ * the place is closed, so this never returns "closed".
+ */
+export function evaluateRussianSchedule(
+  rules: RussianScheduleRule[],
+  date: Date = new Date(),
+): OpenStatus {
+  const day = date.getDay();
+  const previousDay = (day + 6) % 7;
+  const minutes = date.getHours() * 60 + date.getMinutes();
+
+  const open = rules.some((rule) =>
+    rule.close > rule.open
+      ? rule.days.includes(day) && minutes >= rule.open && minutes < rule.close
+      : (rule.days.includes(day) && minutes >= rule.open) ||
+        (rule.days.includes(previousDay) && minutes < rule.close),
+  );
+  return open ? "open" : "unknown";
+}
