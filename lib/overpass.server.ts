@@ -11,6 +11,7 @@ import {
   buildEmergencyMetadataRaw,
   isGenuineEmergencyOsmFacility,
 } from "@/lib/emergencyFacilities";
+import { cleanOsmOrganizations, hasClosedLifecycleTag } from "@/lib/osmCleanup";
 import { slugify } from "@/lib/orgUtils";
 import {
   normalizeRawCoordinates,
@@ -475,7 +476,8 @@ function parseOverpassElements(
 ): Organization[] {
   const elements = data.elements ?? [];
   const seen = new Set<string>();
-  const organizations: Organization[] = [];
+  const mapped: Organization[] = [];
+  let closed = 0;
 
   for (const el of elements) {
     const org = mapElementToOrganization(
@@ -485,10 +487,26 @@ function parseOverpassElements(
       options,
     );
     if (!org) continue;
+    // disused:* / abandoned:* / was:* — the object is gone, never show it.
+    if (hasClosedLifecycleTag(el.tags)) {
+      closed += 1;
+      continue;
+    }
     const key = `${org.lat.toFixed(5)}:${org.lng.toFixed(5)}:${org.name}`;
     if (seen.has(key)) continue;
     seen.add(key);
-    organizations.push(org);
+    mapped.push(org);
+  }
+
+  // Emergency facilities keep every record; regular search drops same-place duplicates and junk.
+  let organizations = mapped;
+  if (!options?.emergency) {
+    const cleaned = cleanOsmOrganizations(mapped, closed);
+    organizations = cleaned.organizations;
+    const { before, duplicates, junk, after } = cleaned.stats;
+    console.log(
+      `[overpass] cleanup: ${before} -> ${after} (duplicates ${duplicates}, junk ${junk}, closed ${closed})`,
+    );
   }
 
   return organizations.sort((a, b) => {
