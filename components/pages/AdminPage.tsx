@@ -280,7 +280,7 @@ export function AdminPage({
 
           {!configured && (
             <p className="mb-4 rounded-lg border border-amber-500/30 bg-amber-500/10 px-3 py-2 text-sm text-amber-300">
-              Set ADMIN_PASSWORD in .env.local to enable admin access.
+              Set ADMIN_PASSWORD and ADMIN_SESSION_SECRET (32+ characters) in the server environment to enable admin access.
             </p>
           )}
 
