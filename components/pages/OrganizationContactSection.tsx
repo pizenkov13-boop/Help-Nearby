@@ -1,7 +1,6 @@
 "use client";
 
 import { Clock, Globe, Mail, MapPin, Phone } from "lucide-react";
-import { trackPhoneClicked, trackWebsiteClicked } from "@/lib/analytics.client";
 import { useLanguage } from "@/lib/i18n/LanguageProvider";
 import { getHoursDisplay, getPhoneTelUrl } from "@/lib/orgUtils";
 import { getOrganizationSource } from "@/lib/organizationSource";
@@ -44,7 +43,6 @@ export function OrganizationContactSection({ org }: { org: Organization }) {
             <Phone className="h-5 w-5 shrink-0 text-gray-500" aria-hidden />
             <a
               href={getPhoneTelUrl(phone)}
-              onClick={() => trackPhoneClicked(org)}
               className="text-gray-600 hover:text-emerald-400 dark:text-gray-300"
             >
               {phone}
@@ -69,7 +67,6 @@ export function OrganizationContactSection({ org }: { org: Organization }) {
               href={website}
               target="_blank"
               rel="noopener noreferrer"
-              onClick={() => trackWebsiteClicked(org)}
               className="inline-flex min-h-11 items-center break-all text-blue-500 hover:text-blue-400 dark:text-blue-400"
             >
               {website.replace(/^https?:\/\//, "")}

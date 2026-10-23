@@ -12,11 +12,7 @@ import {
 import { CategoryIcon } from "@/components/icons/CategoryIcon";
 import { CATEGORY_CONFIG } from "@/lib/categories";
 import { useLanguage } from "@/lib/i18n/LanguageProvider";
-import {
-  trackOrganizationCardOpened,
-  trackDirectionsClicked,
-  trackPhoneClicked,
-} from "@/lib/analytics.client";
+import { trackEvent } from "@/lib/umami.client";
 import { recordImpactClick } from "@/lib/impact.client";
 import {
   getDirectionsUrl,
@@ -65,20 +61,19 @@ export function OrganizationCard({
   const approximate = isApproximateLocation(org);
 
   const handleCallClick = () => {
-    trackPhoneClicked(org);
     recordImpactClick(org.id, "call");
     onImpactRecorded?.();
   };
 
   const handleDirectionsClick = () => {
-    trackDirectionsClicked(org);
+    trackEvent("directions_requested");
     recordImpactClick(org.id, "directions");
     onImpactRecorded?.();
     onGetDirections?.(org);
   };
 
   const handleCardOpen = () => {
-    trackOrganizationCardOpened(org);
+    trackEvent("organization_card_opened");
     onSelect?.(org);
   };
 
@@ -275,7 +270,7 @@ export function OrganizationCard({
                   target="_blank"
                   rel="noopener noreferrer"
                   onClick={() => {
-                    trackDirectionsClicked(org);
+                    trackEvent("directions_requested");
                     recordImpactClick(org.id, "directions");
                     onImpactRecorded?.();
                   }}

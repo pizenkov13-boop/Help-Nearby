@@ -1,6 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { DM_Sans, Newsreader } from "next/font/google";
-import { AnalyticsLoader } from "@/components/providers/AnalyticsLoader";
+import { UmamiScript } from "@/components/providers/UmamiScript";
 import { ServiceWorkerRegister } from "@/components/ServiceWorkerRegister";
 import { AppProviders } from "@/components/providers/AppProviders";
 import "leaflet/dist/leaflet.css";
@@ -86,7 +86,7 @@ export default function RootLayout({
         className="min-h-screen bg-surface font-sans text-foreground transition-[background-color] duration-300"
       >
         <AppProviders>{children}</AppProviders>
-        <AnalyticsLoader />
+        <UmamiScript />
         <ServiceWorkerRegister />
       </body>
     </html>

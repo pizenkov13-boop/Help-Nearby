@@ -13,15 +13,33 @@ function tileImgSource() {
   }
 }
 
+/**
+ * Origin of the Umami tracker (from NEXT_PUBLIC_UMAMI_SRC), or "" when analytics is not configured.
+ * It is the only analytics host the policy ever allows, for the script and for the events it posts.
+ */
+function umamiOrigin() {
+  const src = process.env.NEXT_PUBLIC_UMAMI_SRC?.trim();
+  const websiteId = process.env.NEXT_PUBLIC_UMAMI_WEBSITE_ID?.trim();
+  if (!src || !websiteId) return "";
+  try {
+    const url = new URL(src);
+    return url.protocol === "https:" ? url.origin : "";
+  } catch {
+    return "";
+  }
+}
+
+const withUmami = (base) => [base, umamiOrigin()].filter(Boolean).join(" ");
+
 /** Production CSP — no unsafe-eval; Next.js inline boot scripts need unsafe-inline. */
 export const CONTENT_SECURITY_POLICY = [
   "default-src 'self'",
-  "script-src 'self' 'unsafe-inline' https://us-assets.i.posthog.com https://eu-assets.i.posthog.com",
-  "script-src-elem 'self' 'unsafe-inline' https://us-assets.i.posthog.com https://eu-assets.i.posthog.com",
+  withUmami("script-src 'self' 'unsafe-inline'"),
+  withUmami("script-src-elem 'self' 'unsafe-inline'"),
   "style-src 'self' 'unsafe-inline'",
   `img-src 'self' data: blob: ${tileImgSource()} https://unpkg.com`,
   "font-src 'self' data:",
-  "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://*.posthog.com https://us.i.posthog.com https://eu.i.posthog.com https://*.i.posthog.com https://us-assets.i.posthog.com https://eu-assets.i.posthog.com",
+  withUmami("connect-src 'self' https://*.supabase.co wss://*.supabase.co"),
   "worker-src 'self'",
   "manifest-src 'self'",
   "base-uri 'self'",
