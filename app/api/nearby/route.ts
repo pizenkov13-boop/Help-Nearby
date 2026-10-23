@@ -1,24 +1,26 @@
 import { NextResponse } from "next/server";
+import { readJsonBody, toNumber } from "@/lib/apiBody.server";
 import { NEARBY_RADIUS_METERS } from "@/lib/constants";
 import { fetchNearbyOverpassOrganizations } from "@/lib/overpass.server";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
-export async function GET(request: Request) {
+/** Body: { lat, lng, radius? }. Nothing about the request (URL, position) is logged. */
+export async function POST(request: Request) {
   try {
-    const { searchParams } = new URL(request.url);
-    const lat = Number(searchParams.get("lat"));
-    const lng = Number(searchParams.get("lng"));
-    const radius = Number(searchParams.get("radius") ?? NEARBY_RADIUS_METERS);
+    const body = await readJsonBody(request);
+    const lat = toNumber(body.lat);
+    const lng = toNumber(body.lng);
+    const radius = Number.isFinite(toNumber(body.radius))
+      ? toNumber(body.radius)
+      : NEARBY_RADIUS_METERS;
 
     if (!Number.isFinite(lat) || !Number.isFinite(lng)) {
-      console.warn("[api/nearby] Invalid lat/lng — returning empty list");
       return NextResponse.json([]);
     }
 
     const organizations = await fetchNearbyOverpassOrganizations(lat, lng, radius);
-
     return NextResponse.json(organizations);
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
