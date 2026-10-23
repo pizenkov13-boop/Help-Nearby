@@ -58,7 +58,7 @@ const COPY: Record<PrivacyLanguage, PrivacyCopy> = {
       {
         title: "What the forms store",
         items: [
-          "Review: the name, country, message and rating you type, and the date. A review is published only after moderation. Do not write anything you do not want to be public.",
+          "Review: an optional name or nickname (not a real-name field; leave it empty to appear as Anonymous), the country, the message and the rating you type, and the date. A review is published only after moderation. Do not write anything you do not want to be public.",
           "Add an organization: the name, category, country, city, address, phone, e-mail, website, opening hours and description you type, plus coordinates found from the address. These details are published after verification, so give organization contacts, not private ones.",
           "Counter of help: when you press Call or Directions we store only the organization id, the action and the time. Nothing that identifies you.",
         ],
@@ -114,7 +114,7 @@ const COPY: Record<PrivacyLanguage, PrivacyCopy> = {
       {
         title: "Что сохраняют формы",
         items: [
-          "Отзыв: имя, страна, текст и оценка, которые вы вводите, и дата. Отзыв публикуется только после модерации. Не пишите то, что не хотите сделать публичным.",
+          "Отзыв: необязательное имя или псевдоним (это не поле для настоящего имени; оставьте пустым, и вы будете «Аноним»), страна, текст и оценка, которые вы вводите, и дата. Отзыв публикуется только после модерации. Не пишите то, что не хотите сделать публичным.",
           "Добавление организации: название, категория, страна, город, адрес, телефон, e-mail, сайт, часы работы и описание, которые вы вводите, а также координаты, найденные по адресу. Эти данные публикуются после проверки, поэтому указывайте контакты организации, а не личные.",
           "Счётчик помощи: при нажатии «Позвонить» или «Маршрут» мы сохраняем только идентификатор организации, тип действия и время. Ничего, что идентифицирует вас.",
         ],

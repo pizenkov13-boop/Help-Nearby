@@ -15,7 +15,7 @@ test.describe("Forms", () => {
     await page.goto("/reviews");
 
     await expect(page.getByRole("heading", { name: /Reviews/i })).toBeVisible();
-    await expect(page.getByLabel("Your name")).toBeVisible();
+    await expect(page.getByLabel("Name or nickname (optional)")).toBeVisible();
     await expect(page.getByRole("button", { name: /Submit feedback/i })).toBeVisible();
   });
 

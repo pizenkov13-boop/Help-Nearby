@@ -14,6 +14,7 @@ import {
 import type { DbOrganization } from "@/lib/data";
 import { CategoryIcon } from "@/components/icons/CategoryIcon";
 import { CountryFlag } from "@/components/icons/CountryFlag";
+import { displayReviewerName } from "@/lib/reviewInput";
 import { CATEGORIES, CATEGORY_CONFIG } from "@/lib/categories";
 import type { Category, Review } from "@/lib/types";
 import { cn } from "@/lib/utils";
@@ -478,7 +479,7 @@ export function AdminPage({
                   <div className="flex items-center gap-2">
                     <MessageSquare className="h-4 w-4 text-blue-400" />
                     <span className="font-semibold text-white">
-                      {review.name}
+                      {displayReviewerName(review.name, "Anonymous")}
                     </span>
                     <CountryFlag country={review.country} />
                     <span className="text-sm text-gray-500">
