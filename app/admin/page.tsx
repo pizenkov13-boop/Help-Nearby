@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { AdminPage } from "@/components/pages/AdminPage";
-import { getAdminPassword, isAdminAuthenticated } from "@/lib/adminAuth";
+import { isAdminAuthenticated, isAdminConfigured } from "@/lib/adminAuth";
 import { getSupabaseAdmin } from "@/lib/supabaseAdmin";
 
 export const runtime = "nodejs";
@@ -18,7 +18,7 @@ export default async function AdminRoutePage() {
   return (
     <AdminPage
       initialAuthenticated={authenticated}
-      initialConfigured={Boolean(getAdminPassword())}
+      initialConfigured={isAdminConfigured()}
       initialCanVerify={Boolean(getSupabaseAdmin())}
     />
   );

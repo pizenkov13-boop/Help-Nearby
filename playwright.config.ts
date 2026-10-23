@@ -41,6 +41,13 @@ export default defineConfig({
         reuseExistingServer: !process.env.CI,
         timeout: 600_000,
         // Never let e2e reach the real AI provider, even if .env.local holds a key.
-        env: { AITUNNEL_API_KEY: "", DEBUG_TOKEN: "", E2E_FIXTURE_ORGS: "1" },
+        env: {
+          AITUNNEL_API_KEY: "",
+          DEBUG_TOKEN: "",
+          E2E_FIXTURE_ORGS: "1",
+          // Test-only admin credentials (never real): they override anything in .env.local.
+          ADMIN_PASSWORD: "e2e-admin-password",
+          ADMIN_SESSION_SECRET: "e2e-session-secret-0123456789-abcdefghij",
+        },
       },
 });
