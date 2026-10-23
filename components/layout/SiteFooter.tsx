@@ -13,6 +13,7 @@ import {
   Plus,
   Send,
   Share2,
+  ShieldCheck,
   Target,
 } from "lucide-react";
 import { BrandLogo } from "@/components/BrandLogo";
@@ -120,6 +121,12 @@ export function SiteFooter() {
               <Link href="/submit">
                 <Plus className="ui-icon" aria-hidden />
                 {t("footerSubmitOrg")}
+              </Link>
+            </li>
+            <li>
+              <Link href="/privacy">
+                <ShieldCheck className="ui-icon" aria-hidden />
+                {t("navPrivacy")}
               </Link>
             </li>
           </ul>
