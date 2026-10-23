@@ -1,23 +1,25 @@
 import { NextResponse } from "next/server";
+import { readJsonBody, toNumber } from "@/lib/apiBody.server";
 import { nominatimReverse } from "@/lib/nominatim.server";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
-export async function GET(request: Request) {
-  const { searchParams } = new URL(request.url);
-  const lat = Number(searchParams.get("lat"));
-  const lon = Number(searchParams.get("lon"));
+/** Body: { lat, lng }. Returns the country only. */
+export async function POST(request: Request) {
+  const body = await readJsonBody(request);
+  const lat = toNumber(body.lat);
+  const lng = toNumber(body.lng);
 
-  if (!Number.isFinite(lat) || !Number.isFinite(lon)) {
+  if (!Number.isFinite(lat) || !Number.isFinite(lng)) {
     return NextResponse.json(
-      { error: "Query parameters lat and lon are required." },
+      { error: "lat and lng are required." },
       { status: 400 },
     );
   }
 
   try {
-    const result = await nominatimReverse(lat, lon);
+    const result = await nominatimReverse(lat, lng);
 
     if (!result) {
       return NextResponse.json({ error: "Location not found." }, { status: 404 });

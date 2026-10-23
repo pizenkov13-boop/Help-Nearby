@@ -33,7 +33,9 @@ export async function POST(request: Request) {
     const rating = Number(body.rating);
 
     const result = await submitReview({
+      // optional: an empty name is stored as "Anonymous" in the submitter's language
       name: String(body.name ?? ""),
+      language: String(body.language ?? ""),
       country: String(body.country ?? ""),
       message: String(body.message ?? ""),
       rating,

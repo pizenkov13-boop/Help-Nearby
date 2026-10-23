@@ -45,14 +45,14 @@ async function mockPlaceApis(page: Page) {
     return json(route, { results: q.includes("nice") ? [nicePlace] : [] });
   });
   await page.route(/\/api\/geocode\/reverse/, (route) => {
-    const params = new URL(route.request().url()).searchParams;
-    const lng = Number(params.get("lon") ?? params.get("lng"));
+    // The position travels in the POST body, never in the URL.
+    const lng = Number(route.request().postDataJSON()?.lng);
     return lng > 0 && lng < 20
       ? json(route, { country: "France", countryCode: "FR" })
       : json(route, { country: "United States", countryCode: "US" });
   });
   await page.route(/\/api\/organizations/, (route) => {
-    const country = new URL(route.request().url()).searchParams.get("country");
+    const country = route.request().postDataJSON()?.country;
     return json(route, country === "France" ? niceOrgs : MOCK_NEARBY_ORGS);
   });
   await page.route(/\/api\/nearby/, (route) => json(route, []));

@@ -227,7 +227,13 @@ export function ChatWidget() {
                 )}
               </button>
             </div>
-            <p className="mt-2 text-xs leading-snug text-slate-500 dark:text-gray-500">
+            <p
+              data-testid="chat-privacy-notice"
+              className="mt-2 text-xs leading-snug text-slate-600 dark:text-gray-400"
+            >
+              {t("chatPrivacyNotice")}
+            </p>
+            <p className="mt-1 text-xs leading-snug text-slate-500 dark:text-gray-500">
               {t("chatDisclaimer")}
             </p>
           </div>

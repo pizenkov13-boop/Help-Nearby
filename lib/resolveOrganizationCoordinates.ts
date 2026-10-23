@@ -1,4 +1,5 @@
 import { hasValidMapCoordinates } from "@/lib/mapCoordinates";
+import { postJson } from "@/lib/postJson";
 import {
   getOrganizationCoordinates,
   isOverpassOrganization,
@@ -64,11 +65,7 @@ async function fetchSnappedCoordinates(
   if (cached) return cached;
 
   try {
-    const params = new URLSearchParams({
-      lat: String(lat),
-      lng: String(lng),
-    });
-    const res = await fetch(`/api/nearest?${params}`);
+    const res = await postJson("/api/nearest", { lat, lng });
     if (!res.ok) return null;
 
     const data = (await res.json()) as { lat?: number; lng?: number };

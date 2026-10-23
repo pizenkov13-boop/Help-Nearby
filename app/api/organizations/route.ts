@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { readJsonBody, toNumber, toTrimmedString } from "@/lib/apiBody.server";
 import { fetchOrganizations } from "@/lib/data";
 import type { Organization } from "@/lib/types";
 import { createTtlCache, searchCacheKey, withTimeout } from "@/lib/ttlCache";
@@ -9,12 +10,13 @@ export const dynamic = "force-dynamic";
 const SUPABASE_TIMEOUT_MS = 4000;
 const catalogCache = createTtlCache<Organization[]>();
 
-export async function GET(request: Request) {
-  const { searchParams } = new URL(request.url);
-  const country = searchParams.get("country")?.trim() || undefined;
-  const lat = Number(searchParams.get("lat"));
-  const lng = Number(searchParams.get("lng"));
-  const radius = Number(searchParams.get("radius"));
+/** Body: { country? } or { lat, lng, radius }. The position is never put in the URL. */
+export async function POST(request: Request) {
+  const body = await readJsonBody(request);
+  const country = toTrimmedString(body.country);
+  const lat = toNumber(body.lat);
+  const lng = toNumber(body.lng);
+  const radius = toNumber(body.radius);
 
   const hasLocation = Number.isFinite(lat) && Number.isFinite(lng);
   const location = hasLocation ? { lat, lng } : null;

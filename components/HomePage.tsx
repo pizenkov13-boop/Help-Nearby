@@ -58,14 +58,7 @@ import {
   formatSearchNearestOrgs,
   formatSearchRadiusWithin,
 } from "@/lib/i18n/translations";
-import {
-  formatSearchLocation,
-  trackFindHelpClicked,
-  trackGeolocationDenied,
-  trackGeolocationGranted,
-  trackOrganizationsLoaded,
-  trackSearchPerformed,
-} from "@/lib/analytics.client";
+import { trackEvent } from "@/lib/umami.client";
 import { SiteLayout } from "@/components/layout/SiteLayout";
 import { cn } from "@/lib/utils";
 import { Filters } from "./Filters";
@@ -145,7 +138,7 @@ export function HomePage() {
   const searchRunIdRef = useRef(0);
   const searchAbortRef = useRef<AbortController | null>(null);
   const lastSearchAreaRef = useRef<string | null>(null);
-  const lastOrganizationsLoadedRef = useRef<string | null>(null);
+  const mapOpenedTrackedRef = useRef(false);
 
   const searchAreaKey = useCallback(
     (location: UserLocation, lite: boolean) =>
@@ -541,11 +534,6 @@ export function HomePage() {
         if (geo) {
           cacheDetectedCountry(geo.country, geo.countryCode);
         }
-        trackGeolocationGranted({
-          country: geo?.country ?? "",
-          lat,
-          lng,
-        });
         setUserLocation({
           lat,
           lng,
@@ -555,14 +543,11 @@ export function HomePage() {
         setIsLocating(false);
       },
       (error: GeolocationPositionError) => {
-        if (error.code === error.PERMISSION_DENIED) {
-          trackGeolocationDenied(language);
-        }
         setIsLocating(false);
       },
       { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 },
     );
-  }, [language]);
+  }, []);
 
   const handleSwitchToLiteVersion = useCallback(() => {
     setStoredViewMode("lite");
@@ -654,8 +639,6 @@ export function HomePage() {
   );
 
   const handleFindHelp = useCallback(() => {
-    trackFindHelpClicked(language);
-
     if (mapExpanded && userLocation) {
       scrollToMapTop();
       return;
@@ -681,11 +664,6 @@ export function HomePage() {
         if (geo) {
           cacheDetectedCountry(geo.country, geo.countryCode);
         }
-        trackGeolocationGranted({
-          country: geo?.country ?? "",
-          lat,
-          lng,
-        });
         openMapAccordion(
           {
             lat,
@@ -696,9 +674,6 @@ export function HomePage() {
         );
       },
       (error: GeolocationPositionError) => {
-        if (error.code === error.PERMISSION_DENIED) {
-          trackGeolocationDenied(language);
-        }
         openMapAccordion(DEFAULT_LOCATION, true);
       },
       { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 },
@@ -709,7 +684,6 @@ export function HomePage() {
     openMapAccordion,
     scrollToMapTop,
     liteModeActive,
-    language,
   ]);
 
   useEffect(() => {
@@ -822,30 +796,16 @@ export function HomePage() {
     (query: string) => {
       const trimmed = query.trim();
       if (!trimmed) return;
-      trackSearchPerformed({
-        query: trimmed,
-        location: formatSearchLocation(userLocation),
-        results_count: filtered.length,
-      });
+      trackEvent("search_performed");
     },
-    [userLocation, filtered],
+    [],
   );
 
   useEffect(() => {
-    if (!mapExpanded || orgsLoading || !userLocation) return;
-
-    const cachedCountry = readCachedDetectedCountry()?.country ?? "";
-    const radius = metersToDisplayKm(searchRadiusMeters ?? 0);
-    const signature = `${filtered.length}|${cachedCountry}|${radius}`;
-    if (lastOrganizationsLoadedRef.current === signature) return;
-    lastOrganizationsLoadedRef.current = signature;
-
-    trackOrganizationsLoaded({
-      count: filtered.length,
-      country: cachedCountry,
-      radius,
-    });
-  }, [mapExpanded, orgsLoading, userLocation, filtered.length, searchRadiusMeters]);
+    if (!mapExpanded || mapOpenedTrackedRef.current) return;
+    mapOpenedTrackedRef.current = true;
+    trackEvent("map_opened");
+  }, [mapExpanded]);
 
   return (
     <SiteLayout>

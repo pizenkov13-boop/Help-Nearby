@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { getAdminPassword, isAdminAuthenticated } from "@/lib/adminAuth";
+import { isAdminAuthenticated, isAdminConfigured } from "@/lib/adminAuth";
 import { getSupabaseAdmin } from "@/lib/supabaseAdmin";
 
 export const runtime = "nodejs";
@@ -9,7 +9,7 @@ export async function GET() {
   const authenticated = await isAdminAuthenticated();
   return NextResponse.json({
     authenticated,
-    configured: Boolean(getAdminPassword()),
+    configured: isAdminConfigured(),
     canVerify: Boolean(getSupabaseAdmin()),
   });
 }

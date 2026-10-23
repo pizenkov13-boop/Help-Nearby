@@ -10,6 +10,7 @@ import {
   writeOverpassClientCache,
 } from "@/lib/overpassClientCache";
 import { resolveOrganizationCoordinates } from "@/lib/resolveOrganizationCoordinates";
+import { postJson } from "@/lib/postJson";
 import { readSessionCache, writeSessionCache } from "@/lib/sessionCache";
 import {
   getMaxRadiusMeters,
@@ -80,15 +81,19 @@ function mergeAllNearbySources(
   return mergeOrganizations(mergeOrganizations(catalog, overpass), verified);
 }
 
-/** Fetches JSON with an abort timeout; distinguishes timeout from other failures. */
+/**
+ * POSTs a JSON body (the position never goes into the URL) with an abort timeout;
+ * distinguishes timeout from other failures.
+ */
 async function fetchJsonWithTimeout(
   url: string,
+  body: Record<string, unknown>,
   timeoutMs: number,
 ): Promise<{ ok: true; data: unknown } | { ok: false; timedOut: boolean }> {
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), timeoutMs);
   try {
-    const res = await fetch(url, { signal: controller.signal });
+    const res = await postJson(url, body, { signal: controller.signal });
     if (!res.ok) {
       return { ok: false, timedOut: res.status === 504 };
     }
@@ -117,17 +122,13 @@ async function fetchSupabaseCatalog(
   const cached = readSessionCache<Organization[]>(cacheKey);
   if (cached) return { organizations: cached, status: "done" };
 
-  const params = new URLSearchParams();
-  if (country) {
-    params.set("country", country);
-  } else {
-    params.set("lat", String(location.lat));
-    params.set("lng", String(location.lng));
-    params.set("radius", String(radiusMeters));
-  }
+  const body: Record<string, unknown> = country
+    ? { country }
+    : { lat: location.lat, lng: location.lng, radius: radiusMeters };
 
   const result = await fetchJsonWithTimeout(
-    `/api/organizations?${params}`,
+    "/api/organizations",
+    body,
     SUPABASE_FETCH_TIMEOUT_MS,
   );
   if (!result.ok || !Array.isArray(result.data)) {
@@ -149,14 +150,9 @@ async function fetchOverpassNearby(
   const cached = readOverpassClientCache(location.lat, location.lng, radiusMeters);
   if (cached) return { organizations: cached, status: "done" };
 
-  const params = new URLSearchParams({
-    lat: String(location.lat),
-    lng: String(location.lng),
-    radius: String(radiusMeters),
-  });
-
   const result = await fetchJsonWithTimeout(
-    `/api/nearby?${params}`,
+    "/api/nearby",
+    { lat: location.lat, lng: location.lng, radius: radiusMeters },
     OVERPASS_FETCH_TIMEOUT_MS,
   );
   if (!result.ok) {
@@ -187,11 +183,9 @@ async function fetchOchaDirectory(
   const cached = readSessionCache<Organization[]>(cacheKey);
   if (cached) return { organizations: cached, status: "done" };
 
-  const params = new URLSearchParams({ country, stage: "directory" });
-  if (countryCode) params.set("countryCode", countryCode);
-
   const result = await fetchJsonWithTimeout(
-    `/api/verified-nearby?${params}`,
+    "/api/verified-nearby",
+    { country, stage: "directory", ...(countryCode ? { countryCode } : {}) },
     OCHA_FETCH_TIMEOUT_MS,
   );
   if (!result.ok || !Array.isArray(result.data)) {

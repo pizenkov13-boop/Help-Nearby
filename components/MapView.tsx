@@ -19,18 +19,15 @@ import {
   categoryIconMarkup,
   verifiedCheckMarkup,
 } from "@/lib/categoryIconMarkup";
-import {
-  trackMapInteraction,
-  trackOrganizationCardOpened,
-} from "@/lib/analytics.client";
+import { trackEvent } from "@/lib/umami.client";
 import { getMapTileConfig } from "@/lib/mapTiles";
 import { getOrganizationSource } from "@/lib/organizationSource";
 
 const DefaultIcon = L.icon({
-  iconUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png",
-  iconRetinaUrl:
-    "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png",
-  shadowUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png",
+  // Served from our own origin (public/leaflet): no request to a third-party CDN.
+  iconUrl: "/leaflet/marker-icon.png",
+  iconRetinaUrl: "/leaflet/marker-icon-2x.png",
+  shadowUrl: "/leaflet/marker-shadow.png",
   iconSize: [25, 41],
   iconAnchor: [12, 41],
   popupAnchor: [1, -34],
@@ -223,7 +220,6 @@ export default function MapView({
   const { t } = useLanguage();
   const mapHostRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<L.Map | null>(null);
-  const skipZoomTrackingRef = useRef(0);
   const markersLayerRef = useRef<L.LayerGroup | null>(null);
   const routeLayerRef = useRef<L.Polyline | null>(null);
   const routeConnectorLayerRef = useRef<L.Polyline | null>(null);
@@ -336,26 +332,6 @@ export default function MapView({
       referrerPolicy: "strict-origin-when-cross-origin",
     }).addTo(map);
 
-    map.on("zoomend", () => {
-      if (skipZoomTrackingRef.current > 0) {
-        skipZoomTrackingRef.current -= 1;
-        return;
-      }
-      trackMapInteraction({
-        interaction_type: "zoom",
-        zoom_level: map.getZoom(),
-      });
-    });
-
-    map.on("click", (event) => {
-      trackMapInteraction({
-        interaction_type: "click",
-        lat: event.latlng.lat,
-        lng: event.latlng.lng,
-        zoom_level: map.getZoom(),
-      });
-    });
-
     const publishCenter = () => {
       const c = map.getCenter();
       container.dataset.center = `${c.lat.toFixed(3)},${c.lng.toFixed(3)}`;
@@ -419,7 +395,7 @@ export default function MapView({
         icon: createCategoryIcon(org.category, org.verified),
       })
         .on("click", () => {
-          trackOrganizationCardOpened(org);
+          trackEvent("organization_card_opened");
         })
         .bindPopup(buildOrganizationPopup(org))
         .addTo(markersLayer);
@@ -448,7 +424,6 @@ export default function MapView({
       }
     }
 
-    skipZoomTrackingRef.current += 1;
     fitMapToContent(
       map,
       mapOrganizations,
@@ -472,7 +447,6 @@ export default function MapView({
     if (!map || !selectedOrg || route?.coordinates.length) return;
 
     const { lat, lng } = getOrganizationCoordinates(selectedOrg);
-    skipZoomTrackingRef.current += 1;
     map.flyTo([lat, lng], 15, { duration: 0.8 });
   }, [selected, route, mapReady]);
 
@@ -482,7 +456,6 @@ export default function MapView({
 
     const timer = window.setTimeout(() => {
       map.invalidateSize();
-      skipZoomTrackingRef.current += 1;
       fitMapToContent(
         map,
         mapOrganizations,
