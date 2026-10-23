@@ -84,6 +84,7 @@ export type TranslationKey =
   | "navWhy"
   | "navReviews"
   | "navReviewsShort"
+  | "navPrivacy"
   | "navRecent"
   | "recentTitle"
   | "recentSubtitle"
@@ -349,6 +350,7 @@ const en: Record<TranslationKey, string> = {
   navWhy: "Why It Matters",
   navReviews: "Reviews & Suggestions",
   navReviewsShort: "Reviews",
+  navPrivacy: "Privacy",
   navRecent: "Recently added",
   recentTitle: "Recently added organizations",
   recentSubtitle: "Newly verified organizations added to Help Nearby, newest first.",
@@ -644,6 +646,7 @@ const ru: Record<TranslationKey, string> = {
   navWhy: "Почему это важно",
   navReviews: "Отзывы и предложения",
   navReviewsShort: "Отзывы",
+  navPrivacy: "Конфиденциальность",
   navRecent: "Недавно добавлены",
   recentTitle: "Недавно добавленные организации",
   recentSubtitle: "Новые проверенные организации в Help Nearby — сначала самые свежие.",
@@ -952,6 +955,7 @@ const es: Record<TranslationKey, string> = {
   navWhy: "Por qué importa",
   navReviews: "Reseñas y sugerencias",
   navReviewsShort: "Reseñas",
+  navPrivacy: "Privacidad",
   navRecent: "Añadidas recientemente",
   recentTitle: "Organizaciones añadidas recientemente",
   recentSubtitle: "Organizaciones recién verificadas en Help Nearby, las más nuevas primero.",
@@ -1265,6 +1269,7 @@ const fr: Record<TranslationKey, string> = {
   navWhy: "Pourquoi c'est important",
   navReviews: "Avis et suggestions",
   navReviewsShort: "Avis",
+  navPrivacy: "Confidentialité",
   navRecent: "Ajouts récents",
   recentTitle: "Organisations récemment ajoutées",
   recentSubtitle: "Organisations nouvellement vérifiées sur Help Nearby, les plus récentes d'abord.",
@@ -1579,6 +1584,7 @@ const de: Record<TranslationKey, string> = {
   navWhy: "Warum es wichtig ist",
   navReviews: "Bewertungen und Vorschläge",
   navReviewsShort: "Reviews",
+  navPrivacy: "Datenschutz",
   navRecent: "Neu hinzugefügt",
   recentTitle: "Kürzlich hinzugefügte Organisationen",
   recentSubtitle: "Neu verifizierte Organisationen bei Help Nearby, die neuesten zuerst.",
@@ -1894,6 +1900,7 @@ const zh: Record<TranslationKey, string> = {
   navWhy: "为何重要",
   navReviews: "评价与建议",
   navReviewsShort: "评价",
+  navPrivacy: "隐私",
   navRecent: "最新添加",
   recentTitle: "最近添加的组织",
   recentSubtitle: "Help Nearby 上新近验证的组织，按最新排序。",
@@ -2182,6 +2189,7 @@ const ar: Record<TranslationKey, string> = {
   navWhy: "لماذا هذا مهم",
   navReviews: "التقييمات والاقتراحات",
   navReviewsShort: "التقييمات",
+  navPrivacy: "الخصوصية",
   navRecent: "أُضيفت حديثًا",
   recentTitle: "المنظمات المضافة حديثًا",
   recentSubtitle: "منظمات تم التحقق منها حديثًا على Help Nearby، الأحدث أولًا.",
