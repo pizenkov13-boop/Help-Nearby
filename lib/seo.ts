@@ -9,6 +9,7 @@ export const STATIC_SITEMAP_PATHS = [
   "/reviews",
   "/recent",
   "/submit",
+  "/privacy",
 ] as const;
 
 export function absoluteUrl(path: string): string {

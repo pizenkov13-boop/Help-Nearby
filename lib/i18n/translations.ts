@@ -74,6 +74,7 @@ export type TranslationKey =
   | "chatWelcome"
   | "chatHint"
   | "chatDisclaimer"
+  | "chatPrivacyNotice"
   | "chatErrorTooLong"
   | "chatErrorRateLimit"
   | "locating"
@@ -83,6 +84,7 @@ export type TranslationKey =
   | "navWhy"
   | "navReviews"
   | "navReviewsShort"
+  | "navPrivacy"
   | "navRecent"
   | "recentTitle"
   | "recentSubtitle"
@@ -216,6 +218,9 @@ export type TranslationKey =
   | "reviewsTitle"
   | "reviewsSubtitle"
   | "reviewsFormName"
+  | "reviewsFormNamePlaceholder"
+  | "reviewsFormNameHint"
+  | "reviewAnonymous"
   | "reviewsFormCountry"
   | "reviewsFormRating"
   | "reviewsFormMessage"
@@ -338,6 +343,7 @@ const en: Record<TranslationKey, string> = {
   chatWelcome: "Hi! I'm the Help Nearby assistant. I can help you find food, shelter, medical aid, clothing and other humanitarian help, or explain how to use the app.",
   chatHint: "Ask me where to find help, how to contact an organization, or how to use Help Nearby.",
   chatDisclaimer: "AI can make mistakes. Check hours by phone. In an emergency call your local emergency number.",
+  chatPrivacyNotice: "Your messages are sent to a third-party AI service (api.aitunnel.ru) to produce replies. Do not write personal data.",
   chatErrorTooLong: "Your message is too long. Please keep it under 1000 characters.",
   chatErrorRateLimit: "Too many requests. Please wait a few minutes and try again.",
   locating: "Getting your location…",
@@ -347,6 +353,7 @@ const en: Record<TranslationKey, string> = {
   navWhy: "Why It Matters",
   navReviews: "Reviews & Suggestions",
   navReviewsShort: "Reviews",
+  navPrivacy: "Privacy",
   navRecent: "Recently added",
   recentTitle: "Recently added organizations",
   recentSubtitle: "Newly verified organizations added to Help Nearby, newest first.",
@@ -508,14 +515,17 @@ const en: Record<TranslationKey, string> = {
   reviewsTitle: "Reviews & Suggestions",
   reviewsSubtitle:
     "Share your experience or suggest improvements to help us serve people better.",
-  reviewsFormName: "Your name",
+  reviewsFormName: "Name or nickname (optional)",
+  reviewsFormNamePlaceholder: "e.g. Alex",
+  reviewsFormNameHint: "Please do not include your surname, phone number or other personal details.",
+  reviewAnonymous: "Anonymous",
   reviewsFormCountry: "Your country",
   reviewsFormRating: "Rating",
   reviewsFormMessage: "Your feedback or suggestion",
   reviewsFormSubmit: "Submit feedback",
   reviewsFormSuccess:
     "Thank you! Your review was submitted and will appear after approval.",
-  reviewsFormRequired: "Please enter your name, country, and message.",
+  reviewsFormRequired: "Please enter your country and message.",
   reviewsListTitle: "Community feedback",
   reviewsListEmpty: "No reviews yet. Be the first to share your experience.",
   reviewsLoading: "Loading reviews…",
@@ -631,6 +641,7 @@ const ru: Record<TranslationKey, string> = {
   chatWelcome: "Привет! Я помощник Help Nearby. Помогу найти еду, приют, медицинскую помощь, одежду и другую гуманитарную помощь или объясню, как пользоваться приложением.",
   chatHint: "Спросите, где найти помощь, как связаться с организацией или как пользоваться Help Nearby.",
   chatDisclaimer: "ИИ может ошибаться. Уточняйте часы работы по телефону. В экстренной ситуации звоните по местному номеру экстренной помощи.",
+  chatPrivacyNotice: "Ваши сообщения передаются стороннему ИИ-сервису (api.aitunnel.ru) для подготовки ответа. Не пишите личные данные.",
   chatErrorTooLong: "Сообщение слишком длинное. Пожалуйста, уложитесь в 1000 символов.",
   chatErrorRateLimit: "Слишком много запросов. Подождите несколько минут и попробуйте снова.",
   locating: "Определяем ваше местоположение…",
@@ -641,6 +652,7 @@ const ru: Record<TranslationKey, string> = {
   navWhy: "Почему это важно",
   navReviews: "Отзывы и предложения",
   navReviewsShort: "Отзывы",
+  navPrivacy: "Конфиденциальность",
   navRecent: "Недавно добавлены",
   recentTitle: "Недавно добавленные организации",
   recentSubtitle: "Новые проверенные организации в Help Nearby — сначала самые свежие.",
@@ -813,14 +825,17 @@ const ru: Record<TranslationKey, string> = {
   reviewsTitle: "Отзывы и предложения",
   reviewsSubtitle:
     "Поделитесь опытом или предложите улучшения, чтобы мы помогали людям ещё лучше.",
-  reviewsFormName: "Ваше имя",
+  reviewsFormName: "Имя или псевдоним (необязательно)",
+  reviewsFormNamePlaceholder: "Например: Паша / Alex",
+  reviewsFormNameHint: "Не указывайте фамилию, телефон или другие личные данные.",
+  reviewAnonymous: "Аноним",
   reviewsFormCountry: "Ваша страна",
   reviewsFormRating: "Оценка",
   reviewsFormMessage: "Ваш отзыв или предложение",
   reviewsFormSubmit: "Отправить отзыв",
   reviewsFormSuccess:
     "Спасибо! Ваш отзыв отправлен и появится после проверки.",
-  reviewsFormRequired: "Пожалуйста, укажите имя, страну и сообщение.",
+  reviewsFormRequired: "Пожалуйста, укажите страну и сообщение.",
   reviewsListTitle: "Отзывы сообщества",
   reviewsListEmpty: "Пока нет отзывов. Будьте первым, кто поделится опытом.",
   reviewsLoading: "Загрузка отзывов…",
@@ -938,6 +953,7 @@ const es: Record<TranslationKey, string> = {
   chatWelcome: "¡Hola! Soy el asistente de Help Nearby. Puedo ayudarte a encontrar comida, refugio, ayuda médica, ropa y otra ayuda humanitaria, o explicarte cómo usar la app.",
   chatHint: "Pregúntame dónde encontrar ayuda, cómo contactar a una organización o cómo usar Help Nearby.",
   chatDisclaimer: "La IA puede cometer errores. Confirma los horarios por teléfono. En una emergencia llama al número de emergencias local.",
+  chatPrivacyNotice: "Tus mensajes se envían a un servicio de IA de terceros (api.aitunnel.ru) para generar las respuestas. No escribas datos personales.",
   chatErrorTooLong: "Tu mensaje es demasiado largo. Usa menos de 1000 caracteres.",
   chatErrorRateLimit: "Demasiadas solicitudes. Espera unos minutos e inténtalo de nuevo.",
   locating: "Obteniendo tu ubicación…",
@@ -948,6 +964,7 @@ const es: Record<TranslationKey, string> = {
   navWhy: "Por qué importa",
   navReviews: "Reseñas y sugerencias",
   navReviewsShort: "Reseñas",
+  navPrivacy: "Privacidad",
   navRecent: "Añadidas recientemente",
   recentTitle: "Organizaciones añadidas recientemente",
   recentSubtitle: "Organizaciones recién verificadas en Help Nearby, las más nuevas primero.",
@@ -1124,14 +1141,17 @@ const es: Record<TranslationKey, string> = {
   reviewsTitle: "Reseñas y sugerencias",
   reviewsSubtitle:
     "Comparte tu experiencia o sugiere mejoras para ayudarnos a servir mejor a las personas.",
-  reviewsFormName: "Tu nombre",
+  reviewsFormName: "Nombre o apodo (opcional)",
+  reviewsFormNamePlaceholder: "p. ej., Alex",
+  reviewsFormNameHint: "No incluyas tu apellido, teléfono ni otros datos personales.",
+  reviewAnonymous: "Anónimo",
   reviewsFormCountry: "Tu país",
   reviewsFormRating: "Calificación",
   reviewsFormMessage: "Tu comentario o sugerencia",
   reviewsFormSubmit: "Enviar comentario",
   reviewsFormSuccess:
     "¡Gracias! Tu reseña fue enviada y aparecerá tras la aprobación.",
-  reviewsFormRequired: "Por favor, ingresa tu nombre, país y mensaje.",
+  reviewsFormRequired: "Por favor, ingresa tu país y mensaje.",
   reviewsListTitle: "Comentarios de la comunidad",
   reviewsListEmpty:
     "Aún no hay reseñas. Sé la primera persona en compartir tu experiencia.",
@@ -1250,6 +1270,7 @@ const fr: Record<TranslationKey, string> = {
   chatWelcome: "Bonjour ! Je suis l'assistant Help Nearby. Je peux vous aider à trouver nourriture, abri, aide médicale, vêtements et autre aide humanitaire, ou vous expliquer comment utiliser l'application.",
   chatHint: "Demandez-moi où trouver de l'aide, comment contacter une organisation ou comment utiliser Help Nearby.",
   chatDisclaimer: "L'IA peut se tromper. Vérifiez les horaires par téléphone. En cas d'urgence, appelez le numéro d'urgence local.",
+  chatPrivacyNotice: "Vos messages sont envoyés à un service d'IA tiers (api.aitunnel.ru) pour générer les réponses. N'écrivez pas de données personnelles.",
   chatErrorTooLong: "Votre message est trop long. Veuillez rester sous 1000 caractères.",
   chatErrorRateLimit: "Trop de requêtes. Veuillez patienter quelques minutes et réessayer.",
   locating: "Récupération de votre position…",
@@ -1260,6 +1281,7 @@ const fr: Record<TranslationKey, string> = {
   navWhy: "Pourquoi c'est important",
   navReviews: "Avis et suggestions",
   navReviewsShort: "Avis",
+  navPrivacy: "Confidentialité",
   navRecent: "Ajouts récents",
   recentTitle: "Organisations récemment ajoutées",
   recentSubtitle: "Organisations nouvellement vérifiées sur Help Nearby, les plus récentes d'abord.",
@@ -1437,14 +1459,17 @@ const fr: Record<TranslationKey, string> = {
   reviewsTitle: "Avis et suggestions",
   reviewsSubtitle:
     "Partagez votre expérience ou proposez des améliorations pour nous aider à mieux servir les personnes.",
-  reviewsFormName: "Votre nom",
+  reviewsFormName: "Nom ou pseudonyme (facultatif)",
+  reviewsFormNamePlaceholder: "p. ex. Alex",
+  reviewsFormNameHint: "N'indiquez pas votre nom de famille, votre téléphone ni d'autres données personnelles.",
+  reviewAnonymous: "Anonyme",
   reviewsFormCountry: "Votre pays",
   reviewsFormRating: "Note",
   reviewsFormMessage: "Votre avis ou suggestion",
   reviewsFormSubmit: "Envoyer l'avis",
   reviewsFormSuccess:
     "Merci ! Votre avis a été envoyé et apparaîtra après validation.",
-  reviewsFormRequired: "Veuillez saisir votre nom, votre pays et votre message.",
+  reviewsFormRequired: "Veuillez saisir votre pays et votre message.",
   reviewsListTitle: "Retours de la communauté",
   reviewsListEmpty:
     "Aucun avis pour l'instant. Soyez la première personne à partager votre expérience.",
@@ -1563,6 +1588,7 @@ const de: Record<TranslationKey, string> = {
   chatWelcome: "Hallo! Ich bin der Help-Nearby-Assistent. Ich helfe Ihnen, Essen, Unterkunft, medizinische Hilfe, Kleidung und andere humanitäre Hilfe zu finden, oder erkläre die App.",
   chatHint: "Fragen Sie mich, wo es Hilfe gibt, wie Sie eine Organisation kontaktieren oder wie Help Nearby funktioniert.",
   chatDisclaimer: "KI kann Fehler machen. Öffnungszeiten telefonisch prüfen. Im Notfall wählen Sie den örtlichen Notruf.",
+  chatPrivacyNotice: "Ihre Nachrichten werden zur Beantwortung an einen externen KI-Dienst (api.aitunnel.ru) gesendet. Schreiben Sie keine persönlichen Daten.",
   chatErrorTooLong: "Ihre Nachricht ist zu lang. Bitte bleiben Sie unter 1000 Zeichen.",
   chatErrorRateLimit: "Zu viele Anfragen. Bitte warten Sie einige Minuten und versuchen Sie es erneut.",
   locating: "Ihr Standort wird ermittelt…",
@@ -1573,6 +1599,7 @@ const de: Record<TranslationKey, string> = {
   navWhy: "Warum es wichtig ist",
   navReviews: "Bewertungen und Vorschläge",
   navReviewsShort: "Reviews",
+  navPrivacy: "Datenschutz",
   navRecent: "Neu hinzugefügt",
   recentTitle: "Kürzlich hinzugefügte Organisationen",
   recentSubtitle: "Neu verifizierte Organisationen bei Help Nearby, die neuesten zuerst.",
@@ -1751,15 +1778,17 @@ const de: Record<TranslationKey, string> = {
   reviewsTitle: "Bewertungen und Vorschläge",
   reviewsSubtitle:
     "Teilen Sie Ihre Erfahrung oder schlagen Sie Verbesserungen vor, damit wir Menschen besser unterstützen können.",
-  reviewsFormName: "Ihr Name",
+  reviewsFormName: "Name oder Spitzname (optional)",
+  reviewsFormNamePlaceholder: "z. B. Alex",
+  reviewsFormNameHint: "Bitte geben Sie weder Nachnamen noch Telefonnummer oder andere persönliche Daten an.",
+  reviewAnonymous: "Anonym",
   reviewsFormCountry: "Ihr Land",
   reviewsFormRating: "Bewertung",
   reviewsFormMessage: "Ihr Feedback oder Vorschlag",
   reviewsFormSubmit: "Feedback senden",
   reviewsFormSuccess:
     "Danke! Ihre Bewertung wurde gesendet und erscheint nach Freigabe.",
-  reviewsFormRequired:
-    "Bitte geben Sie Ihren Namen, Ihr Land und eine Nachricht ein.",
+  reviewsFormRequired: "Bitte geben Sie Ihr Land und eine Nachricht ein.",
   reviewsListTitle: "Community-Feedback",
   reviewsListEmpty:
     "Noch keine Bewertungen. Teilen Sie als Erste/r Ihre Erfahrung.",
@@ -1878,6 +1907,7 @@ const zh: Record<TranslationKey, string> = {
   chatWelcome: "您好！我是 Help Nearby 助手。我可以帮您寻找食物、庇护所、医疗援助、衣物等人道主义帮助，也可以说明如何使用本应用。",
   chatHint: "问我哪里能找到帮助、如何联系机构，或如何使用 Help Nearby。",
   chatDisclaimer: "AI 可能出错。请通过电话确认营业时间。紧急情况下请拨打当地急救电话。",
+  chatPrivacyNotice: "您的消息会发送给第三方 AI 服务（api.aitunnel.ru）以生成回复。请勿填写个人信息。",
   chatErrorTooLong: "消息过长，请控制在 1000 个字符以内。",
   chatErrorRateLimit: "请求过多，请等待几分钟后再试。",
   locating: "正在获取您的位置…",
@@ -1887,6 +1917,7 @@ const zh: Record<TranslationKey, string> = {
   navWhy: "为何重要",
   navReviews: "评价与建议",
   navReviewsShort: "评价",
+  navPrivacy: "隐私",
   navRecent: "最新添加",
   recentTitle: "最近添加的组织",
   recentSubtitle: "Help Nearby 上新近验证的组织，按最新排序。",
@@ -2046,13 +2077,16 @@ const zh: Record<TranslationKey, string> = {
     "无论是热饭、安全住所还是医疗照护，Help Nearby 的存在是为了让任何人都不必独自面对危机。",
   reviewsTitle: "评价与建议",
   reviewsSubtitle: "分享您的体验或提出改进建议，帮助我们更好服务他人。",
-  reviewsFormName: "您的姓名",
+  reviewsFormName: "姓名或昵称（可选）",
+  reviewsFormNamePlaceholder: "例如：Alex",
+  reviewsFormNameHint: "请勿填写姓氏、电话号码或其他个人信息。",
+  reviewAnonymous: "匿名",
   reviewsFormCountry: "您的国家",
   reviewsFormRating: "评分",
   reviewsFormMessage: "您的反馈或建议",
   reviewsFormSubmit: "提交反馈",
   reviewsFormSuccess: "感谢！您的评价已提交，将在审核后显示。",
-  reviewsFormRequired: "请填写姓名、国家和留言。",
+  reviewsFormRequired: "请填写国家和留言。",
   reviewsListTitle: "社区反馈",
   reviewsListEmpty: "暂无评价。欢迎成为第一位分享体验的人。",
   reviewsLoading: "正在加载评价…",
@@ -2165,6 +2199,7 @@ const ar: Record<TranslationKey, string> = {
   chatWelcome: "مرحباً! أنا مساعد Help Nearby. يمكنني مساعدتك في العثور على الطعام والمأوى والمساعدة الطبية والملابس وغيرها من المساعدات الإنسانية، أو شرح كيفية استخدام التطبيق.",
   chatHint: "اسألني أين تجد المساعدة، أو كيف تتواصل مع منظمة، أو كيف تستخدم Help Nearby.",
   chatDisclaimer: "قد يخطئ الذكاء الاصطناعي. تحقق من ساعات العمل عبر الهاتف. في حالات الطوارئ اتصل برقم الطوارئ المحلي.",
+  chatPrivacyNotice: "تُرسل رسائلك إلى خدمة ذكاء اصطناعي تابعة لجهة خارجية (api.aitunnel.ru) لإنشاء الردود. لا تكتب بيانات شخصية.",
   chatErrorTooLong: "رسالتك طويلة جداً. يرجى ألا تتجاوز 1000 حرف.",
   chatErrorRateLimit: "طلبات كثيرة جداً. يرجى الانتظار بضع دقائق ثم المحاولة مرة أخرى.",
   locating: "جارٍ تحديد موقعك…",
@@ -2174,6 +2209,7 @@ const ar: Record<TranslationKey, string> = {
   navWhy: "لماذا هذا مهم",
   navReviews: "التقييمات والاقتراحات",
   navReviewsShort: "التقييمات",
+  navPrivacy: "الخصوصية",
   navRecent: "أُضيفت حديثًا",
   recentTitle: "المنظمات المضافة حديثًا",
   recentSubtitle: "منظمات تم التحقق منها حديثًا على Help Nearby، الأحدث أولًا.",
@@ -2346,14 +2382,17 @@ const ar: Record<TranslationKey, string> = {
   reviewsTitle: "التقييمات والاقتراحات",
   reviewsSubtitle:
     "شارك تجربتك أو اقترح تحسينات لمساعدتنا على خدمة الناس بشكل أفضل.",
-  reviewsFormName: "اسمك",
+  reviewsFormName: "الاسم أو اللقب (اختياري)",
+  reviewsFormNamePlaceholder: "مثال: Alex",
+  reviewsFormNameHint: "يرجى عدم كتابة اسم العائلة أو رقم الهاتف أو أي بيانات شخصية أخرى.",
+  reviewAnonymous: "مجهول",
   reviewsFormCountry: "بلدك",
   reviewsFormRating: "التقييم",
   reviewsFormMessage: "ملاحظتك أو اقتراحك",
   reviewsFormSubmit: "إرسال الملاحظة",
   reviewsFormSuccess:
     "شكراً لك! تم إرسال تقييمك وسيظهر بعد المراجعة.",
-  reviewsFormRequired: "يرجى إدخال الاسم والبلد والرسالة.",
+  reviewsFormRequired: "يرجى إدخال البلد والرسالة.",
   reviewsListTitle: "آراء المجتمع",
   reviewsListEmpty: "لا توجد تقييمات بعد. كن أول من يشارك تجربته.",
   reviewsLoading: "جارٍ تحميل التقييمات…",

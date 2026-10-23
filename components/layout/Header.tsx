@@ -11,7 +11,6 @@ import { MobileMenu } from "@/components/layout/MobileMenu";
 import { AnchorNavLink } from "@/components/navigation/AnchorNavLink";
 import { useLanguage } from "@/lib/i18n/LanguageProvider";
 import { openEmergencyHelp } from "@/lib/emergencyEvents";
-import { trackLanguageChanged } from "@/lib/analytics.client";
 import type { LanguageCode } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
@@ -235,9 +234,6 @@ export function Header() {
                 setLangOpen(open);
               }}
               onSelect={(code) => {
-                if (code !== language) {
-                  trackLanguageChanged(language, code);
-                }
                 setLanguage(code as LanguageCode);
               }}
             />

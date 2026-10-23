@@ -143,7 +143,11 @@ export type HoursDisplay =
 
 /**
  * What the organization page may show for opening hours:
- * structured per-day hours, or the raw text when it can be parsed; otherwise "unknown".
+ * - structured per-day hours;
+ * - the raw text when it can be parsed (OSM opening_hours);
+ * - the raw text as written for catalog entries (e.g. "Пн–Чт 19:00–20:00"), even when it cannot be parsed.
+ * OSM raw text is never shown unparsed (it can carry tag metadata), and a JSON-looking string is not text.
+ * Otherwise "unknown".
  */
 export function getHoursDisplay(org: Organization): HoursDisplay {
   if (hasStructuredHours(org)) {
@@ -152,6 +156,12 @@ export function getHoursDisplay(org: Organization): HoursDisplay {
   }
   const raw = org.hoursRaw?.trim();
   if (raw && getOrganizationOpenStatus(org) !== "unknown") {
+    return { kind: "listed", lines: [raw] };
+  }
+  const isOsm = org.id.startsWith("overpass-");
+  // Overpass serializes filter tags into hoursRaw: "[opening_hours; ]emergency:yes; healthcare:hospital; amenity:hospital".
+  const hasOsmMetadata = /(^|;\s*)(emergency|healthcare|amenity):/.test(raw ?? "");
+  if (raw && !isOsm && !hasOsmMetadata && !raw.startsWith("{")) {
     return { kind: "listed", lines: [raw] };
   }
   return { kind: "unknown" };

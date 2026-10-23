@@ -14,6 +14,7 @@ import {
 import type { DbOrganization } from "@/lib/data";
 import { CategoryIcon } from "@/components/icons/CategoryIcon";
 import { CountryFlag } from "@/components/icons/CountryFlag";
+import { displayReviewerName } from "@/lib/reviewInput";
 import { CATEGORIES, CATEGORY_CONFIG } from "@/lib/categories";
 import type { Category, Review } from "@/lib/types";
 import { cn } from "@/lib/utils";
@@ -280,7 +281,7 @@ export function AdminPage({
 
           {!configured && (
             <p className="mb-4 rounded-lg border border-amber-500/30 bg-amber-500/10 px-3 py-2 text-sm text-amber-300">
-              Set ADMIN_PASSWORD in .env.local to enable admin access.
+              Set ADMIN_PASSWORD and ADMIN_SESSION_SECRET (32+ characters) in the server environment to enable admin access.
             </p>
           )}
 
@@ -478,7 +479,7 @@ export function AdminPage({
                   <div className="flex items-center gap-2">
                     <MessageSquare className="h-4 w-4 text-blue-400" />
                     <span className="font-semibold text-white">
-                      {review.name}
+                      {displayReviewerName(review.name, "Anonymous")}
                     </span>
                     <CountryFlag country={review.country} />
                     <span className="text-sm text-gray-500">

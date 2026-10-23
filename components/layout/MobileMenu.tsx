@@ -8,7 +8,6 @@ import { createPortal } from "react-dom";
 import { BrandLogo } from "@/components/BrandLogo";
 import { AnchorNavLink } from "@/components/navigation/AnchorNavLink";
 import { ThemeToggle } from "@/components/ThemeToggle";
-import { trackLanguageChanged } from "@/lib/analytics.client";
 import { openEmergencyHelp } from "@/lib/emergencyEvents";
 import { useLanguage } from "@/lib/i18n/LanguageProvider";
 import { LANGUAGES, LANGUAGE_NATIVE_NAMES } from "@/lib/i18n/translations";
@@ -257,7 +256,6 @@ export function MobileMenu({ open, onClose }: MobileMenuProps) {
                   className={cn("mm-lang", current && "on")}
                   onClick={() => {
                     if (!current) {
-                      trackLanguageChanged(language, code);
                       setLanguage(code as LanguageCode);
                     }
                   }}
