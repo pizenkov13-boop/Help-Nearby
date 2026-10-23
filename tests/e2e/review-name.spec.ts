@@ -37,6 +37,8 @@ async function mockReviews(page: Page, listed: ReturnType<typeof review>[] = [])
 }
 
 async function fillAndSubmit(page: Page, fields: { name?: string; country?: string; message?: string }) {
+  // Wait until the page is hydrated: a click before that submits the plain HTML form.
+  await page.waitForLoadState("networkidle");
   if (fields.name !== undefined) await page.locator("#review-name").fill(fields.name);
   if (fields.country !== undefined) await page.locator("#review-country").fill(fields.country);
   if (fields.message !== undefined) await page.locator("#review-message").fill(fields.message);
