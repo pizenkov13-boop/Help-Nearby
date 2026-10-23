@@ -34,6 +34,23 @@ export function readOverpassClientCache(
   }
 }
 
+/** The key names hold a rounded (~2 km) area, so expired entries are deleted instead of lingering. */
+function purgeExpiredOverpassEntries(): void {
+  const now = Date.now();
+  for (let i = localStorage.length - 1; i >= 0; i -= 1) {
+    const key = localStorage.key(i);
+    if (!key?.startsWith(STORAGE_PREFIX)) continue;
+    try {
+      const entry = JSON.parse(localStorage.getItem(key) ?? "null") as { timestamp?: number } | null;
+      if (!entry || typeof entry.timestamp !== "number" || now - entry.timestamp > OVERPASS_CACHE_TTL_MS) {
+        localStorage.removeItem(key);
+      }
+    } catch {
+      localStorage.removeItem(key);
+    }
+  }
+}
+
 export function writeOverpassClientCache(
   lat: number,
   lng: number,
@@ -43,6 +60,7 @@ export function writeOverpassClientCache(
   if (typeof window === "undefined") return;
 
   try {
+    purgeExpiredOverpassEntries();
     const key = STORAGE_PREFIX + buildOverpassCacheKey(lat, lng, radiusMeters);
     localStorage.setItem(
       key,
