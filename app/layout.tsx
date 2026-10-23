@@ -1,27 +1,11 @@
 import type { Metadata, Viewport } from "next";
-import { DM_Sans, Newsreader } from "next/font/google";
 import { UmamiScript } from "@/components/providers/UmamiScript";
 import { ServiceWorkerRegister } from "@/components/ServiceWorkerRegister";
 import { AppProviders } from "@/components/providers/AppProviders";
 import "leaflet/dist/leaflet.css";
 import "./globals.css";
+import { fontVariableClasses } from "./fonts";
 import { cn } from "@/lib/utils";
-
-const dmSans = DM_Sans({
-  subsets: ["latin", "latin-ext"],
-  variable: "--font-dm-sans",
-  weight: ["400", "500", "600", "700", "800"],
-  display: "swap",
-});
-
-const newsreader = Newsreader({
-  subsets: ["latin"],
-  variable: "--font-newsreader",
-  weight: ["400", "500", "600", "700"],
-  style: ["normal", "italic"],
-  display: "swap",
-  adjustFontFallback: false,
-});
 
 const SITE_URL = "https://help-nearby.org";
 const SITE_TITLE = "Help Nearby — Find Help Near You";
@@ -75,7 +59,7 @@ export default function RootLayout({
       lang="en"
       dir="ltr"
       suppressHydrationWarning
-      className={cn("font-sans", dmSans.variable, newsreader.variable)}
+      className={cn("font-sans", ...fontVariableClasses)}
     >
       <head>
         <script src="/chunk-recovery.js" />

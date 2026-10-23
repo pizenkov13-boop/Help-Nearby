@@ -2,6 +2,12 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Self-hosted fonts: the original variable names combine the Latin and Latin-extended files (see app/fonts.ts). */
+:root {
+  --font-dm-sans: var(--font-dm-sans-latin), var(--font-dm-sans-latin-ext);
+  --font-newsreader: var(--font-newsreader-latin), var(--font-newsreader-latin-ext);
+}
+
 /* Critical theme — unlayered so it always ships even if cache/layers fail */
 html {
   background-color: var(--surface);

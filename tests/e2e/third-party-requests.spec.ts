@@ -1,3 +1,5 @@
+import { readdirSync, readFileSync, statSync } from "node:fs";
+import { join } from "node:path";
 import { test, expect } from "@playwright/test";
 import { CONTENT_SECURITY_POLICY } from "../../config/contentSecurityPolicy.mjs";
 import { mockNearbyApi, openMapWithOrgs, preferFullMode } from "./helpers";
@@ -67,5 +69,60 @@ test.describe("Third-party browser requests", () => {
   test("the CSP allows no CDN, no Supabase host for the browser and no analytics host by default", () => {
     expect(CONTENT_SECURITY_POLICY).not.toMatch(/unpkg|flagcdn|supabase|posthog|umami/i);
     expect(CONTENT_SECURITY_POLICY).toContain("tile.openstreetmap.org");
+  });
+});
+
+const GOOGLE_FONT_HOSTS = /fonts\.googleapis\.com|fonts\.gstatic\.com/i;
+
+function sourceFiles(dir: string, out: string[] = []): string[] {
+  for (const entry of readdirSync(dir)) {
+    const full = join(dir, entry);
+    if (statSync(full).isDirectory()) sourceFiles(full, out);
+    else if (/\.(tsx?|mjs|css|html)$/.test(entry)) out.push(full);
+  }
+  return out;
+}
+
+test.describe("Fonts are self-hosted", () => {
+  test("no source file imports next/font/google or names a Google Fonts host", () => {
+    const root = join(__dirname, "..", "..");
+    const offenders: string[] = [];
+    for (const dir of ["app", "components", "lib", "config"]) {
+      for (const file of sourceFiles(join(root, dir))) {
+        const text = readFileSync(file, "utf8");
+        if (/next\/font\/google|@next\/font\/google/.test(text) || GOOGLE_FONT_HOSTS.test(text)) {
+          offenders.push(file.replace(root, ""));
+        }
+      }
+    }
+    expect(offenders).toEqual([]);
+    for (const file of ["next.config.mjs", join("public", "theme-init.js")]) {
+      expect(readFileSync(join(root, file), "utf8")).not.toMatch(GOOGLE_FONT_HOSTS);
+    }
+  });
+
+  test("pages load their fonts from our own origin and never contact Google Fonts", async ({ page, baseURL }) => {
+    const googleRequests: string[] = [];
+    const ownFonts: string[] = [];
+    page.on("request", (request) => {
+      const url = request.url();
+      if (GOOGLE_FONT_HOSTS.test(url)) googleRequests.push(url);
+      if (/\.woff2(\?|$)/.test(url) && new URL(url).origin === new URL(baseURL!).origin) ownFonts.push(url);
+    });
+
+    for (const path of ["/", "/about", "/privacy"]) {
+      await page.goto(path);
+      await page.waitForLoadState("networkidle");
+    }
+
+    expect(googleRequests).toEqual([]);
+    expect(ownFonts.length).toBeGreaterThan(0);
+
+    const html = await page.content();
+    expect(html).not.toMatch(GOOGLE_FONT_HOSTS);
+    // the combined families resolve to the self-hosted ones
+    const family = await page.evaluate(() => getComputedStyle(document.body).fontFamily);
+    expect(family).not.toMatch(/^"?DM Sans"?,/);
+    expect(await page.evaluate(() => document.fonts.size)).toBeGreaterThan(0);
   });
 });
