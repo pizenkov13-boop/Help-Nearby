@@ -1,3 +1,4 @@
+import { postJson } from "@/lib/postJson";
 import type { UserLocation } from "@/lib/types";
 
 export type RoutingMode = "driving" | "walking";
@@ -25,15 +26,13 @@ export async function fetchRoute(
   to: { lat: number; lng: number },
   mode: RoutingMode,
 ): Promise<RouteData> {
-  const params = new URLSearchParams({
-    fromLat: String(from.lat),
-    fromLng: String(from.lng),
-    toLat: String(to.lat),
-    toLng: String(to.lng),
+  const response = await postJson("/api/route", {
+    fromLat: from.lat,
+    fromLng: from.lng,
+    toLat: to.lat,
+    toLng: to.lng,
     mode,
   });
-
-  const response = await fetch(`/api/route?${params}`);
   const data = (await response.json()) as RouteData & { error?: string };
 
   if (!response.ok) {

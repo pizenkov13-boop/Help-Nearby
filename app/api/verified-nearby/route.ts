@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { readJsonBody, toNumber, toTrimmedString } from "@/lib/apiBody.server";
 import { NEARBY_RADIUS_METERS } from "@/lib/constants";
 import { createTtlCache, withTimeout } from "@/lib/ttlCache";
 import {
@@ -13,14 +14,17 @@ export const dynamic = "force-dynamic";
 const DIRECTORY_TIMEOUT_MS = 6000;
 const directoryCache = createTtlCache<Organization[]>();
 
-export async function GET(request: Request) {
-  const { searchParams } = new URL(request.url);
-  const lat = Number(searchParams.get("lat"));
-  const lng = Number(searchParams.get("lng"));
-  const radius = Number(searchParams.get("radius") ?? NEARBY_RADIUS_METERS);
-  const country = searchParams.get("country")?.trim();
-  const countryCode = searchParams.get("countryCode")?.trim() || null;
-  const stage = searchParams.get("stage");
+/** Body: { country, countryCode?, stage?: "directory", lat?, lng?, radius? }. */
+export async function POST(request: Request) {
+  const body = await readJsonBody(request);
+  const lat = toNumber(body.lat);
+  const lng = toNumber(body.lng);
+  const radius = Number.isFinite(toNumber(body.radius))
+    ? toNumber(body.radius)
+    : NEARBY_RADIUS_METERS;
+  const country = toTrimmedString(body.country);
+  const countryCode = toTrimmedString(body.countryCode) ?? null;
+  const stage = toTrimmedString(body.stage);
 
   if (!country) {
     return NextResponse.json([]);

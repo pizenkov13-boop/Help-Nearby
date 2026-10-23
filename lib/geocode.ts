@@ -1,3 +1,5 @@
+import { postJson } from "@/lib/postJson";
+
 export interface ReverseGeocodeResult {
   country: string;
   countryCode: string | null;
@@ -47,11 +49,7 @@ export async function reverseGeocodeCountry(
   lng: number,
 ): Promise<ReverseGeocodeResult | null> {
   try {
-    const params = new URLSearchParams({
-      lat: String(lat),
-      lon: String(lng),
-    });
-    const response = await fetch(`/api/geocode/reverse?${params}`);
+    const response = await postJson("/api/geocode/reverse", { lat, lng });
 
     if (!response.ok) return null;
 
