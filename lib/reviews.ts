@@ -1,3 +1,4 @@
+import { prepareReview, type ReviewInput } from "@/lib/reviewInput";
 import { getSupabase, isSupabaseFetchError } from "@/lib/supabase";
 import { getSupabaseAdmin } from "@/lib/supabaseAdmin";
 import type { Review } from "@/lib/types";
@@ -5,12 +6,7 @@ import type { Review } from "@/lib/types";
 const REVIEW_COLUMNS =
   "id, name, country, message, rating, approved, created_at";
 
-export interface SubmitReviewInput {
-  name: string;
-  country: string;
-  message: string;
-  rating: number;
-}
+export type SubmitReviewInput = ReviewInput;
 
 function formatSupabaseError(error: {
   message: string;
@@ -60,20 +56,11 @@ export const fetchReviews = fetchApprovedReviews;
 export async function submitReview(
   input: SubmitReviewInput,
 ): Promise<{ ok: true; review: Review } | { ok: false; error: string }> {
-  const name = input.name.trim();
-  const country = input.country.trim();
-  const message = input.message.trim();
-  const rating = Math.round(input.rating);
+  const prepared = prepareReview(input);
+  if (!prepared.ok) return prepared;
 
-  if (!name || !country || !message) {
-    return { ok: false, error: "Name, country, and message are required." };
-  }
-
-  if (rating < 1 || rating > 5) {
-    return { ok: false, error: "Rating must be between 1 and 5." };
-  }
-
-  const row = { name, country, message, rating, approved: false as const };
+  const { row } = prepared;
+  const { name, country, message, rating } = row;
 
   const admin = getSupabaseAdmin();
   if (admin) {

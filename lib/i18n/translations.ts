@@ -218,6 +218,9 @@ export type TranslationKey =
   | "reviewsTitle"
   | "reviewsSubtitle"
   | "reviewsFormName"
+  | "reviewsFormNamePlaceholder"
+  | "reviewsFormNameHint"
+  | "reviewAnonymous"
   | "reviewsFormCountry"
   | "reviewsFormRating"
   | "reviewsFormMessage"
@@ -512,14 +515,17 @@ const en: Record<TranslationKey, string> = {
   reviewsTitle: "Reviews & Suggestions",
   reviewsSubtitle:
     "Share your experience or suggest improvements to help us serve people better.",
-  reviewsFormName: "Your name",
+  reviewsFormName: "Name or nickname (optional)",
+  reviewsFormNamePlaceholder: "e.g. Alex",
+  reviewsFormNameHint: "Please do not include your surname, phone number or other personal details.",
+  reviewAnonymous: "Anonymous",
   reviewsFormCountry: "Your country",
   reviewsFormRating: "Rating",
   reviewsFormMessage: "Your feedback or suggestion",
   reviewsFormSubmit: "Submit feedback",
   reviewsFormSuccess:
     "Thank you! Your review was submitted and will appear after approval.",
-  reviewsFormRequired: "Please enter your name, country, and message.",
+  reviewsFormRequired: "Please enter your country and message.",
   reviewsListTitle: "Community feedback",
   reviewsListEmpty: "No reviews yet. Be the first to share your experience.",
   reviewsLoading: "Loading reviews…",
@@ -819,14 +825,17 @@ const ru: Record<TranslationKey, string> = {
   reviewsTitle: "Отзывы и предложения",
   reviewsSubtitle:
     "Поделитесь опытом или предложите улучшения, чтобы мы помогали людям ещё лучше.",
-  reviewsFormName: "Ваше имя",
+  reviewsFormName: "Имя или псевдоним (необязательно)",
+  reviewsFormNamePlaceholder: "Например: Паша / Alex",
+  reviewsFormNameHint: "Не указывайте фамилию, телефон или другие личные данные.",
+  reviewAnonymous: "Аноним",
   reviewsFormCountry: "Ваша страна",
   reviewsFormRating: "Оценка",
   reviewsFormMessage: "Ваш отзыв или предложение",
   reviewsFormSubmit: "Отправить отзыв",
   reviewsFormSuccess:
     "Спасибо! Ваш отзыв отправлен и появится после проверки.",
-  reviewsFormRequired: "Пожалуйста, укажите имя, страну и сообщение.",
+  reviewsFormRequired: "Пожалуйста, укажите страну и сообщение.",
   reviewsListTitle: "Отзывы сообщества",
   reviewsListEmpty: "Пока нет отзывов. Будьте первым, кто поделится опытом.",
   reviewsLoading: "Загрузка отзывов…",
@@ -1132,14 +1141,17 @@ const es: Record<TranslationKey, string> = {
   reviewsTitle: "Reseñas y sugerencias",
   reviewsSubtitle:
     "Comparte tu experiencia o sugiere mejoras para ayudarnos a servir mejor a las personas.",
-  reviewsFormName: "Tu nombre",
+  reviewsFormName: "Nombre o apodo (opcional)",
+  reviewsFormNamePlaceholder: "p. ej., Alex",
+  reviewsFormNameHint: "No incluyas tu apellido, teléfono ni otros datos personales.",
+  reviewAnonymous: "Anónimo",
   reviewsFormCountry: "Tu país",
   reviewsFormRating: "Calificación",
   reviewsFormMessage: "Tu comentario o sugerencia",
   reviewsFormSubmit: "Enviar comentario",
   reviewsFormSuccess:
     "¡Gracias! Tu reseña fue enviada y aparecerá tras la aprobación.",
-  reviewsFormRequired: "Por favor, ingresa tu nombre, país y mensaje.",
+  reviewsFormRequired: "Por favor, ingresa tu país y mensaje.",
   reviewsListTitle: "Comentarios de la comunidad",
   reviewsListEmpty:
     "Aún no hay reseñas. Sé la primera persona en compartir tu experiencia.",
@@ -1447,14 +1459,17 @@ const fr: Record<TranslationKey, string> = {
   reviewsTitle: "Avis et suggestions",
   reviewsSubtitle:
     "Partagez votre expérience ou proposez des améliorations pour nous aider à mieux servir les personnes.",
-  reviewsFormName: "Votre nom",
+  reviewsFormName: "Nom ou pseudonyme (facultatif)",
+  reviewsFormNamePlaceholder: "p. ex. Alex",
+  reviewsFormNameHint: "N'indiquez pas votre nom de famille, votre téléphone ni d'autres données personnelles.",
+  reviewAnonymous: "Anonyme",
   reviewsFormCountry: "Votre pays",
   reviewsFormRating: "Note",
   reviewsFormMessage: "Votre avis ou suggestion",
   reviewsFormSubmit: "Envoyer l'avis",
   reviewsFormSuccess:
     "Merci ! Votre avis a été envoyé et apparaîtra après validation.",
-  reviewsFormRequired: "Veuillez saisir votre nom, votre pays et votre message.",
+  reviewsFormRequired: "Veuillez saisir votre pays et votre message.",
   reviewsListTitle: "Retours de la communauté",
   reviewsListEmpty:
     "Aucun avis pour l'instant. Soyez la première personne à partager votre expérience.",
@@ -1763,15 +1778,17 @@ const de: Record<TranslationKey, string> = {
   reviewsTitle: "Bewertungen und Vorschläge",
   reviewsSubtitle:
     "Teilen Sie Ihre Erfahrung oder schlagen Sie Verbesserungen vor, damit wir Menschen besser unterstützen können.",
-  reviewsFormName: "Ihr Name",
+  reviewsFormName: "Name oder Spitzname (optional)",
+  reviewsFormNamePlaceholder: "z. B. Alex",
+  reviewsFormNameHint: "Bitte geben Sie weder Nachnamen noch Telefonnummer oder andere persönliche Daten an.",
+  reviewAnonymous: "Anonym",
   reviewsFormCountry: "Ihr Land",
   reviewsFormRating: "Bewertung",
   reviewsFormMessage: "Ihr Feedback oder Vorschlag",
   reviewsFormSubmit: "Feedback senden",
   reviewsFormSuccess:
     "Danke! Ihre Bewertung wurde gesendet und erscheint nach Freigabe.",
-  reviewsFormRequired:
-    "Bitte geben Sie Ihren Namen, Ihr Land und eine Nachricht ein.",
+  reviewsFormRequired: "Bitte geben Sie Ihr Land und eine Nachricht ein.",
   reviewsListTitle: "Community-Feedback",
   reviewsListEmpty:
     "Noch keine Bewertungen. Teilen Sie als Erste/r Ihre Erfahrung.",
@@ -2060,13 +2077,16 @@ const zh: Record<TranslationKey, string> = {
     "无论是热饭、安全住所还是医疗照护，Help Nearby 的存在是为了让任何人都不必独自面对危机。",
   reviewsTitle: "评价与建议",
   reviewsSubtitle: "分享您的体验或提出改进建议，帮助我们更好服务他人。",
-  reviewsFormName: "您的姓名",
+  reviewsFormName: "姓名或昵称（可选）",
+  reviewsFormNamePlaceholder: "例如：Alex",
+  reviewsFormNameHint: "请勿填写姓氏、电话号码或其他个人信息。",
+  reviewAnonymous: "匿名",
   reviewsFormCountry: "您的国家",
   reviewsFormRating: "评分",
   reviewsFormMessage: "您的反馈或建议",
   reviewsFormSubmit: "提交反馈",
   reviewsFormSuccess: "感谢！您的评价已提交，将在审核后显示。",
-  reviewsFormRequired: "请填写姓名、国家和留言。",
+  reviewsFormRequired: "请填写国家和留言。",
   reviewsListTitle: "社区反馈",
   reviewsListEmpty: "暂无评价。欢迎成为第一位分享体验的人。",
   reviewsLoading: "正在加载评价…",
@@ -2362,14 +2382,17 @@ const ar: Record<TranslationKey, string> = {
   reviewsTitle: "التقييمات والاقتراحات",
   reviewsSubtitle:
     "شارك تجربتك أو اقترح تحسينات لمساعدتنا على خدمة الناس بشكل أفضل.",
-  reviewsFormName: "اسمك",
+  reviewsFormName: "الاسم أو اللقب (اختياري)",
+  reviewsFormNamePlaceholder: "مثال: Alex",
+  reviewsFormNameHint: "يرجى عدم كتابة اسم العائلة أو رقم الهاتف أو أي بيانات شخصية أخرى.",
+  reviewAnonymous: "مجهول",
   reviewsFormCountry: "بلدك",
   reviewsFormRating: "التقييم",
   reviewsFormMessage: "ملاحظتك أو اقتراحك",
   reviewsFormSubmit: "إرسال الملاحظة",
   reviewsFormSuccess:
     "شكراً لك! تم إرسال تقييمك وسيظهر بعد المراجعة.",
-  reviewsFormRequired: "يرجى إدخال الاسم والبلد والرسالة.",
+  reviewsFormRequired: "يرجى إدخال البلد والرسالة.",
   reviewsListTitle: "آراء المجتمع",
   reviewsListEmpty: "لا توجد تقييمات بعد. كن أول من يشارك تجربته.",
   reviewsLoading: "جارٍ تحميل التقييمات…",

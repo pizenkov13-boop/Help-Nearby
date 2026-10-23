@@ -2,6 +2,8 @@
 
 import { Star } from "lucide-react";
 import { CountryFlag } from "@/components/icons/CountryFlag";
+import { useLanguage } from "@/lib/i18n/LanguageProvider";
+import { displayReviewerName } from "@/lib/reviewInput";
 import type { Review } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
@@ -10,6 +12,7 @@ interface ReviewCardProps {
 }
 
 export function ReviewCard({ review }: ReviewCardProps) {
+  const { t } = useLanguage();
   const date = new Date(review.created_at).toLocaleDateString(undefined, {
     year: "numeric",
     month: "short",
@@ -21,7 +24,7 @@ export function ReviewCard({ review }: ReviewCardProps) {
       <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
         <div className="flex items-center gap-2">
           <CountryFlag country={review.country} />
-          <span className="font-semibold text-slate-900 dark:text-white">{review.name}</span>
+          <span className="font-semibold text-slate-900 dark:text-white">{displayReviewerName(review.name, t("reviewAnonymous"))}</span>
           <span className="text-sm text-slate-500">· {review.country}</span>
         </div>
         <time className="text-xs text-slate-500" dateTime={review.created_at}>

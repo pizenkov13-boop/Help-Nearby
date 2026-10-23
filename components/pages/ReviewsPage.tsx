@@ -6,11 +6,12 @@ import { PageHero } from "@/components/layout/PageHero";
 import { ReviewCard } from "@/components/ReviewCard";
 import { SiteLayout } from "@/components/layout/SiteLayout";
 import { useLanguage } from "@/lib/i18n/LanguageProvider";
+import { MAX_REVIEW_NAME_LENGTH } from "@/lib/reviewInput";
 import type { Review } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
 export function ReviewsPage() {
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   const [name, setName] = useState("");
   const [country, setCountry] = useState("");
   const [rating, setRating] = useState(5);
@@ -42,7 +43,8 @@ export function ReviewsPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!name.trim() || !country.trim() || !message.trim()) {
+    // The name is optional: only country and message are required.
+    if (!country.trim() || !message.trim()) {
       setError(t("reviewsFormRequired"));
       return;
     }
@@ -56,6 +58,7 @@ export function ReviewsPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           name: name.trim(),
+          language,
           country: country.trim(),
           message: message.trim(),
           rating,
@@ -121,8 +124,18 @@ export function ReviewsPage() {
                   id="review-name"
                   type="text"
                   value={name}
+                  maxLength={MAX_REVIEW_NAME_LENGTH}
+                  autoComplete="nickname"
+                  aria-describedby="review-name-hint"
+                  placeholder={t("reviewsFormNamePlaceholder")}
                   onChange={(e) => setName(e.target.value)}
                 />
+                <p
+                  id="review-name-hint"
+                  className="mt-1 text-xs text-[var(--text-muted)]"
+                >
+                  {t("reviewsFormNameHint")}
+                </p>
               </div>
 
               <div>
