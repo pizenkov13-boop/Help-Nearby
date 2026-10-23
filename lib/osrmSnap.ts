@@ -25,7 +25,7 @@ export async function snapToNearestWalkingRoad(
     });
 
     if (!response.ok) {
-      console.warn("[osrmSnap] nearest HTTP", response.status, { lng, lat });
+      console.warn("[osrmSnap] nearest HTTP", response.status);
       return { lng, lat };
     }
 

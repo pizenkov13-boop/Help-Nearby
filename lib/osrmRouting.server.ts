@@ -50,7 +50,7 @@ async function fetchRouteFromUrl(url: string): Promise<RouteData | null> {
   });
 
   if (!response.ok) {
-    console.warn("[route] provider HTTP", response.status, url.slice(0, 80));
+    console.warn("[route] provider HTTP", response.status, new URL(url).host);
     return null;
   }
 
@@ -99,7 +99,6 @@ async function fetchOsrmWalkingRoute(
 ): Promise<RouteData | null> {
   const coords = `${from.lng},${from.lat};${to.lng},${to.lat}`;
   const url = `${OSRM_ROUTE}/${coords}?overview=full&geometries=geojson`;
-  console.log("[route] OSRM route", coords);
   return fetchRouteFromUrl(url);
 }
 
@@ -109,7 +108,6 @@ async function fetchOsmDeFootRoute(
 ): Promise<RouteData | null> {
   const coords = `${from.lng},${from.lat};${to.lng},${to.lat}`;
   const url = `${OSM_DE_ROUTE}/${coords}?overview=full&geometries=geojson`;
-  console.log("[route] OSM.de foot route", coords);
   return fetchRouteFromUrl(url);
 }
 
@@ -123,11 +121,6 @@ export async function fetchSnappedWalkingRoute(
     snapToNearestWalkingRoad(fromLng, fromLat),
     snapToNearestWalkingRoad(toLng, toLat),
   ]);
-
-  console.log("[route] snapped", {
-    from: `${from.lng},${from.lat}`,
-    to: `${to.lng},${to.lat}`,
-  });
 
   const osrm = await fetchOsrmWalkingRoute(from, to);
   if (osrm) return extendRouteToExactDestination(osrm, toLat, toLng);
