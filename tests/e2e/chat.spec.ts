@@ -1,4 +1,5 @@
 import { test, expect } from "@playwright/test";
+import { LANGUAGES, translations } from "@/lib/i18n/translations";
 import { preferFullMode } from "./helpers";
 
 let lastChatRequest: {
@@ -23,6 +24,24 @@ test.describe("Chat widget", () => {
         }),
       });
     });
+  });
+
+  test("tells the user that message text goes to a third-party AI service", async ({ page }) => {
+    await page.goto("/");
+    await page.getByRole("button", { name: "AI Assistant" }).click();
+
+    const notice = page.getByTestId("chat-privacy-notice");
+    await expect(notice).toBeVisible();
+    await expect(notice).toContainText("third-party AI service");
+    await expect(notice).toContainText("api.aitunnel.ru");
+  });
+
+  test("the privacy notice exists in every language and names the provider", () => {
+    for (const { code } of LANGUAGES) {
+      const text = translations[code].chatPrivacyNotice;
+      expect(text?.length, code).toBeGreaterThan(20);
+      expect(text, code).toContain("api.aitunnel.ru");
+    }
   });
 
   test("opens, sends message, receives reply", async ({ page }) => {
