@@ -23,7 +23,7 @@ export function CountryFlag({ country, className }: CountryFlagProps) {
   return (
     // eslint-disable-next-line @next/next/no-img-element
     <img
-      src={`https://flagcdn.com/${code.toLowerCase()}.svg`}
+      src={`/flags/${code.toLowerCase()}.svg`}
       width={20}
       height={15}
       alt=""

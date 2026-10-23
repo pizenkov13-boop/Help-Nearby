@@ -37,9 +37,10 @@ export const CONTENT_SECURITY_POLICY = [
   withUmami("script-src 'self' 'unsafe-inline'"),
   withUmami("script-src-elem 'self' 'unsafe-inline'"),
   "style-src 'self' 'unsafe-inline'",
-  `img-src 'self' data: blob: ${tileImgSource()} https://unpkg.com`,
+  `img-src 'self' data: blob: ${tileImgSource()}`,
   "font-src 'self' data:",
-  withUmami("connect-src 'self' https://*.supabase.co wss://*.supabase.co"),
+  // The browser talks to our own API only (Supabase is reached from the server), plus the optional Umami host.
+  withUmami("connect-src 'self'"),
   "worker-src 'self'",
   "manifest-src 'self'",
   "base-uri 'self'",
