@@ -74,6 +74,7 @@ export type TranslationKey =
   | "chatWelcome"
   | "chatHint"
   | "chatDisclaimer"
+  | "chatPrivacyNotice"
   | "chatErrorTooLong"
   | "chatErrorRateLimit"
   | "locating"
@@ -338,6 +339,7 @@ const en: Record<TranslationKey, string> = {
   chatWelcome: "Hi! I'm the Help Nearby assistant. I can help you find food, shelter, medical aid, clothing and other humanitarian help, or explain how to use the app.",
   chatHint: "Ask me where to find help, how to contact an organization, or how to use Help Nearby.",
   chatDisclaimer: "AI can make mistakes. Check hours by phone. In an emergency call your local emergency number.",
+  chatPrivacyNotice: "Your messages are sent to a third-party AI service (api.aitunnel.ru) to produce replies. Do not write personal data.",
   chatErrorTooLong: "Your message is too long. Please keep it under 1000 characters.",
   chatErrorRateLimit: "Too many requests. Please wait a few minutes and try again.",
   locating: "Getting your location…",
@@ -631,6 +633,7 @@ const ru: Record<TranslationKey, string> = {
   chatWelcome: "Привет! Я помощник Help Nearby. Помогу найти еду, приют, медицинскую помощь, одежду и другую гуманитарную помощь или объясню, как пользоваться приложением.",
   chatHint: "Спросите, где найти помощь, как связаться с организацией или как пользоваться Help Nearby.",
   chatDisclaimer: "ИИ может ошибаться. Уточняйте часы работы по телефону. В экстренной ситуации звоните по местному номеру экстренной помощи.",
+  chatPrivacyNotice: "Ваши сообщения передаются стороннему ИИ-сервису (api.aitunnel.ru) для подготовки ответа. Не пишите личные данные.",
   chatErrorTooLong: "Сообщение слишком длинное. Пожалуйста, уложитесь в 1000 символов.",
   chatErrorRateLimit: "Слишком много запросов. Подождите несколько минут и попробуйте снова.",
   locating: "Определяем ваше местоположение…",
@@ -938,6 +941,7 @@ const es: Record<TranslationKey, string> = {
   chatWelcome: "¡Hola! Soy el asistente de Help Nearby. Puedo ayudarte a encontrar comida, refugio, ayuda médica, ropa y otra ayuda humanitaria, o explicarte cómo usar la app.",
   chatHint: "Pregúntame dónde encontrar ayuda, cómo contactar a una organización o cómo usar Help Nearby.",
   chatDisclaimer: "La IA puede cometer errores. Confirma los horarios por teléfono. En una emergencia llama al número de emergencias local.",
+  chatPrivacyNotice: "Tus mensajes se envían a un servicio de IA de terceros (api.aitunnel.ru) para generar las respuestas. No escribas datos personales.",
   chatErrorTooLong: "Tu mensaje es demasiado largo. Usa menos de 1000 caracteres.",
   chatErrorRateLimit: "Demasiadas solicitudes. Espera unos minutos e inténtalo de nuevo.",
   locating: "Obteniendo tu ubicación…",
@@ -1250,6 +1254,7 @@ const fr: Record<TranslationKey, string> = {
   chatWelcome: "Bonjour ! Je suis l'assistant Help Nearby. Je peux vous aider à trouver nourriture, abri, aide médicale, vêtements et autre aide humanitaire, ou vous expliquer comment utiliser l'application.",
   chatHint: "Demandez-moi où trouver de l'aide, comment contacter une organisation ou comment utiliser Help Nearby.",
   chatDisclaimer: "L'IA peut se tromper. Vérifiez les horaires par téléphone. En cas d'urgence, appelez le numéro d'urgence local.",
+  chatPrivacyNotice: "Vos messages sont envoyés à un service d'IA tiers (api.aitunnel.ru) pour générer les réponses. N'écrivez pas de données personnelles.",
   chatErrorTooLong: "Votre message est trop long. Veuillez rester sous 1000 caractères.",
   chatErrorRateLimit: "Trop de requêtes. Veuillez patienter quelques minutes et réessayer.",
   locating: "Récupération de votre position…",
@@ -1563,6 +1568,7 @@ const de: Record<TranslationKey, string> = {
   chatWelcome: "Hallo! Ich bin der Help-Nearby-Assistent. Ich helfe Ihnen, Essen, Unterkunft, medizinische Hilfe, Kleidung und andere humanitäre Hilfe zu finden, oder erkläre die App.",
   chatHint: "Fragen Sie mich, wo es Hilfe gibt, wie Sie eine Organisation kontaktieren oder wie Help Nearby funktioniert.",
   chatDisclaimer: "KI kann Fehler machen. Öffnungszeiten telefonisch prüfen. Im Notfall wählen Sie den örtlichen Notruf.",
+  chatPrivacyNotice: "Ihre Nachrichten werden zur Beantwortung an einen externen KI-Dienst (api.aitunnel.ru) gesendet. Schreiben Sie keine persönlichen Daten.",
   chatErrorTooLong: "Ihre Nachricht ist zu lang. Bitte bleiben Sie unter 1000 Zeichen.",
   chatErrorRateLimit: "Zu viele Anfragen. Bitte warten Sie einige Minuten und versuchen Sie es erneut.",
   locating: "Ihr Standort wird ermittelt…",
@@ -1878,6 +1884,7 @@ const zh: Record<TranslationKey, string> = {
   chatWelcome: "您好！我是 Help Nearby 助手。我可以帮您寻找食物、庇护所、医疗援助、衣物等人道主义帮助，也可以说明如何使用本应用。",
   chatHint: "问我哪里能找到帮助、如何联系机构，或如何使用 Help Nearby。",
   chatDisclaimer: "AI 可能出错。请通过电话确认营业时间。紧急情况下请拨打当地急救电话。",
+  chatPrivacyNotice: "您的消息会发送给第三方 AI 服务（api.aitunnel.ru）以生成回复。请勿填写个人信息。",
   chatErrorTooLong: "消息过长，请控制在 1000 个字符以内。",
   chatErrorRateLimit: "请求过多，请等待几分钟后再试。",
   locating: "正在获取您的位置…",
@@ -2165,6 +2172,7 @@ const ar: Record<TranslationKey, string> = {
   chatWelcome: "مرحباً! أنا مساعد Help Nearby. يمكنني مساعدتك في العثور على الطعام والمأوى والمساعدة الطبية والملابس وغيرها من المساعدات الإنسانية، أو شرح كيفية استخدام التطبيق.",
   chatHint: "اسألني أين تجد المساعدة، أو كيف تتواصل مع منظمة، أو كيف تستخدم Help Nearby.",
   chatDisclaimer: "قد يخطئ الذكاء الاصطناعي. تحقق من ساعات العمل عبر الهاتف. في حالات الطوارئ اتصل برقم الطوارئ المحلي.",
+  chatPrivacyNotice: "تُرسل رسائلك إلى خدمة ذكاء اصطناعي تابعة لجهة خارجية (api.aitunnel.ru) لإنشاء الردود. لا تكتب بيانات شخصية.",
   chatErrorTooLong: "رسالتك طويلة جداً. يرجى ألا تتجاوز 1000 حرف.",
   chatErrorRateLimit: "طلبات كثيرة جداً. يرجى الانتظار بضع دقائق ثم المحاولة مرة أخرى.",
   locating: "جارٍ تحديد موقعك…",
