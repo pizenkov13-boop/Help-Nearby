@@ -27,7 +27,7 @@ The project was built by **Pavel Izenkin**, 15, from Prokopyevsk, Russia — wit
 | **Production platform (Next.js)** | May 17, 2026 – present · [help-nearby.org](https://help-nearby.org) |
 | **Prize submission** | Zayed Sustainability Prize **2027** — Global High Schools category |
 | **Prototype reach (Webflow, April–May 2026)** | Users from **24 countries** in the first month (Webflow analytics) |
-| **Production analytics (Next.js, since May 17, 2026)** | PostHog on help-nearby.org — early-stage traffic; exact visitor and country counts are in the PostHog dashboard (not duplicated here to avoid stale figures) |
+| **Production analytics (Next.js)** | Cookie-less [Umami](https://umami.is/) — pageviews and four anonymous events; exact counts are in the Umami dashboard (not duplicated here to avoid stale figures) |
 
 ---
 
@@ -104,7 +104,7 @@ Verified from `package.json` and project source:
 | POI data | [Overpass API](https://wiki.openstreetmap.org/wiki/Overpass_API) | via `/api/nearby` |
 | Routing | [OSRM](http://project-osrm.org/) | via `/api/route` |
 | AI chat | [AITunnel](https://aitunnel.ru/) (OpenAI-compatible API) | via `/api/chat` |
-| Analytics | [PostHog](https://posthog.com/) (`posthog-js`) | **1.374.3** |
+| Analytics | [Umami](https://umami.is/) (script only, no npm dependency) | cookie-less, optional |
 | Hosting | [Vercel](https://vercel.com/) | Production + preview deploys |
 | E2E tests | [Playwright](https://playwright.dev/) | **1.60.0** |
 
@@ -175,9 +175,9 @@ AITUNNEL_MODEL=gpt-6-luna
 # ReliefWeb humanitarian sources (optional — set after appname approval)
 RELIEFWEB_APPNAME=help-nearby-sources-a4p8n1QSR
 
-# Analytics (optional)
-NEXT_PUBLIC_POSTHOG_KEY=your-posthog-key
-NEXT_PUBLIC_POSTHOG_HOST=https://us.i.posthog.com
+# Analytics (optional) — the Umami script loads only when BOTH are set
+# NEXT_PUBLIC_UMAMI_WEBSITE_ID=your-website-id
+# NEXT_PUBLIC_UMAMI_SRC=https://your-umami-host/script.js
 ```
 
 ### GitHub Actions secrets
