@@ -82,12 +82,11 @@ export async function submitOrganization(
 
   const query = [address, city, country].filter(Boolean).join(", ");
   const coords = query ? await nominatimSearch(query) : null;
-  const slug = await uniqueSlug(`${name}-${city}`);
+  const baseSlug = await uniqueSlug(`${name}-${city}`);
 
   try {
-    const { error } = await supabase.from("organizations").insert({
+    const row = {
       name,
-      slug,
       category: [input.category],
       country,
       city,
@@ -101,7 +100,15 @@ export async function submitOrganization(
       description: input.description?.trim() || null,
       rating: null,
       verified: false,
-    });
+    };
+
+    let slug = baseSlug;
+    let { error } = await supabase.from("organizations").insert({ ...row, slug });
+    if (error?.code === "23505") {
+      // Unverified rows are invisible to the anon key, so the slug check cannot see them: retry once with a suffix.
+      slug = `${baseSlug}-${Date.now()}`;
+      ({ error } = await supabase.from("organizations").insert({ ...row, slug }));
+    }
 
     if (error) {
       console.error("[submitOrganization]", error.message);

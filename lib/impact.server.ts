@@ -1,6 +1,7 @@
 import "server-only";
 
 import { getSupabase, isSupabaseFetchError } from "@/lib/supabase";
+import { getSupabaseAdmin } from "@/lib/supabaseAdmin";
 import type { ImpactAction } from "@/lib/impact.client";
 
 export type { ImpactAction };
@@ -37,7 +38,8 @@ export async function trackImpactClick(
 }
 
 export async function getTodayImpactCount(): Promise<number> {
-  const supabase = getSupabase();
+  // impact_clicks is insert-only for the anon key (RLS); the aggregate count is read server-side only.
+  const supabase = getSupabaseAdmin() ?? getSupabase();
   if (!supabase) return 0;
 
   try {
