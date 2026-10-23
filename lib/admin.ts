@@ -7,7 +7,8 @@ const REVIEW_COLUMNS =
   "id, name, country, message, rating, approved, created_at";
 
 export async function fetchUnverifiedOrganizations(): Promise<DbOrganization[]> {
-  const supabase = getSupabase();
+  // Unverified submissions are not readable with the anon key (RLS), so moderation uses the server-side admin client.
+  const supabase = getSupabaseAdmin();
   if (!supabase) return [];
 
   try {
