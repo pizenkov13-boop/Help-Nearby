@@ -122,7 +122,7 @@ test.describe("Home page", () => {
     const context = await browser.newContext({ viewport: { width: 390, height: 844 } });
     const page = await context.newPage();
     await page.addInitScript(() => {
-      sessionStorage.setItem("help-nearby-view-mode", "lite");
+      localStorage.setItem("help-nearby-view-mode", "lite");
     });
     const nearbyRequests: string[] = [];
     page.on("request", (request) => {

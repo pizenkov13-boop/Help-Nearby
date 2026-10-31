@@ -28,8 +28,6 @@ import { resolveOrganizationCoordinates } from "@/lib/resolveOrganizationCoordin
 import {
   detectSlowConnectionFromNetwork,
   getStoredViewMode,
-  isSlowMeasuredFetch,
-  isSlowInternetCountry,
   setStoredViewMode,
   shouldUseLiteMode,
   subscribeToNetworkChanges,
@@ -112,8 +110,6 @@ export function HomePage() {
   const [routeLoading, setRouteLoading] = useState(false);
   const [routeError, setRouteError] = useState<string | null>(null);
   const [slowByNetworkInfo, setSlowByNetworkInfo] = useState(false);
-  const [slowByCountryFallback, setSlowByCountryFallback] = useState(false);
-  const [slowByMeasuredSpeed, setSlowByMeasuredSpeed] = useState(false);
   const [viewPreference, setViewPreference] = useState<ViewModePreference | null>(
     null,
   );
@@ -130,7 +126,6 @@ export function HomePage() {
   const [verifiedOnlyNotice, setVerifiedOnlyNotice] = useState(false);
   const shouldScrollRef = useRef(false);
   const findTriggeredRef = useRef(false);
-  const liteAutoOpenedRef = useRef(false);
   const searchRunIdRef = useRef(0);
   const searchAbortRef = useRef<AbortController | null>(null);
   const lastSearchAreaRef = useRef<string | null>(null);
@@ -141,24 +136,15 @@ export function HomePage() {
     [],
   );
 
-  const detectedSlowConnection =
-    slowByNetworkInfo || slowByCountryFallback || slowByMeasuredSpeed;
-  const liteModeActive = shouldUseLiteMode(
-    detectedSlowConnection,
-    viewPreference,
-  );
+  // Automatic Lite mode: only the browser's own Data Saver / 2G signal (see lib/liteMode.ts).
+  const liteModeActive = shouldUseLiteMode(slowByNetworkInfo, viewPreference);
   useEffect(() => {
     setViewPreference(getStoredViewMode());
   }, []);
 
   const refreshImpactCount = useCallback(async () => {
     try {
-      const startedAt = performance.now();
       const res = await fetch("/api/impact");
-      const durationMs = performance.now() - startedAt;
-      if (isSlowMeasuredFetch(durationMs)) {
-        setSlowByMeasuredSpeed(true);
-      }
       if (!res.ok) return;
       const data = (await res.json()) as { count?: number };
       setImpactCount(data.count ?? 0);
@@ -177,22 +163,8 @@ export function HomePage() {
   }, [refreshImpactCount]);
 
   useEffect(() => {
-    const networkSlow = detectSlowConnectionFromNetwork();
-
-    if (networkSlow !== null) {
-      setSlowByNetworkInfo(networkSlow);
-
-      return subscribeToNetworkChanges((slow) => {
-        setSlowByNetworkInfo(slow);
-      });
-    }
-
-    // No Network Information API: only use a country remembered from an earlier explicit search.
-    // Never ask for geolocation on page load; that happens only after "find help nearby".
-    const cached = readCachedDetectedCountry();
-    if (cached && isSlowInternetCountry(cached.country, cached.countryCode)) {
-      setSlowByCountryFallback(true);
-    }
+    setSlowByNetworkInfo(detectSlowConnectionFromNetwork());
+    return subscribeToNetworkChanges(setSlowByNetworkInfo);
   }, []);
 
   const applySearchResult = useCallback(
