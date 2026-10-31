@@ -65,6 +65,8 @@ function buildOverpassQuery(lat: number, lng: number, radius: number): string {
   nwr["amenity"="clinic"]${around};
   nwr["amenity"="hospital"]${around};
   nwr["amenity"="pharmacy"]${around};
+  nwr["amenity"="doctors"]${around};
+  nwr["emergency"="ambulance_station"]${around};
   nwr["social_facility"="food_bank"]${around};
   nwr["social_facility"="shelter"]${around};
   nwr["charity"="yes"]${around};
@@ -88,6 +90,8 @@ export function buildChatOverpassQuery(
   nwr["amenity"="clinic"]${around};
   nwr["amenity"="hospital"]${around};
   nwr["amenity"="pharmacy"]${around};
+  nwr["amenity"="doctors"]${around};
+  nwr["emergency"="ambulance_station"]${around};
   nwr["amenity"="social_facility"]${around};
   nwr["social_facility"="food_bank"]${around};
   nwr["social_facility"="shelter"]${around};
@@ -118,6 +122,8 @@ const CHAT_CATEGORY_SELECTORS: Record<Category, string[]> = {
     '["amenity"="clinic"]',
     '["amenity"="hospital"]',
     '["amenity"="pharmacy"]',
+    '["amenity"="doctors"]',
+    '["emergency"="ambulance_station"]',
   ],
   clothing: ['["social_facility"="clothing_bank"]', '["amenity"="give_box"]'],
   volunteer: [
@@ -441,7 +447,9 @@ function mapElementToOrganization(
   const osmKind =
     tags.amenity === "pharmacy"
       ? "pharmacy"
-      : tags.shop
+      : tags.emergency === "ambulance_station"
+        ? "ambulance_station"
+        : tags.shop
         ? `shop:${tags.shop}`
         : (tags.amenity ?? tags.social_facility ?? tags.healthcare ?? "other");
 

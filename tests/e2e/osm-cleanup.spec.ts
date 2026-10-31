@@ -150,33 +150,80 @@ test.describe("OSM cleanup", () => {
 });
 
 test.describe("OSM medical filter (unit)", () => {
-  test("keeps hospitals, clinics, pharmacies, doctors, emergency and ambulance", () => {
-    expect(isGenuineMedicalOsmElement({ amenity: "hospital" }, "City Hospital")).toBe(true);
-    expect(isGenuineMedicalOsmElement({ amenity: "clinic" }, "CityMD")).toBe(true);
-    expect(isGenuineMedicalOsmElement({ amenity: "pharmacy" }, "Corner Pharmacy")).toBe(true);
-    expect(isGenuineMedicalOsmElement({ amenity: "doctors" }, "Dr. Smith")).toBe(true);
-    expect(isGenuineMedicalOsmElement({ healthcare: "emergency" }, "ER")).toBe(true);
-    expect(isGenuineMedicalOsmElement({ emergency: "ambulance_station" }, "Ambulance 5")).toBe(true);
+  const ok = (tags: Record<string, string>) =>
+    isGenuineMedicalOsmElement(tags, tags.name ?? "");
+
+  test("keeps a hospital, a pharmacy, an urgent-care clinic and an ambulance station", () => {
+    expect(ok({ amenity: "hospital", name: "Bellevue Hospital Center" })).toBe(true);
+    expect(ok({ healthcare: "hospital", name: "St. Mary's" })).toBe(true);
+    expect(ok({ amenity: "pharmacy", healthcare: "pharmacy", name: "Corner Pharmacy" })).toBe(true);
+    expect(
+      ok({
+        amenity: "clinic",
+        healthcare: "clinic",
+        "healthcare:speciality": "urgent_care",
+        name: "CityMD Urgent Care",
+      }),
+    ).toBe(true);
+    expect(ok({ emergency: "ambulance_station", name: "Ambulance Station 5" })).toBe(true);
+    expect(ok({ amenity: "clinic", emergency: "yes", name: "Night Clinic" })).toBe(true);
   });
 
-  test("drops cosmetic, fertility and surrogacy businesses", () => {
-    expect(
-      isGenuineMedicalOsmElement({ amenity: "clinic" }, "Penile Enhancement Center of New York"),
-    ).toBe(false);
-    expect(
-      isGenuineMedicalOsmElement({ amenity: "clinic" }, "Elevate Egg Donors and Surrogates"),
-    ).toBe(false);
-    expect(
-      isGenuineMedicalOsmElement({ amenity: "clinic", "healthcare:speciality": "cosmetic" }, "Glow"),
-    ).toBe(false);
-    expect(
-      isGenuineMedicalOsmElement({ amenity: "clinic", healthcare: "sperm_donation" }, "Donor Bank"),
-    ).toBe(false);
-    expect(isGenuineMedicalOsmElement({ amenity: "clinic" }, "Клиника эстетической медицины")).toBe(false);
+  test("keeps clinics and doctors with an allowed speciality", () => {
+    for (const speciality of ["general", "family_medicine", "paediatrics", "internal", "emergency"]) {
+      expect(ok({ amenity: "doctors", "healthcare:speciality": speciality, name: "Dr. Lee" })).toBe(true);
+    }
+    expect(ok({ amenity: "clinic", "healthcare:speciality": "dermatology;general", name: "Skin and Family" })).toBe(true);
   });
 
-  test("drops healthcare=* values outside the allowed set", () => {
-    expect(isGenuineMedicalOsmElement({ healthcare: "alternative" }, "Wellness")).toBe(false);
-    expect(isGenuineMedicalOsmElement({ healthcare: "psychotherapist" }, "Therapy")).toBe(false);
+  test("keeps a clinic with no speciality tag and a neutral name", () => {
+    expect(ok({ amenity: "clinic", healthcare: "clinic", name: "Riverside Health Center" })).toBe(true);
+    expect(ok({ amenity: "doctors", name: "Dr. Smith" })).toBe(true);
+  });
+
+  test("drops the Penile Enhancement Center and the egg donor / surrogacy agency", () => {
+    expect(
+      ok({
+        amenity: "clinic",
+        healthcare: "clinic",
+        "healthcare:speciality": "urology",
+        name: "Penile Enhancement Center of New York",
+      }),
+    ).toBe(false);
+    // Tag-less: only the name safety net catches it.
+    expect(ok({ amenity: "clinic", name: "Penile Enhancement Center of New York" })).toBe(false);
+    expect(
+      ok({
+        amenity: "clinic",
+        healthcare: "sperm_donation",
+        "healthcare:speciality": "fertility",
+        name: "Elevate Egg Donors and Surrogates",
+      }),
+    ).toBe(false);
+    expect(ok({ amenity: "clinic", name: "Elevate Egg Donors and Surrogates" })).toBe(false);
+  });
+
+  test("drops excluded specialities even when they come with a good name", () => {
+    for (const speciality of ["cosmetic", "plastic_surgery", "aesthetic", "fertility", "ivf", "reproductive", "surrogacy"]) {
+      expect(ok({ amenity: "clinic", "healthcare:speciality": speciality, name: "Community Health" })).toBe(false);
+    }
+    expect(ok({ amenity: "clinic", "healthcare:speciality": "general;cosmetic", name: "Community Health" })).toBe(false);
+    expect(ok({ amenity: "hospital", "healthcare:speciality": "plastic_surgery", name: "Plastic Hospital" })).toBe(false);
+  });
+
+  test("drops dermatology alone, alternative medicine, dentists, vets and unknown healthcare values", () => {
+    expect(ok({ amenity: "clinic", "healthcare:speciality": "dermatology", name: "Skin Clinic" })).toBe(false);
+    expect(ok({ amenity: "clinic", "healthcare:speciality": "psychiatry", name: "Mind Clinic" })).toBe(false);
+    expect(ok({ amenity: "clinic", healthcare: "alternative", name: "Herbal Wellness" })).toBe(false);
+    expect(ok({ healthcare: "psychotherapist", name: "Therapy" })).toBe(false);
+    expect(ok({ amenity: "dentist", name: "Smile Dental" })).toBe(false);
+    expect(ok({ amenity: "dentist", emergency: "yes", name: "24h Dental" })).toBe(true);
+    expect(ok({ amenity: "veterinary", name: "Pet Clinic" })).toBe(false);
+    expect(ok({ healthcare: "veterinary", name: "Pet Clinic" })).toBe(false);
+  });
+
+  test("drops objects whose tags do not give a confident answer", () => {
+    expect(ok({ healthcare: "centre", name: "Wellness Centre" })).toBe(false);
+    expect(ok({ amenity: "clinic", "healthcare:speciality": "sports_medicine", name: "Active Care" })).toBe(false);
   });
 });
