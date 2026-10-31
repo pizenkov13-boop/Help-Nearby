@@ -53,6 +53,16 @@ test.describe("Which place the results are for", () => {
     expect(bodies.some(({ body }) => body.lang === "en")).toBe(true);
   });
 
+  test("a reverse geocode that never answers delays neither the panel nor the results", async ({ page }) => {
+    await setup(page);
+    await page.route(/\/api\/geocode\/reverse/, () => new Promise(() => {}));
+    const started = Date.now();
+    await openPanel(page);
+    await expect(orgCards(page).first()).toBeVisible({ timeout: 15_000 });
+    expect(Date.now() - started).toBeLessThan(12_000);
+    await expect(page.getByTestId("place-label")).toHaveText("Results near: your current location");
+  });
+
   test("without a place label it says 'your current location'", async ({ page }) => {
     await setup(page);
     await openPanel(page);
