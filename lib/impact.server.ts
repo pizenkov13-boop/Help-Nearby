@@ -2,13 +2,14 @@ import "server-only";
 
 import { classifyDbFailure, getSupabase, isSupabaseFetchError, type DbFailureReason } from "@/lib/supabase";
 import { getSupabaseAdmin } from "@/lib/supabaseAdmin";
+import { diagnoseDbFailure, type DbDiagnosis } from "@/lib/dbDiagnostics.server";
 import type { ImpactAction } from "@/lib/impact.client";
 
 export type { ImpactAction };
 
 export type ImpactCountResult =
   | { ok: true; count: number }
-  | { ok: false; reason: DbFailureReason };
+  | { ok: false; reason: DbFailureReason; detail?: DbDiagnosis & { ms: number } };
 
 /** The "helped today" number changes slowly: one database count per minute per server instance. */
 const COUNT_CACHE_MS = 60_000;
@@ -59,6 +60,7 @@ export async function getTodayImpactCount(): Promise<ImpactCountResult> {
   const supabase = getSupabaseAdmin() ?? getSupabase();
   if (!supabase) return { ok: false, reason: "not_configured" };
 
+  const startedAt = Date.now();
   try {
     const { count, error } = await supabase
       .from("impact_clicks")
@@ -67,13 +69,21 @@ export async function getTodayImpactCount(): Promise<ImpactCountResult> {
 
     if (error) {
       console.error("[getTodayImpactCount]", error.code ?? "", error.message);
-      return { ok: false, reason: classifyDbFailure(error) };
+      return {
+        ok: false,
+        reason: classifyDbFailure(error),
+        detail: { ...(await diagnoseDbFailure(error)), ms: Date.now() - startedAt },
+      };
     }
 
     cachedCount = { count: count ?? 0, at: Date.now() };
     return { ok: true, count: cachedCount.count };
   } catch (error) {
     console.error("[getTodayImpactCount]", classifyDbFailure(error), error instanceof Error ? error.message : "");
-    return { ok: false, reason: classifyDbFailure(error) };
+    return {
+      ok: false,
+      reason: classifyDbFailure(error),
+      detail: { ...(await diagnoseDbFailure(error)), ms: Date.now() - startedAt },
+    };
   }
 }

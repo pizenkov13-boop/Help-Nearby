@@ -22,7 +22,7 @@ export async function GET() {
   if (!result.ok) {
     // An explicit error, never a made-up {"count":0}.
     return NextResponse.json(
-      { count: null, error: true, reason: result.reason },
+      { count: null, error: true, reason: result.reason, ...(result.detail ? { detail: result.detail } : {}) },
       { status: 503, headers: { "Cache-Control": "no-store" } },
     );
   }
