@@ -5,7 +5,7 @@ import { nominatimReverse } from "@/lib/nominatim.server";
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
-/** Body: { lat, lng }. Returns the country only. */
+/** Body: { lat, lng, lang? } (never in the URL). Returns the country and a short place label. */
 export async function POST(request: Request) {
   const body = await readJsonBody(request);
   const lat = toNumber(body.lat);
@@ -19,7 +19,8 @@ export async function POST(request: Request) {
   }
 
   try {
-    const result = await nominatimReverse(lat, lng);
+    const language = typeof body.lang === "string" ? body.lang : undefined;
+    const result = await nominatimReverse(lat, lng, language);
 
     if (!result) {
       return NextResponse.json({ error: "Location not found." }, { status: 404 });

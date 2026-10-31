@@ -92,14 +92,15 @@ test.describe("Place search", () => {
     await page.locator("#org-search").fill("Nice, France");
     await page.locator("#org-search").press("Enter");
 
-    await expect(page.getByTestId("place-chip")).toContainText("Searching near Nice, France");
+    await expect(page.getByTestId("place-chip")).toContainText("Results near: Nice, France");
     await expect(card(page, "Croix-Rouge française – Nice")).toBeVisible({ timeout: 20_000 });
     await expect(card(page, "E2E Test Food Bank")).toHaveCount(0);
     await expect.poll(mapCenteredNear(page, 43.7102, 7.262), { timeout: 10_000 }).toBe(true);
 
-    // "Use my location" returns to browser geolocation (mocked NYC).
-    await page.getByTestId("place-chip").getByRole("button", { name: "Use my location" }).click();
-    await expect(page.getByTestId("place-chip")).toHaveCount(0);
+    // "Change place" → "Use my location" returns to browser geolocation (mocked NYC).
+    await page.getByTestId("change-place").click();
+    await page.getByTestId("change-place-form").getByRole("button", { name: "Use my location" }).click();
+    await expect(page.getByTestId("place-label")).toHaveText("Results near: your current location");
     await expect(card(page, "E2E Test Food Bank")).toBeVisible({ timeout: 20_000 });
     await expect.poll(mapCenteredNear(page, 40.7128, -74.006), { timeout: 10_000 }).toBe(true);
   });
@@ -129,7 +130,8 @@ test.describe("Place search", () => {
     await expect(page.getByTestId("place-error")).toHaveText(
       "Place not found. Try a city name, e.g. Nice, France.",
     );
-    await expect(page.getByTestId("place-chip")).toHaveCount(0);
+    // The bar keeps naming the position the results are for, not the unknown text.
+    await expect(page.getByTestId("place-label")).not.toContainText("Zzzzqqq");
   });
 
   test("works in lite mode (list only, no map) and on a phone-sized screen", async ({ page }) => {

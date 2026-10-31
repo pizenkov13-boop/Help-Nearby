@@ -5,20 +5,23 @@ import type { Organization } from "@/lib/types";
 
 const DUPLICATE_RADIUS_MILES = 0.05;
 
+/** Letters and digits of any script (Latin, Cyrillic, CJK, Arabic, ...), lowercased. */
 function normalizeOrgName(name: string): string {
   return name
     .toLowerCase()
-    .replace(/[^a-z0-9\u0400-\u04ff]+/g, " ")
+    .replace(/[^\p{L}\p{N}]+/gu, " ")
     .trim();
 }
+
+/** The same name this close (about 500 m) is one organization; a chain's other branches are farther away. */
+const SAME_NAME_RADIUS_MILES = 0.3;
 
 function isDuplicateOrganization(
   existing: Organization,
   candidate: Organization,
 ): boolean {
-  if (normalizeOrgName(existing.name) === normalizeOrgName(candidate.name)) {
-    return true;
-  }
+  const existingName = normalizeOrgName(existing.name);
+  const sameName = existingName !== "" && existingName === normalizeOrgName(candidate.name);
 
   const hasCoords =
     Number.isFinite(existing.lat) &&
@@ -28,12 +31,12 @@ function isDuplicateOrganization(
     !(existing.lat === 0 && existing.lng === 0) &&
     !(candidate.lat === 0 && candidate.lng === 0);
 
-  if (!hasCoords) return false;
+  // Without coordinates (country-level directory entries) the name is all there is to compare.
+  if (!hasCoords) return sameName;
 
-  return (
-    distanceMiles(existing.lat, existing.lng, candidate.lat, candidate.lng) <
-    DUPLICATE_RADIUS_MILES
-  );
+  const miles = distanceMiles(existing.lat, existing.lng, candidate.lat, candidate.lng);
+  if (miles < DUPLICATE_RADIUS_MILES) return true;
+  return sameName && miles < SAME_NAME_RADIUS_MILES;
 }
 
 /** Merge sources; earlier batches win duplicates (name or proximity). */

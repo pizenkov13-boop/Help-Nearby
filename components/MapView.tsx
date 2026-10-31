@@ -136,22 +136,32 @@ function clearLeafletContainer(container: HTMLElement | null) {
   container.replaceChildren();
 }
 
+/** OSM names, addresses and the place label are free text: never put them into popup HTML raw. */
+function escapeHtml(text: string): string {
+  return text
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+
 function buildOrganizationPopup(org: Organization) {
   const verified = org.verified
     ? `<span style="display:inline-flex;align-items:center;margin-left:4px;color:#34d399;vertical-align:middle;">${verifiedCheckMarkup(14, "#34d399")}</span>`
     : "";
   const source = getOrganizationSource(org);
   const sourceLine = source
-    ? `<br /><span style="font-size:11px;color:#6b7280;">Source: ${source.label}</span>`
+    ? `<br /><span style="font-size:11px;color:#6b7280;">Source: ${escapeHtml(source.label)}</span>`
     : "";
   const address = org.address
-    ? `<br /><span style="font-size:12px;color:#9ca3af;">${org.address}</span>`
+    ? `<br /><span style="font-size:12px;color:#9ca3af;">${escapeHtml(org.address)}</span>`
     : "";
   const icon = categoryIconMarkup(org.category, 14, "#9ca3af");
 
   return `<div style="font-size:14px;">
-    <strong>${org.name}</strong>${verified}<br />
-    <span style="display:inline-flex;align-items:center;gap:4px;">${icon} ${org.category}</span>${sourceLine}${address}
+    <strong>${escapeHtml(org.name)}</strong>${verified}<br />
+    <span style="display:inline-flex;align-items:center;gap:4px;">${icon} ${escapeHtml(org.category)}</span>${sourceLine}${address}
   </div>`;
 }
 
@@ -172,20 +182,19 @@ function fitMapToContent(
     return;
   }
 
-  const points: [number, number][] = [
-    [userLocation.lat, userLocation.lng],
-    ...organizations.map((org) => {
-      const { lat, lng } = getOrganizationCoordinates(org);
-      return [lat, lng] as [number, number];
-    }),
-  ];
+  // Centered on the searched place (not on the middle of the markers), wide enough for every marker.
+  const place = L.latLng(userLocation.lat, userLocation.lng);
+  const farthestMeters = organizations.reduce((max, org) => {
+    const { lat, lng } = getOrganizationCoordinates(org);
+    return Math.max(max, place.distanceTo([lat, lng]));
+  }, 0);
 
-  if (points.length === 1) {
-    map.setView([userLocation.lat, userLocation.lng], 15);
+  if (farthestMeters === 0) {
+    map.setView(place, 15);
     return;
   }
 
-  map.fitBounds(L.latLngBounds(points), { padding: [48, 48], maxZoom: 14 });
+  map.fitBounds(place.toBounds(farthestMeters * 2.2), { padding: [48, 48], maxZoom: 14 });
 }
 
 interface MapViewProps {
@@ -385,7 +394,7 @@ export default function MapView({
     }
 
     L.marker(position, { icon: userLocationIcon, zIndexOffset: 1000 })
-      .bindPopup(`<div style="font-size:14px;font-weight:500;">${yourLocationLabel}</div>`)
+      .bindPopup(`<div style="font-size:14px;font-weight:500;">${escapeHtml(yourLocationLabel)}</div>`)
       .addTo(markersLayer);
 
     for (const org of mapOrganizations) {
