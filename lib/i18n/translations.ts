@@ -267,6 +267,7 @@ export type TranslationKey =
   | "loadFailed"
   | "loadRetry"
   | "osmUnavailableNotice"
+  | "catalogUnavailableNotice"
   | "unverifiedOsmBadge"
   | "sourceCatalogPending"
   | "sourceOsmPending"
@@ -579,6 +580,7 @@ const en: Record<TranslationKey, string> = {
   loadFailed: "Couldn't load organizations.",
   loadRetry: "Try again",
   osmUnavailableNotice: "OpenStreetMap is temporarily unavailable — showing verified organizations only",
+  catalogUnavailableNotice: "The verified catalog is temporarily unavailable — showing OpenStreetMap results only",
   unverifiedOsmBadge: "Unverified · OpenStreetMap",
   sourceCatalogPending: "Help Nearby directory…",
   sourceOsmPending: "OpenStreetMap…",
@@ -901,6 +903,7 @@ const ru: Record<TranslationKey, string> = {
   loadFailed: "Не удалось загрузить организации.",
   loadRetry: "Повторить",
   osmUnavailableNotice: "OpenStreetMap временно недоступен — показаны только проверенные организации",
+  catalogUnavailableNotice: "Каталог проверенных организаций временно недоступен — показаны только данные OpenStreetMap",
   unverifiedOsmBadge: "Не проверено · OpenStreetMap",
   sourceCatalogPending: "Каталог Help Nearby…",
   sourceOsmPending: "OpenStreetMap…",
@@ -1230,6 +1233,7 @@ const es: Record<TranslationKey, string> = {
   loadFailed: "No se pudieron cargar las organizaciones.",
   loadRetry: "Reintentar",
   osmUnavailableNotice: "OpenStreetMap no está disponible por ahora — solo se muestran organizaciones verificadas",
+  catalogUnavailableNotice: "El catálogo verificado no está disponible por ahora — solo se muestran resultados de OpenStreetMap",
   unverifiedOsmBadge: "Sin verificar · OpenStreetMap",
   sourceCatalogPending: "Directorio Help Nearby…",
   sourceOsmPending: "OpenStreetMap…",
@@ -1560,6 +1564,7 @@ const fr: Record<TranslationKey, string> = {
   loadFailed: "Impossible de charger les organisations.",
   loadRetry: "Réessayer",
   osmUnavailableNotice: "OpenStreetMap est temporairement indisponible — seules les organisations vérifiées sont affichées",
+  catalogUnavailableNotice: "Le catalogue vérifié est temporairement indisponible — seuls les résultats OpenStreetMap sont affichés",
   unverifiedOsmBadge: "Non vérifié · OpenStreetMap",
   sourceCatalogPending: "Annuaire Help Nearby…",
   sourceOsmPending: "OpenStreetMap…",
@@ -1891,6 +1896,7 @@ const de: Record<TranslationKey, string> = {
   loadFailed: "Organisationen konnten nicht geladen werden.",
   loadRetry: "Erneut versuchen",
   osmUnavailableNotice: "OpenStreetMap ist vorübergehend nicht erreichbar — es werden nur geprüfte Organisationen angezeigt",
+  catalogUnavailableNotice: "Der geprüfte Katalog ist vorübergehend nicht erreichbar — es werden nur OpenStreetMap-Ergebnisse angezeigt",
   unverifiedOsmBadge: "Nicht verifiziert · OpenStreetMap",
   sourceCatalogPending: "Help-Nearby-Verzeichnis…",
   sourceOsmPending: "OpenStreetMap…",
@@ -2198,6 +2204,7 @@ const zh: Record<TranslationKey, string> = {
   loadFailed: "无法加载机构。",
   loadRetry: "重试",
   osmUnavailableNotice: "OpenStreetMap 暂时不可用——仅显示已验证的机构",
+  catalogUnavailableNotice: "已验证目录暂时不可用——仅显示 OpenStreetMap 结果",
   unverifiedOsmBadge: "未验证 · OpenStreetMap",
   sourceCatalogPending: "Help Nearby 名录…",
   sourceOsmPending: "OpenStreetMap…",
@@ -2517,6 +2524,7 @@ const ar: Record<TranslationKey, string> = {
   loadFailed: "تعذّر تحميل المؤسسات.",
   loadRetry: "إعادة المحاولة",
   osmUnavailableNotice: "OpenStreetMap غير متاح مؤقتًا — تُعرض المؤسسات الموثّقة فقط",
+  catalogUnavailableNotice: "الدليل الموثّق غير متاح مؤقتًا — تُعرض نتائج OpenStreetMap فقط",
   unverifiedOsmBadge: "غير موثّق · OpenStreetMap",
   sourceCatalogPending: "دليل Help Nearby…",
   sourceOsmPending: "OpenStreetMap…",
