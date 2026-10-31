@@ -85,7 +85,7 @@ test.describe("Home page", () => {
     await page.getByRole("button", { name: /Switch to lite mode/i }).click();
     await expect(page.getByText(/Lite mode active/i)).toBeVisible();
     await expect(page.locator(".leaflet-container")).toHaveCount(0);
-    expect(await orgCards(page).count()).toBeGreaterThan(0);
+    await expect(orgCards(page).first()).toBeVisible({ timeout: 10_000 });
   });
 
   test("without geolocation the button shows a message and a search field, no foreign city", async ({

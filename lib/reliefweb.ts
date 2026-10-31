@@ -68,13 +68,14 @@ function typeNameFromFields(
   return type.name?.trim() ?? "";
 }
 
-function inferCategory(description: string, name: string, typeName: string): Category {
+/** Keyword allowlist; null (not shown) when the text names none of the five categories. */
+function inferCategory(description: string, name: string, typeName: string): Category | null {
   const text = `${name} ${description} ${typeName}`.toLowerCase();
   if (/\b(food|nutrition|wfp|hunger|agriculture)\b/.test(text)) return "food";
   if (/\b(shelter|housing|displacement|camp)\b/.test(text)) return "shelter";
   if (/\b(medical|health|clinic|hospital|pharma|wash)\b/.test(text)) return "medical";
   if (/\b(clothing|apparel)\b/.test(text)) return "clothing";
-  return "volunteer";
+  return null;
 }
 
 function mapReliefWebSource(item: ReliefWebSourceItem, country: string): Organization | null {
@@ -92,6 +93,7 @@ function mapReliefWebSource(item: ReliefWebSourceItem, country: string): Organiz
     fieldText(fields.description) ||
     `Humanitarian organization listed on ReliefWeb${typeName ? ` (${typeName})` : ""}.`;
   const category = inferCategory(description, name, typeName);
+  if (!category) return null;
   const homepage = fieldText(fields.homepage);
   const rwId = item.id.replace(/\D/g, "") || item.id;
   const countryLat = fields.country?.[0]?.location?.lat;
