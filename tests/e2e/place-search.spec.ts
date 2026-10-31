@@ -139,8 +139,11 @@ test.describe("Place search", () => {
     await page.setViewportSize({ width: 390, height: 800 });
     await page.goto("/");
 
+    // Geolocation is not granted: pressing the button opens the panel with the message and the search field.
+    await page.getByRole("button", { name: /Find Help Near Me/i }).click();
     const search = page.locator("#org-search");
     await expect(search).toBeVisible({ timeout: 30_000 });
+    await expect(page.getByTestId("location-needed")).toBeVisible();
     await expect(page.locator(".leaflet-container")).toHaveCount(0);
 
     await search.fill("Nice, France");
