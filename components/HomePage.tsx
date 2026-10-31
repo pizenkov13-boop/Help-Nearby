@@ -3,7 +3,6 @@
 import { MapPin } from "lucide-react";
 import { useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { DEFAULT_LOCATION } from "@/lib/constants";
 import {
   cacheDetectedCountry,
   readCachedDetectedCountry,
@@ -96,7 +95,6 @@ export function HomePage() {
   const [userLocation, setUserLocation] = useState<TrackedUserLocation | null>(
     null,
   );
-  const [usingDefaultLocation, setUsingDefaultLocation] = useState(false);
   // Place search: when set, this place (not browser geolocation) is the active search location.
   const [searchPlace, setSearchPlace] = useState<PlaceResult | null>(null);
   const [placeError, setPlaceError] = useState<string | null>(null);
@@ -119,7 +117,6 @@ export function HomePage() {
   const [viewPreference, setViewPreference] = useState<ViewModePreference | null>(
     null,
   );
-  const [liteDetectionDone, setLiteDetectionDone] = useState(false);
   const [impactCount, setImpactCount] = useState<number | null>(null);
   const [searchRadiusMeters, setSearchRadiusMeters] = useState<number | null>(
     null,
@@ -184,35 +181,18 @@ export function HomePage() {
 
     if (networkSlow !== null) {
       setSlowByNetworkInfo(networkSlow);
-      setLiteDetectionDone(true);
 
       return subscribeToNetworkChanges((slow) => {
         setSlowByNetworkInfo(slow);
       });
     }
 
-    if (!navigator.geolocation) {
-      setLiteDetectionDone(true);
-      return;
+    // No Network Information API: only use a country remembered from an earlier explicit search.
+    // Never ask for geolocation on page load; that happens only after "find help nearby".
+    const cached = readCachedDetectedCountry();
+    if (cached && isSlowInternetCountry(cached.country, cached.countryCode)) {
+      setSlowByCountryFallback(true);
     }
-
-    navigator.geolocation.getCurrentPosition(
-      async (position) => {
-        const geo = await reverseGeocodeCountry(
-          position.coords.latitude,
-          position.coords.longitude,
-        );
-        if (geo) {
-          cacheDetectedCountry(geo.country, geo.countryCode);
-          if (isSlowInternetCountry(geo.country, geo.countryCode)) {
-            setSlowByCountryFallback(true);
-          }
-        }
-        setLiteDetectionDone(true);
-      },
-      () => setLiteDetectionDone(true),
-      { enableHighAccuracy: false, timeout: 8000, maximumAge: 86400000 },
-    );
   }, []);
 
   const applySearchResult = useCallback(
@@ -250,6 +230,10 @@ export function HomePage() {
         liteModeActive,
       );
       const hadCachedResults = Boolean(cached);
+      if (!cached) {
+        // Never keep showing the previous place's organizations while the new search loads.
+        setAllOrganizations([]);
+      }
       if (cached) {
         applySearchResult(cached.organizations, {
           activeRadiusMeters: cached.searchRadiusMeters ?? 0,
@@ -537,7 +521,6 @@ export function HomePage() {
           lng,
           accuracy: position.coords.accuracy,
         });
-        setUsingDefaultLocation(false);
         setIsLocating(false);
       },
       (error: GeolocationPositionError) => {
@@ -556,17 +539,18 @@ export function HomePage() {
     setRouteError(null);
   }, []);
 
+  const hasUserLocation = userLocation !== null;
   const userLocationRef = useRef(userLocation);
   userLocationRef.current = userLocation;
 
   useEffect(() => {
-    if (!mapExpanded || liteModeActive || usingDefaultLocation || searchPlace) return;
+    // Only follow the device position once the user has shared it and no typed place is active.
+    if (!mapExpanded || liteModeActive || !hasUserLocation || searchPlace) return;
 
     return watchUserLocation((location) => {
       setUserLocation(location);
-      setUsingDefaultLocation(false);
     });
-  }, [mapExpanded, liteModeActive, usingDefaultLocation, searchPlace]);
+  }, [mapExpanded, liteModeActive, hasUserLocation, searchPlace]);
 
   useEffect(() => {
     if (liteModeActive || !routeDestination) {
@@ -626,9 +610,8 @@ export function HomePage() {
   }, [mapExpanded, scrollToMapTop]);
 
   const openMapAccordion = useCallback(
-    (location: TrackedUserLocation, isDefault: boolean) => {
+    (location: TrackedUserLocation | null) => {
       setUserLocation(location);
-      setUsingDefaultLocation(isDefault);
       setMapExpanded(true);
       setIsLocating(false);
       shouldScrollRef.current = true;
@@ -644,13 +627,9 @@ export function HomePage() {
 
     setIsLocating(true);
 
-    if (liteModeActive) {
-      openMapAccordion(DEFAULT_LOCATION, true);
-      return;
-    }
-
+    // No geolocation: open the panel without a location so the person is asked to allow it or type a city.
     if (!navigator.geolocation) {
-      openMapAccordion(DEFAULT_LOCATION, true);
+      openMapAccordion(null);
       return;
     }
 
@@ -662,17 +641,14 @@ export function HomePage() {
         if (geo) {
           cacheDetectedCountry(geo.country, geo.countryCode);
         }
-        openMapAccordion(
-          {
-            lat,
-            lng,
-            accuracy: position.coords.accuracy,
-          },
-          false,
-        );
+        openMapAccordion({
+          lat,
+          lng,
+          accuracy: position.coords.accuracy,
+        });
       },
-      (error: GeolocationPositionError) => {
-        openMapAccordion(DEFAULT_LOCATION, true);
+      () => {
+        openMapAccordion(null);
       },
       { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 },
     );
@@ -681,23 +657,7 @@ export function HomePage() {
     userLocation,
     openMapAccordion,
     scrollToMapTop,
-    liteModeActive,
   ]);
-
-  useEffect(() => {
-    if (
-      !liteModeActive ||
-      !liteDetectionDone ||
-      mapExpanded ||
-      liteAutoOpenedRef.current
-    ) {
-      return;
-    }
-    liteAutoOpenedRef.current = true;
-    setUserLocation(DEFAULT_LOCATION);
-    setUsingDefaultLocation(true);
-    setMapExpanded(true);
-  }, [liteModeActive, liteDetectionDone, mapExpanded]);
 
   useEffect(() => {
     if (
@@ -728,9 +688,8 @@ export function HomePage() {
 
       if (mapExpanded) {
         setUserLocation({ lat: place.lat, lng: place.lng });
-        setUsingDefaultLocation(true);
       } else {
-        openMapAccordion({ lat: place.lat, lng: place.lng }, true);
+        openMapAccordion({ lat: place.lat, lng: place.lng });
       }
     },
     [mapExpanded, openMapAccordion],
@@ -762,14 +721,15 @@ export function HomePage() {
     setPlaceError(null);
     lastSearchAreaRef.current = null;
 
-    const useDefault = () => {
-      setUserLocation(DEFAULT_LOCATION);
-      setUsingDefaultLocation(true);
-      setFlyTarget({ lat: DEFAULT_LOCATION.lat, lng: DEFAULT_LOCATION.lng, key: Date.now() });
+    // Location unavailable: drop the previous place's results instead of substituting another city.
+    const clearLocation = () => {
+      setUserLocation(null);
+      setAllOrganizations([]);
+      setSearchRadiusMeters(null);
     };
 
     if (!navigator.geolocation) {
-      useDefault();
+      clearLocation();
       return;
     }
     setIsLocating(true);
@@ -778,12 +738,11 @@ export function HomePage() {
         const lat = position.coords.latitude;
         const lng = position.coords.longitude;
         setUserLocation({ lat, lng, accuracy: position.coords.accuracy });
-        setUsingDefaultLocation(false);
         setFlyTarget({ lat, lng, key: Date.now() });
         setIsLocating(false);
       },
       () => {
-        useDefault();
+        clearLocation();
         setIsLocating(false);
       },
       { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 },
@@ -812,7 +771,7 @@ export function HomePage() {
         style={{ transitionDuration: `${ACCORDION_DURATION_MS}ms` }}
         aria-hidden={!mapExpanded}
       >
-        {(userLocation || liteModeActive) && (
+        {mapExpanded && (
           <section className="map-panel">
             <div className="container">
               <div className="mb-3 flex flex-col gap-3 md:mb-6">
@@ -822,11 +781,6 @@ export function HomePage() {
                     {liteModeActive && (
                       <span className="map-badge emerald">
                         {t("liteModeNotice")}
-                      </span>
-                    )}
-                    {usingDefaultLocation && !liteModeActive && !searchPlace && (
-                      <span className="map-badge amber">
-                        {t("defaultLocationNotice")}
                       </span>
                     )}
                     {anySourcePending && (
@@ -857,7 +811,17 @@ export function HomePage() {
                   </h2>
                 </div>
 
-                {!orgsLoading && searchRadiusMeters != null && (
+                {!userLocation && (
+                  <p
+                    className="rounded-lg border border-amber-500/40 bg-amber-500/10 px-4 py-3 text-sm font-medium text-amber-900 dark:text-amber-200"
+                    role="status"
+                    data-testid="location-needed"
+                  >
+                    {t("locationNeededNotice")}
+                  </p>
+                )}
+
+                {userLocation && !orgsLoading && searchRadiusMeters != null && (
                   <div className="flex flex-wrap items-center gap-3">
                     <p className="text-sm text-slate-600 dark:text-slate-400">
                       {searchMode === "nearest" && nearestFallbackKm != null

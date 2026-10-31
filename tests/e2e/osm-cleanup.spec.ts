@@ -5,6 +5,7 @@ import {
   hasClosedLifecycleTag,
   removeJunkOsmOrganizations,
 } from "@/lib/osmCleanup";
+import { isGenuineMedicalOsmElement } from "@/lib/osmMedical";
 import type { Organization } from "@/lib/types";
 import { MOCK_NEARBY_ORGS } from "./helpers";
 
@@ -145,5 +146,37 @@ test.describe("OSM cleanup", () => {
     const { organizations, stats } = cleanOsmOrganizations(orgs, 2);
     expect(organizations.map((o) => o.id)).toEqual(["overpass-node-1"]);
     expect(stats).toEqual({ before: 5, duplicates: 1, junk: 1, closed: 2, after: 1 });
+  });
+});
+
+test.describe("OSM medical filter (unit)", () => {
+  test("keeps hospitals, clinics, pharmacies, doctors, emergency and ambulance", () => {
+    expect(isGenuineMedicalOsmElement({ amenity: "hospital" }, "City Hospital")).toBe(true);
+    expect(isGenuineMedicalOsmElement({ amenity: "clinic" }, "CityMD")).toBe(true);
+    expect(isGenuineMedicalOsmElement({ amenity: "pharmacy" }, "Corner Pharmacy")).toBe(true);
+    expect(isGenuineMedicalOsmElement({ amenity: "doctors" }, "Dr. Smith")).toBe(true);
+    expect(isGenuineMedicalOsmElement({ healthcare: "emergency" }, "ER")).toBe(true);
+    expect(isGenuineMedicalOsmElement({ emergency: "ambulance_station" }, "Ambulance 5")).toBe(true);
+  });
+
+  test("drops cosmetic, fertility and surrogacy businesses", () => {
+    expect(
+      isGenuineMedicalOsmElement({ amenity: "clinic" }, "Penile Enhancement Center of New York"),
+    ).toBe(false);
+    expect(
+      isGenuineMedicalOsmElement({ amenity: "clinic" }, "Elevate Egg Donors and Surrogates"),
+    ).toBe(false);
+    expect(
+      isGenuineMedicalOsmElement({ amenity: "clinic", "healthcare:speciality": "cosmetic" }, "Glow"),
+    ).toBe(false);
+    expect(
+      isGenuineMedicalOsmElement({ amenity: "clinic", healthcare: "sperm_donation" }, "Donor Bank"),
+    ).toBe(false);
+    expect(isGenuineMedicalOsmElement({ amenity: "clinic" }, "Клиника эстетической медицины")).toBe(false);
+  });
+
+  test("drops healthcare=* values outside the allowed set", () => {
+    expect(isGenuineMedicalOsmElement({ healthcare: "alternative" }, "Wellness")).toBe(false);
+    expect(isGenuineMedicalOsmElement({ healthcare: "psychotherapist" }, "Therapy")).toBe(false);
   });
 });

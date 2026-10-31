@@ -80,7 +80,7 @@ export type TranslationKey =
   | "locating"
   | "locationError"
   | "yourLocation"
-  | "defaultLocationNotice"
+  | "locationNeededNotice"
   | "navWhy"
   | "navReviews"
   | "navReviewsShort"
@@ -349,7 +349,8 @@ const en: Record<TranslationKey, string> = {
   locating: "Getting your location…",
   locationError: "Unable to get your location. Please enable location access.",
   yourLocation: "You are here",
-  defaultLocationNotice: "Showing default location",
+  locationNeededNotice:
+    "Allow location access or enter a city to find help near you.",
   navWhy: "Why It Matters",
   navReviews: "Reviews & Suggestions",
   navReviewsShort: "Reviews",
@@ -648,7 +649,8 @@ const ru: Record<TranslationKey, string> = {
   locationError:
     "Не удалось определить ваше местоположение. Пожалуйста, включите доступ к геолокации.",
   yourLocation: "Вы здесь",
-  defaultLocationNotice: "Показано местоположение по умолчанию",
+  locationNeededNotice:
+    "Разрешите доступ к геолокации или введите город, чтобы найти помощь рядом.",
   navWhy: "Почему это важно",
   navReviews: "Отзывы и предложения",
   navReviewsShort: "Отзывы",
@@ -960,7 +962,8 @@ const es: Record<TranslationKey, string> = {
   locationError:
     "No se pudo obtener tu ubicación. Habilita el acceso a la ubicación.",
   yourLocation: "Estás aquí",
-  defaultLocationNotice: "Mostrando ubicación predeterminada",
+  locationNeededNotice:
+    "Permite el acceso a la ubicación o escribe una ciudad para encontrar ayuda cerca.",
   navWhy: "Por qué importa",
   navReviews: "Reseñas y sugerencias",
   navReviewsShort: "Reseñas",
@@ -1277,7 +1280,8 @@ const fr: Record<TranslationKey, string> = {
   locationError:
     "Impossible d'obtenir votre position. Veuillez autoriser l'accès à la localisation.",
   yourLocation: "Vous êtes ici",
-  defaultLocationNotice: "Affichage de la position par défaut",
+  locationNeededNotice:
+    "Autorisez la localisation ou saisissez une ville pour trouver de l’aide près de vous.",
   navWhy: "Pourquoi c'est important",
   navReviews: "Avis et suggestions",
   navReviewsShort: "Avis",
@@ -1595,7 +1599,8 @@ const de: Record<TranslationKey, string> = {
   locationError:
     "Ihr Standort konnte nicht ermittelt werden. Bitte erlauben Sie den Standortzugriff.",
   yourLocation: "Sie sind hier",
-  defaultLocationNotice: "Standardstandort wird angezeigt",
+  locationNeededNotice:
+    "Erlauben Sie den Standortzugriff oder geben Sie eine Stadt ein, um Hilfe in Ihrer Nähe zu finden.",
   navWhy: "Warum es wichtig ist",
   navReviews: "Bewertungen und Vorschläge",
   navReviewsShort: "Reviews",
@@ -1913,7 +1918,7 @@ const zh: Record<TranslationKey, string> = {
   locating: "正在获取您的位置…",
   locationError: "无法获取您的位置。请启用位置访问权限。",
   yourLocation: "您在这里",
-  defaultLocationNotice: "显示默认位置",
+  locationNeededNotice: "请允许访问位置信息，或输入城市名称，以查找附近的帮助。",
   navWhy: "为何重要",
   navReviews: "评价与建议",
   navReviewsShort: "评价",
@@ -2205,7 +2210,8 @@ const ar: Record<TranslationKey, string> = {
   locating: "جارٍ تحديد موقعك…",
   locationError: "تعذر الحصول على موقعك. يرجى تفعيل الوصول إلى الموقع.",
   yourLocation: "موقعك هنا",
-  defaultLocationNotice: "عرض الموقع الافتراضي",
+  locationNeededNotice:
+    "اسمح بالوصول إلى الموقع أو أدخل اسم مدينة للعثور على مساعدة قريبة منك.",
   navWhy: "لماذا هذا مهم",
   navReviews: "التقييمات والاقتراحات",
   navReviewsShort: "التقييمات",
