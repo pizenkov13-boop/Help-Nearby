@@ -109,7 +109,7 @@ test.describe("Home page", () => {
 
     await page.getByRole("button", { name: /Find Help Near Me/i }).click();
     await expect(page.getByTestId("location-needed")).toContainText(
-      "Allow location access or enter a city to find help near you.",
+      "type a city below",
     );
     await expect(page.getByTestId("location-needed").getByRole("button", { name: "Use my location" })).toBeVisible();
     // No place is named until one is known.
