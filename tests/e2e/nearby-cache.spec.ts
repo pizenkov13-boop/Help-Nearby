@@ -1,4 +1,4 @@
-import { test, expect } from "@playwright/test";
+import { test, expect } from "./fixtures";
 import { nearbyAreaKey, readNearbyCache, writeNearbyCache } from "@/lib/nearbyCache";
 import { readOverpassClientCache, writeOverpassClientCache } from "@/lib/overpassClientCache";
 import { MOCK_NEARBY_ORGS } from "./helpers";

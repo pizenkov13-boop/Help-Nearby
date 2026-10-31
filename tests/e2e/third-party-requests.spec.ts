@@ -1,6 +1,6 @@
 import { readdirSync, readFileSync, statSync } from "node:fs";
 import { join } from "node:path";
-import { test, expect } from "@playwright/test";
+import { test, expect } from "./fixtures";
 import { CONTENT_SECURITY_POLICY } from "../../config/contentSecurityPolicy.mjs";
 import { mockNearbyApi, openMapWithOrgs, preferFullMode } from "./helpers";
 
@@ -66,7 +66,7 @@ test.describe("Third-party browser requests", () => {
     }
   });
 
-  test("the CSP allows no CDN, no Supabase host for the browser and no analytics host by default", () => {
+  test("the CSP allows no CDN, no Supabase host and no analytics host for the browser", () => {
     expect(CONTENT_SECURITY_POLICY).not.toMatch(/unpkg|flagcdn|supabase|posthog|umami/i);
     expect(CONTENT_SECURITY_POLICY).toContain("tile.openstreetmap.org");
   });
@@ -104,6 +104,7 @@ test.describe("Fonts are self-hosted", () => {
   test("pages load their fonts from our own origin and never contact Google Fonts", async ({ page, baseURL }) => {
     const googleRequests: string[] = [];
     const ownFonts: string[] = [];
+    await preferFullMode(page);
     page.on("request", (request) => {
       const url = request.url();
       if (GOOGLE_FONT_HOSTS.test(url)) googleRequests.push(url);
@@ -112,7 +113,7 @@ test.describe("Fonts are self-hosted", () => {
 
     for (const path of ["/", "/about", "/privacy"]) {
       await page.goto(path);
-      await page.waitForLoadState("networkidle");
+      await page.evaluate(() => document.fonts.ready);
     }
 
     expect(googleRequests).toEqual([]);

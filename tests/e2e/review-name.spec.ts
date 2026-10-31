@@ -1,5 +1,7 @@
-import { test, expect, type Page } from "@playwright/test";
+import { test, expect } from "./fixtures";
+import type { Page } from "@playwright/test";
 import { translations } from "@/lib/i18n/translations";
+import { preferFullMode } from "./helpers";
 import {
   anonymousReviewerName,
   displayReviewerName,
@@ -19,6 +21,8 @@ const review = (name: string, id = 1) => ({
 
 /** Mocks the reviews API (never the real database) and records what the form posts. */
 async function mockReviews(page: Page, listed: ReturnType<typeof review>[] = []) {
+  // A first visit without the cache-version key reloads the page once, which would wipe a half-filled form.
+  await preferFullMode(page);
   const posted: Record<string, unknown>[] = [];
   await page.route(/\/api\/reviews/, async (route) => {
     if (route.request().method() === "POST") {
@@ -37,6 +41,11 @@ async function mockReviews(page: Page, listed: ReturnType<typeof review>[] = [])
 }
 
 async function fillAndSubmit(page: Page, fields: { name?: string; country?: string; message?: string }) {
+  // Wait until React has hydrated the form: before that, typed text is lost and a click submits the plain HTML form.
+  await page.waitForFunction(() => {
+    const input = document.querySelector("#review-name");
+    return !!input && Object.keys(input).some((key) => key.startsWith("__reactProps"));
+  });
   if (fields.name !== undefined) await page.locator("#review-name").fill(fields.name);
   if (fields.country !== undefined) await page.locator("#review-country").fill(fields.country);
   if (fields.message !== undefined) await page.locator("#review-message").fill(fields.message);
@@ -57,8 +66,8 @@ test.describe("Review form: the name is an optional nickname", () => {
   });
 
   test("labels, placeholder and the personal-data hint (Russian)", async ({ page }) => {
+    await mockReviews(page); // first: its init script resets storage, so the language is set after it
     await page.addInitScript(() => localStorage.setItem("hn-language", "ru"));
-    await mockReviews(page);
     await page.goto("/reviews");
 
     await expect(page.getByLabel("Имя или псевдоним (необязательно)")).toBeVisible();

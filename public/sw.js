@@ -1,4 +1,4 @@
-const CACHE_NAME = "help-nearby-v13";
+const CACHE_NAME = "help-nearby-v14";
 const OFFLINE_URL = "/offline.html";
 
 /** Static assets only — do not precache HTML routes (Next.js RSC pages are not cache-safe). */
@@ -42,6 +42,11 @@ function isApiRequest(url) {
   return url.pathname.startsWith("/api/");
 }
 
+/** Vercel Web Analytics (/_vercel/insights/*) is served and updated by the platform: never cached here. */
+function isPlatformRequest(url) {
+  return url.pathname.startsWith("/_vercel/");
+}
+
 function isNextJsCodeAsset(pathname) {
   return (
     pathname.startsWith("/_next/static/") &&
@@ -54,6 +59,7 @@ function shouldBypassServiceWorker(request, url) {
   // Cross-origin requests (map tiles, etc.) are never cached by this worker.
   if (url.origin !== self.location.origin) return true;
   if (isApiRequest(url)) return true;
+  if (isPlatformRequest(url)) return true;
   if (isNextJsCodeAsset(url.pathname)) return true;
   if (url.pathname.startsWith("/_next/") && !url.pathname.startsWith("/_next/static/")) {
     return true;

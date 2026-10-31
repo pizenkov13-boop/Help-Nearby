@@ -1,4 +1,4 @@
-import { test, expect } from "@playwright/test";
+import { test, expect } from "./fixtures";
 import { headerNav, MOCK_NEARBY_ORGS, preferFullMode } from "./helpers";
 
 const recentOrgs = MOCK_NEARBY_ORGS.map((org, i) => ({

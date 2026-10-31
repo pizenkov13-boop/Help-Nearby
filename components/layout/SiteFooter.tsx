@@ -9,6 +9,7 @@ import {
   ExternalLink,
   Globe,
   House,
+  Mail,
   MessageSquare,
   Plus,
   Send,
@@ -18,6 +19,7 @@ import {
 } from "lucide-react";
 import { BrandLogo } from "@/components/BrandLogo";
 import { GithubIcon, InstagramIcon } from "@/components/icons/BrandIcons";
+import { CONTACT_EMAIL } from "@/lib/contactEmail";
 import { useLanguage } from "@/lib/i18n/LanguageProvider";
 
 const SDG_GOALS = [
@@ -30,7 +32,7 @@ const SDG_GOALS = [
 const INSTAGRAM_URL =
   "https://www.instagram.com/help.nearby1?igsh=MWx4ZzYxMnA2MXR5Mg%3D%3D&utm_source=qr";
 const UN_SDG_URL = "https://sdgs.un.org/partnerships/helpnearby";
-const SITE_URL = "https://help-nearby.org";
+const SITE_URL = "https://www.help-nearby.org";
 const GITHUB_URL = "https://github.com/pizenkov13-boop/Help-Nearby";
 
 function HeartIcon() {
@@ -138,6 +140,10 @@ export function SiteFooter() {
             <a className="contact-btn" href={INSTAGRAM_URL} target="_blank" rel="noopener noreferrer">
               <InstagramIcon className="ui-icon" aria-hidden />
               {t("footerInstagram")}
+            </a>
+            <a className="contact-btn" href={`mailto:${CONTACT_EMAIL}`} data-testid="footer-contact-email">
+              <Mail className="ui-icon" aria-hidden />
+              {CONTACT_EMAIL}
             </a>
             <button type="button" className="contact-btn" onClick={() => void handleShare()}>
               <Share2 className="ui-icon" aria-hidden />

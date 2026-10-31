@@ -1,4 +1,4 @@
-import { test, expect } from "@playwright/test";
+import { test, expect } from "./fixtures";
 import { mapDbOrganization, type DbOrganization } from "@/lib/data";
 import { sortOrganizationsForList } from "@/lib/mergeOrganizations";
 import type { Organization } from "@/lib/types";

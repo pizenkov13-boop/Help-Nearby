@@ -58,7 +58,6 @@ import {
   formatSearchNearestOrgs,
   formatSearchRadiusWithin,
 } from "@/lib/i18n/translations";
-import { trackEvent } from "@/lib/umami.client";
 import { SiteLayout } from "@/components/layout/SiteLayout";
 import { cn } from "@/lib/utils";
 import { Filters } from "./Filters";
@@ -138,7 +137,6 @@ export function HomePage() {
   const searchRunIdRef = useRef(0);
   const searchAbortRef = useRef<AbortController | null>(null);
   const lastSearchAreaRef = useRef<string | null>(null);
-  const mapOpenedTrackedRef = useRef(false);
 
   const searchAreaKey = useCallback(
     (location: UserLocation, lite: boolean) =>
@@ -792,21 +790,6 @@ export function HomePage() {
     );
   }, []);
 
-  const handleSearchSubmit = useCallback(
-    (query: string) => {
-      const trimmed = query.trim();
-      if (!trimmed) return;
-      trackEvent("search_performed");
-    },
-    [],
-  );
-
-  useEffect(() => {
-    if (!mapExpanded || mapOpenedTrackedRef.current) return;
-    mapOpenedTrackedRef.current = true;
-    trackEvent("map_opened");
-  }, [mapExpanded]);
-
   return (
     <SiteLayout>
       <Hero
@@ -914,7 +897,6 @@ export function HomePage() {
                   <SearchBar
                     value={filters.searchQuery}
                     onChange={updateSearchQuery}
-                    onSubmit={handleSearchSubmit}
                     localMatches={localMatches}
                     onSelectOrganization={setSelected}
                     onSearchPlace={(text) => void handleSearchPlace(text)}

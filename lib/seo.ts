@@ -1,5 +1,5 @@
 /** Canonical site origin, shared by the sitemap, robots, canonical URLs and JSON-LD. */
-export const SITE_URL = "https://help-nearby.org";
+export const SITE_URL = "https://www.help-nearby.org";
 
 /** Static, indexable pages (the admin and API routes are intentionally absent). */
 export const STATIC_SITEMAP_PATHS = [
