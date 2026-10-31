@@ -70,6 +70,8 @@ import { HowItWorks } from "./HowItWorks";
 import { MapView } from "@/components/map/MapViewDynamic";
 
 const ACCORDION_DURATION_MS = 500;
+/** How long a search waits for the reverse geocode (country, place name) before it starts without it. */
+const REVERSE_GEOCODE_WAIT_MS = 2_500;
 
 const defaultFilters: FilterState = {
   category: "all",
@@ -231,13 +233,20 @@ export function HomePage() {
       setVerifiedOnlyNotice(false);
 
       try {
-        const geo = await reverseGeocodeCountry(location.lat, location.lng, language);
-        if (geo) {
-          cacheDetectedCountry(geo.country, geo.countryCode);
-          if (geo.place && runId === searchRunIdRef.current) {
-            setGeoLabel({ lat: location.lat, lng: location.lng, label: geo.place });
+        // The country (for the directory sources) and the place label come from Nominatim, which can be
+        // slow: wait for it briefly, search without it if needed, and still show the label when it arrives.
+        const geoRequest = reverseGeocodeCountry(location.lat, location.lng, language);
+        void geoRequest.then((found) => {
+          if (!found) return;
+          cacheDetectedCountry(found.country, found.countryCode);
+          if (found.place && runId === searchRunIdRef.current) {
+            setGeoLabel({ lat: location.lat, lng: location.lng, label: found.place });
           }
-        }
+        });
+        const geo = await Promise.race([
+          geoRequest,
+          new Promise<null>((resolve) => setTimeout(() => resolve(null), REVERSE_GEOCODE_WAIT_MS)),
+        ]);
         const result = await searchNearbyWithSmartRadius(
           location,
           {
@@ -512,16 +521,10 @@ export function HomePage() {
 
     setIsLocating(true);
     navigator.geolocation.getCurrentPosition(
-      async (position) => {
-        const lat = position.coords.latitude;
-        const lng = position.coords.longitude;
-        const geo = await reverseGeocodeCountry(lat, lng);
-        if (geo) {
-          cacheDetectedCountry(geo.country, geo.countryCode);
-        }
+      (position) => {
         setUserLocation({
-          lat,
-          lng,
+          lat: position.coords.latitude,
+          lng: position.coords.longitude,
           accuracy: position.coords.accuracy,
         });
         setIsLocating(false);
@@ -637,16 +640,12 @@ export function HomePage() {
     }
 
     navigator.geolocation.getCurrentPosition(
-      async (position) => {
-        const lat = position.coords.latitude;
-        const lng = position.coords.longitude;
-        const geo = await reverseGeocodeCountry(lat, lng);
-        if (geo) {
-          cacheDetectedCountry(geo.country, geo.countryCode);
-        }
+      (position) => {
+        // Open the panel at once: the search below reverse-geocodes the position itself, and a slow
+        // Nominatim must not keep the person waiting for a panel that is already able to show results.
         openMapAccordion({
-          lat,
-          lng,
+          lat: position.coords.latitude,
+          lng: position.coords.longitude,
           accuracy: position.coords.accuracy,
         });
       },
