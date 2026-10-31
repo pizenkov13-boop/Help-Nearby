@@ -1,6 +1,5 @@
 "use client";
 
-import { MapPin } from "lucide-react";
 import { useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
@@ -37,7 +36,12 @@ import {
   fetchRoute,
   type RouteData,
 } from "@/lib/routing";
-import { readNearbyCache, writeNearbyCache } from "@/lib/nearbyCache";
+import {
+  purgeExpiredNearbyCache,
+  readNearbyCache,
+  writeNearbyCache,
+} from "@/lib/nearbyCache";
+import { purgeExpiredOverpassClientCache } from "@/lib/overpassClientCache";
 import {
   searchNearbyWithSmartRadius,
   type NearbySourceStates,
@@ -59,6 +63,7 @@ import { SiteLayout } from "@/components/layout/SiteLayout";
 import { cn } from "@/lib/utils";
 import { Filters } from "./Filters";
 import { Hero } from "./Hero";
+import { PlaceBar } from "./PlaceBar";
 import { OrganizationList } from "./OrganizationList";
 import { SearchBar } from "./SearchBar";
 import { HowItWorks } from "./HowItWorks";
@@ -124,6 +129,8 @@ export function HomePage() {
   );
   const [liteMapVisible, setLiteMapVisible] = useState(false);
   const [verifiedOnlyNotice, setVerifiedOnlyNotice] = useState(false);
+  // Label of the place the device position points to (set by reverse geocoding the search position).
+  const [geoLabel, setGeoLabel] = useState<{ lat: number; lng: number; label: string } | null>(null);
   const shouldScrollRef = useRef(false);
   const findTriggeredRef = useRef(false);
   const searchRunIdRef = useRef(0);
@@ -140,6 +147,9 @@ export function HomePage() {
   const liteModeActive = shouldUseLiteMode(slowByNetworkInfo, viewPreference);
   useEffect(() => {
     setViewPreference(getStoredViewMode());
+    // Remembered results live 30 minutes; delete older ones as soon as the page opens.
+    purgeExpiredNearbyCache();
+    purgeExpiredOverpassClientCache();
   }, []);
 
   const refreshImpactCount = useCallback(async () => {
@@ -157,10 +167,10 @@ export function HomePage() {
     void refreshImpactCount();
   }, [refreshImpactCount]);
 
+  // The count is cached for a minute on the server and the CDN: count the click here instead of re-reading it.
   const handleImpactRecorded = useCallback(() => {
     setImpactCount((prev) => (prev ?? 0) + 1);
-    void refreshImpactCount();
-  }, [refreshImpactCount]);
+  }, []);
 
   useEffect(() => {
     setSlowByNetworkInfo(detectSlowConnectionFromNetwork());
@@ -221,9 +231,12 @@ export function HomePage() {
       setVerifiedOnlyNotice(false);
 
       try {
-        const geo = await reverseGeocodeCountry(location.lat, location.lng);
+        const geo = await reverseGeocodeCountry(location.lat, location.lng, language);
         if (geo) {
           cacheDetectedCountry(geo.country, geo.countryCode);
+          if (geo.place && runId === searchRunIdRef.current) {
+            setGeoLabel({ lat: location.lat, lng: location.lng, label: geo.place });
+          }
         }
         const result = await searchNearbyWithSmartRadius(
           location,
@@ -308,7 +321,7 @@ export function HomePage() {
         setSourcesLoading(false);
       }
     },
-    [userLocation, liteModeActive, applySearchResult],
+    [userLocation, liteModeActive, applySearchResult, language],
   );
 
   useEffect(() => {
@@ -346,6 +359,24 @@ export function HomePage() {
   }, [userLocation, searchRadiusMeters, liteModeActive, runNearbySearch]);
 
   const maxSearchRadiusMeters = getMaxRadiusMeters(liteModeActive);
+
+  const handleRetry = useCallback(() => {
+    void runNearbySearch({ autoExpand: true });
+  }, [runNearbySearch]);
+
+  // The place the results are around: a typed place, else the reverse-geocoded device position.
+  const geoLabelMatches =
+    geoLabel !== null &&
+    userLocation !== null &&
+    Math.abs(geoLabel.lat - userLocation.lat) < 0.05 &&
+    Math.abs(geoLabel.lng - userLocation.lng) < 0.05;
+  const placeLabel =
+    searchPlace?.name ?? (geoLabelMatches ? geoLabel!.label : t("currentLocationLabel"));
+  // A coarse fix (Wi-Fi / IP based) can be hundreds of km off; say so.
+  const approximateKm =
+    !searchPlace && userLocation?.accuracy != null && userLocation.accuracy > 20_000
+      ? Math.round(userLocation.accuracy / 1000)
+      : null;
 
   const coordinateValidated = useMemo(() => {
     if (!userLocation) return allOrganizations;
@@ -721,6 +752,22 @@ export function HomePage() {
     );
   }, []);
 
+  const sourceSettled = sourceStates !== null && !anySourcePending;
+  const sourceDown = (status: string | undefined) => status === "failed" || status === "timeout";
+  // OSM did not answer in time: the list is the verified catalog only, and the page says so.
+  const osmUnavailable = sourceSettled && sourceDown(sourceStates?.osm);
+  // Nothing to show and a source failed: that is an error, not an empty area.
+  const loadFailed =
+    sourceSettled &&
+    allOrganizations.length === 0 &&
+    (sourceDown(sourceStates?.supabase) || sourceDown(sourceStates?.osm));
+  const nothingHere =
+    !orgsLoading &&
+    !anySourcePending &&
+    !loadFailed &&
+    !filters.searchQuery.trim() &&
+    sourceStates !== null;
+
   return (
     <SiteLayout>
       <Hero
@@ -775,9 +822,9 @@ export function HomePage() {
                         {t("sourceOchaPending")}
                       </span>
                     )}
-                    {verifiedOnlyNotice && (
-                      <span className="map-badge amber">
-                        {t("verifiedOnlyNotice")}
+                    {(verifiedOnlyNotice || osmUnavailable) && (
+                      <span className="map-badge amber" data-testid="osm-unavailable">
+                        {t("osmUnavailableNotice")}
                       </span>
                     )}
                   </h2>
@@ -789,7 +836,15 @@ export function HomePage() {
                     role="status"
                     data-testid="location-needed"
                   >
-                    {t("locationNeededNotice")}
+                    {t("locationNeededNotice")}{" "}
+                    <button
+                      type="button"
+                      onClick={handleUseMyLocation}
+                      disabled={isLocating}
+                      className="font-semibold underline underline-offset-2 hover:no-underline disabled:opacity-50"
+                    >
+                      {t("placeUseMyLocation")}
+                    </button>
                   </p>
                 )}
 
@@ -903,51 +958,46 @@ export function HomePage() {
                   )}
                 >
                   <div className="min-w-0 flex-1 overflow-x-hidden overflow-y-auto p-3 md:p-4">
-                    {searchPlace && (
-                      <div
-                        className="mb-3 flex flex-wrap items-center gap-x-2 gap-y-1 rounded-full border border-blue-500/30 bg-blue-500/10 px-3 py-2 text-sm text-blue-800 md:text-xs dark:text-blue-200"
-                        data-testid="place-chip"
-                      >
-                        <MapPin className="h-3.5 w-3.5 shrink-0" aria-hidden />
-                        <span className="min-w-0 break-words font-medium">
-                          {t("placeSearchingNear").replace("{place}", searchPlace.name)}
-                        </span>
-                        <span aria-hidden>·</span>
-                        <button
-                          type="button"
-                          onClick={handleUseMyLocation}
-                          className="font-semibold underline underline-offset-2 hover:no-underline"
-                        >
-                          {t("placeUseMyLocation")}
-                        </button>
-                      </div>
+                    {userLocation && (
+                      <PlaceBar
+                        label={placeLabel}
+                        approximateKm={approximateKm}
+                        onSearchPlace={(text) => void handleSearchPlace(text)}
+                        onUseMyLocation={handleUseMyLocation}
+                        placeSearching={placeSearching}
+                        placeError={placeError}
+                        isLocating={isLocating}
+                      />
                     )}
                     <OrganizationList
                       organizations={filtered}
                       isLoading={orgsLoading && filtered.length === 0}
                       searchQuery={filters.searchQuery}
                       emptyMessage={
-                        !orgsLoading &&
-                        allOrganizations.length === 0 &&
-                        !filters.searchQuery.trim() &&
-                        filters.category === "all" &&
-                        !filters.openNow
-                          ? t("noVerifiedNearby")
-                          : undefined
+                        loadFailed
+                          ? t("loadFailed")
+                          : nothingHere
+                            ? t("noOrgsHereExpand")
+                            : undefined
                       }
                       emptyAction={
-                        !orgsLoading &&
-                        !anySourcePending &&
-                        allOrganizations.length === 0 &&
-                        !filters.searchQuery.trim() &&
-                        filters.category === "all" &&
-                        !filters.openNow ? (
+                        loadFailed ? (
+                          <button
+                            type="button"
+                            onClick={handleRetry}
+                            data-testid="load-retry"
+                            className="mt-4 min-h-11 rounded-full border border-blue-500/40 bg-blue-500/10 px-4 py-2 text-sm font-semibold text-blue-700 transition-colors hover:bg-blue-500/20 dark:text-blue-300"
+                          >
+                            {t("loadRetry")}
+                          </button>
+                        ) : nothingHere ? (
                           <button
                             type="button"
                             onClick={handleTryLargerRadius}
+                            data-testid="empty-expand"
                             className="mt-4 min-h-11 rounded-full border border-blue-500/40 bg-blue-500/10 px-4 py-2 text-sm font-semibold text-blue-700 transition-colors hover:bg-blue-500/20 dark:text-blue-300"
                           >
-                            {t("searchLargerRadius")}
+                            {t("searchExpand")}
                           </button>
                         ) : undefined
                       }
