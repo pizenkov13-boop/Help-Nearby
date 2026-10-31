@@ -55,10 +55,10 @@ export const MOCK_NEARBY_ORGS: Organization[] = [
 export async function preferFullMode(page: Page) {
   await page.addInitScript(
     ([cacheKey, cacheVersion]) => {
-      sessionStorage.setItem("help-nearby-view-mode", "full");
       localStorage.clear();
       sessionStorage.clear();
-      sessionStorage.setItem("help-nearby-view-mode", "full");
+      // The Lite / full choice is remembered in localStorage.
+      localStorage.setItem("help-nearby-view-mode", "full");
       // Production builds reload the page when this key is missing; keep it set.
       localStorage.setItem(cacheKey, cacheVersion);
     },

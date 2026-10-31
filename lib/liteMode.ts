@@ -7,65 +7,14 @@ export interface NetworkInformation {
   removeEventListener?(type: "change", listener: () => void): void;
 }
 
-/** Fallback when navigator.connection is unavailable. */
-const SLOW_INTERNET_COUNTRY_NAMES = new Set([
-  "sudan",
-  "yemen",
-  "afghanistan",
-  "haiti",
-  "syria",
-  "somalia",
-  "chad",
-  "niger",
-  "mali",
-  "burkina faso",
-  "central african republic",
-  "eritrea",
-  "burundi",
-  "mozambique",
-  "sierra leone",
-  "guinea-bissau",
-  "liberia",
-  "madagascar",
-  "malawi",
-  "rwanda",
-  "south sudan",
-  "togo",
-  "democratic republic of the congo",
-  "dem. rep. congo",
-  "dr congo",
-  "congo, the democratic republic of the",
-  "congo, democratic republic of the",
-]);
-
-const SLOW_INTERNET_COUNTRY_CODES = new Set([
-  "sd", // Sudan
-  "ye", // Yemen
-  "af", // Afghanistan
-  "cd", // DRC
-  "ht", // Haiti
-  "sy", // Syria
-  "so", // Somalia
-  "td", // Chad
-  "ne", // Niger
-  "ml", // Mali
-  "bf", // Burkina Faso
-  "cf", // Central African Republic
-  "er", // Eritrea
-  "bi", // Burundi
-  "mz", // Mozambique
-  "sl", // Sierra Leone
-  "gw", // Guinea-Bissau
-  "lr", // Liberia
-  "mg", // Madagascar
-  "mw", // Malawi
-  "rw", // Rwanda
-  "ss", // South Sudan
-  "tg", // Togo
-]);
-
+/**
+ * Lite mode switches on by itself only for signals that come from the visitor's own browser:
+ * navigator.connection.saveData === true, or effectiveType "slow-2g" / "2g". Nothing we measure on
+ * our own servers (response times of /api/*, cold starts, region) and no country list is used, they
+ * say nothing about the visitor's connection. Without the Network Information API it stays off.
+ * The visitor can always switch by hand; that choice is kept in localStorage (no cookies).
+ */
 export const LITE_MODE_STORAGE_KEY = "help-nearby-view-mode";
-export const SLOW_FETCH_THRESHOLD_MS = 2200;
 
 export type ViewModePreference = "lite" | "full";
 
@@ -85,66 +34,18 @@ export function getNetworkConnection(): NetworkInformation | null {
   return nav.connection ?? nav.mozConnection ?? nav.webkitConnection ?? null;
 }
 
-/** True when connection quality warrants lite mode. */
+/** True when the browser itself reports Data Saver or a 2G-class connection. */
 export function isSlowNetworkConnection(
   connection: NetworkInformation | null,
 ): boolean {
   if (!connection) return false;
-
-  if (connection.saveData) {
-    return true;
-  }
-
-  if (!connection.effectiveType) return false;
-
-  const { effectiveType } = connection;
-
-  if (
-    effectiveType === "slow-2g" ||
-    effectiveType === "2g" ||
-    effectiveType === "3g"
-  ) {
-    return true;
-  }
-
-  return false;
+  if (connection.saveData === true) return true;
+  return connection.effectiveType === "slow-2g" || connection.effectiveType === "2g";
 }
 
-/**
- * Detect slow connection from Network API.
- * Returns null when the API is unavailable (use country fallback).
- */
-export function detectSlowConnectionFromNetwork(): boolean | null {
-  const connection = getNetworkConnection();
-  if (
-    !connection ||
-    (connection.effectiveType === undefined && connection.saveData === undefined)
-  ) {
-    return null;
-  }
-
-  return isSlowNetworkConnection(connection);
-}
-
-export function isSlowInternetCountry(
-  country: string | null | undefined,
-  countryCode?: string | null,
-): boolean {
-  if (countryCode) {
-    const code = countryCode.trim().toLowerCase();
-    if (SLOW_INTERNET_COUNTRY_CODES.has(code)) return true;
-  }
-
-  if (!country) return false;
-
-  const normalized = normalizeCountryName(country);
-
-  if (SLOW_INTERNET_COUNTRY_NAMES.has(normalized)) return true;
-
-  return (
-    normalized.includes("democratic republic") &&
-    normalized.includes("congo")
-  );
+/** Current Network Information verdict; false when the API is missing. */
+export function detectSlowConnectionFromNetwork(): boolean {
+  return isSlowNetworkConnection(getNetworkConnection());
 }
 
 /** Subscribe to network changes; returns cleanup. */
@@ -152,7 +53,7 @@ export function subscribeToNetworkChanges(
   onChange: (slow: boolean) => void,
 ): () => void {
   const connection = getNetworkConnection();
-  if (!connection?.addEventListener || connection.effectiveType === undefined) {
+  if (!connection?.addEventListener) {
     return () => {};
   }
 
@@ -165,14 +66,21 @@ export function subscribeToNetworkChanges(
 }
 
 export function getStoredViewMode(): ViewModePreference | null {
-  if (typeof window === "undefined") return null;
-  const value = sessionStorage.getItem(LITE_MODE_STORAGE_KEY);
-  if (value === "lite" || value === "full") return value;
+  try {
+    const value = window.localStorage.getItem(LITE_MODE_STORAGE_KEY);
+    if (value === "lite" || value === "full") return value;
+  } catch {
+    // Storage blocked (private mode, site data off): no remembered choice.
+  }
   return null;
 }
 
 export function setStoredViewMode(mode: ViewModePreference): void {
-  sessionStorage.setItem(LITE_MODE_STORAGE_KEY, mode);
+  try {
+    window.localStorage.setItem(LITE_MODE_STORAGE_KEY, mode);
+  } catch {
+    // Storage blocked: the choice still applies for this page view.
+  }
 }
 
 export function shouldUseLiteMode(
@@ -182,12 +90,4 @@ export function shouldUseLiteMode(
   if (preference === "full") return false;
   if (preference === "lite") return true;
   return detectedSlowConnection;
-}
-
-/**
- * Fetch duration fallback for browsers where navigator.connection
- * is missing or does not reflect throttled/devtools conditions.
- */
-export function isSlowMeasuredFetch(durationMs: number): boolean {
-  return durationMs >= SLOW_FETCH_THRESHOLD_MS;
 }

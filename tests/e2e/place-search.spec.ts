@@ -134,7 +134,7 @@ test.describe("Place search", () => {
 
   test("works in lite mode (list only, no map) and on a phone-sized screen", async ({ page }) => {
     await page.addInitScript(() => {
-      sessionStorage.setItem("help-nearby-view-mode", "lite");
+      localStorage.setItem("help-nearby-view-mode", "lite");
     });
     await page.setViewportSize({ width: 390, height: 800 });
     await page.goto("/");
