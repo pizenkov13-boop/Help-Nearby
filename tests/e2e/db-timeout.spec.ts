@@ -1,6 +1,7 @@
 import { test, expect } from "./fixtures";
 import {
   classifyDbFailure,
+  createDbClient,
   DB_BREAKER_MS,
   DB_TIMEOUT_MS,
   resetDbBreaker,
@@ -59,6 +60,24 @@ test.describe("Database deadline and breaker (unit)", () => {
     for (let i = 0; i < 4; i += 1) {
       expect((await timedFetch("https://example.invalid/x")).status).toBe(401);
     }
+  });
+
+  test("a failed read is attempted once: the library's 1 s + 2 s + 4 s retries are off", async () => {
+    let calls = 0;
+    globalThis.fetch = (async () => {
+      calls += 1;
+      throw new TypeError("fetch failed");
+    }) as typeof fetch;
+
+    const client = createDbClient("https://example.supabase.co", "anon-test-key");
+    const started = Date.now();
+    const { error } = await client
+      .from("impact_clicks")
+      .select("*", { count: "exact", head: true });
+
+    expect(error).not.toBeNull();
+    expect(calls).toBe(1);
+    expect(Date.now() - started).toBeLessThan(1_000); // with retries this took 7 s
   });
 
   test("failures are told apart", () => {

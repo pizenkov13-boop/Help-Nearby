@@ -77,6 +77,23 @@ export function classifyDbFailure(error: unknown): DbFailureReason {
   return "db_error";
 }
 
+/**
+ * The one place Supabase clients are created. postgrest-js retries a failed GET/HEAD three times
+ * with 1 s, 2 s and 4 s pauses: when the database host is unreachable every request then took a
+ * fixed 7 s before failing. A page request cannot wait that long, so retries are switched off
+ * (the breaker above already stops repeated attempts). supabase-js does not expose the option, so
+ * it is set on the REST client it builds; a test checks it still takes effect after upgrades.
+ */
+export function createDbClient(url: string, key: string): SupabaseClient {
+  const client = createClient(url, key, {
+    auth: { persistSession: false, autoRefreshToken: false },
+    global: { fetch: timedFetch },
+  });
+  const rest = (client as unknown as { rest?: { retry?: boolean } }).rest;
+  if (rest) rest.retry = false;
+  return client;
+}
+
 let warnedMissing = false;
 let warnedUnreachable = false;
 let client: SupabaseClient | null = null;
@@ -144,10 +161,7 @@ export function getSupabase(): SupabaseClient | null {
   }
 
   if (!client) {
-    client = createClient(supabaseUrl, supabaseAnonKey, {
-      auth: { persistSession: false, autoRefreshToken: false },
-      global: { fetch: timedFetch },
-    });
+    client = createDbClient(supabaseUrl, supabaseAnonKey);
   }
 
   return client;
