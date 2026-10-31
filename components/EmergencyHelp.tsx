@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { Loader2, LifeBuoy, MapPin, Phone, X } from "lucide-react";
-import { DEFAULT_LOCATION, NEARBY_RADIUS_METERS } from "@/lib/constants";
+import { NEARBY_RADIUS_METERS } from "@/lib/constants";
 import { useLanguage } from "@/lib/i18n/LanguageProvider";
 import { getPhoneTelUrl } from "@/lib/orgUtils";
 import { postJson } from "@/lib/postJson";
@@ -46,7 +46,8 @@ export function EmergencyHelp() {
     setOrganizations([]);
 
     if (!navigator.geolocation) {
-      void loadEmergencyList(DEFAULT_LOCATION);
+      setState("error");
+      setErrorMessage(t("emergencyLocationDenied"));
       return;
     }
 
