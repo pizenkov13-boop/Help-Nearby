@@ -101,24 +101,26 @@ export async function resolveHdxGroupName(
   return null;
 }
 
-function inferCategory(description: string, name: string): Category {
+/** Keyword allowlist; null (not shown) when the text names none of the five categories. */
+function inferCategory(description: string, name: string): Category | null {
   const text = `${name} ${description}`.toLowerCase();
   if (/\b(food|nutrition|wfp|hunger)\b/.test(text)) return "food";
   if (/\b(shelter|housing|displacement)\b/.test(text)) return "shelter";
   if (/\b(medical|health|clinic|hospital|pharma)\b/.test(text)) return "medical";
   if (/\b(clothing|apparel)\b/.test(text)) return "clothing";
-  return "volunteer";
+  return null;
 }
 
 function mapHdxOrg(
   org: HdxOrganization,
   country: string,
   listEntry?: HdxOrganization,
-): Organization {
+): Organization | null {
   const name = org.title ?? org.display_name ?? org.name;
   const description =
     org.description ?? listEntry?.description ?? "Humanitarian data provider on HDX (UN OCHA).";
   const category = inferCategory(description, name);
+  if (!category) return null;
   const slug = slugify(`hdx-${org.name}`);
 
   return {
@@ -203,7 +205,8 @@ export async function fetchHdxOrganizationsForCountry(
     if (listEntry?.org_url && !pkgOrg.org_url) {
       pkgOrg.org_url = listEntry.org_url;
     }
-    organizations.push(mapHdxOrg(pkgOrg, country, listEntry));
+    const mapped = mapHdxOrg(pkgOrg, country, listEntry);
+    if (mapped) organizations.push(mapped);
   }
 
   console.log(
