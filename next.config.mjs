@@ -60,7 +60,7 @@ const nextConfig = {
       },
       {
         source:
-          "/((?!_next/static|_next/image|favicon.ico|icons|images|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico|js|css|woff2)$).*)",
+          "/((?!_next/static|_next/image|favicon.ico|icons|images|api/impact$|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico|js|css|woff2)$).*)",
         headers: documentHeaders,
       },
       {

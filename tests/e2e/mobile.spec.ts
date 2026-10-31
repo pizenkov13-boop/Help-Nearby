@@ -23,6 +23,18 @@ async function openResults(page: Page) {
   await page.getByRole("button", { name: /Find Help Near Me/i }).click();
   await expect(page.locator("#org-search")).toBeVisible({ timeout: 30_000 });
   await expect(page.locator(".map-panel article").first()).toBeVisible({ timeout: 30_000 });
+  // The page scrolls itself (smoothly) to the results half a second after the panel opens;
+  // measure only once that scroll has finished.
+  await expect
+    .poll(
+      async () => {
+        const before = await page.evaluate(() => window.scrollY);
+        await page.waitForTimeout(400);
+        return before === (await page.evaluate(() => window.scrollY));
+      },
+      { timeout: 10_000 },
+    )
+    .toBe(true);
 }
 
 for (const phone of PHONES) {
@@ -152,7 +164,9 @@ for (const phone of PHONES) {
         .poll(
           async () => {
             await page.evaluate(() => window.scrollBy(0, 700));
-            return search.evaluate((el) => Math.round(el.getBoundingClientRect().top));
+            const top = await search.evaluate((el) => Math.round(el.getBoundingClientRect().top));
+            // Scrolled out of view (negative top) is not "stuck": keep polling until it holds at the top.
+            return top >= 0 ? top : 9_999;
           },
           { timeout: 8_000 },
         )

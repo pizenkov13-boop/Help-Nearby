@@ -3,6 +3,8 @@ import { postJson } from "@/lib/postJson";
 export interface ReverseGeocodeResult {
   country: string;
   countryCode: string | null;
+  /** Short "district, city" label for the position; null when Nominatim has none. */
+  place?: string | null;
 }
 
 /** Forward geocode a free-text address via the server-side Nominatim proxy. */
@@ -47,9 +49,14 @@ export async function forwardGeocode(
 export async function reverseGeocodeCountry(
   lat: number,
   lng: number,
+  language?: string,
 ): Promise<ReverseGeocodeResult | null> {
   try {
-    const response = await postJson("/api/geocode/reverse", { lat, lng });
+    const response = await postJson("/api/geocode/reverse", {
+      lat,
+      lng,
+      ...(language ? { lang: language } : {}),
+    });
 
     if (!response.ok) return null;
 

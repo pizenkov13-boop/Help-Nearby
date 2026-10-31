@@ -38,17 +38,25 @@ export async function nominatimSearch(
   return { lat, lng };
 }
 
-/** Reverse geocode coordinates to country — server-side only (Nominatim usage policy). */
+/**
+ * Reverse geocode coordinates to country and a short place label ("district, city") — server-side
+ * only (Nominatim usage policy). The label is what the page shows as "Results near: ...".
+ */
 export async function nominatimReverse(
   lat: number,
   lng: number,
-): Promise<{ country: string; countryCode: string | null } | null> {
+  language?: string,
+): Promise<{ country: string; countryCode: string | null; place: string | null } | null> {
   if (!Number.isFinite(lat) || !Number.isFinite(lng)) return null;
 
   const url = new URL("https://nominatim.openstreetmap.org/reverse");
   url.searchParams.set("lat", String(lat));
   url.searchParams.set("lon", String(lng));
   url.searchParams.set("format", "json");
+  url.searchParams.set("zoom", "14");
+  if (language && /^[a-z]{2}(-[A-Za-z]{2})?$/.test(language)) {
+    url.searchParams.set("accept-language", language);
+  }
 
   const response = await fetch(url.toString(), {
     headers: { "User-Agent": "HelpNearby/1.0 (help-nearby.app)" },
@@ -58,15 +66,22 @@ export async function nominatimReverse(
   if (!response.ok) return null;
 
   const data = (await response.json()) as {
-    address?: { country?: string; country_code?: string };
+    address?: Record<string, string | undefined>;
   };
 
-  const country = data.address?.country;
-  if (!country) return null;
+  const address = data.address;
+  const country = address?.country;
+  if (!address || !country) return null;
+
+  const city =
+    address.city ?? address.town ?? address.village ?? address.municipality ?? address.county;
+  const district = address.suburb ?? address.city_district ?? address.neighbourhood;
+  const place = district && city && district !== city ? `${district}, ${city}` : (city ?? district ?? null);
 
   return {
     country,
-    countryCode: data.address?.country_code?.toUpperCase() ?? null,
+    countryCode: address.country_code?.toUpperCase() ?? null,
+    place,
   };
 }
 

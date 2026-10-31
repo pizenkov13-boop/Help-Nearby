@@ -114,6 +114,14 @@ export function OrganizationCard({
           {t("unverifiedOsmBadge")}
         </span>
       )}
+      {approximate && (
+        <span
+          className="inline-flex items-center rounded-full bg-slate-100 px-2 py-0.5 text-[13px] md:text-xs font-medium text-slate-600 dark:bg-gray-700/60 dark:text-gray-300"
+          data-testid="list-only-badge"
+        >
+          {t("listOnlyBadge")}
+        </span>
+      )}
       {source && (
         <span className="inline-flex max-w-full items-center rounded-full bg-slate-100 px-2 py-0.5 text-[13px] md:text-xs font-medium text-slate-600 dark:bg-gray-700/60 dark:text-gray-300">
           <span className="mr-1 shrink-0 text-slate-400 dark:text-gray-500">

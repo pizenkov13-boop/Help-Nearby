@@ -145,7 +145,7 @@ test.describe("Progressive nearby search", () => {
     await startSearch(page);
 
     await expect(page.getByTestId("loading-nearby")).toHaveCount(0, { timeout: 20_000 });
-    await expect(page.getByText(/No verified organizations/i)).toBeVisible();
-    await expect(page.getByRole("button", { name: "Try a larger radius" })).toBeVisible();
+    await expect(page.getByText("No organizations here yet. Expand the search.")).toBeVisible();
+    await expect(page.getByRole("button", { name: "Expand search" })).toBeVisible();
   });
 });
