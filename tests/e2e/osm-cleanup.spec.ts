@@ -6,7 +6,10 @@ import {
   removeJunkOsmOrganizations,
 } from "@/lib/osmCleanup";
 import { isGenuineMedicalOsmElement } from "@/lib/osmMedical";
-import type { Organization } from "@/lib/types";
+import { classifyOsmCategory, OSM_CATEGORY_SELECTORS } from "@/lib/osmCategories";
+import { CATEGORIES } from "@/lib/categories";
+import { filterOrganizations } from "@/lib/filterOrganizations";
+import type { Category, FilterState, Organization } from "@/lib/types";
 import { MOCK_NEARBY_ORGS } from "./helpers";
 
 const base = MOCK_NEARBY_ORGS[0] as Organization;
@@ -225,5 +228,115 @@ test.describe("OSM medical filter (unit)", () => {
   test("drops objects whose tags do not give a confident answer", () => {
     expect(ok({ healthcare: "centre", name: "Wellness Centre" })).toBe(false);
     expect(ok({ amenity: "clinic", "healthcare:speciality": "sports_medicine", name: "Active Care" })).toBe(false);
+  });
+});
+
+test.describe("OSM category allowlists (unit)", () => {
+  const cat = (tags: Record<string, string>) => classifyOsmCategory(tags, tags.name ?? "");
+  const allFilter = { category: "all", searchQuery: "", openNow: false } as unknown as FilterState;
+
+  test("shelter: keeps homeless shelters and named real shelters, drops stops, picnic shelters and nursing homes", () => {
+    expect(
+      cat({
+        amenity: "social_facility",
+        social_facility: "shelter",
+        "social_facility:for": "homeless",
+        name: "Bowery Mission Night Shelter",
+      }),
+    ).toBe("shelter");
+    expect(cat({ amenity: "shelter", homeless: "yes", name: "Emergency Warming Shelter" })).toBe("shelter");
+
+    // Real London data: named park huts and pavilions with nothing that says "crisis shelter".
+    expect(cat({ amenity: "shelter", name: "Kennington Park History Hut" })).toBeNull();
+    expect(cat({ amenity: "shelter", building: "yes", historic: "yes", name: "Cabmen's Shelter" })).toBeNull();
+    expect(cat({ amenity: "shelter", building: "yes", name: "The Pavilion" })).toBeNull();
+    expect(cat({ amenity: "shelter", building: "roof", shelter_type: "pavilion", name: "Bourne Valley Wharf Pavilion" })).toBeNull();
+
+    expect(cat({ amenity: "shelter", shelter_type: "public_transport", name: "Main St Stop" })).toBeNull();
+    expect(cat({ amenity: "shelter", highway: "bus_stop", name: "Stop 12" })).toBeNull();
+    expect(cat({ amenity: "shelter", bus: "yes", name: "Stop 13" })).toBeNull();
+    expect(cat({ amenity: "shelter", shelter_type: "picnic_shelter", name: "Lakeside Pavilion" })).toBeNull();
+    expect(cat({ amenity: "shelter", shelter_type: "basic_hut", name: "Ridge Hut" })).toBeNull();
+    expect(cat({ amenity: "shelter", shelter_type: "weather_shelter", name: "Trail Shelter" })).toBeNull();
+    expect(cat({ amenity: "shelter", shelter_type: "lean_to", name: "Lean-to" })).toBeNull();
+    expect(cat({ amenity: "shelter" })).toBeNull();
+    expect(cat({ amenity: "social_facility", social_facility: "nursing_home", name: "Sunrise Senior Living" })).toBeNull();
+    expect(cat({ amenity: "social_facility", social_facility: "group_home", name: "Oak Group Home" })).toBeNull();
+    expect(cat({ amenity: "social_facility", social_facility: "assisted_living", name: "Elm Assisted Living" })).toBeNull();
+  });
+
+  test("food: keeps food banks, soup kitchens and community fridges, drops give boxes", () => {
+    expect(cat({ amenity: "food_bank", name: "City Food Pantry" })).toBe("food");
+    expect(cat({ amenity: "social_facility", social_facility: "food_bank", name: "Harvest Food Bank" })).toBe("food");
+    expect(cat({ amenity: "social_facility", social_facility: "soup_kitchen", name: "Soup Kitchen of St. John" })).toBe("food");
+    expect(cat({ amenity: "community_fridge", name: "Freedge Elm Street" })).toBe("food");
+
+    expect(cat({ amenity: "give_box", name: "Free Little Library" })).toBeNull();
+    expect(cat({ amenity: "give_box", "give_box:food": "yes", name: "Free Food Box" })).toBeNull();
+    expect(cat({ amenity: "give_box", social_facility: "food_bank", name: "Box" })).toBeNull();
+  });
+
+  test("clothing: keeps clothing banks and charity clothing shops, drops plain charity shops and clothes shops", () => {
+    expect(cat({ amenity: "social_facility", social_facility: "clothing_bank", name: "Dress for Success" })).toBe("clothing");
+    expect(cat({ shop: "charity", charity: "clothes", name: "Salvation Army Thrift" })).toBe("clothing");
+    expect(cat({ shop: "charity", second_hand: "yes", name: "Oxfam Shop" })).toBe("clothing");
+    expect(cat({ shop: "charity", clothes: "second_hand", name: "Red Cross Shop" })).toBe("clothing");
+
+    expect(cat({ shop: "charity", name: "Gift Shop for Charity" })).toBeNull();
+    expect(cat({ shop: "charity", clothes: "no", name: "Books for Charity" })).toBeNull();
+    expect(cat({ shop: "clothes", name: "H&M" })).toBeNull();
+    expect(cat({ shop: "clothes", second_hand: "yes", name: "Vintage Store" })).toBeNull();
+  });
+
+  test("volunteer: keeps outreach and helping NGOs and centres, drops everything unmatched", () => {
+    expect(cat({ amenity: "social_facility", social_facility: "outreach", name: "Street Outreach Team" })).toBe("volunteer");
+    expect(cat({ office: "ngo", volunteers: "yes", name: "Neighbours Helping Neighbours" })).toBe("volunteer");
+    expect(cat({ office: "charity", "ngo:type": "humanitarian", name: "Relief Aid" })).toBe("volunteer");
+    expect(cat({ amenity: "community_centre", "community_centre:for": "refugees", name: "Refugee Welcome Centre" })).toBe("volunteer");
+    expect(cat({ amenity: "community_centre", "social_facility:for": "homeless", name: "Day Centre" })).toBe("volunteer");
+
+    expect(cat({ office: "ngo", name: "Some Association" })).toBeNull();
+    expect(cat({ amenity: "community_centre", name: "Town Hall" })).toBeNull();
+    expect(cat({ charity: "yes", name: "Mystery Place" })).toBeNull();
+    expect(cat({ shop: "charity", name: "Plain Charity Shop" })).toBeNull();
+    expect(cat({ amenity: "social_facility", social_facility: "day_care", name: "Kids Day Care" })).toBeNull();
+    expect(cat({ amenity: "restaurant", name: "Pizza" })).toBeNull();
+    expect(cat({ name: "Nothing" })).toBeNull();
+  });
+
+  test("private objects are not shown in the help categories", () => {
+    expect(cat({ amenity: "food_bank", access: "private", name: "Staff Pantry" })).toBeNull();
+    expect(cat({ amenity: "social_facility", social_facility: "shelter", access: "no", name: "Closed Shelter" })).toBeNull();
+  });
+
+  test("medical stays decided by the medical whitelist", () => {
+    expect(cat({ amenity: "hospital", name: "Bellevue Hospital Center" })).toBe("medical");
+    expect(cat({ amenity: "clinic", "healthcare:speciality": "cosmetic", name: "Glow Clinic" })).toBeNull();
+  });
+
+  test("there are exactly five categories and the selectors search only allowlisted tags", () => {
+    const five = ["clothing", "food", "medical", "shelter", "volunteer"];
+    expect(Object.keys(OSM_CATEGORY_SELECTORS).sort()).toEqual(five);
+    expect([...CATEGORIES].sort()).toEqual(five);
+    const all = Object.values(OSM_CATEGORY_SELECTORS).flat().join(" ");
+    expect(all).not.toContain("give_box");
+    expect(all).not.toContain('"charity"="yes"');
+    expect(all).not.toContain('"amenity"="social_facility"');
+    expect(OSM_CATEGORY_SELECTORS.clothing.length).toBeGreaterThan(0);
+    // Candidates only: bus stops and the like are removed by classifyOsmCategory, not by Overpass.
+    expect(all).not.toContain('!~');
+    expect(all).not.toContain('["name"]');
+  });
+
+  test("a charity clothing shop is not commercial and shows under All categories", () => {
+    const shop = osm("9", "Oxfam Shop", { osmKind: "charity_shop", category: "clothing", categories: ["clothing"] });
+    expect(filterOrganizations([shop], allFilter)).toHaveLength(1);
+  });
+
+  test("All categories is the union of the five and nothing else", () => {
+    const orgs = (CATEGORIES as Category[]).map((category, i) =>
+      osm(`c${i}`, `Org ${category}`, { category, categories: [category], osmKind: "social_facility" }),
+    );
+    expect(filterOrganizations(orgs, allFilter).map((o) => o.category).sort()).toEqual([...CATEGORIES].sort());
   });
 });

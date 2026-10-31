@@ -12,7 +12,9 @@ import {
   isGenuineEmergencyOsmFacility,
 } from "@/lib/emergencyFacilities";
 import { cleanOsmOrganizations, hasClosedLifecycleTag } from "@/lib/osmCleanup";
-import { isGenuineMedicalOsmElement, isMedicalOsmElement } from "@/lib/osmMedical";
+import { classifyOsmCategory, OSM_CATEGORY_SELECTORS } from "@/lib/osmCategories";
+import { isMedicalOsmElement } from "@/lib/osmMedical";
+import { CATEGORIES } from "@/lib/categories";
 import { slugify } from "@/lib/orgUtils";
 import {
   normalizeRawCoordinates,
@@ -55,87 +57,27 @@ interface CacheEntry {
 
 const serverCache = new Map<string, CacheEntry>();
 
+/** One query for every category: the union of the per-category allowlist selectors. */
 function buildOverpassQuery(lat: number, lng: number, radius: number): string {
   const around = `(around:${radius},${lat},${lng})`;
-  return `
-[out:json][timeout:25];
-(
-  nwr["amenity"="food_bank"]${around};
-  nwr["amenity"="shelter"]${around};
-  nwr["amenity"="clinic"]${around};
-  nwr["amenity"="hospital"]${around};
-  nwr["amenity"="pharmacy"]${around};
-  nwr["amenity"="doctors"]${around};
-  nwr["emergency"="ambulance_station"]${around};
-  nwr["social_facility"="food_bank"]${around};
-  nwr["social_facility"="shelter"]${around};
-  nwr["charity"="yes"]${around};
-);
-out center tags;
-`.trim();
+  const selectors = CATEGORIES.flatMap((category) => OSM_CATEGORY_SELECTORS[category]);
+  const lines = [...new Set(selectors)].map((selector) => `  nwr${selector}${around};`);
+  return ["[out:json][timeout:25];", "(", ...lines, ");", "out center tags;"].join("\n");
 }
 
-/** Broader humanitarian search for AI chat (soup kitchens, charity shops, etc.). */
+/** AI chat search over all categories: same allowlists as the map and the list. */
 export function buildChatOverpassQuery(
   lat: number,
   lng: number,
   radius: number,
 ): string {
-  const around = `(around:${radius},${lat},${lng})`;
-  return `
-[out:json][timeout:25];
-(
-  nwr["amenity"="food_bank"]${around};
-  nwr["amenity"="shelter"]${around};
-  nwr["amenity"="clinic"]${around};
-  nwr["amenity"="hospital"]${around};
-  nwr["amenity"="pharmacy"]${around};
-  nwr["amenity"="doctors"]${around};
-  nwr["emergency"="ambulance_station"]${around};
-  nwr["amenity"="social_facility"]${around};
-  nwr["social_facility"="food_bank"]${around};
-  nwr["social_facility"="shelter"]${around};
-  nwr["social_facility"="soup_kitchen"]${around};
-  nwr["social_facility"="nutrition_center"]${around};
-  nwr["social_facility:for"="food"]${around};
-  nwr["shop"="charity"]${around};
-  nwr["charity"="yes"]${around};
-  nwr["amenity"="give_box"]${around};
-  nwr["amenity"="community_centre"]["community_centre:for"="social_facility"]${around};
-);
-out center tags;
-`.trim();
+  return buildOverpassQuery(lat, lng, radius);
 }
-
-const CHAT_CATEGORY_SELECTORS: Record<Category, string[]> = {
-  food: [
-    '["amenity"="food_bank"]',
-    '["social_facility"="food_bank"]',
-    '["social_facility"="soup_kitchen"]',
-    '["social_facility"="nutrition_center"]',
-    '["social_facility:for"="food"]',
-    '["amenity"="give_box"]',
-  ],
-  shelter: ['["amenity"="shelter"]', '["social_facility"="shelter"]'],
-  // Pharmacies are only searched for the medical category.
-  medical: [
-    '["amenity"="clinic"]',
-    '["amenity"="hospital"]',
-    '["amenity"="pharmacy"]',
-    '["amenity"="doctors"]',
-    '["emergency"="ambulance_station"]',
-  ],
-  clothing: ['["social_facility"="clothing_bank"]', '["amenity"="give_box"]'],
-  volunteer: [
-    '["charity"="yes"]',
-    '["amenity"="community_centre"]["community_centre:for"="social_facility"]',
-  ],
-};
 
 function buildChatCategoryQuery(category: Category) {
   return (lat: number, lng: number, radius: number): string => {
     const around = `(around:${radius},${lat},${lng})`;
-    const lines = CHAT_CATEGORY_SELECTORS[category].map(
+    const lines = OSM_CATEGORY_SELECTORS[category].map(
       (selector) => `  nwr${selector}${around};`,
     );
     return ["[out:json][timeout:25];", "(", ...lines, ");", "out center tags;"].join(
@@ -351,40 +293,6 @@ function resolveOverpassCoordinates(
   return best;
 }
 
-function mapTagsToCategory(tags: Record<string, string>): Category {
-  const amenity = tags.amenity?.toLowerCase();
-  const social = tags.social_facility?.toLowerCase();
-
-  if (
-    amenity === "food_bank" ||
-    social === "food_bank" ||
-    social === "soup_kitchen" ||
-    social === "nutrition_center" ||
-    tags["social_facility:for"] === "food" ||
-    amenity === "give_box"
-  ) {
-    return "food";
-  }
-  if (amenity === "shelter" || social === "shelter") {
-    return "shelter";
-  }
-  if (
-    amenity === "clinic" ||
-    amenity === "hospital" ||
-    amenity === "pharmacy" ||
-    tags.healthcare
-  ) {
-    return "medical";
-  }
-  if (tags.shop === "charity" || tags.charity === "yes") {
-    return "volunteer";
-  }
-  if (tags.clothes === "yes" || tags["second_hand"] === "yes") {
-    return "clothing";
-  }
-  return "volunteer";
-}
-
 function buildAddress(tags: Record<string, string>): string {
   if (tags["addr:full"]) return tags["addr:full"];
   const parts = [
@@ -414,17 +322,20 @@ function mapElementToOrganization(
     return null;
   }
 
-  // Medical category: only real care (hospital, clinic, pharmacy, doctors, emergency, ambulance).
-  // Cosmetic, fertility, surrogacy and similar businesses are dropped, whatever their amenity tag.
-  if (
-    isMedicalOsmElement(tags) &&
-    !isGenuineMedicalOsmElement(
-      tags,
-      tags.name ?? tags.brand ?? tags.operator ?? tags["addr:housename"] ?? "",
-    )
-  ) {
-    return null;
-  }
+  const name =
+    tags.name ??
+    tags.brand ??
+    tags.operator ??
+    tags["addr:housename"] ??
+    null;
+  if (!name) return null;
+
+  // Every category is a tag allowlist (osmCategories.ts); what passes none is not shown.
+  // The emergency list has no category tabs: its police and fire stations are filed as "medical".
+  const category =
+    classifyOsmCategory(tags, name) ??
+    (options?.emergency && !isMedicalOsmElement(tags) ? "medical" : null);
+  if (!category) return null;
 
   const coords = resolveOverpassCoordinates(
     el,
@@ -434,24 +345,17 @@ function mapElementToOrganization(
   );
   if (!coords) return null;
 
-  const name =
-    tags.name ??
-    tags.brand ??
-    tags.operator ??
-    tags["addr:housename"] ??
-    null;
-  if (!name) return null;
-
-  const category = mapTagsToCategory(tags);
   const slug = `osm-${el.type}-${el.id}-${slugify(name)}`;
   const osmKind =
     tags.amenity === "pharmacy"
       ? "pharmacy"
       : tags.emergency === "ambulance_station"
         ? "ambulance_station"
-        : tags.shop
-        ? `shop:${tags.shop}`
-        : (tags.amenity ?? tags.social_facility ?? tags.healthcare ?? "other");
+        : tags.shop === "charity"
+          ? "charity_shop"
+          : tags.shop
+            ? `shop:${tags.shop}`
+            : (tags.amenity ?? tags.social_facility ?? tags.healthcare ?? tags.office ?? "osm");
 
   return {
     id: `overpass-${el.type}-${el.id}`,
