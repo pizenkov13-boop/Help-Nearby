@@ -19,7 +19,6 @@ import {
   categoryIconMarkup,
   verifiedCheckMarkup,
 } from "@/lib/categoryIconMarkup";
-import { trackEvent } from "@/lib/umami.client";
 import { getMapTileConfig } from "@/lib/mapTiles";
 import { getOrganizationSource } from "@/lib/organizationSource";
 
@@ -394,9 +393,6 @@ export default function MapView({
       L.marker([lat, lng], {
         icon: createCategoryIcon(org.category, org.verified),
       })
-        .on("click", () => {
-          trackEvent("organization_card_opened");
-        })
         .bindPopup(buildOrganizationPopup(org))
         .addTo(markersLayer);
     }

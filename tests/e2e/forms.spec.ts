@@ -1,4 +1,4 @@
-import { test, expect } from "@playwright/test";
+import { test, expect } from "./fixtures";
 
 test.describe("Forms", () => {
   test("submit page shows validation on empty submit", async ({ page }) => {

@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { UmamiScript } from "@/components/providers/UmamiScript";
+import { VercelAnalytics } from "@/components/providers/VercelAnalytics";
 import { ServiceWorkerRegister } from "@/components/ServiceWorkerRegister";
 import { AppProviders } from "@/components/providers/AppProviders";
 import "leaflet/dist/leaflet.css";
@@ -7,7 +7,7 @@ import "./globals.css";
 import { fontVariableClasses } from "./fonts";
 import { cn } from "@/lib/utils";
 
-const SITE_URL = "https://help-nearby.org";
+const SITE_URL = "https://www.help-nearby.org";
 const SITE_TITLE = "Help Nearby — Find Help Near You";
 const SITE_DESCRIPTION =
   "Discover food banks, shelters, medical aid, clothing donations, and volunteer opportunities near you.";
@@ -70,7 +70,7 @@ export default function RootLayout({
         className="min-h-screen bg-surface font-sans text-foreground transition-[background-color] duration-300"
       >
         <AppProviders>{children}</AppProviders>
-        <UmamiScript />
+        <VercelAnalytics />
         <ServiceWorkerRegister />
       </body>
     </html>

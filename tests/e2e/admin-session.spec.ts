@@ -1,5 +1,6 @@
 import { createHash } from "node:crypto";
-import { test, expect, type APIRequestContext, type PlaywrightWorkerArgs } from "@playwright/test";
+import { test, expect } from "./fixtures";
+import type { APIRequestContext, PlaywrightWorkerArgs } from "@playwright/test";
 
 type Playwright = PlaywrightWorkerArgs["playwright"];
 import {

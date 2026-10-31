@@ -13,7 +13,6 @@ import {
 } from "lucide-react";
 import { SiteLayout } from "@/components/layout/SiteLayout";
 import { OrganizationContactSection } from "@/components/pages/OrganizationContactSection";
-import { trackEvent } from "@/lib/umami.client";
 import { CategoryIcon } from "@/components/icons/CategoryIcon";
 import { CATEGORY_CONFIG } from "@/lib/categories";
 import { useLanguage } from "@/lib/i18n/LanguageProvider";
@@ -187,7 +186,6 @@ export function OrganizationDetailPage({ org }: OrganizationDetailPageProps) {
             href={directionsUrl}
             target="_blank"
             rel="noopener noreferrer"
-            onClick={() => trackEvent("directions_requested")}
             className="inline-flex flex-1 items-center justify-center gap-2 rounded-xl border border-gray-300 bg-white px-6 py-4 text-lg font-semibold text-gray-900 transition-colors hover:border-blue-500/50 hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-800 dark:text-white dark:hover:bg-gray-700/50"
           >
             <Navigation className="h-5 w-5 text-blue-400" />
