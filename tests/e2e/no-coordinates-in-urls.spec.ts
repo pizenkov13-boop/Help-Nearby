@@ -1,4 +1,4 @@
-import { test, expect } from "@playwright/test";
+import { test, expect } from "./fixtures";
 import { mockNearbyApi, openMapWithOrgs, preferFullMode } from "./helpers";
 
 // The position travels only in JSON POST bodies, never in a URL (access logs, history, Referer).

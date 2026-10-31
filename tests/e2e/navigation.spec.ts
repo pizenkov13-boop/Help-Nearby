@@ -1,4 +1,4 @@
-import { test, expect } from "@playwright/test";
+import { test, expect } from "./fixtures";
 import { headerNav, preferFullMode } from "./helpers";
 
 test.describe("Navigation", () => {

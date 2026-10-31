@@ -1,4 +1,4 @@
-import { test, expect } from "@playwright/test";
+import { test, expect } from "./fixtures";
 import { parseChatMarkdown, parseInline, safeHttpUrl } from "@/lib/chatMarkdown";
 import { preferFullMode } from "./helpers";
 
