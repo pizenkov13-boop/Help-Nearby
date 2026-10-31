@@ -1,6 +1,6 @@
-import { createClient, type SupabaseClient } from "@supabase/supabase-js";
+import type { SupabaseClient } from "@supabase/supabase-js";
 import { getSupabasePublicEnv } from "@/lib/env";
-import { timedFetch } from "@/lib/supabase";
+import { createDbClient } from "@/lib/supabase";
 import { ensureEnvLoaded } from "@/lib/env.server";
 
 export function getSupabaseAdmin(): SupabaseClient | null {
@@ -13,8 +13,5 @@ export function getSupabaseAdmin(): SupabaseClient | null {
     return null;
   }
 
-  return createClient(url, serviceKey, {
-    auth: { persistSession: false, autoRefreshToken: false },
-    global: { fetch: timedFetch },
-  });
+  return createDbClient(url, serviceKey);
 }
