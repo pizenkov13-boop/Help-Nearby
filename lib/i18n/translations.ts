@@ -81,6 +81,11 @@ export type TranslationKey =
   | "locationError"
   | "yourLocation"
   | "locationNeededNotice"
+  | "locationWaiting"
+  | "locationDeniedNotice"
+  | "locationUnavailableNotice"
+  | "locationTimeoutNotice"
+  | "locationInAppNotice"
   | "navWhy"
   | "navReviews"
   | "navReviewsShort"
@@ -363,6 +368,11 @@ const en: Record<TranslationKey, string> = {
   yourLocation: "You are here",
   locationNeededNotice:
     "Allow location access or enter a city to find help near you.",
+  locationWaiting: "Waiting for your permission to use your location… You can also type a city below.",
+  locationDeniedNotice: "Location access is blocked. Allow it in your browser settings, or type a city below.",
+  locationUnavailableNotice: "Couldn't determine your location. Type a city below.",
+  locationTimeoutNotice: "The location request got no answer. If no prompt appeared, open the site in your regular browser or type a city below.",
+  locationInAppNotice: "This in-app browser doesn't share your location. Open the site in your regular browser or type a city below.",
   navWhy: "Why It Matters",
   navReviews: "Reviews & Suggestions",
   navReviewsShort: "Reviews",
@@ -675,6 +685,11 @@ const ru: Record<TranslationKey, string> = {
   yourLocation: "Вы здесь",
   locationNeededNotice:
     "Разрешите доступ к геолокации или введите город, чтобы найти помощь рядом.",
+  locationWaiting: "Ждём разрешения на доступ к местоположению… Можно сразу ввести город ниже.",
+  locationDeniedNotice: "Доступ к местоположению заблокирован. Разрешите его в настройках браузера или введите город ниже.",
+  locationUnavailableNotice: "Не удалось определить местоположение. Введите город ниже.",
+  locationTimeoutNotice: "Запрос местоположения остался без ответа. Если окно разрешения не появилось, откройте сайт в обычном браузере или введите город ниже.",
+  locationInAppNotice: "Этот встроенный браузер не передаёт местоположение. Откройте сайт в обычном браузере или введите город ниже.",
   navWhy: "Почему это важно",
   navReviews: "Отзывы и предложения",
   navReviewsShort: "Отзывы",
@@ -1000,6 +1015,11 @@ const es: Record<TranslationKey, string> = {
   yourLocation: "Estás aquí",
   locationNeededNotice:
     "Permite el acceso a la ubicación o escribe una ciudad para encontrar ayuda cerca.",
+  locationWaiting: "Esperando tu permiso de ubicación… También puedes escribir una ciudad abajo.",
+  locationDeniedNotice: "El acceso a la ubicación está bloqueado. Permítelo en los ajustes del navegador o escribe una ciudad abajo.",
+  locationUnavailableNotice: "No se pudo determinar tu ubicación. Escribe una ciudad abajo.",
+  locationTimeoutNotice: "La solicitud de ubicación no obtuvo respuesta. Si no apareció el aviso, abre el sitio en tu navegador habitual o escribe una ciudad abajo.",
+  locationInAppNotice: "Este navegador integrado no comparte la ubicación. Abre el sitio en tu navegador habitual o escribe una ciudad abajo.",
   navWhy: "Por qué importa",
   navReviews: "Reseñas y sugerencias",
   navReviewsShort: "Reseñas",
@@ -1330,6 +1350,11 @@ const fr: Record<TranslationKey, string> = {
   yourLocation: "Vous êtes ici",
   locationNeededNotice:
     "Autorisez la localisation ou saisissez une ville pour trouver de l’aide près de vous.",
+  locationWaiting: "En attente de votre autorisation de localisation… Vous pouvez aussi saisir une ville ci-dessous.",
+  locationDeniedNotice: "L'accès à la position est bloqué. Autorisez-le dans les réglages du navigateur ou saisissez une ville ci-dessous.",
+  locationUnavailableNotice: "Impossible de déterminer votre position. Saisissez une ville ci-dessous.",
+  locationTimeoutNotice: "La demande de localisation est restée sans réponse. Si aucune fenêtre n'est apparue, ouvrez le site dans votre navigateur habituel ou saisissez une ville ci-dessous.",
+  locationInAppNotice: "Ce navigateur intégré ne partage pas la position. Ouvrez le site dans votre navigateur habituel ou saisissez une ville ci-dessous.",
   navWhy: "Pourquoi c'est important",
   navReviews: "Avis et suggestions",
   navReviewsShort: "Avis",
@@ -1661,6 +1686,11 @@ const de: Record<TranslationKey, string> = {
   yourLocation: "Sie sind hier",
   locationNeededNotice:
     "Erlauben Sie den Standortzugriff oder geben Sie eine Stadt ein, um Hilfe in Ihrer Nähe zu finden.",
+  locationWaiting: "Warte auf Ihre Erlaubnis für den Standort … Sie können unten auch eine Stadt eingeben.",
+  locationDeniedNotice: "Der Standortzugriff ist blockiert. Erlauben Sie ihn in den Browsereinstellungen oder geben Sie unten eine Stadt ein.",
+  locationUnavailableNotice: "Ihr Standort konnte nicht bestimmt werden. Geben Sie unten eine Stadt ein.",
+  locationTimeoutNotice: "Die Standortabfrage blieb ohne Antwort. Wenn keine Abfrage erschien, öffnen Sie die Website im normalen Browser oder geben Sie unten eine Stadt ein.",
+  locationInAppNotice: "Dieser integrierte Browser gibt den Standort nicht weiter. Öffnen Sie die Website im normalen Browser oder geben Sie unten eine Stadt ein.",
   navWhy: "Warum es wichtig ist",
   navReviews: "Bewertungen und Vorschläge",
   navReviewsShort: "Reviews",
@@ -1991,6 +2021,11 @@ const zh: Record<TranslationKey, string> = {
   locationError: "无法获取您的位置。请启用位置访问权限。",
   yourLocation: "您在这里",
   locationNeededNotice: "请允许访问位置信息，或输入城市名称，以查找附近的帮助。",
+  locationWaiting: "正在等待您授权位置信息…也可以在下方直接输入城市。",
+  locationDeniedNotice: "位置权限已被阻止。请在浏览器设置中允许，或在下方输入城市。",
+  locationUnavailableNotice: "无法确定您的位置。请在下方输入城市。",
+  locationTimeoutNotice: "位置请求没有响应。如果没有出现授权提示，请在常规浏览器中打开本站，或在下方输入城市。",
+  locationInAppNotice: "此内置浏览器不提供位置信息。请在常规浏览器中打开本站，或在下方输入城市。",
   navWhy: "为何重要",
   navReviews: "评价与建议",
   navReviewsShort: "评价",
@@ -2296,6 +2331,11 @@ const ar: Record<TranslationKey, string> = {
   yourLocation: "موقعك هنا",
   locationNeededNotice:
     "اسمح بالوصول إلى الموقع أو أدخل اسم مدينة للعثور على مساعدة قريبة منك.",
+  locationWaiting: "في انتظار إذنك لاستخدام موقعك… يمكنك أيضًا كتابة مدينة أدناه.",
+  locationDeniedNotice: "الوصول إلى الموقع محظور. اسمح به من إعدادات المتصفح أو اكتب مدينة أدناه.",
+  locationUnavailableNotice: "تعذّر تحديد موقعك. اكتب مدينة أدناه.",
+  locationTimeoutNotice: "لم يصل رد على طلب الموقع. إذا لم تظهر نافذة الإذن، افتح الموقع في المتصفح المعتاد أو اكتب مدينة أدناه.",
+  locationInAppNotice: "هذا المتصفح المدمج لا يشارك الموقع. افتح الموقع في المتصفح المعتاد أو اكتب مدينة أدناه.",
   navWhy: "لماذا هذا مهم",
   navReviews: "التقييمات والاقتراحات",
   navReviewsShort: "التقييمات",
