@@ -1,4 +1,4 @@
-import { test, expect } from "@playwright/test";
+import { test, expect } from "./fixtures";
 import { filterEmergency247Organizations } from "@/lib/emergency";
 import { getOrganizationOpenStatus } from "@/lib/orgUtils";
 import type { Organization } from "@/lib/types";

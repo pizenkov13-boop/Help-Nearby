@@ -1,4 +1,4 @@
-import { test, expect } from "@playwright/test";
+import { test, expect } from "./fixtures";
 
 test.describe("Debug sources route", () => {
   test("is disabled (404) without a matching DEBUG_TOKEN", async ({ request }) => {

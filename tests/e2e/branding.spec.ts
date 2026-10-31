@@ -1,4 +1,4 @@
-import { test, expect } from "@playwright/test";
+import { test, expect } from "./fixtures";
 
 test.describe("Icons, manifest and social image", () => {
   test("every icon / manifest / og link in <head> resolves to a real file", async ({ request }) => {

@@ -1,4 +1,4 @@
-import { test, expect } from "@playwright/test";
+import { test, expect } from "./fixtures";
 import { buildOrganizationJsonLd, serializeJsonLd } from "@/lib/orgJsonLd";
 import { buildOrgDescription, buildOrgTitle } from "@/lib/orgSeo";
 import {
@@ -45,7 +45,7 @@ test.describe("robots and sitemap", () => {
     expect(body).toMatch(/User-Agent: \*/i);
     expect(body).toMatch(/Allow: \//);
     expect(body).toMatch(/Disallow: \/api\//);
-    expect(body).toContain("Sitemap: https://help-nearby.org/sitemap.xml");
+    expect(body).toContain("Sitemap: https://www.help-nearby.org/sitemap.xml");
   });
 
   test("sitemap.xml is served as XML with the static pages", async ({ request }) => {
@@ -55,7 +55,7 @@ test.describe("robots and sitemap", () => {
     const body = await res.text();
     expect(body).toContain("<urlset");
     for (const path of ["/about", "/why-it-matters", "/reviews", "/recent"]) {
-      expect(body).toContain(`https://help-nearby.org${path}</loc>`);
+      expect(body).toContain(`https://www.help-nearby.org${path}</loc>`);
     }
     // Playwright-only fixtures are never listed.
     expect(body).not.toContain("/org/e2e-");
@@ -68,10 +68,10 @@ test.describe("robots and sitemap", () => {
       { slug: "no-date", lastModified: null },
     ]);
     const urls = entries.map((e) => e.url);
-    expect(urls).toContain("https://help-nearby.org/org/crf-moulins");
-    expect(urls).toContain("https://help-nearby.org/org/no-date");
+    expect(urls).toContain("https://www.help-nearby.org/org/crf-moulins");
+    expect(urls).toContain("https://www.help-nearby.org/org/no-date");
     expect(urls.some((u) => u.includes("e2e-"))).toBe(false);
-    expect(urls).toContain("https://help-nearby.org/");
+    expect(urls).toContain("https://www.help-nearby.org/");
 
     const dated = entries.find((e) => e.url.endsWith("/crf-moulins"))!;
     expect(dated.lastModified).toEqual(new Date("2026-01-02T03:04:05Z"));
@@ -83,13 +83,13 @@ test.describe("robots and sitemap", () => {
 
     // Static pages live only in the first file; large catalogs get an index.
     expect(buildSitemapChunk(1, [{ slug: "x", lastModified: null }]).map((e) => e.url)).toEqual([
-      "https://help-nearby.org/org/x",
+      "https://www.help-nearby.org/org/x",
     ]);
     expect(sitemapChunkCount(0)).toBe(1);
     expect(sitemapChunkCount(SITEMAP_ORGS_PER_FILE)).toBe(1);
     expect(sitemapChunkCount(SITEMAP_ORGS_PER_FILE + 1)).toBe(2);
     expect(sitemapChunkCount(120_000)).toBe(3);
-    expect(renderSitemapIndex(3)).toContain("https://help-nearby.org/sitemap/2.xml");
+    expect(renderSitemapIndex(3)).toContain("https://www.help-nearby.org/sitemap/2.xml");
   });
 });
 
@@ -114,11 +114,11 @@ test.describe("titles and metadata", () => {
       page.locator(selector).first().getAttribute(name);
 
     expect(await attr('link[rel="canonical"]', "href")).toBe(
-      "https://help-nearby.org/org/e2e-croix-rouge-moulins",
+      "https://www.help-nearby.org/org/e2e-croix-rouge-moulins",
     );
     expect(await attr('meta[property="og:title"]', "content")).toContain("| HelpNearby");
     expect(await attr('meta[property="og:url"]', "content")).toBe(
-      "https://help-nearby.org/org/e2e-croix-rouge-moulins",
+      "https://www.help-nearby.org/org/e2e-croix-rouge-moulins",
     );
     expect(await attr('meta[property="og:image"]', "content")).toContain("/og-image.png");
     expect(await attr('meta[name="twitter:card"]', "content")).toBe("summary_large_image");
@@ -154,7 +154,7 @@ test.describe("JSON-LD", () => {
     expect(data["@context"]).toBe("https://schema.org");
     expect(data["@type"]).toEqual(["NGO", "LocalBusiness"]);
     expect(data.name).toBe("Croix-Rouge française – Unité locale de Moulins");
-    expect(data.url).toBe("https://help-nearby.org/org/e2e-croix-rouge-moulins");
+    expect(data.url).toBe("https://www.help-nearby.org/org/e2e-croix-rouge-moulins");
     expect(data.sameAs).toEqual(["https://www.croix-rouge.fr/annuaire/moulins"]);
     expect(data.address).toMatchObject({
       "@type": "PostalAddress",

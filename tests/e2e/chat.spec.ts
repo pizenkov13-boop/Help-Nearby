@@ -1,4 +1,4 @@
-import { test, expect } from "@playwright/test";
+import { test, expect } from "./fixtures";
 import { LANGUAGES, translations } from "@/lib/i18n/translations";
 import { preferFullMode } from "./helpers";
 

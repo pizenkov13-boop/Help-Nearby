@@ -1,4 +1,4 @@
-import { test, expect } from "@playwright/test";
+import { test, expect } from "./fixtures";
 
 test.describe("Chat API without an AI key", () => {
   test("the public health route no longer exists (it could spend provider balance)", async ({ request }) => {

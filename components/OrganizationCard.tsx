@@ -12,7 +12,6 @@ import {
 import { CategoryIcon } from "@/components/icons/CategoryIcon";
 import { CATEGORY_CONFIG } from "@/lib/categories";
 import { useLanguage } from "@/lib/i18n/LanguageProvider";
-import { trackEvent } from "@/lib/umami.client";
 import { recordImpactClick } from "@/lib/impact.client";
 import {
   getDirectionsUrl,
@@ -66,14 +65,12 @@ export function OrganizationCard({
   };
 
   const handleDirectionsClick = () => {
-    trackEvent("directions_requested");
     recordImpactClick(org.id, "directions");
     onImpactRecorded?.();
     onGetDirections?.(org);
   };
 
   const handleCardOpen = () => {
-    trackEvent("organization_card_opened");
     onSelect?.(org);
   };
 
@@ -270,7 +267,6 @@ export function OrganizationCard({
                   target="_blank"
                   rel="noopener noreferrer"
                   onClick={() => {
-                    trackEvent("directions_requested");
                     recordImpactClick(org.id, "directions");
                     onImpactRecorded?.();
                   }}
