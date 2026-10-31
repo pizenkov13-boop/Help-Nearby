@@ -181,6 +181,19 @@ test.describe("Empty and failed loads", () => {
     await expect(page.getByText("Couldn't load organizations.")).toHaveCount(0);
   });
 
+  test("database down: OpenStreetMap results are shown and the page says the verified catalog is unavailable", async ({ page }) => {
+    await setup(page);
+    await page.route(/\/api\/organizations/, (route) => json(route, { error: true, reason: "network" }, 503));
+    await openPanel(page);
+
+    await expect(orgCards(page).first()).toBeVisible({ timeout: 30_000 });
+    await expect(page.getByTestId("catalog-unavailable")).toHaveText(
+      "The verified catalog is temporarily unavailable — showing OpenStreetMap results only",
+      { timeout: 30_000 },
+    );
+    await expect(page.getByText("Couldn't load organizations.")).toHaveCount(0);
+  });
+
   test("OSM down: the verified catalog is shown and the page says OpenStreetMap is unavailable", async ({ page }) => {
     await setup(page);
     await page.route(/\/api\/nearby/, (route) => json(route, { error: true }, 504));
