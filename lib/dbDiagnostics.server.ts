@@ -1,15 +1,10 @@
 import "server-only";
 
-import { lookup } from "node:dns/promises";
-import { getSupabasePublicEnv } from "@/lib/env";
-
 export interface DbDiagnosis {
   /** Node/undici error code of the underlying failure (ENOTFOUND, ETIMEDOUT, UND_ERR_CONNECT_TIMEOUT, ...). */
   causeCode: string | null;
   /** Error name and message with the project host masked; no keys, no URLs. */
   message: string;
-  /** Whether the configured Supabase host resolves from this server: "ok", an error code, or "no_url". */
-  dns: string;
 }
 
 const maskHost = (text: string) =>
@@ -27,7 +22,8 @@ function errorCode(value: unknown): string | null {
 }
 
 /**
- * Why a database call failed, safe to return in an error body: error codes and a DNS check only.
+ * Why a database call failed, safe to return in an error body: error code and message only.
+ * No DNS lookup here: resolving a dead host is exactly what hangs for ~7 s on Vercel.
  * Never includes the host name, keys or query strings.
  */
 export async function diagnoseDbFailure(error: unknown): Promise<DbDiagnosis> {
@@ -39,20 +35,5 @@ export async function diagnoseDbFailure(error: unknown): Promise<DbDiagnosis> {
         ? `${String((error as { message: unknown }).message)} ${String((error as { details?: unknown }).details ?? "")}`
         : String(error);
 
-  let dns = "no_url";
-  const { url } = getSupabasePublicEnv();
-  if (url) {
-    try {
-      const host = new URL(url).hostname;
-      await Promise.race([
-        lookup(host),
-        new Promise((_, reject) => setTimeout(() => reject(Object.assign(new Error("dns timeout"), { code: "DNS_TIMEOUT" })), 2_000)),
-      ]);
-      dns = "ok";
-    } catch (dnsError) {
-      dns = errorCode(dnsError) ?? "error";
-    }
-  }
-
-  return { causeCode: errorCode(cause) ?? errorCode(error), message: maskHost(raw), dns };
+  return { causeCode: errorCode(cause) ?? errorCode(error), message: maskHost(raw) };
 }
