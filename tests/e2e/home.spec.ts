@@ -88,6 +88,58 @@ test.describe("Home page", () => {
     expect(await orgCards(page).count()).toBeGreaterThan(0);
   });
 
+  test("without geolocation the button shows a message and a search field, no foreign city", async ({
+    browser,
+  }) => {
+    const context = await browser.newContext({ viewport: { width: 1280, height: 720 } });
+    const page = await context.newPage();
+    await preferFullMode(page);
+    const nearbyRequests: string[] = [];
+    page.on("request", (request) => {
+      if (/\/api\/(nearby|verified-nearby|organizations|emergency)/.test(request.url())) {
+        nearbyRequests.push(request.url());
+      }
+    });
+    await mockNearbyApi(page);
+
+    await page.goto("/");
+    // Nothing is searched or shown on open.
+    await expect(page.locator(".map-panel")).toHaveCount(0);
+    expect(nearbyRequests).toEqual([]);
+
+    await page.getByRole("button", { name: /Find Help Near Me/i }).click();
+    await expect(page.getByTestId("location-needed")).toHaveText(
+      "Allow location access or enter a city to find help near you.",
+    );
+    await expect(page.locator("#org-search")).toBeVisible();
+    await expect(page.locator(".leaflet-container")).toHaveCount(0);
+    await expect(orgCards(page)).toHaveCount(0);
+    expect(nearbyRequests).toEqual([]);
+    await context.close();
+  });
+
+  test("lite mode never opens the map or loads organizations on its own", async ({ browser }) => {
+    const context = await browser.newContext({ viewport: { width: 390, height: 844 } });
+    const page = await context.newPage();
+    await page.addInitScript(() => {
+      sessionStorage.setItem("help-nearby-view-mode", "lite");
+    });
+    const nearbyRequests: string[] = [];
+    page.on("request", (request) => {
+      if (/\/api\/(nearby|verified-nearby|organizations)/.test(request.url())) {
+        nearbyRequests.push(request.url());
+      }
+    });
+    await mockNearbyApi(page);
+
+    await page.goto("/");
+    await page.waitForTimeout(1_500);
+    await expect(page.locator(".map-panel")).toHaveCount(0);
+    await expect(page.getByText(/New York|CityMD/)).toHaveCount(0);
+    expect(nearbyRequests).toEqual([]);
+    await context.close();
+  });
+
   test("mobile viewport shows map and organization list", async ({ page }) => {
     await page.setViewportSize({ width: 390, height: 844 });
     await openMapWithOrgs(page);

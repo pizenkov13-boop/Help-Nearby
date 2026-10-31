@@ -12,6 +12,7 @@ import {
   isGenuineEmergencyOsmFacility,
 } from "@/lib/emergencyFacilities";
 import { cleanOsmOrganizations, hasClosedLifecycleTag } from "@/lib/osmCleanup";
+import { isGenuineMedicalOsmElement, isMedicalOsmElement } from "@/lib/osmMedical";
 import { slugify } from "@/lib/orgUtils";
 import {
   normalizeRawCoordinates,
@@ -404,6 +405,18 @@ function mapElementToOrganization(
   if (!tags) return null;
 
   if (options?.emergency && !isGenuineEmergencyOsmFacility(tags)) {
+    return null;
+  }
+
+  // Medical category: only real care (hospital, clinic, pharmacy, doctors, emergency, ambulance).
+  // Cosmetic, fertility, surrogacy and similar businesses are dropped, whatever their amenity tag.
+  if (
+    isMedicalOsmElement(tags) &&
+    !isGenuineMedicalOsmElement(
+      tags,
+      tags.name ?? tags.brand ?? tags.operator ?? tags["addr:housename"] ?? "",
+    )
+  ) {
     return null;
   }
 

@@ -1,10 +1,4 @@
-import type { UserLocation } from "./types";
-
-/** Fallback when geolocation is unavailable or denied */
-export const DEFAULT_LOCATION: UserLocation = {
-  lat: 40.758,
-  lng: -73.9855,
-};
+// There is deliberately no default location: without geolocation or a typed city, nothing is searched.
 
 /** Default nearby search start radius (5 km); smart search expands up to 40 km. */
 export const NEARBY_RADIUS_METERS = 5_000;
