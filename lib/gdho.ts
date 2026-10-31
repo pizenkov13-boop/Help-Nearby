@@ -34,7 +34,8 @@ function parseCsvRow(line: string): string[] {
   return fields;
 }
 
-function mapGdhoTypeToCategory(type: string, sector: string): Category {
+/** Keyword allowlist; null (not shown) when the type and sector name none of the five categories. */
+function mapGdhoTypeToCategory(type: string, sector: string): Category | null {
   const combined = `${type} ${sector}`.toLowerCase();
   if (combined.includes("food") || combined.includes("nutrition")) return "food";
   if (combined.includes("shelter")) return "shelter";
@@ -43,8 +44,7 @@ function mapGdhoTypeToCategory(type: string, sector: string): Category {
   if (combined.includes("refugee") || combined.includes("coordination")) {
     return "volunteer";
   }
-  if (type.toLowerCase().includes("un")) return "medical";
-  return "volunteer";
+  return null;
 }
 
 function buildGdhoSearchUrl(country: string): string {
@@ -111,6 +111,7 @@ export async function fetchGdhoOrganizationsForCountry(
       const website = websiteIdx >= 0 ? (row[websiteIdx] ?? "").trim() : "";
       const rawId = idIdx >= 0 ? (row[idIdx] ?? String(i)) : String(i);
       const category = mapGdhoTypeToCategory(type, sector);
+      if (!category) continue;
 
       const descriptionParts = [
         type ? `Type: ${type}` : "",
