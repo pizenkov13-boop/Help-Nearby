@@ -1,8 +1,9 @@
+import { CLIENT_CACHE_TTL_MS } from "@/lib/overpassCache";
 import type { Organization } from "@/lib/types";
 import type { SearchRadiusMode } from "@/lib/smartRadius";
 
 const CACHE_KEY = "help-nearby-orgs-cache";
-const CACHE_TTL_MS = 60 * 60 * 1000;
+const CACHE_TTL_MS = CLIENT_CACHE_TTL_MS;
 /** ~2.2 km at the equator: the cache remembers an area, never the user's exact position. */
 const AREA_ROUND_DEG = 0.02;
 
@@ -89,5 +90,24 @@ export function writeNearbyCache(input: NearbyCacheInput): void {
     localStorage.setItem(CACHE_KEY, JSON.stringify(payload));
   } catch (error) {
     console.warn("[nearbyCache] write failed:", error);
+  }
+}
+
+/** Deletes the remembered list when it is older than the cache lifetime (called when the page opens). */
+export function purgeExpiredNearbyCache(): void {
+  if (typeof window === "undefined") return;
+  try {
+    const raw = localStorage.getItem(CACHE_KEY);
+    if (!raw) return;
+    const entry = JSON.parse(raw) as { timestamp?: unknown; lat?: unknown };
+    if (
+      typeof entry.timestamp !== "number" ||
+      Date.now() - entry.timestamp >= CACHE_TTL_MS ||
+      "lat" in entry
+    ) {
+      removeEntry();
+    }
+  } catch {
+    removeEntry();
   }
 }

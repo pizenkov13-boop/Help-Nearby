@@ -1,7 +1,13 @@
 import { CATEGORIES } from "@/lib/categories";
 import { NEARBY_RADIUS_METERS } from "@/lib/constants";
 import { distanceMiles, formatDistanceMiles } from "@/lib/geo";
-import { getSupabase, isSupabaseFetchError } from "@/lib/supabase";
+import {
+  classifyDbFailure,
+  DbUnavailableError,
+  getSupabase,
+  isSupabaseFetchError,
+  type DbFailureReason,
+} from "@/lib/supabase";
 import type { Category, Organization, UserLocation, WeeklyHours } from "./types";
 
 export interface DbOrganization {
@@ -27,6 +33,8 @@ export interface DbOrganization {
 export interface FetchOrganizationsOptions {
   country?: string;
   radiusMeters?: number;
+  /** Throw DbUnavailableError instead of returning an empty catalog when the database fails. */
+  strict?: boolean;
 }
 
 function toCategory(value: string): Category | null {
@@ -126,9 +134,12 @@ function filterByRadius(
   );
 }
 
-async function queryOrganizations(country?: string): Promise<DbOrganization[]> {
+async function queryOrganizations(country?: string, strict = false): Promise<DbOrganization[]> {
   const supabase = getSupabase();
-  if (!supabase) return [];
+  if (!supabase) {
+    if (strict) throw new DbUnavailableError("not_configured");
+    return [];
+  }
 
   try {
     let query = supabase.from("organizations").select("*").order("name");
@@ -140,6 +151,7 @@ async function queryOrganizations(country?: string): Promise<DbOrganization[]> {
     const { data, error } = await query;
 
     if (error) {
+      if (strict) throw new DbUnavailableError(classifyDbFailure(error));
       if (isSupabaseFetchError(error)) {
         console.warn(
           "[fetchOrganizations] Supabase unreachable — using empty catalog",
@@ -152,6 +164,9 @@ async function queryOrganizations(country?: string): Promise<DbOrganization[]> {
 
     return (data as DbOrganization[]) ?? [];
   } catch (error) {
+    if (strict) {
+      throw error instanceof DbUnavailableError ? error : new DbUnavailableError(classifyDbFailure(error));
+    }
     if (isSupabaseFetchError(error)) {
       console.warn("[fetchOrganizations] Supabase unreachable — using empty catalog");
     } else {
@@ -167,10 +182,10 @@ export async function fetchOrganizations(
 ): Promise<Organization[]> {
   const radiusMeters = options?.radiusMeters ?? NEARBY_RADIUS_METERS;
 
-  let rows = await queryOrganizations(options?.country);
+  let rows = await queryOrganizations(options?.country, options?.strict);
 
   if (rows.length === 0 && options?.country) {
-    rows = await queryOrganizations();
+    rows = await queryOrganizations(undefined, options?.strict);
   }
 
   let orgs = rows.map((row) => mapDbOrganization(row, userLocation));
@@ -418,6 +433,8 @@ export interface RecentOrganizationsPage {
   organizations: Organization[];
   hasMore: boolean;
   error: boolean;
+  /** Why the page could not be loaded (set together with error). */
+  reason?: DbFailureReason;
 }
 
 /** Verified organizations, newest first, paginated with range(). */
@@ -427,7 +444,9 @@ export async function fetchRecentOrganizations(
   const limit = Math.min(Math.max(options.limit ?? RECENT_PAGE_SIZE, 1), 100);
   const offset = Math.max(options.offset ?? 0, 0);
   const supabase = getSupabase();
-  if (!supabase) return { organizations: [], hasMore: false, error: false };
+  if (!supabase) {
+    return { organizations: [], hasMore: false, error: true, reason: "not_configured" };
+  }
 
   try {
     let query = supabase
@@ -444,8 +463,8 @@ export async function fetchRecentOrganizations(
     const { data, error } = await query.range(offset, offset + limit);
 
     if (error) {
-      console.error("[fetchRecentOrganizations]", error.message);
-      return { organizations: [], hasMore: false, error: true };
+      console.error("[fetchRecentOrganizations]", error.code ?? "", error.message);
+      return { organizations: [], hasMore: false, error: true, reason: classifyDbFailure(error) };
     }
 
     const rows = (data as DbOrganization[]) ?? [];
@@ -460,7 +479,7 @@ export async function fetchRecentOrganizations(
     } else {
       console.error("[fetchRecentOrganizations]", error);
     }
-    return { organizations: [], hasMore: false, error: true };
+    return { organizations: [], hasMore: false, error: true, reason: classifyDbFailure(error) };
   }
 }
 

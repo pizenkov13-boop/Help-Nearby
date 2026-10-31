@@ -1,6 +1,6 @@
 import {
   buildOverpassCacheKey,
-  OVERPASS_CACHE_TTL_MS,
+  CLIENT_CACHE_TTL_MS,
 } from "@/lib/overpassCache";
 import type { Organization } from "@/lib/types";
 
@@ -23,7 +23,7 @@ export function readOverpassClientCache(
       organizations: Organization[];
     };
 
-    if (Date.now() - entry.timestamp > OVERPASS_CACHE_TTL_MS) {
+    if (Date.now() - entry.timestamp > CLIENT_CACHE_TTL_MS) {
       localStorage.removeItem(key);
       return null;
     }
@@ -42,7 +42,7 @@ function purgeExpiredOverpassEntries(): void {
     if (!key?.startsWith(STORAGE_PREFIX)) continue;
     try {
       const entry = JSON.parse(localStorage.getItem(key) ?? "null") as { timestamp?: number } | null;
-      if (!entry || typeof entry.timestamp !== "number" || now - entry.timestamp > OVERPASS_CACHE_TTL_MS) {
+      if (!entry || typeof entry.timestamp !== "number" || now - entry.timestamp > CLIENT_CACHE_TTL_MS) {
         localStorage.removeItem(key);
       }
     } catch {
@@ -68,5 +68,15 @@ export function writeOverpassClientCache(
     );
   } catch (error) {
     console.warn("[overpassClientCache] write failed:", error);
+  }
+}
+
+/** Deletes expired Overpass answers (called when the page opens). */
+export function purgeExpiredOverpassClientCache(): void {
+  if (typeof window === "undefined") return;
+  try {
+    purgeExpiredOverpassEntries();
+  } catch {
+    // storage unavailable
   }
 }
