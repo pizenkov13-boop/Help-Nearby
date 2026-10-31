@@ -756,6 +756,9 @@ export function HomePage() {
   const sourceDown = (status: string | undefined) => status === "failed" || status === "timeout";
   // OSM did not answer in time: the list is the verified catalog only, and the page says so.
   const osmUnavailable = sourceSettled && sourceDown(sourceStates?.osm);
+  // The verified catalog (database) did not answer: what is listed comes from OpenStreetMap only.
+  const catalogUnavailable =
+    sourceSettled && sourceDown(sourceStates?.supabase) && allOrganizations.length > 0;
   // Nothing to show and a source failed: that is an error, not an empty area.
   const loadFailed =
     sourceSettled &&
@@ -820,6 +823,11 @@ export function HomePage() {
                     {anySourcePending && sourceStates?.ocha === "pending" && (
                       <span className="map-badge blue" data-testid="source-ocha">
                         {t("sourceOchaPending")}
+                      </span>
+                    )}
+                    {catalogUnavailable && (
+                      <span className="map-badge amber" data-testid="catalog-unavailable">
+                        {t("catalogUnavailableNotice")}
                       </span>
                     )}
                     {(verifiedOnlyNotice || osmUnavailable) && (
