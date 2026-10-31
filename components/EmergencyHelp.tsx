@@ -5,6 +5,7 @@ import { Loader2, LifeBuoy, MapPin, Phone, X } from "lucide-react";
 import { NEARBY_RADIUS_METERS } from "@/lib/constants";
 import { useLanguage } from "@/lib/i18n/LanguageProvider";
 import { getPhoneTelUrl } from "@/lib/orgUtils";
+import { requestPosition } from "@/lib/locationRequest";
 import { postJson } from "@/lib/postJson";
 import type { Organization, UserLocation } from "@/lib/types";
 import { EMERGENCY_OPEN_EVENT } from "@/lib/emergencyEvents";
@@ -45,25 +46,17 @@ export function EmergencyHelp() {
     setErrorMessage(null);
     setOrganizations([]);
 
-    if (!navigator.geolocation) {
-      setState("error");
-      setErrorMessage(t("emergencyLocationDenied"));
-      return;
-    }
-
-    navigator.geolocation.getCurrentPosition(
-      (position) => {
-        void loadEmergencyList({
-          lat: position.coords.latitude,
-          lng: position.coords.longitude,
-        });
+    // Same rules as the main search: only on a tap, and never an endless "locating..." (a prompt nobody
+    // answers ends in the error text after 12 s, and a late "allow" still loads the list).
+    requestPosition({
+      onPosition: (location) => {
+        void loadEmergencyList({ lat: location.lat, lng: location.lng });
       },
-      () => {
+      onIssue: () => {
         setState("error");
         setErrorMessage(t("emergencyLocationDenied"));
       },
-      { enableHighAccuracy: true, timeout: 12000, maximumAge: 0 },
-    );
+    });
   }, [loadEmergencyList, t]);
 
   const handleOpen = useCallback(() => {

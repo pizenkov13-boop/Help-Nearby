@@ -10,6 +10,7 @@ import { setChatContext } from "@/lib/chatClientContext";
 import { filterOrganizations } from "@/lib/filterOrganizations";
 import { limitOsmOrganizations } from "@/lib/osmRelevance";
 import { fetchPlaces, type PlaceResult } from "@/lib/placeSearch";
+import { requestPosition, type LocationIssue } from "@/lib/locationRequest";
 import { getOrganizationSource } from "@/lib/organizationSource";
 import {
   watchUserLocation,
@@ -106,6 +107,8 @@ export function HomePage() {
   const [placeSearching, setPlaceSearching] = useState(false);
   const [flyTarget, setFlyTarget] = useState<{ lat: number; lng: number; key: number } | null>(null);
   const [isLocating, setIsLocating] = useState(false);
+  // Why the last location request did not give a position (shown with the city field).
+  const [locationIssue, setLocationIssue] = useState<LocationIssue | null>(null);
   const [allOrganizations, setAllOrganizations] = useState<Organization[]>([]);
   const [orgsLoading, setOrgsLoading] = useState(true);
   const [sourcesLoading, setSourcesLoading] = useState(false);
@@ -136,6 +139,7 @@ export function HomePage() {
   const shouldScrollRef = useRef(false);
   const findTriggeredRef = useRef(false);
   const searchRunIdRef = useRef(0);
+  const searchPlaceRef = useRef<PlaceResult | null>(null);
   const searchAbortRef = useRef<AbortController | null>(null);
   const lastSearchAreaRef = useRef<string | null>(null);
 
@@ -513,28 +517,41 @@ export function HomePage() {
     ],
   );
 
+  /**
+   * The one place that asks the browser for the position (only ever called from a tap). It never
+   * leaves the page waiting: errors, a missing API and a prompt nobody answers all end in a message.
+   */
+  const askForLocation = useCallback((options?: { fly?: boolean; clearOnIssue?: boolean }) => {
+    setLocationIssue(null);
+    setIsLocating(true);
+    requestPosition({
+      onPosition: (location) => {
+        setIsLocating(false);
+        // A late answer must not replace a city the person typed in the meantime.
+        if (searchPlaceRef.current) return;
+        setLocationIssue(null);
+        setUserLocation(location);
+        if (options?.fly) setFlyTarget({ lat: location.lat, lng: location.lng, key: Date.now() });
+      },
+      onIssue: (issue) => {
+        setIsLocating(false);
+        setLocationIssue(issue);
+        // Never keep another place's results on screen, and never substitute a different city.
+        if (options?.clearOnIssue) {
+          setUserLocation(null);
+          setAllOrganizations([]);
+          setSearchRadiusMeters(null);
+        }
+      },
+    });
+  }, []);
+
   const handleSwitchToFullVersion = useCallback(() => {
     setStoredViewMode("full");
     setViewPreference("full");
 
-    if (!navigator.geolocation) return;
-
-    setIsLocating(true);
-    navigator.geolocation.getCurrentPosition(
-      (position) => {
-        setUserLocation({
-          lat: position.coords.latitude,
-          lng: position.coords.longitude,
-          accuracy: position.coords.accuracy,
-        });
-        setIsLocating(false);
-      },
-      (error: GeolocationPositionError) => {
-        setIsLocating(false);
-      },
-      { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 },
-    );
-  }, []);
+    askForLocation();
+  }, [askForLocation]);
 
   const handleSwitchToLiteVersion = useCallback(() => {
     setStoredViewMode("lite");
@@ -546,6 +563,7 @@ export function HomePage() {
   }, []);
 
   const hasUserLocation = userLocation !== null;
+  searchPlaceRef.current = searchPlace;
   const userLocationRef = useRef(userLocation);
   userLocationRef.current = userLocation;
 
@@ -631,35 +649,11 @@ export function HomePage() {
       return;
     }
 
-    setIsLocating(true);
-
-    // No geolocation: open the panel without a location so the person is asked to allow it or type a city.
-    if (!navigator.geolocation) {
-      openMapAccordion(null);
-      return;
-    }
-
-    navigator.geolocation.getCurrentPosition(
-      (position) => {
-        // Open the panel at once: the search below reverse-geocodes the position itself, and a slow
-        // Nominatim must not keep the person waiting for a panel that is already able to show results.
-        openMapAccordion({
-          lat: position.coords.latitude,
-          lng: position.coords.longitude,
-          accuracy: position.coords.accuracy,
-        });
-      },
-      () => {
-        openMapAccordion(null);
-      },
-      { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 },
-    );
-  }, [
-    mapExpanded,
-    userLocation,
-    openMapAccordion,
-    scrollToMapTop,
-  ]);
+    // Open the panel with the city field at once. The answer to the location prompt can be slow,
+    // never come (embedded browsers) or be "no"; none of that may leave the person with nothing to do.
+    openMapAccordion(null);
+    askForLocation();
+  }, [mapExpanded, userLocation, openMapAccordion, scrollToMapTop, askForLocation]);
 
   useEffect(() => {
     if (
@@ -719,37 +713,24 @@ export function HomePage() {
   );
 
   const handleUseMyLocation = useCallback(() => {
+    searchPlaceRef.current = null;
     setSearchPlace(null);
     setPlaceError(null);
     lastSearchAreaRef.current = null;
+    askForLocation({ fly: true, clearOnIssue: true });
+  }, [askForLocation]);
 
-    // Location unavailable: drop the previous place's results instead of substituting another city.
-    const clearLocation = () => {
-      setUserLocation(null);
-      setAllOrganizations([]);
-      setSearchRadiusMeters(null);
-    };
-
-    if (!navigator.geolocation) {
-      clearLocation();
-      return;
-    }
-    setIsLocating(true);
-    navigator.geolocation.getCurrentPosition(
-      (position) => {
-        const lat = position.coords.latitude;
-        const lng = position.coords.longitude;
-        setUserLocation({ lat, lng, accuracy: position.coords.accuracy });
-        setFlyTarget({ lat, lng, key: Date.now() });
-        setIsLocating(false);
-      },
-      () => {
-        clearLocation();
-        setIsLocating(false);
-      },
-      { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 },
-    );
-  }, []);
+  const locationMessage = isLocating
+    ? t("locationWaiting")
+    : locationIssue === "denied"
+      ? t("locationDeniedNotice")
+      : locationIssue === "unavailable"
+        ? t("locationUnavailableNotice")
+        : locationIssue === "timeout"
+          ? t("locationTimeoutNotice")
+          : locationIssue === "in-app"
+            ? t("locationInAppNotice")
+            : t("locationNeededNotice");
 
   const sourceSettled = sourceStates !== null && !anySourcePending;
   const sourceDown = (status: string | undefined) => status === "failed" || status === "timeout";
@@ -843,7 +824,7 @@ export function HomePage() {
                     role="status"
                     data-testid="location-needed"
                   >
-                    {t("locationNeededNotice")}{" "}
+                    {locationMessage}{" "}
                     <button
                       type="button"
                       onClick={handleUseMyLocation}
@@ -976,43 +957,46 @@ export function HomePage() {
                         isLocating={isLocating}
                       />
                     )}
-                    <OrganizationList
-                      organizations={filtered}
-                      isLoading={orgsLoading && filtered.length === 0}
-                      searchQuery={filters.searchQuery}
-                      emptyMessage={
-                        loadFailed
-                          ? t("loadFailed")
-                          : nothingHere
-                            ? t("noOrgsHereExpand")
-                            : undefined
-                      }
-                      emptyAction={
-                        loadFailed ? (
-                          <button
-                            type="button"
-                            onClick={handleRetry}
-                            data-testid="load-retry"
-                            className="mt-4 min-h-11 rounded-full border border-blue-500/40 bg-blue-500/10 px-4 py-2 text-sm font-semibold text-blue-700 transition-colors hover:bg-blue-500/20 dark:text-blue-300"
-                          >
-                            {t("loadRetry")}
-                          </button>
-                        ) : nothingHere ? (
-                          <button
-                            type="button"
-                            onClick={handleTryLargerRadius}
-                            data-testid="empty-expand"
-                            className="mt-4 min-h-11 rounded-full border border-blue-500/40 bg-blue-500/10 px-4 py-2 text-sm font-semibold text-blue-700 transition-colors hover:bg-blue-500/20 dark:text-blue-300"
-                          >
-                            {t("searchExpand")}
-                          </button>
-                        ) : undefined
-                      }
-                      selectedId={selected?.id}
-                      onSelect={setSelected}
-                      onGetDirections={handleGetDirections}
-                      onImpactRecorded={handleImpactRecorded}
-                    />
+                    {/* Without a place there is nothing to list (and nothing to load): no skeleton cards. */}
+                    {userLocation && (
+                      <OrganizationList
+                        organizations={filtered}
+                        isLoading={orgsLoading && filtered.length === 0}
+                        searchQuery={filters.searchQuery}
+                        emptyMessage={
+                          loadFailed
+                            ? t("loadFailed")
+                            : nothingHere
+                              ? t("noOrgsHereExpand")
+                              : undefined
+                        }
+                        emptyAction={
+                          loadFailed ? (
+                            <button
+                              type="button"
+                              onClick={handleRetry}
+                              data-testid="load-retry"
+                              className="mt-4 min-h-11 rounded-full border border-blue-500/40 bg-blue-500/10 px-4 py-2 text-sm font-semibold text-blue-700 transition-colors hover:bg-blue-500/20 dark:text-blue-300"
+                            >
+                              {t("loadRetry")}
+                            </button>
+                          ) : nothingHere ? (
+                            <button
+                              type="button"
+                              onClick={handleTryLargerRadius}
+                              data-testid="empty-expand"
+                              className="mt-4 min-h-11 rounded-full border border-blue-500/40 bg-blue-500/10 px-4 py-2 text-sm font-semibold text-blue-700 transition-colors hover:bg-blue-500/20 dark:text-blue-300"
+                            >
+                              {t("searchExpand")}
+                            </button>
+                          ) : undefined
+                        }
+                        selectedId={selected?.id}
+                        onSelect={setSelected}
+                        onGetDirections={handleGetDirections}
+                        onImpactRecorded={handleImpactRecorded}
+                      />
+                    )}
                   </div>
                   {liteModeActive && userLocation && !liteMapVisible && (
                     <div className="border-t border-slate-200 p-3 dark:border-white/10">

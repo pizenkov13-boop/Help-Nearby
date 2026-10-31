@@ -48,6 +48,11 @@ const nextConfig = {
         value: "no-cache, must-revalidate",
       },
       {
+        // Location is asked for on a tap, by this site only (never by an embedded frame).
+        key: "Permissions-Policy",
+        value: "geolocation=(self)",
+      },
+      {
         key: "Content-Security-Policy",
         value: CONTENT_SECURITY_POLICY,
       },

@@ -6,13 +6,15 @@ import {
   cacheDetectedCountry,
   readCachedDetectedCountry,
 } from "@/lib/detectedCountry";
-import { reverseGeocodeCountry } from "@/lib/geocode";
 import { isSunnyRegionCountry } from "@/lib/sunnyRegions";
 import { hasStoredThemePreference } from "@/lib/themePreference";
 
 /**
  * On first visit (no saved theme preference), enable light mode in sunny
  * regions (Africa, Arabian Peninsula, hot Middle East). Manual toggle always wins.
+ * The region is only taken from a country already found by an explicit search: this component
+ * never asks the browser for the location (a prompt on page load, before any tap, trains people to
+ * refuse it and blocks the real request).
  */
 export function ThemeRegionSync() {
   const { setTheme } = useTheme();
@@ -39,20 +41,6 @@ export function ThemeRegionSync() {
       return;
     }
 
-    if (!navigator.geolocation) return;
-
-    navigator.geolocation.getCurrentPosition(
-      async (position) => {
-        const geo = await reverseGeocodeCountry(
-          position.coords.latitude,
-          position.coords.longitude,
-        );
-        if (!geo) return;
-        applyFromCountry(geo.country, geo.countryCode);
-      },
-      () => {},
-      { enableHighAccuracy: false, timeout: 8000, maximumAge: 86400000 },
-    );
   }, [setTheme]);
 
   return null;
