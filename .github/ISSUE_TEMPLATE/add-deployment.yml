@@ -1,0 +1,44 @@
+name: "Add my city / Добавить мой город"
+description: "Launched your own HelpNearby copy? Tell us and we will add your city to the README table. / Запустили свою копию HelpNearby? Расскажите, и мы добавим ваш город в таблицу README."
+title: "Add my city: "
+labels: ["deployment"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Everything you write here is public. Do not post passwords, keys or private data.
+        Всё, что вы напишете здесь, публично. Не публикуйте пароли, ключи и личные данные.
+  - type: input
+    id: city
+    attributes:
+      label: "City / Город"
+      placeholder: "Paris"
+    validations:
+      required: true
+  - type: input
+    id: country
+    attributes:
+      label: "Country / Страна"
+      placeholder: "France"
+    validations:
+      required: true
+  - type: input
+    id: site
+    attributes:
+      label: "Site address / Адрес сайта"
+      placeholder: "https://help.example.org"
+    validations:
+      required: true
+  - type: input
+    id: operator
+    attributes:
+      label: "Name or organization that runs it / Имя или организация, которая ведёт сайт"
+    validations:
+      required: true
+  - type: input
+    id: contact
+    attributes:
+      label: "Contact (optional) / Контакт (необязательно)"
+      description: "Shown publicly in this issue. Leave empty if you prefer. / Виден всем в этой заявке. Можно не заполнять."
+    validations:
+      required: false
