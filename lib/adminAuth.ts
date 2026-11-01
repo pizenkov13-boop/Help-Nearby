@@ -1,3 +1,4 @@
+import { createHash } from "node:crypto";
 import { cookies } from "next/headers";
 import { ensureEnvLoaded } from "@/lib/env.server";
 import {
@@ -23,7 +24,13 @@ export function getAdminPassword(): string | undefined {
 export function getAdminSessionSecret(): string | undefined {
   ensureEnvLoaded();
   const secret = process.env.ADMIN_SESSION_SECRET?.trim();
-  return isUsableSecret(secret) ? secret : undefined;
+  if (isUsableSecret(secret)) return secret;
+
+  // Fewer variables for a new copy: without ADMIN_SESSION_SECRET the signing key is derived from the
+  // server-only Supabase service key (never sent to the client). A configured secret always wins.
+  const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY?.trim();
+  if (!serviceKey) return undefined;
+  return createHash("sha256").update(`helpnearby-admin-session:${serviceKey}`).digest("hex");
 }
 
 /** Admin access needs both the password and the session secret; otherwise it is switched off. */

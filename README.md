@@ -124,38 +124,40 @@ These are used as data sources only; the project is independent and is not opera
 
 ## Запусти в своём городе
 
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Fpizenkov13-boop%2FHelp-Nearby&env=NEXT_PUBLIC_SUPABASE_URL,NEXT_PUBLIC_SUPABASE_ANON_KEY,SUPABASE_SERVICE_ROLE_KEY,ADMIN_PASSWORD,ADMIN_SESSION_SECRET&envDescription=Supabase%20project%20keys%20and%20admin%20credentials%20(see%20README%2C%20Run%20it%20in%20your%20city)&envLink=https%3A%2F%2Fgithub.com%2Fpizenkov13-boop%2FHelp-Nearby%23run-it-in-your-city&project-name=help-nearby&repository-name=help-nearby)
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Fpizenkov13-boop%2FHelp-Nearby&env=ADMIN_PASSWORD&envDescription=Password%20for%20the%20%2Fadmin%20page%20(optional%3A%20leave%20empty%20to%20keep%20admin%20off)&envLink=https%3A%2F%2Fgithub.com%2Fpizenkov13-boop%2FHelp-Nearby%23run-it-in-your-city&integration-ids=oac_VqOgBHqhEoFTPzGkPd7L0iH6&project-name=help-nearby&repository-name=help-nearby)
 
-Любой может запустить свою копию Help Nearby для города, региона или сообщества. Нужны бесплатные аккаунты на GitHub, [Supabase](https://supabase.com/) и [Vercel](https://vercel.com/).
+Любой может запустить свою копию Help Nearby для города, региона или сообщества. Нужны бесплатные аккаунты на GitHub и [Vercel](https://vercel.com/); база данных создаётся автоматически.
 
-1. **Сделайте форк репозитория** (или используйте его как шаблон) на GitHub.
-2. **Создайте проект Supabase** на [supabase.com](https://supabase.com/). Запишите URL проекта, ключ `anon` и ключ `service_role` (Project Settings → API).
-3. **Выполните SQL.** В Supabase → SQL Editor запустите [`supabase/schema.sql`](supabase/schema.sql) на пустом проекте. При желании запустите и [`supabase/seed_demo.sql`](supabase/seed_demo.sql): он добавляет три вымышленные организации-примера, которые нужно удалить или заменить своими.
-4. **Задайте переменные окружения** (Vercel → Project → Settings → Environment Variables или локально в `.env.local`). Храните ключи в секрете и никогда не коммитьте их.
+1. **Нажмите «Deploy with Vercel»** и войдите через GitHub: Vercel сам сделает форк репозитория.
+2. **Подключите Supabase** на шаге интеграций (бесплатный тариф): проект базы и все ключи создаются и подставляются автоматически. Задайте `ADMIN_PASSWORD` (пароль для `/admin`).
+3. **Нажмите Deploy.** Во время сборки таблицы создаются сами (`npm run setup`, идемпотентно, из [`supabase/schema.sql`](supabase/schema.sql)); SQL вручную выполнять не нужно.
+4. **Добавьте организации:** откройте `/admin` и подтверждайте заявки с `/submit`, либо загрузите CSV в таблицу `organizations` (Supabase → Table Editor → Insert → Import data from CSV; колонки как в [`supabase/schema.sql`](supabase/schema.sql), `verified` поставьте `true`). Демо-данные: [`supabase/seed_demo.sql`](supabase/seed_demo.sql) (три вымышленные организации, удалите их).
 
-   | Переменная | Обязательна | Описание |
-   |------------|-------------|----------|
-   | `NEXT_PUBLIC_SUPABASE_URL` | да | URL проекта Supabase |
-   | `NEXT_PUBLIC_SUPABASE_ANON_KEY` | да | Публичный ключ Supabase (anon) |
-   | `SUPABASE_SERVICE_ROLE_KEY` | да | Серверный ключ для модерации и счётчиков |
-   | `ADMIN_PASSWORD` | да | Пароль для `/admin` |
-   | `ADMIN_SESSION_SECRET` | да | Случайная строка от 32 символов, которой подписывается cookie админ-сессии |
-   | `NEXT_PUBLIC_SITE_NAME` | нет | Название сайта в метаданных и манифесте PWA (по умолчанию `Help Nearby`) |
-   | `NEXT_PUBLIC_SITE_URL` | нет | Основной адрес вашего сайта, например `https://help.example.org` |
-   | `NEXT_PUBLIC_DEFAULT_LANGUAGE` | нет | Язык при первом визите: `en`, `ru`, `es`, `fr`, `de`, `zh`, `ar` (по умолчанию `en`) |
-   | `NEXT_PUBLIC_CONTACT_EMAIL` | нет | Публичный контактный адрес в подвале и на странице приватности |
-   | `NEXT_PUBLIC_MAP_CENTER` | нет | Центр карты региона в виде `lat,lng` (зарезервировано; сейчас приложение стартует с местоположения посетителя) |
-   | `NEXT_PUBLIC_MAP_ZOOM` | нет | Начальный зум карты, 1–19 (по умолчанию `14`) |
-   | `NEXT_PUBLIC_FOOTER_LINK_URL` | нет | Ссылка на проект в подвале (по умолчанию — этот репозиторий) |
-   | `DISABLE_PING` | нет | `true` отключает анонимный пинг копии (см. [Приватность](#приватность-и-анонимный-пинг)) |
-   | `RELIEFWEB_APPNAME` | нет | Ваш зарегистрированный [appname ReliefWeb](https://apidoc.reliefweb.int/); без него результаты ReliefWeb пропускаются |
-   | `AITUNNEL_API_KEY`, `AITUNNEL_BASE_URL`, `AITUNNEL_MODEL` | нет | Включают экспериментального ИИ-ассистента |
-   | `NEXT_PUBLIC_MAP_TILES_URL`, `NEXT_PUBLIC_MAP_TILES_ATTRIBUTION` | нет | Свой провайдер тайлов карты |
-   | `DEBUG_TOKEN` | нет | Включает диагностический маршрут `/api/debug/sources` |
-
-5. **Задеплойте на Vercel** (кнопкой выше или импортом форка), затем **добавьте организации**: войдите в `/admin` и подтверждайте заявки с `/submit`, либо загрузите строки CSV-файлом в таблицу `organizations` (Supabase → Table Editor → Insert → Import data from CSV; колонки как в [`supabase/schema.sql`](supabase/schema.sql), `verified` поставьте `true`).
+Без базы данных сайт тоже работает: поиск идёт по OpenStreetMap и открытым гуманитарным источникам, а `/admin` и форма добавления организации отвечают, что база не подключена.
 
 **Запустил? Напиши на hello@help-nearby.org или добавь строку через pull request.**
+
+Переменные окружения. Ничего обязательного вручную задавать не нужно:
+
+| Переменная | Откуда | Описание |
+|------------|--------|----------|
+| `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY`, `POSTGRES_URL_NON_POOLING` | интеграция Supabase (автоматически) | Доступ к базе и создание таблиц при сборке |
+| `ADMIN_PASSWORD` | вы (рекомендуется) | Пароль для `/admin`; без него админка выключена |
+| `ADMIN_SESSION_SECRET` | необязательно | Строка от 32 символов для подписи cookie админа; по умолчанию вычисляется из серверного ключа Supabase |
+| `NEXT_PUBLIC_SITE_NAME` | необязательно | Название сайта в метаданных и манифесте PWA (по умолчанию `Help Nearby`) |
+| `NEXT_PUBLIC_SITE_URL` | необязательно | Основной адрес вашего сайта, например `https://help.example.org` |
+| `NEXT_PUBLIC_DEFAULT_LANGUAGE` | необязательно | Язык при первом визите: `en`, `ru`, `es`, `fr`, `de`, `zh`, `ar` (по умолчанию `en`) |
+| `NEXT_PUBLIC_CONTACT_EMAIL` | необязательно | Публичный контактный адрес в подвале и на странице приватности |
+| `NEXT_PUBLIC_MAP_CENTER` | необязательно | Центр карты региона в виде `lat,lng` (зарезервировано; сейчас приложение стартует с местоположения посетителя) |
+| `NEXT_PUBLIC_MAP_ZOOM` | необязательно | Начальный зум карты, 1–19 (по умолчанию `14`) |
+| `NEXT_PUBLIC_FOOTER_LINK_URL` | необязательно | Ссылка на проект в подвале (по умолчанию — этот репозиторий) |
+| `DISABLE_PING` | необязательно | `true` отключает анонимный пинг копии (см. [Приватность](#приватность-и-анонимный-пинг)) |
+| `RELIEFWEB_APPNAME` | необязательно | Ваш зарегистрированный [appname ReliefWeb](https://apidoc.reliefweb.int/); без него результаты ReliefWeb пропускаются |
+| `AITUNNEL_API_KEY`, `AITUNNEL_BASE_URL`, `AITUNNEL_MODEL` | необязательно | Включают экспериментального ИИ-ассистента |
+| `NEXT_PUBLIC_MAP_TILES_URL`, `NEXT_PUBLIC_MAP_TILES_ATTRIBUTION` | необязательно | Свой провайдер тайлов карты |
+| `DEBUG_TOKEN` | необязательно | Включает диагностический маршрут `/api/debug/sources` |
+
+Ручной вариант (без интеграции): создайте проект Supabase, выполните [`supabase/schema.sql`](supabase/schema.sql) в SQL Editor и задайте `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY` и `SUPABASE_SERVICE_ROLE_KEY` сами. Храните ключи в секрете и никогда не коммитьте их.
 
 ### Где работает
 
@@ -174,38 +176,40 @@ These are used as data sources only; the project is independent and is not opera
 
 ## Run it in your city
 
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Fpizenkov13-boop%2FHelp-Nearby&env=NEXT_PUBLIC_SUPABASE_URL,NEXT_PUBLIC_SUPABASE_ANON_KEY,SUPABASE_SERVICE_ROLE_KEY,ADMIN_PASSWORD,ADMIN_SESSION_SECRET&envDescription=Supabase%20project%20keys%20and%20admin%20credentials%20(see%20README%2C%20Run%20it%20in%20your%20city)&envLink=https%3A%2F%2Fgithub.com%2Fpizenkov13-boop%2FHelp-Nearby%23run-it-in-your-city&project-name=help-nearby&repository-name=help-nearby)
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Fpizenkov13-boop%2FHelp-Nearby&env=ADMIN_PASSWORD&envDescription=Password%20for%20the%20%2Fadmin%20page%20(optional%3A%20leave%20empty%20to%20keep%20admin%20off)&envLink=https%3A%2F%2Fgithub.com%2Fpizenkov13-boop%2FHelp-Nearby%23run-it-in-your-city&integration-ids=oac_VqOgBHqhEoFTPzGkPd7L0iH6&project-name=help-nearby&repository-name=help-nearby)
 
-Anyone can run their own copy of Help Nearby for a city, region or community. You need free accounts on GitHub, [Supabase](https://supabase.com/) and [Vercel](https://vercel.com/).
+Anyone can run their own copy of Help Nearby for a city, region or community. You need free accounts on GitHub and [Vercel](https://vercel.com/); the database is created automatically.
 
-1. **Fork the repository** (or use it as a template) on GitHub.
-2. **Create a Supabase project** at [supabase.com](https://supabase.com/). Note the project URL, the `anon` key and the `service_role` key (Project Settings → API).
-3. **Run the SQL.** In Supabase → SQL Editor, run [`supabase/schema.sql`](supabase/schema.sql) on the empty project. Optionally run [`supabase/seed_demo.sql`](supabase/seed_demo.sql) too: it adds three fictional example organizations that you should delete or replace.
-4. **Set the environment variables** (Vercel → Project → Settings → Environment Variables, or `.env.local` locally). Keep the keys secret and never commit them.
+1. **Click "Deploy with Vercel"** and sign in with GitHub: Vercel forks the repository for you.
+2. **Connect Supabase** in the integrations step (free plan): the database project and all keys are created and filled in automatically. Set `ADMIN_PASSWORD` (the password for `/admin`).
+3. **Click Deploy.** During the build the tables are created for you (`npm run setup`, idempotent, from [`supabase/schema.sql`](supabase/schema.sql)); no SQL to run by hand.
+4. **Add organizations:** open `/admin` and verify community submissions from `/submit`, or bulk-load rows by importing a CSV into the `organizations` table (Supabase → Table Editor → Insert → Import data from CSV; columns follow [`supabase/schema.sql`](supabase/schema.sql), set `verified` to `true`). Demo data: [`supabase/seed_demo.sql`](supabase/seed_demo.sql) (three fictional organizations, delete them).
 
-   | Variable | Required | Description |
-   |----------|----------|-------------|
-   | `NEXT_PUBLIC_SUPABASE_URL` | yes | Supabase project URL |
-   | `NEXT_PUBLIC_SUPABASE_ANON_KEY` | yes | Supabase anon (public) key |
-   | `SUPABASE_SERVICE_ROLE_KEY` | yes | Server-only key used for moderation and counters |
-   | `ADMIN_PASSWORD` | yes | Password for `/admin` |
-   | `ADMIN_SESSION_SECRET` | yes | Random string of 32+ characters that signs the admin session cookie |
-   | `NEXT_PUBLIC_SITE_NAME` | no | Site name in page metadata and the PWA manifest (default `Help Nearby`) |
-   | `NEXT_PUBLIC_SITE_URL` | no | Canonical origin of your site, e.g. `https://help.example.org` |
-   | `NEXT_PUBLIC_DEFAULT_LANGUAGE` | no | First-visit language: `en`, `ru`, `es`, `fr`, `de`, `zh`, `ar` (default `en`) |
-   | `NEXT_PUBLIC_CONTACT_EMAIL` | no | Public contact address shown in the footer and privacy page |
-   | `NEXT_PUBLIC_MAP_CENTER` | no | Regional map center as `lat,lng` (reserved; the app currently starts from the visitor's own location) |
-   | `NEXT_PUBLIC_MAP_ZOOM` | no | Initial map zoom, 1–19 (default `14`) |
-   | `NEXT_PUBLIC_FOOTER_LINK_URL` | no | Project link in the footer (default: this repository) |
-   | `DISABLE_PING` | no | `true` turns off the anonymous deployment ping (see [Privacy](#privacy-and-the-anonymous-ping)) |
-   | `RELIEFWEB_APPNAME` | no | Your registered [ReliefWeb appname](https://apidoc.reliefweb.int/); without it ReliefWeb results are skipped |
-   | `AITUNNEL_API_KEY`, `AITUNNEL_BASE_URL`, `AITUNNEL_MODEL` | no | Enable the experimental AI assistant |
-   | `NEXT_PUBLIC_MAP_TILES_URL`, `NEXT_PUBLIC_MAP_TILES_ATTRIBUTION` | no | Custom map tile provider |
-   | `DEBUG_TOKEN` | no | Enables the `/api/debug/sources` diagnostics route |
-
-5. **Deploy on Vercel** (use the button above or import your fork), then **add organizations**: sign in at `/admin` to verify community submissions from `/submit`, or bulk-load rows by importing a CSV into the `organizations` table (Supabase → Table Editor → Insert → Import data from CSV; columns follow [`supabase/schema.sql`](supabase/schema.sql), set `verified` to `true`).
+The site also works without a database: search uses OpenStreetMap and open humanitarian sources, and `/admin` and the organization form say that no database is connected.
 
 **Launched yours?** Write to hello@help-nearby.org or add a row to the table below with a pull request.
+
+Environment variables. Nothing is required by hand:
+
+| Variable | Source | Description |
+|----------|--------|-------------|
+| `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY`, `POSTGRES_URL_NON_POOLING` | Supabase integration (automatic) | Database access and table creation at build time |
+| `ADMIN_PASSWORD` | you (recommended) | Password for `/admin`; without it the admin area is off |
+| `ADMIN_SESSION_SECRET` | optional | Random string of 32+ characters that signs the admin cookie; derived from the server-side Supabase key by default |
+| `NEXT_PUBLIC_SITE_NAME` | optional | Site name in page metadata and the PWA manifest (default `Help Nearby`) |
+| `NEXT_PUBLIC_SITE_URL` | optional | Canonical origin of your site, e.g. `https://help.example.org` |
+| `NEXT_PUBLIC_DEFAULT_LANGUAGE` | optional | First-visit language: `en`, `ru`, `es`, `fr`, `de`, `zh`, `ar` (default `en`) |
+| `NEXT_PUBLIC_CONTACT_EMAIL` | optional | Public contact address shown in the footer and privacy page |
+| `NEXT_PUBLIC_MAP_CENTER` | optional | Regional map center as `lat,lng` (reserved; the app currently starts from the visitor's own location) |
+| `NEXT_PUBLIC_MAP_ZOOM` | optional | Initial map zoom, 1–19 (default `14`) |
+| `NEXT_PUBLIC_FOOTER_LINK_URL` | optional | Project link in the footer (default: this repository) |
+| `DISABLE_PING` | optional | `true` turns off the anonymous deployment ping (see [Privacy](#privacy-and-the-anonymous-ping)) |
+| `RELIEFWEB_APPNAME` | optional | Your registered [ReliefWeb appname](https://apidoc.reliefweb.int/); without it ReliefWeb results are skipped |
+| `AITUNNEL_API_KEY`, `AITUNNEL_BASE_URL`, `AITUNNEL_MODEL` | optional | Enable the experimental AI assistant |
+| `NEXT_PUBLIC_MAP_TILES_URL`, `NEXT_PUBLIC_MAP_TILES_ATTRIBUTION` | optional | Custom map tile provider |
+| `DEBUG_TOKEN` | optional | Enables the `/api/debug/sources` diagnostics route |
+
+Manual alternative (no integration): create a Supabase project, run [`supabase/schema.sql`](supabase/schema.sql) in the SQL Editor and set `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY` and `SUPABASE_SERVICE_ROLE_KEY` yourself. Keep the keys secret and never commit them.
 
 ### Where it runs
 
