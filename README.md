@@ -122,6 +122,57 @@ These are used as data sources only; the project is independent and is not opera
 
 ---
 
+## Запусти в своём городе
+
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Fpizenkov13-boop%2FHelp-Nearby&env=NEXT_PUBLIC_SUPABASE_URL,NEXT_PUBLIC_SUPABASE_ANON_KEY,SUPABASE_SERVICE_ROLE_KEY,ADMIN_PASSWORD,ADMIN_SESSION_SECRET&envDescription=Supabase%20project%20keys%20and%20admin%20credentials%20(see%20README%2C%20Run%20it%20in%20your%20city)&envLink=https%3A%2F%2Fgithub.com%2Fpizenkov13-boop%2FHelp-Nearby%23run-it-in-your-city&project-name=help-nearby&repository-name=help-nearby)
+
+Любой может запустить свою копию Help Nearby для города, региона или сообщества. Нужны бесплатные аккаунты на GitHub, [Supabase](https://supabase.com/) и [Vercel](https://vercel.com/).
+
+1. **Сделайте форк репозитория** (или используйте его как шаблон) на GitHub.
+2. **Создайте проект Supabase** на [supabase.com](https://supabase.com/). Запишите URL проекта, ключ `anon` и ключ `service_role` (Project Settings → API).
+3. **Выполните SQL.** В Supabase → SQL Editor запустите [`supabase/schema.sql`](supabase/schema.sql) на пустом проекте. При желании запустите и [`supabase/seed_demo.sql`](supabase/seed_demo.sql): он добавляет три вымышленные организации-примера, которые нужно удалить или заменить своими.
+4. **Задайте переменные окружения** (Vercel → Project → Settings → Environment Variables или локально в `.env.local`). Храните ключи в секрете и никогда не коммитьте их.
+
+   | Переменная | Обязательна | Описание |
+   |------------|-------------|----------|
+   | `NEXT_PUBLIC_SUPABASE_URL` | да | URL проекта Supabase |
+   | `NEXT_PUBLIC_SUPABASE_ANON_KEY` | да | Публичный ключ Supabase (anon) |
+   | `SUPABASE_SERVICE_ROLE_KEY` | да | Серверный ключ для модерации и счётчиков |
+   | `ADMIN_PASSWORD` | да | Пароль для `/admin` |
+   | `ADMIN_SESSION_SECRET` | да | Случайная строка от 32 символов, которой подписывается cookie админ-сессии |
+   | `NEXT_PUBLIC_SITE_NAME` | нет | Название сайта в метаданных и манифесте PWA (по умолчанию `Help Nearby`) |
+   | `NEXT_PUBLIC_SITE_URL` | нет | Основной адрес вашего сайта, например `https://help.example.org` |
+   | `NEXT_PUBLIC_DEFAULT_LANGUAGE` | нет | Язык при первом визите: `en`, `ru`, `es`, `fr`, `de`, `zh`, `ar` (по умолчанию `en`) |
+   | `NEXT_PUBLIC_CONTACT_EMAIL` | нет | Публичный контактный адрес в подвале и на странице приватности |
+   | `NEXT_PUBLIC_MAP_CENTER` | нет | Центр карты региона в виде `lat,lng` (зарезервировано; сейчас приложение стартует с местоположения посетителя) |
+   | `NEXT_PUBLIC_MAP_ZOOM` | нет | Начальный зум карты, 1–19 (по умолчанию `14`) |
+   | `NEXT_PUBLIC_FOOTER_LINK_URL` | нет | Ссылка на проект в подвале (по умолчанию — этот репозиторий) |
+   | `NEXT_PUBLIC_HIDE_POWERED_BY` | нет | `true` убирает подпись «Powered by HelpNearby» |
+   | `DISABLE_PING` | нет | `true` отключает анонимный пинг копии (см. [Приватность](#приватность-и-анонимный-пинг)) |
+   | `RELIEFWEB_APPNAME` | нет | Ваш зарегистрированный [appname ReliefWeb](https://apidoc.reliefweb.int/); без него результаты ReliefWeb пропускаются |
+   | `AITUNNEL_API_KEY`, `AITUNNEL_BASE_URL`, `AITUNNEL_MODEL` | нет | Включают экспериментального ИИ-ассистента |
+   | `NEXT_PUBLIC_MAP_TILES_URL`, `NEXT_PUBLIC_MAP_TILES_ATTRIBUTION` | нет | Свой провайдер тайлов карты |
+   | `DEBUG_TOKEN` | нет | Включает диагностический маршрут `/api/debug/sources` |
+
+5. **Задеплойте на Vercel** (кнопкой выше или импортом форка), затем **добавьте организации**: войдите в `/admin` и подтверждайте заявки с `/submit`, либо загрузите строки CSV-файлом в таблицу `organizations` (Supabase → Table Editor → Insert → Import data from CSV; колонки как в [`supabase/schema.sql`](supabase/schema.sql), `verified` поставьте `true`).
+
+**Запустил? Напиши на hello@help-nearby.org или добавь строку через pull request.**
+
+### Где работает
+
+| Город | Страна | Сайт | Кто ведёт |
+|-------|--------|------|-----------|
+| Париж / весь мир | Франция / весь мир | [www.help-nearby.org](https://www.help-nearby.org/) | Pavel Izenkin |
+
+### Приватность и анонимный пинг
+
+- **Посетители:** на основном сайте используется аналитика без cookie (только агрегированные просмотры страниц); в браузере хранятся лишь настройки языка и темы. Подробности — на странице приватности в приложении.
+- **Анонимный пинг копий:** копия Help Nearby на любом домене, кроме `www.help-nearby.org`, раз в сутки отправляет один запрос на `https://www.help-nearby.org/api/deployments` ровно с тремя полями: `domain` (имя хоста вашего сайта), `version` (версия приложения) и `timestamp`. В нём нет данных посетителей, поисковых запросов и ключей. Как любой HTTP-запрос, он приходит на наш сервер с IP-адреса вашего сервера; адрес используется только для ограничения частоты в памяти и не сохраняется. Это позволяет проекту видеть, сколько копий живы. Пинг отправляет ежедневный cron Vercel из [`vercel.json`](vercel.json) через [`lib/ping.server.ts`](lib/ping.server.ts).
+- **Как отключить:** задайте `DISABLE_PING=true` в переменных окружения (или удалите запись cron в `vercel.json`).
+- **Наша сторона:** принимающий маршрут проверяет и ограничивает запросы и хранит в таблице `deployments` только домен, версию, время первого и последнего пинга.
+
+---
+
 ## Run it in your city
 
 [![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Fpizenkov13-boop%2FHelp-Nearby&env=NEXT_PUBLIC_SUPABASE_URL,NEXT_PUBLIC_SUPABASE_ANON_KEY,SUPABASE_SERVICE_ROLE_KEY,ADMIN_PASSWORD,ADMIN_SESSION_SECRET&envDescription=Supabase%20project%20keys%20and%20admin%20credentials%20(see%20README%2C%20Run%20it%20in%20your%20city)&envLink=https%3A%2F%2Fgithub.com%2Fpizenkov13-boop%2FHelp-Nearby%23run-it-in-your-city&project-name=help-nearby&repository-name=help-nearby)
@@ -148,7 +199,7 @@ Anyone can run their own copy of Help Nearby for a city, region or community. Yo
    | `NEXT_PUBLIC_MAP_ZOOM` | no | Initial map zoom, 1–19 (default `14`) |
    | `NEXT_PUBLIC_FOOTER_LINK_URL` | no | Project link in the footer (default: this repository) |
    | `NEXT_PUBLIC_HIDE_POWERED_BY` | no | `true` removes the "Powered by HelpNearby" credit |
-   | `DISABLE_PING` | no | `true` turns off the anonymous deployment ping (see [Privacy](#privacy)) |
+   | `DISABLE_PING` | no | `true` turns off the anonymous deployment ping (see [Privacy](#privacy-and-the-anonymous-ping)) |
    | `RELIEFWEB_APPNAME` | no | Your registered [ReliefWeb appname](https://apidoc.reliefweb.int/); without it ReliefWeb results are skipped |
    | `AITUNNEL_API_KEY`, `AITUNNEL_BASE_URL`, `AITUNNEL_MODEL` | no | Enable the experimental AI assistant |
    | `NEXT_PUBLIC_MAP_TILES_URL`, `NEXT_PUBLIC_MAP_TILES_ATTRIBUTION` | no | Custom map tile provider |
@@ -164,9 +215,7 @@ Anyone can run their own copy of Help Nearby for a city, region or community. Yo
 |------|---------|------|--------|
 | Paris / Global | France / Worldwide | [www.help-nearby.org](https://www.help-nearby.org/) | Pavel Izenkin |
 
----
-
-## Privacy
+### Privacy and the anonymous ping
 
 - **Visitors:** the app uses cookie-less, aggregated page-view analytics on the main site and stores a language/theme preference in the browser only. See the in-app privacy page for details.
 - **Anonymous deployment ping (copies only):** a copy of Help Nearby running on any domain other than `www.help-nearby.org` sends one request per day to `https://www.help-nearby.org/api/deployments` with exactly three fields: `domain` (the hostname of your site), `version` (the app version) and `timestamp`. It contains no visitor data, no search queries, no data about your visitors and no keys. Like any HTTP request it reaches our server from your server's IP address, which is used only for in-memory rate limiting and is not stored. It lets the project see how many copies are alive. The ping is sent by the daily Vercel cron in [`vercel.json`](vercel.json) through [`lib/ping.server.ts`](lib/ping.server.ts).
