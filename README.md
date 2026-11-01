@@ -185,7 +185,7 @@ Community submissions via `/submit` are stored as **unverified** until approved 
 | **Nominatim** | Forward/reverse geocoding for addresses | `lib/nominatim.server.ts` → `/api/geocode` |
 | **OSRM** | Turn-by-turn routing | `lib/osrmRouting.server.ts` → `/api/route` |
 
-HDX, GDHO, and ReliefWeb results merge with Supabase + Overpass in `lib/nearbySearch.ts` (deduplicated by name). Each OCHA-family source has a 15-second timeout. ReliefWeb is skipped for Ukraine (local catalog + HDX/GDHO cover that region). Failures do not block other results.
+HDX, GDHO, and ReliefWeb results merge with Supabase + Overpass in `lib/nearbySearch.ts` (deduplicated by name). Each OCHA-family source has a 15-second timeout. ReliefWeb may be skipped for some countries where other sources already cover the region. Failures do not block other results.
 
 ---
 

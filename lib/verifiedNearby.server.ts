@@ -5,6 +5,7 @@ import { readStoredCountryOrgs } from "@/lib/externalOrgs.server";
 import { fetchGdhoOrganizationsForCountry } from "@/lib/gdho";
 import { fetchHdxOrganizationsForCountry } from "@/lib/hdx";
 import { fetchReliefWebOrganizationsForCountry } from "@/lib/reliefweb";
+import { skipsReliefWeb } from "@/lib/sourceRules";
 import { nominatimSearch } from "@/lib/nominatim.server";
 import type { Organization, UserLocation } from "@/lib/types";
 
@@ -15,11 +16,6 @@ const MAX_GEOCODE = 12;
 const GEOCODE_PER_OCHA_SOURCE = 4;
 /** Country-wide OCHA orgs shown even outside search radius (per source). */
 const MAX_OCHA_COUNTRY_WIDE_PER_SOURCE = 8;
-
-function isUkraine(country: string, countryCode?: string | null): boolean {
-  if (countryCode?.trim().toUpperCase() === "UA") return true;
-  return country.trim().toLowerCase() === "ukraine";
-}
 
 function normalizeName(name: string): string {
   return name
@@ -238,7 +234,7 @@ export async function fetchVerifiedNearbyOrganizations(
   country: string,
   countryCode?: string | null,
 ): Promise<Organization[]> {
-  const skipReliefWeb = isUkraine(country, countryCode);
+  const skipReliefWeb = skipsReliefWeb(country, countryCode);
 
   // The daily copy first: the live sources need 10-30 s from Vercel and cannot finish in time.
   const stored = await readStoredCountryOrgs(country, countryCode);
@@ -306,7 +302,7 @@ export async function fetchVerifiedCountryDirectory(
       [] as Organization[],
       timeoutMs,
     ),
-    isUkraine(country, countryCode)
+    skipsReliefWeb(country, countryCode)
       ? Promise.resolve([] as Organization[])
       : fetchWithSourceTimeout(
           "ReliefWeb",

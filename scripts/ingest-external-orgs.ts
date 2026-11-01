@@ -12,6 +12,7 @@ import { createClient } from "@supabase/supabase-js";
 import { fetchGdhoOrganizationsForCountry } from "../lib/gdho";
 import { fetchHdxOrganizationsForCountry } from "../lib/hdx";
 import { fetchReliefWebOrganizationsForCountry } from "../lib/reliefweb";
+import { skipsReliefWeb } from "../lib/sourceRules";
 import type { Organization } from "../lib/types";
 
 interface CountryEntry {
@@ -71,12 +72,11 @@ async function main() {
   let stored = 0;
   let failedSources = 0;
   for (const country of countries) {
-    const isUkraine = country.code === "UA";
     const fetched: Array<[Source, () => Promise<Organization[]>]> = [
       ["hdx", () => fetchHdxOrganizationsForCountry(country.name, country.code)],
       ["gdho", () => fetchGdhoOrganizationsForCountry(country.name)],
     ];
-    if (hasReliefWeb && !isUkraine) {
+    if (hasReliefWeb && !skipsReliefWeb(country.name, country.code)) {
       fetched.push(["reliefweb", () => fetchReliefWebOrganizationsForCountry(country.name, country.code)]);
     }
 
