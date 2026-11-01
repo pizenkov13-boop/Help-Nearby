@@ -1,8 +1,8 @@
 import "server-only";
 
-/** Honest, identifiable User-Agent for UN OCHA APIs (HDX, ReliefWeb). */
+/** Identifiable bot User-Agent (standard crawler format) for HDX, GDHO and ReliefWeb. */
 export const OCHA_USER_AGENT =
-  "HelpNearby/1.0 (+https://www.help-nearby.org; hello@help-nearby.org)";
+  "Mozilla/5.0 (compatible; HelpNearbyBot/1.0; +https://www.help-nearby.org; hello@help-nearby.org)";
 
 export function ochaFetch(
   input: string | URL,
