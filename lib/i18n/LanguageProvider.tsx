@@ -10,33 +10,28 @@ import {
   type ReactNode,
 } from "react";
 import type { LanguageCode } from "@/lib/types";
-import { siteConfig } from "@/lib/siteConfig";
-import { LANGUAGES, translations, type TranslationKey } from "./translations";
+import {
+  DEFAULT_LANGUAGE,
+  LANGUAGE_STORAGE_KEY,
+  isLanguageCode,
+  languageDirection,
+  pickSupportedLanguage,
+} from "./detectLanguage";
+import { translations, type TranslationKey } from "./translations";
 
-const STORAGE_KEY = "hn-language";
-
-function isLanguageCode(value: string): value is LanguageCode {
-  return LANGUAGES.some((l) => l.code === value);
-}
-
-const FALLBACK_LANGUAGE: LanguageCode = isLanguageCode(siteConfig.defaultLanguage)
-  ? siteConfig.defaultLanguage
-  : "en";
-
-function readStoredLanguage(): LanguageCode {
-  if (typeof window === "undefined") return FALLBACK_LANGUAGE;
+function readStoredLanguage(): LanguageCode | null {
   try {
-    const stored = localStorage.getItem(STORAGE_KEY);
-    if (stored && isLanguageCode(stored)) return stored;
+    const stored = localStorage.getItem(LANGUAGE_STORAGE_KEY);
+    if (isLanguageCode(stored)) return stored;
   } catch {
     /* ignore */
   }
-  return FALLBACK_LANGUAGE;
+  return null;
 }
 
 function applyDocumentLanguage(code: LanguageCode) {
   document.documentElement.lang = code;
-  document.documentElement.dir = "ltr";
+  document.documentElement.dir = languageDirection(code);
 }
 
 interface LanguageContextValue {
@@ -48,19 +43,40 @@ interface LanguageContextValue {
 
 const LanguageContext = createContext<LanguageContextValue | null>(null);
 
-export function LanguageProvider({ children }: { children: ReactNode }) {
-  const [language, setLanguageState] = useState<LanguageCode>(FALLBACK_LANGUAGE);
+/**
+ * initialLanguage comes from the server (the browser's Accept-Language), so the first paint is already
+ * in the right language and direction. A language picked by hand (localStorage) always wins; without
+ * one, navigator.languages is checked in case the server could not see the header.
+ */
+export function LanguageProvider({
+  children,
+  initialLanguage = DEFAULT_LANGUAGE,
+}: {
+  children: ReactNode;
+  initialLanguage?: LanguageCode;
+}) {
+  const [language, setLanguageState] = useState<LanguageCode>(initialLanguage);
 
   useEffect(() => {
-    const stored = readStoredLanguage();
-    setLanguageState(stored);
-    applyDocumentLanguage(stored);
-  }, []);
+    const target =
+      readStoredLanguage() ??
+      pickSupportedLanguage(
+        navigator.languages?.length ? navigator.languages : [navigator.language],
+      ) ??
+      initialLanguage;
+    setLanguageState(target);
+    applyDocumentLanguage(target);
+    // Reveal the page once React has painted the chosen language (see public/lang-init.js).
+    const frame = requestAnimationFrame(() =>
+      requestAnimationFrame(() => document.documentElement.classList.remove("lang-pending")),
+    );
+    return () => cancelAnimationFrame(frame);
+  }, [initialLanguage]);
 
   const setLanguage = useCallback((code: LanguageCode) => {
     setLanguageState(code);
     try {
-      localStorage.setItem(STORAGE_KEY, code);
+      localStorage.setItem(LANGUAGE_STORAGE_KEY, code);
     } catch {
       /* ignore */
     }
@@ -72,7 +88,7 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
     [language],
   );
 
-  const dir: "ltr" | "rtl" = "ltr";
+  const dir = languageDirection(language);
 
   const value = useMemo(
     () => ({ language, setLanguage, t, dir }),
