@@ -2,6 +2,7 @@
 
 import { ChatWidget } from "@/components/ChatWidget";
 import { EmergencyHelp } from "@/components/EmergencyHelp";
+import { BottomBar } from "@/components/layout/BottomBar";
 import { Header } from "@/components/layout/Header";
 import { ScrollToHash } from "@/components/layout/ScrollToHash";
 import { useLanguage } from "@/lib/i18n/LanguageProvider";
@@ -18,7 +19,7 @@ export function SiteLayout({ children }: SiteLayoutProps) {
   return (
     <div
       dir={dir}
-      className="flex min-h-screen flex-col bg-surface text-foreground transition-colors duration-300"
+      className="has-bottom-bar flex min-h-screen flex-col bg-surface text-foreground transition-colors duration-300"
     >
       <Header />
       <ScrollToHash />
@@ -26,6 +27,7 @@ export function SiteLayout({ children }: SiteLayoutProps) {
       <main className="flex-1">{children}</main>
       <SiteFooter />
       {siteConfig.chatEnabled ? <ChatWidget /> : null}
+      <BottomBar />
     </div>
   );
 }
