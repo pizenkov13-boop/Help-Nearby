@@ -2,6 +2,7 @@ import { test, expect } from "./fixtures";
 import type { Page } from "@playwright/test";
 import {
   grantNycLocation,
+  MOCK_NEARBY_ORGS,
   mockNearbyApi,
   preferFullMode,
 } from "./helpers";
@@ -129,38 +130,75 @@ for (const phone of PHONES) {
       await expect(menu).toBeHidden();
     });
 
-    test("home: sticky search, one-row filter chips, ~45vh map, one-line card buttons", async ({ page }) => {
+    test("results: list first, large cards, map behind a List / Map switch", async ({ page }) => {
+      // Every organization is open around the clock, so the open/closed mark is shown.
+      const allDay = { open: "00:00", close: "23:59" };
+      const hours = {
+        monday: allDay, tuesday: allDay, wednesday: allDay, thursday: allDay,
+        friday: allDay, saturday: allDay, sunday: allDay,
+      };
+      await page.route(/\/api\/(nearby|organizations)/, (route) =>
+        route.fulfill({
+          status: 200,
+          contentType: "application/json",
+          body: JSON.stringify(MOCK_NEARBY_ORGS.map((o) => ({ ...o, hours, hoursRaw: "24/7" }))),
+        }),
+      );
       await openResults(page);
 
+      // The list is what you see first; the map is not even loaded until asked for.
+      await expect(page.locator(".leaflet-container")).toHaveCount(0);
+      const toggle = page.getByRole("group", { name: /List \/ Map/ });
+      await expect(toggle).toBeVisible();
+      for (const h of await toggle.getByRole("button").evaluateAll((els) => els.map((el) => el.getBoundingClientRect().height))) {
+        expect(h).toBeGreaterThanOrEqual(44);
+      }
+      await expect(toggle.getByRole("button", { name: "List", pressed: true })).toBeVisible();
+
       // Filters are a single horizontally scrollable row of chips (all on the same line).
-      const chips = page.locator('[role="group"] button[aria-pressed]');
+      const chips = page.locator('[role="group"] button[aria-pressed]:not(:text-is("List")):not(:text-is("Map"))');
       const tops = await chips.evaluateAll((els) => els.map((el) => Math.round(el.getBoundingClientRect().top)));
       expect(new Set(tops).size).toBe(1);
       for (const h of await chips.evaluateAll((els) => els.map((el) => el.getBoundingClientRect().height))) {
         expect(h).toBeGreaterThanOrEqual(44);
       }
 
-      // Map: fixed fraction of the screen, list below it.
-      const map = (await page.locator(".leaflet-container").first().boundingBox())!;
-      expect(map.height).toBeGreaterThanOrEqual(255);
-      expect(map.height).toBeLessThanOrEqual(Math.max(420, phone.height * 0.5));
-      const firstCard = (await page.locator(".map-panel article").first().boundingBox())!;
-      expect(firstCard.y).toBeGreaterThan(map.y + map.height - 1);
-
-      // Cards: Call Now / Get Directions share one row, each at least 44px tall, labels on one line.
+      // Card: big distance, status, verified mark, readable text, and the two actions side by side.
       const card = page.locator(".map-panel article").first();
+      await card.scrollIntoViewIfNeeded();
+      expect(await card.getByTestId("org-distance").evaluate((el) => parseFloat(getComputedStyle(el).fontSize))).toBeGreaterThanOrEqual(20);
+      await expect(card.getByTestId("open-status")).toHaveText(/Open now/);
+      await expect(card.getByText("Verified")).toBeVisible();
+      for (const size of await card.locator("span, p, a, button").evaluateAll((els) =>
+        els
+          .filter((el) => (el.textContent ?? "").trim().length > 0 && el.children.length === 0)
+          .map((el) => parseFloat(getComputedStyle(el).fontSize)),
+      )) {
+        expect(size).toBeGreaterThanOrEqual(13);
+      }
+
       const call = card.getByRole("link", { name: /Call Now/i });
       const directions = card.getByRole("button", { name: /Get Directions/i });
-      await directions.scrollIntoViewIfNeeded();
+      await expect(call).toHaveAttribute("href", /^tel:\+?\d+/);
       const callBox = (await call.boundingBox())!;
       const dirBox = (await directions.boundingBox())!;
-      expect(Math.abs(callBox.y - dirBox.y)).toBeLessThan(2);
-      expect(callBox.height).toBeGreaterThanOrEqual(44);
-      expect(dirBox.height).toBeGreaterThanOrEqual(44);
-      expect(dirBox.height).toBeLessThan(60); // a wrapped label would make it taller
-      expect(
-        await directions.evaluate((el) => getComputedStyle(el).whiteSpace),
-      ).toBe("nowrap");
+      const cardBox = (await card.boundingBox())!;
+      for (const box of [callBox, dirBox]) {
+        expect(box.height).toBeGreaterThanOrEqual(48);
+        expect(box.width).toBeGreaterThanOrEqual(cardBox.width * 0.4);
+      }
+      expect(await directions.evaluate((el) => getComputedStyle(el).whiteSpace)).toBe("nowrap");
+
+      // The switch brings the map in (and the list out); Get Directions does the same.
+      await page.getByRole("button", { name: "Map", exact: true }).click();
+      const map = page.locator(".leaflet-container");
+      await expect(map).toBeVisible({ timeout: 15_000 });
+      const mapBox = (await map.first().boundingBox())!;
+      expect(mapBox.height).toBeGreaterThanOrEqual(300);
+      await expect(page.locator(".map-panel article").first()).toBeHidden();
+      await page.getByRole("button", { name: "List", exact: true }).click();
+      await expect(page.locator(".map-panel article").first()).toBeVisible();
+      await expect(map).toHaveCount(0);
 
       // The search box stays in view while the list scrolls.
       // (The accordion releases overflow:hidden a moment after opening, then the bar can stick.)
@@ -177,35 +215,85 @@ for (const phone of PHONES) {
         )
         .toBeLessThan(120);
       await expect(search).toBeInViewport();
-      expect(await search.evaluate((el) => el.getBoundingClientRect().top)).toBeGreaterThanOrEqual(0);
 
       expect(await noHorizontalScroll(page)).toBeLessThanOrEqual(0);
     });
 
-    test("home: category tiles and bottom bar are thumb-sized, in the thumb zone, and cover nothing", async ({ page }) => {
+    test("results: Get Directions switches to the map", async ({ page }) => {
+      await openResults(page);
+      await page.locator(".map-panel article").first().getByRole("button", { name: /Get Directions/i }).click();
+      await expect(page.locator(".leaflet-container")).toBeVisible({ timeout: 15_000 });
+      await expect(page.getByRole("button", { name: "Map", exact: true, pressed: true })).toBeVisible();
+    });
+
+    test("home: tiles, main button and bottom bar are tidy, thumb-sized and cover nothing", async ({ page }) => {
       await page.goto("/");
+      // Tiles fade in one after another: measure once the entrance animation has finished.
+      await page.evaluate(() => Promise.all(document.getAnimations().map((anim) => anim.finished.catch(() => undefined))));
       const tiles = page.locator(".hero-tile");
-      await expect(tiles).toHaveCount(5);
-      for (const b of await tiles.evaluateAll((els) => els.map((el) => el.getBoundingClientRect()))) {
+      await expect(tiles).toHaveCount(4);
+      const rects = await tiles.evaluateAll((els) => els.map((el) => el.getBoundingClientRect()));
+      for (const b of rects) {
         expect(b.width).toBeGreaterThanOrEqual(48);
-        expect(b.height).toBeGreaterThanOrEqual(48);
+        expect(b.height).toBeGreaterThanOrEqual(88);
         expect(b.right).toBeLessThanOrEqual(phone.width);
       }
-      // The tile labels are not clipped.
+      // 2x2 grid, all four the same height, two per row.
+      expect(new Set(rects.map((r) => Math.round(r.height))).size).toBe(1);
+      expect(new Set(rects.map((r) => Math.round(r.top))).size).toBe(2);
       for (const clipped of await tiles.evaluateAll((els) => els.map((el) => el.scrollWidth > el.clientWidth + 1))) {
         expect(clipped).toBe(false);
       }
 
+      // Volunteering: a quiet full-width row under the grid.
+      const row = page.locator(".hero-row");
+      const rowBox = (await row.boundingBox())!;
+      expect(rowBox.height).toBeGreaterThanOrEqual(52);
+      expect(rowBox.y).toBeGreaterThan(rects[3].bottom);
+      expect(Math.abs(rowBox.width - (rects[1].right - rects[0].left))).toBeLessThan(2);
+
+      // The main button: one calm blue-teal gradient, 56px, one line, 17px.
+      const cta = page.getByRole("button", { name: /Find help near me/i });
+      const ctaBox = (await cta.boundingBox())!;
+      expect(ctaBox.height).toBeGreaterThanOrEqual(56);
+      expect(ctaBox.height).toBeLessThan(68);
+      expect(await cta.evaluate((el) => el.scrollWidth <= el.clientWidth + 1)).toBe(true);
+      const style = await cta.evaluate((el) => {
+        const cs = getComputedStyle(el);
+        return { bg: cs.backgroundImage, size: parseFloat(cs.fontSize), weight: Number(cs.fontWeight) };
+      });
+      expect(style.bg).toContain("linear-gradient");
+      expect(style.size).toBe(17);
+      expect(style.weight).toBeGreaterThanOrEqual(600);
+
+      // Bottom bar: three equal items (the language switcher lives in the header), at most 64px high.
       const bar = page.locator(".bottom-bar");
       await expect(bar).toBeVisible();
       const barBox = (await bar.boundingBox())!;
       expect(Math.round(barBox.y + barBox.height)).toBe(phone.height);
-      for (const b of await bar.locator(".bb-item").evaluateAll((els) => els.map((el) => el.getBoundingClientRect()))) {
+      expect(barBox.height).toBeLessThanOrEqual(64);
+      const items = await bar.locator(".bb-item").evaluateAll((els) => els.map((el) => el.getBoundingClientRect()));
+      expect(items).toHaveLength(3);
+      expect(new Set(items.map((b) => Math.round(b.width))).size).toBe(1);
+      for (const b of items) {
         expect(b.width).toBeGreaterThanOrEqual(48);
         expect(b.height).toBeGreaterThanOrEqual(48);
       }
+      // Labels stay on one line, icons are 24px.
+      for (const wrapped of await bar.locator(".bb-label").evaluateAll((els) => els.map((el) => el.getBoundingClientRect().height > 18))) {
+        expect(wrapped).toBe(false);
+      }
+      expect(await bar.locator(".bb-pill svg").first().evaluate((el) => el.getBoundingClientRect().width)).toBe(24);
       // The round chat button is gone on phones (the bar has a chat item).
       await expect(page.locator("button.fixed.rounded-full")).toBeHidden();
+
+      // No hole below the hero: the trust line sits above the bar on the first screen and How it works follows right after it.
+      await expect(page.locator(".hero-trust")).toContainText("OpenStreetMap");
+      const howLink = page.locator(".hero-how");
+      expect((await howLink.boundingBox())!.height).toBeGreaterThanOrEqual(48);
+      expect((await page.locator(".hero-trust").boundingBox())!.y).toBeLessThan(barBox.y);
+      const gap = (await page.locator("#how-it-works").boundingBox())!.y - (await howLink.boundingBox())!.y - 48;
+      expect(gap).toBeLessThan(64);
 
       // Scrolled to the very end, the last line of the footer sits above the bar.
       await page.evaluate(() =>
@@ -215,6 +303,14 @@ for (const phone of PHONES) {
         .poll(() => page.locator("footer").evaluate((el) => el.getBoundingClientRect().bottom))
         .toBeLessThanOrEqual(barBox.y + 1);
       expect(await noHorizontalScroll(page)).toBeLessThanOrEqual(0);
+    });
+
+    test("home: Volunteer row searches that category", async ({ page }) => {
+      await grantNycLocation(page);
+      await page.goto("/");
+      await page.locator(".hero-row").click();
+      await expect(page.locator("#org-search")).toBeVisible({ timeout: 30_000 });
+      await expect(page.getByRole("button", { name: "Volunteer", pressed: true })).toBeVisible();
     });
 
     test("home: a category tile starts the search with that category selected", async ({ page }) => {

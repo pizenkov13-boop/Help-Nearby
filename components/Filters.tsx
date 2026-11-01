@@ -124,9 +124,10 @@ export function CategoryPill({
       onClick={onClick}
       aria-pressed={active}
       className={cn(
-        "inline-flex min-h-11 shrink-0 items-center gap-1.5 whitespace-nowrap rounded-full border border-slate-200 px-4 text-sm font-medium text-slate-600 transition-all hover:border-slate-300",
+        "fpill inline-flex min-h-11 shrink-0 items-center gap-1.5 whitespace-nowrap rounded-full border border-slate-200 px-4 text-sm font-medium text-slate-600 transition-all hover:border-slate-300",
         "dark:border-gray-700 dark:text-gray-300 dark:hover:border-gray-600",
         "lg:min-h-0 lg:gap-1 lg:px-3 lg:py-1 lg:text-xs",
+        active && "fpill-on",
         active && (activeClass ?? "border-blue-500/50 bg-blue-500/15 text-blue-700 dark:bg-blue-500/20 dark:text-blue-300"),
       )}
     >

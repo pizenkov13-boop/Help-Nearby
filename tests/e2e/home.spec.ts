@@ -143,11 +143,13 @@ test.describe("Home page", () => {
     await context.close();
   });
 
-  test("mobile viewport shows map and organization list", async ({ page }) => {
+  test("mobile viewport shows the list first and the map behind the Map switch", async ({ page }) => {
     await page.setViewportSize({ width: 390, height: 844 });
     await openMapWithOrgs(page);
 
-    await expect(page.locator(".leaflet-container")).toBeVisible();
     expect(await orgCards(page).count()).toBeGreaterThan(0);
+    await expect(page.locator(".leaflet-container")).toHaveCount(0);
+    await page.getByRole("button", { name: "Map", exact: true }).click();
+    await expect(page.locator(".leaflet-container")).toBeVisible();
   });
 });

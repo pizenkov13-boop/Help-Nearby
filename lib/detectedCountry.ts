@@ -1,4 +1,6 @@
 export const DETECTED_COUNTRY_CACHE_KEY = "help-nearby-detected-country";
+/** Fired on window when the country of the search place becomes known (the distance unit follows it). */
+export const DETECTED_COUNTRY_EVENT = "hn:country-detected";
 
 export interface DetectedCountry {
   country: string;
@@ -15,6 +17,7 @@ export function cacheDetectedCountry(
     DETECTED_COUNTRY_CACHE_KEY,
     JSON.stringify({ country, countryCode } satisfies DetectedCountry),
   );
+  window.dispatchEvent(new Event(DETECTED_COUNTRY_EVENT));
 }
 
 export function readCachedDetectedCountry(): DetectedCountry | null {

@@ -39,7 +39,7 @@ test.describe("Navigation", () => {
 
     await expect(headerNav(page).getByRole("link", { name: "Главная" })).toBeVisible();
     await expect(
-      page.getByRole("button", { name: "Найти помощь рядом со мной" }),
+      page.getByRole("button", { name: "Помощь рядом со мной" }),
     ).toBeVisible();
   });
 

@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { Loader2, LifeBuoy, MapPin, Phone, X } from "lucide-react";
 import { NEARBY_RADIUS_METERS } from "@/lib/constants";
+import { formatDistance, useDistanceUnit } from "@/lib/distanceUnits";
 import { useLanguage } from "@/lib/i18n/LanguageProvider";
 import { getPhoneTelUrl } from "@/lib/orgUtils";
 import { requestPosition } from "@/lib/locationRequest";
@@ -13,7 +14,8 @@ import { EMERGENCY_OPEN_EVENT } from "@/lib/emergencyEvents";
 type EmergencyState = "idle" | "locating" | "loading" | "ready" | "error";
 
 export function EmergencyHelp() {
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
+  const unit = useDistanceUnit();
   const [open, setOpen] = useState(false);
   const [state, setState] = useState<EmergencyState>("idle");
   const [organizations, setOrganizations] = useState<Organization[]>([]);
@@ -112,7 +114,7 @@ export function EmergencyHelp() {
             onClick={handleClose}
           />
 
-          <div className="relative z-10 flex max-h-[min(85vh,720px)] w-full max-w-lg flex-col overflow-hidden rounded-2xl border-2 border-red-500/60 bg-white shadow-2xl shadow-red-900/20 dark:bg-gray-900 dark:shadow-red-900/30">
+          <div className="urgent-panel relative z-10 flex max-h-[min(85vh,720px)] w-full max-w-lg flex-col overflow-hidden rounded-2xl border-2 border-red-500/60 bg-white shadow-2xl shadow-red-900/20 dark:bg-gray-900 dark:shadow-red-900/30">
             <div className="flex items-start justify-between gap-3 border-b border-red-500/30 bg-red-50 px-4 py-4 dark:bg-red-600/20 sm:px-5">
               <div>
                 <h2
@@ -174,15 +176,15 @@ export function EmergencyHelp() {
                       {organizations.map((org) => (
                         <li
                           key={org.id}
-                          className="rounded-xl border border-red-500/25 bg-red-50/80 p-4 dark:bg-gray-800/80"
+                          className="urgent-item rounded-xl border border-red-500/25 bg-red-50/80 p-4 dark:bg-gray-800/80"
                         >
                           <div className="mb-2 flex items-start justify-between gap-2">
                             <h3 className="font-semibold text-slate-900 dark:text-white">
                               {org.name}
                             </h3>
                             {org.distance && (
-                              <span className="shrink-0 text-xs font-medium text-red-300">
-                                {org.distance}
+                              <span className="shrink-0 text-lg font-bold text-red-800 dark:text-red-200">
+                                {formatDistance(org.distance, unit, language)}
                               </span>
                             )}
                           </div>
@@ -196,7 +198,7 @@ export function EmergencyHelp() {
                               {org.phone}
                             </a>
                           ) : (
-                            <p className="mb-2 text-sm text-amber-400/90">
+                            <p className="mb-2 text-sm text-amber-800 dark:text-amber-300">
                               {t("emergencyNoPhone")}
                             </p>
                           )}
@@ -215,7 +217,7 @@ export function EmergencyHelp() {
                           {org.phone?.trim() && (
                             <a
                               href={getPhoneTelUrl(org.phone)}
-                              className="mt-3 flex w-full items-center justify-center gap-2 rounded-lg bg-emerald-600 py-2.5 text-sm font-semibold text-white hover:bg-emerald-500"
+                              className="mt-3 flex w-full items-center justify-center gap-2 rounded-lg bg-emerald-700 py-2.5 text-sm font-semibold text-white hover:bg-emerald-600"
                             >
                               <Phone className="h-4 w-4" />
                               {t("emergencyCall")}

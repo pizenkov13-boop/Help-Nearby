@@ -1,37 +1,61 @@
 "use client";
 
 import { usePathname, useRouter } from "next/navigation";
-import { Globe, MessageCircle, Search, Siren } from "lucide-react";
-import { useEffect, useState } from "react";
+import { MessageCircle, Search, Siren } from "lucide-react";
+import type { ReactNode } from "react";
 import { openEmergencyHelp } from "@/lib/emergencyEvents";
 import { useLanguage } from "@/lib/i18n/LanguageProvider";
 import { siteConfig } from "@/lib/siteConfig";
 import {
   CHAT_OPEN_EVENT,
   FIND_HELP_EVENT,
-  LANGUAGE_STATE_EVENT,
-  LANGUAGE_TOGGLE_EVENT,
   dispatchUiEvent,
 } from "@/lib/uiEvents";
 import { cn } from "@/lib/utils";
 
+function Item({
+  icon,
+  label,
+  ariaLabel,
+  className,
+  active,
+  current,
+  ...rest
+}: {
+  icon: ReactNode;
+  label: string;
+  ariaLabel?: string;
+  className?: string;
+  active?: boolean;
+  current?: boolean;
+  onClick: () => void;
+  "aria-haspopup"?: "menu";
+  "aria-expanded"?: boolean;
+}) {
+  return (
+    <button
+      type="button"
+      className={cn("bb-item", active && "on", className)}
+      aria-label={ariaLabel}
+      aria-current={current ? "page" : undefined}
+      {...rest}
+    >
+      <span className="bb-pill" aria-hidden>
+        {icon}
+      </span>
+      <span className="bb-label">{label}</span>
+    </button>
+  );
+}
+
 /**
- * Phones only: the three things a person in a hurry needs (find help, emergency, language) plus the
- * chat, in the thumb zone. The page reserves room for it (see .has-bottom-bar in globals.css), so it
- * never covers content.
+ * Phones only: three equal items (find help, urgent, chat); the language switcher lives in the header. The page reserves
+ * room for the bar (.has-bottom-bar in globals.css), so it never covers content.
  */
 export function BottomBar() {
   const { t } = useLanguage();
   const pathname = usePathname();
   const router = useRouter();
-  const [langOpen, setLangOpen] = useState(false);
-
-  useEffect(() => {
-    const onState = (e: Event) => setLangOpen(Boolean((e as CustomEvent<boolean>).detail));
-    window.addEventListener(LANGUAGE_STATE_EVENT, onState);
-    return () => window.removeEventListener(LANGUAGE_STATE_EVENT, onState);
-  }, []);
-
   const onFind = () => {
     if (pathname === "/") dispatchUiEvent(FIND_HELP_EVENT);
     else router.push("/?find=1");
@@ -39,35 +63,23 @@ export function BottomBar() {
 
   return (
     <nav className="bottom-bar" aria-label={t("navFind")}>
-      <button type="button" className="bb-item bb-find" onClick={onFind}>
-        <Search aria-hidden />
-        <span>{t("navFind")}</span>
-      </button>
-      <button type="button" className="bb-item bb-emergency" onClick={openEmergencyHelp}>
-        <Siren aria-hidden />
-        <span>{t("emergencyHelp")}</span>
-      </button>
-      <button
-        type="button"
-        className={cn("bb-item", langOpen && "on")}
-        aria-label={t("languageMenu")}
-        aria-haspopup="menu"
-        aria-expanded={langOpen}
-        onClick={() => dispatchUiEvent(LANGUAGE_TOGGLE_EVENT)}
-      >
-        <Globe aria-hidden />
-        <span>{t("languageMenu")}</span>
-      </button>
+      <Item icon={<Search />} label={t("navFind")} active={pathname === "/"}
+        current={pathname === "/"}
+        onClick={onFind} />
+      <Item
+        icon={<Siren />}
+        label={t("navUrgent")}
+        ariaLabel={t("emergencyHelp")}
+        className="bb-emergency"
+        onClick={openEmergencyHelp}
+      />
       {siteConfig.chatEnabled ? (
-        <button
-          type="button"
-          className="bb-item bb-chat"
-          aria-label={t("chatTitle")}
+        <Item
+          icon={<MessageCircle />}
+          label={t("navChat")}
+          ariaLabel={t("chatTitle")}
           onClick={() => dispatchUiEvent(CHAT_OPEN_EVENT)}
-        >
-          <MessageCircle aria-hidden />
-          <span>{t("navChat")}</span>
-        </button>
+        />
       ) : null}
     </nav>
   );
