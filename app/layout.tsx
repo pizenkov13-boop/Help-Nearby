@@ -1,4 +1,5 @@
 import type { Metadata, Viewport } from "next";
+import { headers } from "next/headers";
 import { VercelAnalytics } from "@/components/providers/VercelAnalytics";
 import { ServiceWorkerRegister } from "@/components/ServiceWorkerRegister";
 import { AppProviders } from "@/components/providers/AppProviders";
@@ -7,6 +8,11 @@ import "./globals.css";
 import { fontVariableClasses } from "./fonts";
 import { cn } from "@/lib/utils";
 import { siteConfig } from "@/lib/siteConfig";
+import {
+  languageDirection,
+  parseAcceptLanguage,
+  resolveLanguage,
+} from "@/lib/i18n/detectLanguage";
 
 const SITE_URL = siteConfig.url;
 const SITE_TITLE = `${siteConfig.name} — Find Help Near You`;
@@ -50,27 +56,33 @@ export const viewport: Viewport = {
   ],
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  // First visit: the language comes from the browser (Accept-Language), so the first paint is right.
+  const language = resolveLanguage(
+    parseAcceptLanguage((await headers()).get("accept-language")),
+  );
+
   return (
     <html
-      lang="en"
-      dir="ltr"
+      lang={language}
+      dir={languageDirection(language)}
       suppressHydrationWarning
       className={cn("font-sans", ...fontVariableClasses)}
     >
       <head>
         <script src="/chunk-recovery.js" />
         <script src="/theme-init.js" />
+        <script src="/lang-init.js" />
       </head>
       <body
         suppressHydrationWarning
         className="min-h-screen bg-surface font-sans text-foreground transition-[background-color] duration-300"
       >
-        <AppProviders>{children}</AppProviders>
+        <AppProviders initialLanguage={language}>{children}</AppProviders>
         <VercelAnalytics />
         <ServiceWorkerRegister />
       </body>

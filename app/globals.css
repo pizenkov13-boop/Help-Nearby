@@ -1746,6 +1746,7 @@ section[id], .scroll-anchor { scroll-margin-top: 92px; }
   font-weight: 800;
   box-shadow: 0 10px 30px rgba(2, 16, 43, 0.3);
 }
+.hero-cta-main svg { flex: 0 0 auto; }
 .hero-cta-main:disabled { opacity: 0.8; }
 
 .bottom-bar { display: none; }
@@ -1766,8 +1767,9 @@ section[id], .scroll-anchor { scroll-margin-top: 92px; }
   .hero h1 { font-size: 32px; margin-bottom: 8px; }
   .hero p.lead { display: none; }
   .hero-tiles-wrap { text-align: start; }
-  .hero-tile { gap: 8px; padding: 8px 10px; font-size: 16px; overflow-wrap: anywhere; hyphens: auto; }
-  .hero-tile .tile-icon { width: 36px; height: 36px; }
+  .hero-tile { gap: 8px; padding: 8px 10px; font-size: 16px; overflow-wrap: break-word; hyphens: none; }
+  .hero-tile .tile-icon { width: 32px; height: 32px; }
+  .hero-tile .tile-icon svg { width: 20px; height: 20px; }
 
   :root { --bottom-bar-h: calc(68px + env(safe-area-inset-bottom, 0px)); }
   .has-bottom-bar { padding-bottom: var(--bottom-bar-h); }
@@ -1820,3 +1822,6 @@ section[id], .scroll-anchor { scroll-margin-top: 92px; }
 @media (prefers-reduced-motion: reduce) {
   .hero-tile, .hero-tile:active { transition: none; transform: none; }
 }
+
+/* A hand-picked language that differs from the server's: hidden until the app has switched (public/lang-init.js). */
+html.lang-pending body { visibility: hidden; }
