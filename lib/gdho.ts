@@ -1,7 +1,10 @@
 import "server-only";
 
 import { slugify } from "@/lib/orgUtils";
+import { createTtlCache } from "@/lib/ttlCache";
 import type { Category, Organization } from "@/lib/types";
+
+const gdhoCache = createTtlCache<Organization[]>(60 * 60 * 1000);
 
 const GDHO_SEARCH_BASE = "https://humanitarianoutcomes.org/gdho/search/results";
 const GDHO_TIMEOUT_MS = 45_000;
@@ -60,6 +63,10 @@ function buildGdhoSearchUrl(country: string): string {
 export async function fetchGdhoOrganizationsForCountry(
   country: string,
 ): Promise<Organization[]> {
+  const cacheKey = country.trim().toLowerCase();
+  const cached = gdhoCache.get(cacheKey);
+  if (cached) return cached;
+
   const url = buildGdhoSearchUrl(country);
 
   try {
@@ -69,7 +76,8 @@ export async function fetchGdhoOrganizationsForCountry(
         "User-Agent": "HelpNearby/1.0 (help-nearby.app)",
       },
       signal: AbortSignal.timeout(GDHO_TIMEOUT_MS),
-      next: { revalidate: 86400 },
+      // Not the Next.js data cache: it would keep a WAF challenge page (HTTP 200, no CSV) for a day.
+      cache: "no-store",
     });
 
     if (!response.ok) {
@@ -83,7 +91,12 @@ export async function fetchGdhoOrganizationsForCountry(
     const dataLines = lines.filter(
       (line) => !line.startsWith('"Please read') && line.includes(","),
     );
-    if (dataLines.length < 2) return [];
+    if (dataLines.length < 2) {
+      console.warn(
+        `[gdho] no CSV rows for ${country} (HTTP ${response.status}, ${response.headers.get("content-type") ?? "no content-type"}, ${text.length} bytes)`,
+      );
+      return [];
+    }
 
     const header = parseCsvRow(dataLines[0]!);
     const nameIdx = header.findIndex((h) => h === "Name");
@@ -144,6 +157,8 @@ export async function fetchGdhoOrganizationsForCountry(
     }
 
     console.log(`[gdho] ${organizations.length} organization(s) for ${country}`);
+    // Only a real answer is remembered (for an hour); an empty one is retried on the next request.
+    if (organizations.length > 0) gdhoCache.set(cacheKey, organizations);
     return organizations;
   } catch (error) {
     console.error("[gdho] fetch failed:", error);
