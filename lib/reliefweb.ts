@@ -9,7 +9,6 @@ const RELIEFWEB_API = "https://api.reliefweb.int/v2/";
 const RELIEFWEB_TIMEOUT_MS = 30_000;
 const PAGE_SIZE = 100;
 const MAX_PAGES = 10;
-const DEFAULT_APPNAME = "help-nearby-sources-a4p8n1QSR";
 
 interface ReliefWebCountry {
   id?: number;
@@ -49,10 +48,10 @@ interface ReliefWebListBody {
   };
 }
 
-function getReliefWebAppName(): string {
+function getReliefWebAppName(): string | null {
   ensureEnvLoaded();
   const fromEnv = process.env.RELIEFWEB_APPNAME?.trim();
-  return fromEnv && fromEnv.length > 0 ? fromEnv : DEFAULT_APPNAME;
+  return fromEnv && fromEnv.length > 0 ? fromEnv : null;
 }
 
 function fieldText(value: string | string[] | undefined): string {
@@ -148,6 +147,10 @@ async function reliefWebListSources(
   countryCode?: string | null,
 ): Promise<ReliefWebSourceItem[]> {
   const appname = getReliefWebAppName();
+  if (!appname) {
+    console.warn("[reliefweb] RELIEFWEB_APPNAME is not set; skipping ReliefWeb");
+    return [];
+  }
   const url = `${RELIEFWEB_API}sources?appname=${encodeURIComponent(appname)}`;
   const filter = buildCountryFilter(country, countryCode);
   const collected: ReliefWebSourceItem[] = [];
