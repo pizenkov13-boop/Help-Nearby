@@ -76,7 +76,7 @@ test.describe("OSM cleanup", () => {
 
   test("a repeated name without contacts is NOT junk (pharmacy chains stay)", () => {
     const chain = Array.from({ length: 8 }, (_, i) =>
-      osm(String(i), "Подорожник", { lat: 48.8566 + i * 0.01 }),
+      osm(String(i), "Plantain Cafe", { lat: 48.8566 + i * 0.01 }),
     );
     expect(removeJunkOsmOrganizations(chain)).toHaveLength(8);
     expect(dedupeOsmOrganizations(chain)).toHaveLength(8);
@@ -84,32 +84,32 @@ test.describe("OSM cleanup", () => {
 
   test("same name within 100 m but different phones or addresses are different organizations", () => {
     const mini = [
-      osm("1", "Міні ЕКЗ Центр", { phone: "+380 66 083 6099", address: "10/7 Кирилівська вулиця" }),
-      osm("2", "Міні ЕКЗ Центр", {
+      osm("1", "Mini Eco Center", { phone: "+33 6 12 34 56 78", address: "10/7 Rue des Lilas" }),
+      osm("2", "Mini Eco Center", {
         lat: 48.8566 + 0.0003,
-        phone: "+380 44 339 9415;+380 44 332 8158",
+        phone: "+33 1 98 76 54 32;+33 1 98 76 54 33",
         website: "https://www.mini-eco.com/",
       }),
     ];
     expect(dedupeOsmOrganizations(mini)).toHaveLength(2);
 
-    const podorozhnik = [
-      osm("3", "Подорожник", { address: "5 Спаська вулиця" }),
-      osm("4", "Подорожник", { lat: 48.8566 + 0.0003, address: "3/7 Межигірська вулиця" }),
+    const plantain = [
+      osm("3", "Plantain Cafe", { address: "5 Rue Saint-Paul" }),
+      osm("4", "Plantain Cafe", { lat: 48.8566 + 0.0003, address: "3/7 Rue du Moulin" }),
     ];
-    expect(dedupeOsmOrganizations(podorozhnik)).toHaveLength(2);
+    expect(dedupeOsmOrganizations(plantain)).toHaveLength(2);
   });
 
   test("same place with the same phone or a longer form of the same address is still merged", () => {
     const samePhone = [
-      osm("1", "Clinic B", { phone: "+380 44 339 9415" }),
-      osm("2", "Clinic B", { lat: 48.8566 + 0.0002, phone: "044 339 94 15", website: "https://b.example" }),
+      osm("1", "Clinic B", { phone: "+33 1 23 45 67 89" }),
+      osm("2", "Clinic B", { lat: 48.8566 + 0.0002, phone: "01 23 45 67 89", website: "https://b.example" }),
     ];
     expect(dedupeOsmOrganizations(samePhone)).toHaveLength(1);
 
     const sameAddress = [
-      osm("3", "Clinic C", { address: "10/7 Кирилівська вулиця" }),
-      osm("4", "Clinic C", { lat: 48.8566 + 0.0002, address: "10/7 Кирилівська вулиця, 04071" }),
+      osm("3", "Clinic C", { address: "10/7 Rue des Lilas" }),
+      osm("4", "Clinic C", { lat: 48.8566 + 0.0002, address: "10/7 Rue des Lilas, 75004" }),
     ];
     expect(dedupeOsmOrganizations(sameAddress)).toHaveLength(1);
   });

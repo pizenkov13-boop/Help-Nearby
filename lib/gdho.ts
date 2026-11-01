@@ -5,6 +5,7 @@ import { createTtlCache } from "@/lib/ttlCache";
 import type { Category, Organization } from "@/lib/types";
 
 const gdhoCache = createTtlCache<Organization[]>(60 * 60 * 1000);
+const csvCache = createTtlCache<string>(60 * 60 * 1000, 2);
 
 const GDHO_SEARCH_BASE = "https://humanitarianoutcomes.org/gdho/search/results";
 const GDHO_TIMEOUT_MS = 45_000;
@@ -50,15 +51,81 @@ function mapGdhoTypeToCategory(type: string, sector: string): Category | null {
   return null;
 }
 
-function buildGdhoSearchUrl(country: string): string {
-  const params = new URLSearchParams();
-  params.append("country_of_operation[0]", country);
-  params.set("format", "csv");
-  return `${GDHO_SEARCH_BASE}?${params.toString()}`;
+/** Our country names (Nominatim / ISO) → the column titles GDHO uses where they differ. */
+const GDHO_COLUMN_ALIASES: Record<string, string> = {
+  "democratic republic of the congo": "DR Congo",
+  "dr congo": "DR Congo",
+  "republic of the congo": "Congo",
+  syria: "Syrian Arab Republic",
+  libya: "Libyan Arab Jamahiriya",
+  russia: "Russian Federation",
+  iran: "Iran, Islamic Republic of",
+  "south korea": "Korea, Republic of",
+  "north korea": "Korea, Democratic People's Republic of",
+  laos: "Lao People's Democratic Republic",
+  moldova: "Moldova, Republic of",
+  "north macedonia": "Macedonia, the Former Yugoslav Republic of",
+  palestine: "Occupied Palestinian Territories",
+  "palestinian territories": "Occupied Palestinian Territories",
+  "state of palestine": "Occupied Palestinian Territories",
+  "côte d'ivoire": "Cote D'Ivoire",
+  "ivory coast": "Cote D'Ivoire",
+  "cabo verde": "Cape Verde",
+  czechia: "Czech Republic",
+  türkiye: "Turkey",
+  brunei: "Brunei Darussalam",
+  "east timor": "Timor-Leste",
+  micronesia: "Micronesia, Federated States of",
+  "united states of america": "United States",
+  usa: "United States",
+  uk: "United Kingdom",
+  vatican: "Holy See (Vatican City State)",
+  eswatini: "Eswatini",
+  swaziland: "Eswatini",
+};
+
+function findCountryColumn(header: string[], country: string): number {
+  const wanted = country.trim().toLowerCase();
+  const target = (GDHO_COLUMN_ALIASES[wanted] ?? country).trim().toLowerCase();
+  const exact = header.findIndex((h) => h.trim().toLowerCase() === target);
+  if (exact >= 0) return exact;
+  // "Moldova, Republic of" style titles.
+  return header.findIndex((h) => h.trim().toLowerCase().startsWith(`${target},`));
+}
+
+/** The whole GDHO table in one download (the site ignores country filters and has one column per country). */
+async function loadGdhoCsv(): Promise<string | null> {
+  const cached = csvCache.get("all");
+  if (cached) return cached;
+
+  const response = await fetch(`${GDHO_SEARCH_BASE}?format=csv`, {
+    headers: {
+      Accept: "text/csv",
+      "User-Agent": "HelpNearby/1.0 (help-nearby.app)",
+    },
+    signal: AbortSignal.timeout(GDHO_TIMEOUT_MS),
+    // Not the Next.js data cache: it would keep a WAF challenge page (HTTP 200, no CSV) for a day.
+    cache: "no-store",
+  });
+
+  if (!response.ok) {
+    console.warn(`[gdho] HTTP ${response.status}`);
+    return null;
+  }
+
+  const text = await response.text();
+  if (!text.includes("Countries of Operation")) {
+    console.warn(
+      `[gdho] not a CSV answer (HTTP ${response.status}, ${response.headers.get("content-type") ?? "no content-type"}, ${text.length} bytes)`,
+    );
+    return null;
+  }
+  csvCache.set("all", text);
+  return text;
 }
 
 /**
- * Fetch humanitarian organizations operating in a country from GDHO (CSV export).
+ * Organizations that operate in a country, from the GDHO CSV export (closed organizations are skipped).
  */
 export async function fetchGdhoOrganizationsForCountry(
   country: string,
@@ -67,36 +134,15 @@ export async function fetchGdhoOrganizationsForCountry(
   const cached = gdhoCache.get(cacheKey);
   if (cached) return cached;
 
-  const url = buildGdhoSearchUrl(country);
-
   try {
-    const response = await fetch(url, {
-      headers: {
-        Accept: "text/csv",
-        "User-Agent": "HelpNearby/1.0 (help-nearby.app)",
-      },
-      signal: AbortSignal.timeout(GDHO_TIMEOUT_MS),
-      // Not the Next.js data cache: it would keep a WAF challenge page (HTTP 200, no CSV) for a day.
-      cache: "no-store",
-    });
+    const text = await loadGdhoCsv();
+    if (!text) return [];
 
-    if (!response.ok) {
-      console.warn(`[gdho] HTTP ${response.status} for ${country}`);
-      return [];
-    }
-
-    const text = await response.text();
     const lines = text.split(/\r?\n/).filter((line) => line.trim().length > 0);
-
     const dataLines = lines.filter(
       (line) => !line.startsWith('"Please read') && line.includes(","),
     );
-    if (dataLines.length < 2) {
-      console.warn(
-        `[gdho] no CSV rows for ${country} (HTTP ${response.status}, ${response.headers.get("content-type") ?? "no content-type"}, ${text.length} bytes)`,
-      );
-      return [];
-    }
+    if (dataLines.length < 2) return [];
 
     const header = parseCsvRow(dataLines[0]!);
     const nameIdx = header.findIndex((h) => h === "Name");
@@ -105,9 +151,15 @@ export async function fetchGdhoOrganizationsForCountry(
     const hqIdx = header.findIndex((h) => h === "HQ location");
     const sectorIdx = header.findIndex((h) => h === "Sector");
     const idIdx = header.findIndex((h) => h === "Id");
+    const closedIdx = header.findIndex((h) => h === "Year closed");
+    const countryIdx = findCountryColumn(header, country);
 
     if (nameIdx < 0) {
       console.warn("[gdho] CSV missing Name column");
+      return [];
+    }
+    if (countryIdx < 0) {
+      console.warn(`[gdho] no column for ${country}`);
       return [];
     }
 
@@ -115,6 +167,8 @@ export async function fetchGdhoOrganizationsForCountry(
 
     for (let i = 1; i < dataLines.length; i++) {
       const row = parseCsvRow(dataLines[i]!);
+      if ((row[countryIdx] ?? "").trim() === "") continue;
+      if (closedIdx >= 0 && (row[closedIdx] ?? "").trim() !== "") continue;
       const name = row[nameIdx]?.trim();
       if (!name) continue;
 
