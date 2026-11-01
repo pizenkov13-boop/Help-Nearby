@@ -329,7 +329,7 @@ export function formatChatReply(
   if (organizations.length === 0) {
     if (isRussian) {
       if (category && !placeQuery) {
-        return "Укажите город, например: «где поесть в Прокопьевске» или «хочу есть в Москве».";
+        return "Укажите город, например: «где поесть в Париже» или «хочу есть в Москве».";
       }
       return placeQuery
         ? `В ${placeQuery} ничего не найдено (Supabase + OpenStreetMap). Откройте карту на главной или «Экстренная помощь».`
