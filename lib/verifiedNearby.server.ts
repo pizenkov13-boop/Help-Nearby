@@ -1,6 +1,7 @@
 import "server-only";
 
 import { distanceMiles, formatDistanceMiles } from "@/lib/geo";
+import { readStoredCountryOrgs } from "@/lib/externalOrgs.server";
 import { fetchGdhoOrganizationsForCountry } from "@/lib/gdho";
 import { fetchHdxOrganizationsForCountry } from "@/lib/hdx";
 import { fetchReliefWebOrganizationsForCountry } from "@/lib/reliefweb";
@@ -239,7 +240,12 @@ export async function fetchVerifiedNearbyOrganizations(
 ): Promise<Organization[]> {
   const skipReliefWeb = isUkraine(country, countryCode);
 
-  const [hdx, gdho, reliefweb] = await Promise.all([
+  // The daily copy first: the live sources need 10-30 s from Vercel and cannot finish in time.
+  const stored = await readStoredCountryOrgs(country, countryCode);
+
+  const [hdx, gdho, reliefweb] = stored
+    ? [stored.hdx, stored.gdho, stored.reliefweb]
+    : await Promise.all([
     fetchWithSourceTimeout(
       "HDX",
       () => fetchHdxOrganizationsForCountry(country, countryCode),
@@ -284,6 +290,9 @@ export async function fetchVerifiedCountryDirectory(
   gdho: Organization[];
   reliefweb: Organization[];
 }> {
+  const stored = await readStoredCountryOrgs(country, countryCode);
+  if (stored) return stored;
+
   const [hdx, gdho, reliefweb] = await Promise.all([
     fetchWithSourceTimeout(
       "HDX",
