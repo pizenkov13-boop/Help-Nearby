@@ -162,7 +162,7 @@ These are used as data sources only; the project is independent and is not opera
 
 | Город | Страна | Сайт | Кто ведёт |
 |-------|--------|------|-----------|
-| Париж / весь мир | Франция / весь мир | [www.help-nearby.org](https://www.help-nearby.org/) | Pavel Izenkin |
+| Там, где есть помощь в ближайших 15 км | — | [www.help-nearby.org](https://www.help-nearby.org/) | Pavel Izenkin |
 
 ### Приватность и анонимный пинг
 
@@ -213,7 +213,7 @@ Anyone can run their own copy of Help Nearby for a city, region or community. Yo
 
 | City | Country | Site | Run by |
 |------|---------|------|--------|
-| Paris / Global | France / Worldwide | [www.help-nearby.org](https://www.help-nearby.org/) | Pavel Izenkin |
+| Wherever there is help within 15 km | — | [www.help-nearby.org](https://www.help-nearby.org/) | Pavel Izenkin |
 
 ### Privacy and the anonymous ping
 
@@ -221,6 +221,14 @@ Anyone can run their own copy of Help Nearby for a city, region or community. Yo
 - **Anonymous deployment ping (copies only):** a copy of Help Nearby running on any domain other than `www.help-nearby.org` sends one request per day to `https://www.help-nearby.org/api/deployments` with exactly three fields: `domain` (the hostname of your site), `version` (the app version) and `timestamp`. It contains no visitor data, no search queries, no data about your visitors and no keys. Like any HTTP request it reaches our server from your server's IP address, which is used only for in-memory rate limiting and is not stored. It lets the project see how many copies are alive. The ping is sent by the daily Vercel cron in [`vercel.json`](vercel.json) through [`lib/ping.server.ts`](lib/ping.server.ts).
 - **Turn it off:** set `DISABLE_PING=true` in your environment variables (or delete the cron entry in `vercel.json`).
 - **Our side:** the receiving endpoint validates and rate-limits requests and stores only the domain, version, first-seen and last-seen times in a `deployments` table.
+
+---
+
+## Attribution / Авторство
+
+**RU:** Проект распространяется под лицензией MIT. Запуск, изменение и использование для помощи людям разрешены. ЗАПРЕЩЕНО выдавать HelpNearby или его производные за собственную оригинальную разработку. Нельзя подавать его как свой проект на конкурсы, гранты, в программы поступления, в волонтёрские и любые другие организации. Это нарушение правил конкурсов и академической честности. Каждый запуск HelpNearby регистрируется (домен и версия, см. раздел Privacy): мы видим, где он работает. Присвоение авторства фиксируется, и мы сообщаем о нём организаторам конкурсов и программ. Обязательно сохраняйте файл LICENSE и подпись "Powered by HelpNearby" и указывайте, что ваш сайт основан на HelpNearby. Автор: Pavel Izenkin.
+
+**EN:** This project is released under the MIT license. Running, modifying and using it to help people is allowed. It is PROHIBITED to present HelpNearby or its derivatives as your own original work. Do not submit it as your own project to competitions, grants, admissions programs, volunteer or any other organizations. This violates competition rules and academic integrity. Every HelpNearby deployment is registered (domain and version, see Privacy): we can see where it runs. Misrepresenting authorship is documented and reported to the organizers of competitions and programs. You must keep the LICENSE file and the "Powered by HelpNearby" attribution, and state that your site is based on HelpNearby. Author: Pavel Izenkin.
 
 ---
 
