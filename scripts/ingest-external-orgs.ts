@@ -4,7 +4,9 @@
  * so the website never has to call those slow sources from Vercel.
  *
  * Env: NEXT_PUBLIC_SUPABASE_URL (or SUPABASE_URL), SUPABASE_SERVICE_ROLE_KEY, RELIEFWEB_APPNAME (optional).
- * Optional: INGEST_COUNTRIES="Kenya:KE,Uganda:UG" (default: scripts/external-countries.json), DRY_RUN=1.
+ * Optional: INGEST_COUNTRIES="KE,UG" (ISO codes; default: scripts/external-countries.json), DRY_RUN=1,
+ * INGEST_CHUNK = "auto" (default: day of the year modulo the number of chunks), a chunk number, or "all",
+ * INGEST_CHUNK_SIZE (default 60 countries per run).
  * Run with: npm run ingest:external
  */
 import { readFile } from "node:fs/promises";
@@ -16,8 +18,12 @@ import { skipsReliefWeb } from "../lib/sourceRules";
 import type { Organization } from "../lib/types";
 
 interface CountryEntry {
+  /** English name; also what GDHO's country columns are matched against. */
   name: string;
+  /** ISO 3166-1 alpha-2: what the website sends and what external_orgs.country_code holds. */
   code: string;
+  /** ISO 3166-1 alpha-3: what HDX (location group) and ReliefWeb (country.iso3) are queried with. */
+  iso3: string;
 }
 
 type Source = "hdx" | "gdho" | "reliefweb";
@@ -25,16 +31,47 @@ type Source = "hdx" | "gdho" | "reliefweb";
 const BATCH = 400;
 const dryRun = process.env.DRY_RUN === "1";
 
+function dayOfYear(date: Date): number {
+  const start = Date.UTC(date.getUTCFullYear(), 0, 0);
+  return Math.floor((date.getTime() - start) / 86_400_000);
+}
+
 async function loadCountries(): Promise<CountryEntry[]> {
+  const codes = JSON.parse(
+    await readFile(new URL("./external-countries.json", import.meta.url), "utf8"),
+  ) as string[];
+  const names = JSON.parse(
+    await readFile(new URL("./country-names.json", import.meta.url), "utf8"),
+  ) as Record<string, { name: string; iso3: string }>;
+
   const override = process.env.INGEST_COUNTRIES?.trim();
   if (override) {
-    return override.split(",").map((part) => {
-      const [name, code] = part.split(":").map((x) => x.trim());
-      return { name: name ?? "", code: (code ?? "").toUpperCase() };
-    });
+    return override
+      .split(",")
+      .map((code) => code.trim().toUpperCase())
+      .filter((code) => names[code])
+      .map((code) => ({ code, name: names[code]!.name, iso3: names[code]!.iso3 }));
   }
-  const raw = await readFile(new URL("./external-countries.json", import.meta.url), "utf8");
-  return JSON.parse(raw) as CountryEntry[];
+
+  const all = codes
+    .filter((code) => names[code])
+    .map((code) => ({ code, name: names[code]!.name, iso3: names[code]!.iso3 }));
+
+  const size = Math.max(1, Number(process.env.INGEST_CHUNK_SIZE) || 60);
+  const chunks = Math.ceil(all.length / size);
+  // Equal-sized chunks (e.g. 244 countries -> 5 x 49) instead of four full ones and a stub.
+  const perChunk = Math.ceil(all.length / chunks);
+  const requested = (process.env.INGEST_CHUNK ?? "auto").trim().toLowerCase();
+  if (requested === "all") {
+    console.log(`[ingest] all ${all.length} countries`);
+    return all;
+  }
+  const index =
+    requested === "auto" || requested === ""
+      ? dayOfYear(new Date()) % chunks
+      : Math.min(Math.max(0, Math.floor(Number(requested)) || 0), chunks - 1);
+  console.log(`[ingest] chunk ${index + 1} of ${chunks} (${perChunk} countries per chunk)`);
+  return all.slice(index * perChunk, (index + 1) * perChunk);
 }
 
 function toRow(org: Organization, source: Source, country: CountryEntry) {
@@ -56,7 +93,7 @@ function toRow(org: Organization, source: Source, country: CountryEntry) {
 }
 
 async function main() {
-  const countries = (await loadCountries()).filter((c) => c.name && c.code.length === 2);
+  const countries = await loadCountries();
   const url = (process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.SUPABASE_URL || "").trim();
   const key = (process.env.SUPABASE_SERVICE_ROLE_KEY || "").trim();
   if (!dryRun && (!url || !key)) {
@@ -73,11 +110,11 @@ async function main() {
   let failedSources = 0;
   for (const country of countries) {
     const fetched: Array<[Source, () => Promise<Organization[]>]> = [
-      ["hdx", () => fetchHdxOrganizationsForCountry(country.name, country.code)],
+      ["hdx", () => fetchHdxOrganizationsForCountry(country.name, country.iso3)],
       ["gdho", () => fetchGdhoOrganizationsForCountry(country.name)],
     ];
     if (hasReliefWeb && !skipsReliefWeb(country.name, country.code)) {
-      fetched.push(["reliefweb", () => fetchReliefWebOrganizationsForCountry(country.name, country.code)]);
+      fetched.push(["reliefweb", () => fetchReliefWebOrganizationsForCountry(country.name, country.iso3)]);
     }
 
     for (const [source, run] of fetched) {

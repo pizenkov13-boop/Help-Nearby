@@ -2,10 +2,17 @@ name: External organizations
 
 # Downloads the HDX, GDHO and ReliefWeb catalogs once a day (these sources are too slow to call from
 # the website) and stores them in the Supabase table external_orgs.
+# The country list is split into chunks of 60; each daily run takes the chunk
+# (day of the year mod number of chunks), so every country is refreshed every few days.
 on:
   schedule:
     - cron: "30 3 * * *" # every day at 03:30 UTC
   workflow_dispatch:
+    inputs:
+      chunk:
+        description: "Chunk number (0, 1, 2 ...), auto (today's chunk) or all"
+        required: false
+        default: "auto"
 
 permissions: {}
 
@@ -16,7 +23,7 @@ concurrency:
 jobs:
   ingest:
     runs-on: ubuntu-latest
-    timeout-minutes: 180
+    timeout-minutes: 300
     steps:
       - name: Check secrets
         id: check
@@ -50,4 +57,5 @@ jobs:
           NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
           RELIEFWEB_APPNAME: ${{ secrets.RELIEFWEB_APPNAME }}
+          INGEST_CHUNK: ${{ github.event.inputs.chunk || 'auto' }}
         run: npm run ingest:external
