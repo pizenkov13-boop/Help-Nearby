@@ -1,10 +1,8 @@
 import "server-only";
 
-/**
- * UN OCHA APIs (HDX, ReliefWeb) sit behind a WAF that blocks Node's default
- * fetch fingerprint. A standard library User-Agent is required for server-side calls.
- */
-export const OCHA_USER_AGENT = "curl/8.5.0";
+/** Honest, identifiable User-Agent for UN OCHA APIs (HDX, ReliefWeb). */
+export const OCHA_USER_AGENT =
+  "HelpNearby/1.0 (+https://www.help-nearby.org; hello@help-nearby.org)";
 
 export function ochaFetch(
   input: string | URL,
