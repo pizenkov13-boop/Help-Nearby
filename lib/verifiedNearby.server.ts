@@ -34,7 +34,7 @@ async function fetchWithSourceTimeout<T>(
   timeoutMs = SOURCE_TIMEOUT_MS,
 ): Promise<T> {
   try {
-    return await Promise.race([
+    const result = await Promise.race([
       fetcher(),
       new Promise<never>((_, reject) => {
         setTimeout(
@@ -43,6 +43,11 @@ async function fetchWithSourceTimeout<T>(
         );
       }),
     ]);
+    if (Array.isArray(result) && result.length === 0) {
+      // The per-source HTTP status (if the request failed) is logged by the source itself just above.
+      console.warn(`[verifiedNearby] ${label} returned 0 organizations`);
+    }
+    return result;
   } catch (error) {
     console.warn(`[verifiedNearby] ${label} unavailable:`, error);
     return fallback;
