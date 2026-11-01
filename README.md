@@ -1,13 +1,13 @@
 # Help Nearby
 
-[![Live Site](https://img.shields.io/badge/Live-help--nearby.org-2563eb?style=flat-square)](https://help-nearby.org)
+[![Live Site](https://img.shields.io/badge/Live-www.help--nearby.org-2563eb?style=flat-square)](https://www.help-nearby.org/)
 [![Languages](https://img.shields.io/badge/Languages-7-10b981?style=flat-square)](#features)
 [![Next.js](https://img.shields.io/badge/Next.js-16.2.6-000000?style=flat-square&logo=next.js&logoColor=white)](https://nextjs.org/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5-3178c6?style=flat-square&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
 
 **Find free humanitarian assistance near you — food, shelter, medical aid, clothing, and volunteer support on one map.**
 
-[Live app](https://help-nearby.org) · [Submit an organization](https://help-nearby.org/submit) · [Leave a review](https://help-nearby.org/reviews)
+[Live app](https://www.help-nearby.org/) · [Submit an organization](https://www.help-nearby.org/submit) · [Leave a review](https://www.help-nearby.org/reviews)
 
 ---
 
@@ -15,7 +15,7 @@
 
 **Help Nearby** is a free, open-source web platform that helps people in crisis find local assistance organizations. It combines a **verified catalog** stored in Supabase with **live OpenStreetMap data** from the Overpass API, then shows results on an interactive map or in a lightweight list view.
 
-The project was built by **Pavel Izenkin**, 15, from Prokopyevsk, Russia — with the goal of making trusted help easy to find on any device, in any language, even on slow networks.
+The project was built by **Pavel Izenkin**, 16, from Russia — with the goal of making trusted help easy to find on any device, in any language, even on slow networks.
 
 ---
 
@@ -24,7 +24,7 @@ The project was built by **Pavel Izenkin**, 15, from Prokopyevsk, Russia — wit
 | | |
 |---|---|
 | **Initial prototype (Webflow)** | April 16 – May 12, 2026 |
-| **Production platform (Next.js)** | May 17, 2026 – present · [help-nearby.org](https://help-nearby.org) |
+| **Production platform (Next.js)** | May 17, 2026 – present · [www.help-nearby.org](https://www.help-nearby.org/) |
 | **Prize submission** | Zayed Sustainability Prize **2027** — Global High Schools category |
 | **Prototype reach (Webflow, April–May 2026)** | Users from **24 countries** in the first month (Webflow analytics) |
 | **Production analytics (Next.js)** | [Vercel Web Analytics](https://vercel.com/docs/analytics) — cookie-less, aggregated page views; exact counts are in the Vercel dashboard (not duplicated here to avoid stale figures) |
@@ -83,7 +83,7 @@ Community submissions via `/submit` are stored as **unverified** until approved 
 | **Nominatim** | Forward/reverse geocoding for addresses | `lib/nominatim.server.ts` → `/api/geocode` |
 | **OSRM** | Turn-by-turn routing | `lib/osrmRouting.server.ts` → `/api/route` |
 
-HDX, GDHO, and ReliefWeb results merge with Supabase + Overpass in `lib/nearbySearch.ts` (deduplicated by name). HDX and GDHO have a 5-second timeout; ReliefWeb allows 15 seconds. ReliefWeb is skipped for Ukraine (local catalog + HDX/GDHO cover that region). Failures do not block other results.
+HDX, GDHO, and ReliefWeb results merge with Supabase + Overpass in `lib/nearbySearch.ts` (deduplicated by name). Each OCHA-family source has a 15-second timeout. ReliefWeb is skipped for Ukraine (local catalog + HDX/GDHO cover that region). Failures do not block other results.
 
 ---
 
@@ -110,15 +110,15 @@ Verified from `package.json` and project source:
 
 ---
 
-## 🌍 UN OCHA Integration
+## UN-related data sources
 
-HelpNearby integrates with three United Nations OCHA humanitarian databases:
+Country-level organization listings are fetched server-side from three public humanitarian data sources (see "Data sources & integrations" above):
 
-- **HDX (Humanitarian Data Exchange)** — verified organization data
-- **GDHO (Global Directory of Humanitarian Organizations)** — comprehensive NGO directory  
-- **ReliefWeb API** — *officially approved access* — real-time disaster alerts, country reports, and humanitarian situation updates
+- **HDX** (Humanitarian Data Exchange, UN OCHA) — public CKAN API
+- **GDHO** (Global Directory of Humanitarian Organizations, Humanitarian Outcomes) — CSV export
+- **ReliefWeb** (UN OCHA) — public API v2, used with a registered `appname`
 
-This makes HelpNearby one of the few independently-built humanitarian platforms with direct integration into the UN's humanitarian data ecosystem.
+These are used as data sources only; the project is independent and is not operated by or affiliated with the United Nations. Help Nearby is listed on the UN SDG partnerships platform: [sdgs.un.org/partnerships/helpnearby](https://sdgs.un.org/partnerships/helpnearby).
 
 ---
 
@@ -126,8 +126,7 @@ This makes HelpNearby one of the few independently-built humanitarian platforms 
 
 | Environment | URL |
 |-------------|-----|
-| **Production (primary)** | [https://help-nearby.org](https://help-nearby.org) |
-| **Vercel (legacy redirect)** | [https://help-nearby-jgvv.vercel.app](https://help-nearby-jgvv.vercel.app) → redirects to `help-nearby.org` |
+| **Production (primary)** | [https://www.help-nearby.org/](https://www.help-nearby.org/) |
 
 ---
 
@@ -172,8 +171,8 @@ AITUNNEL_MODEL=gpt-6-luna
 # Diagnostics (optional) — enables GET /api/debug/sources?token=...; the route returns 404 when unset
 # DEBUG_TOKEN=a-long-random-string
 
-# ReliefWeb humanitarian sources (optional — set after appname approval)
-RELIEFWEB_APPNAME=help-nearby-sources-a4p8n1QSR
+# ReliefWeb humanitarian sources (optional — your registered ReliefWeb appname)
+RELIEFWEB_APPNAME=your-reliefweb-appname
 
 # Analytics: Vercel Web Analytics needs no environment variables (enable it in the Vercel project).
 ```
@@ -274,7 +273,7 @@ Please do not include API keys or `.env.local` in submissions.
 
 ## Founder
 
-**Pavel Izenkin** — 16 years old, Prokopyevsk, Russia.
+**Pavel Izenkin** — 16 years old, Russia.
 
 Built with support from the open-source community, OpenStreetMap contributors, Supabase, and AITunnel.
 

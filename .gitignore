@@ -42,3 +42,9 @@ next-env.d.ts
 
 # local data/exports (contact proposals, snapshots, rollbacks)
 /scripts/out/
+
+# local agent tooling / swarm state (not part of the app)
+/.claude/
+/.claude-flow/
+/.swarm/
+/ruvector.db
