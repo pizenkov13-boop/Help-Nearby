@@ -1,0 +1,53 @@
+name: External organizations
+
+# Downloads the HDX, GDHO and ReliefWeb catalogs once a day (these sources are too slow to call from
+# the website) and stores them in the Supabase table external_orgs.
+on:
+  schedule:
+    - cron: "30 3 * * *" # every day at 03:30 UTC
+  workflow_dispatch:
+
+permissions: {}
+
+concurrency:
+  group: external-orgs
+  cancel-in-progress: false
+
+jobs:
+  ingest:
+    runs-on: ubuntu-latest
+    timeout-minutes: 180
+    steps:
+      - name: Check secrets
+        id: check
+        env:
+          URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+        run: |
+          if [ -z "$URL" ] || [ -z "$KEY" ]; then
+            echo "NEXT_PUBLIC_SUPABASE_URL / SUPABASE_SERVICE_ROLE_KEY secrets are not set; skipping."
+            echo "run=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "run=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - uses: actions/checkout@v4
+        if: steps.check.outputs.run == 'true'
+
+      - uses: actions/setup-node@v4
+        if: steps.check.outputs.run == 'true'
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install
+        if: steps.check.outputs.run == 'true'
+        run: npm ci --ignore-scripts
+
+      - name: Download and store
+        if: steps.check.outputs.run == 'true'
+        env:
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          RELIEFWEB_APPNAME: ${{ secrets.RELIEFWEB_APPNAME }}
+        run: npm run ingest:external

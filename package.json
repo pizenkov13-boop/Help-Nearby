@@ -11,6 +11,7 @@
     "dev:webpack": "next dev --webpack",
     "dev:clean": "node scripts/clean-dev.mjs && next dev --webpack",
     "setup": "node scripts/setup-db.mjs",
+    "ingest:external": "node --conditions=react-server --import tsx scripts/ingest-external-orgs.ts",
     "prebuild": "npm run setup",
     "build": "next build --webpack",
     "postbuild": "node scripts/copy-standalone-assets.mjs",
@@ -57,6 +58,7 @@
     "sharp": "^0.34.5",
     "tailwindcss": "^3.4.1",
     "to-ico": "^1.1.5",
+    "tsx": "^4.23.15",
     "typescript": "^5"
   }
 }
