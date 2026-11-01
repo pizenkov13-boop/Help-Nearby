@@ -45,7 +45,7 @@ export function osmRichness(org: Organization): number {
   return [org.phone, org.website, org.address, org.hoursRaw].filter(filled).length;
 }
 
-/** Digits of each number in "a; b, c" lists, compared by their last 9 digits (ignores +380 / 0 prefixes). */
+/** Digits of each number in "a; b, c" lists, compared by their last 9 digits (ignores country-code and leading-0 prefixes). */
 function phoneKeys(phone: string): Set<string> {
   const keys = new Set<string>();
   for (const part of phone.split(/[;,/]/)) {
