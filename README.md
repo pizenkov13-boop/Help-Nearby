@@ -1,5 +1,9 @@
 # Help Nearby
 
+> **Для владельцев копий / For copy owners.** Разделы About, Status, Verified humanitarian directory, Founder и Community partner описывают основной сайт HelpNearby. Владельцу копии нужно заменить их описанием своего проекта (подпись «Powered by HelpNearby» и раздел Attribution остаются).
+>
+> The About, Status, Verified humanitarian directory, Founder and Community partner sections describe the main HelpNearby site. A copy owner must replace them with a description of their own project (the "Powered by HelpNearby" credit and the Attribution section stay).
+
 [![Live Site](https://img.shields.io/badge/Live-www.help--nearby.org-2563eb?style=flat-square)](https://www.help-nearby.org/)
 [![Languages](https://img.shields.io/badge/Languages-7-10b981?style=flat-square)](#features)
 [![Next.js](https://img.shields.io/badge/Next.js-16.2.6-000000?style=flat-square&logo=next.js&logoColor=white)](https://nextjs.org/)
@@ -128,14 +132,14 @@ These are used as data sources only; the project is independent and is not opera
 
 Любой может запустить свою копию Help Nearby для города, региона или сообщества. Нужны бесплатные аккаунты на GitHub и [Vercel](https://vercel.com/); база данных создаётся автоматически.
 
-1. **Нажмите «Deploy with Vercel»** и войдите через GitHub: Vercel сам сделает форк репозитория.
+1. **Нажмите кнопку Deploy выше и войдите через GitHub:** Vercel сам сделает форк репозитория.
 2. **Подключите Supabase** на шаге интеграций (бесплатный тариф): проект базы и все ключи создаются и подставляются автоматически. Задайте `ADMIN_PASSWORD` (пароль для `/admin`).
 3. **Нажмите Deploy.** Во время сборки таблицы создаются сами (`npm run setup`, идемпотентно, из [`supabase/schema.sql`](supabase/schema.sql)); SQL вручную выполнять не нужно.
 4. **Добавьте организации:** откройте `/admin` и подтверждайте заявки с `/submit`, либо загрузите CSV в таблицу `organizations` (Supabase → Table Editor → Insert → Import data from CSV; колонки как в [`supabase/schema.sql`](supabase/schema.sql), `verified` поставьте `true`). Демо-данные: [`supabase/seed_demo.sql`](supabase/seed_demo.sql) (три вымышленные организации, удалите их).
 
 Без базы данных сайт тоже работает: поиск идёт по OpenStreetMap и открытым гуманитарным источникам, а `/admin` и форма добавления организации отвечают, что база не подключена.
 
-**Запустил? Напиши на hello@help-nearby.org или добавь строку через pull request.**
+**Запустил свою копию? Добавь строку в таблицу ниже через pull request, и мы покажем твой город.**
 
 Переменные окружения. Ничего обязательного вручную задавать не нужно:
 
@@ -180,14 +184,14 @@ These are used as data sources only; the project is independent and is not opera
 
 Anyone can run their own copy of Help Nearby for a city, region or community. You need free accounts on GitHub and [Vercel](https://vercel.com/); the database is created automatically.
 
-1. **Click "Deploy with Vercel"** and sign in with GitHub: Vercel forks the repository for you.
+1. **Click the Deploy button above and sign in with GitHub:** Vercel will fork the repository for you.
 2. **Connect Supabase** in the integrations step (free plan): the database project and all keys are created and filled in automatically. Set `ADMIN_PASSWORD` (the password for `/admin`).
 3. **Click Deploy.** During the build the tables are created for you (`npm run setup`, idempotent, from [`supabase/schema.sql`](supabase/schema.sql)); no SQL to run by hand.
 4. **Add organizations:** open `/admin` and verify community submissions from `/submit`, or bulk-load rows by importing a CSV into the `organizations` table (Supabase → Table Editor → Insert → Import data from CSV; columns follow [`supabase/schema.sql`](supabase/schema.sql), set `verified` to `true`). Demo data: [`supabase/seed_demo.sql`](supabase/seed_demo.sql) (three fictional organizations, delete them).
 
 The site also works without a database: search uses OpenStreetMap and open humanitarian sources, and `/admin` and the organization form say that no database is connected.
 
-**Launched yours?** Write to hello@help-nearby.org or add a row to the table below with a pull request.
+**Launched your copy?** Add a row to the table below with a pull request and we'll showcase your city.
 
 Environment variables. Nothing is required by hand:
 
@@ -228,13 +232,17 @@ Manual alternative (no integration): create a Supabase project, run [`supabase/s
 
 ## Attribution / Авторство
 
-**RU:** Проект распространяется под лицензией MIT. Запуск, изменение и использование для помощи людям разрешены. ЗАПРЕЩЕНО выдавать HelpNearby или его производные за собственную оригинальную разработку. Нельзя подавать его как свой проект на конкурсы, гранты, в программы поступления, в волонтёрские и любые другие организации. Это нарушение правил конкурсов и академической честности. Каждый запуск HelpNearby регистрируется (домен и версия, см. раздел Privacy): мы видим, где он работает. Присвоение авторства фиксируется, и мы сообщаем о нём организаторам конкурсов и программ. Обязательно сохраняйте файл LICENSE и подпись "Powered by HelpNearby" и указывайте, что ваш сайт основан на HelpNearby. Автор: Pavel Izenkin.
+**RU:** Проект распространяется под лицензией MIT. Запуск, изменение и использование для помощи людям разрешены. ЗАПРЕЩЕНО выдавать HelpNearby или его производные за собственную оригинальную разработку. Нельзя подавать его как свой проект на конкурсы, гранты, в программы поступления, в волонтёрские и любые другие организации. Это нарушение правил конкурсов и академической честности. Запуски HelpNearby регистрируются (домен и версия, см. раздел Privacy): мы видим, где он работает. Присвоение авторства фиксируется, и мы сообщаем о нём организаторам конкурсов и программ. Обязательно сохраняйте файл LICENSE и подпись "Powered by HelpNearby" и указывайте, что ваш сайт основан на HelpNearby. Автор: Pavel Izenkin.
 
-Подпись в футере («На основе HelpNearby, автор Pavel Izenkin») обязательна: она показывается на каждой копии автоматически, не отключается настройками, и удалять её нельзя.
+Подпись в футере («Работает на HelpNearby») обязательна: она показывается на каждой копии автоматически, не отключается настройками, и удалять её нельзя.
 
-**EN:** This project is released under the MIT license. Running, modifying and using it to help people is allowed. It is PROHIBITED to present HelpNearby or its derivatives as your own original work. Do not submit it as your own project to competitions, grants, admissions programs, volunteer or any other organizations. This violates competition rules and academic integrity. Every HelpNearby deployment is registered (domain and version, see Privacy): we can see where it runs. Misrepresenting authorship is documented and reported to the organizers of competitions and programs. You must keep the LICENSE file and the "Powered by HelpNearby" attribution, and state that your site is based on HelpNearby. Author: Pavel Izenkin.
+Допустимая формулировка: «Запустил и веду местную версию открытой платформы HelpNearby (автор Pavel Izenkin) в <город>». Недопустимо: «создал», «разработал», «мой проект», а также ссылаться на страницу HelpNearby на платформе ООН как на свою: она относится только к основному проекту.
 
-The footer credit ("Based on HelpNearby by Pavel Izenkin") is mandatory: it is shown on every copy automatically, cannot be turned off by configuration, and must not be removed.
+**EN:** This project is released under the MIT license. Running, modifying and using it to help people is allowed. It is PROHIBITED to present HelpNearby or its derivatives as your own original work. Do not submit it as your own project to competitions, grants, admissions programs, volunteer or any other organizations. This violates competition rules and academic integrity. HelpNearby deployments are registered (domain and version, see Privacy): we can see where it runs. Misrepresenting authorship is documented and reported to the organizers of competitions and programs. You must keep the LICENSE file and the "Powered by HelpNearby" attribution, and state that your site is based on HelpNearby. Author: Pavel Izenkin.
+
+The footer credit ("Powered by HelpNearby") is mandatory: it is shown on every copy automatically, cannot be turned off by configuration, and must not be removed.
+
+Acceptable wording: "Launched and operate a local version of the open-source HelpNearby platform (by Pavel Izenkin) in <city>". Not acceptable: "created", "developed", "my project", or citing HelpNearby's UN SDG platform page as your own: it belongs to the original project only.
 
 ---
 
@@ -252,7 +260,7 @@ The footer credit ("Based on HelpNearby by Pavel Izenkin") is mandatory: it is s
 
 - Node.js 18+
 - npm (or pnpm / yarn)
-- A [Supabase](https://supabase.com/) project
+- Optional: a [Supabase](https://supabase.com/) project. Without it the site runs on OpenStreetMap data only.
 
 ### 1. Clone & install
 
@@ -267,7 +275,7 @@ npm install
 Create `.env.local`:
 
 ```env
-# Supabase (required)
+# Supabase (optional — without it search works from OpenStreetMap only)
 NEXT_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
 NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key
 
@@ -355,6 +363,9 @@ scripts/             # Geocoding and build utilities
 | `/api/chat` | AI assistant (AITunnel) |
 | `/api/impact` | Impact click tracking |
 | `/api/admin/*` | Admin auth, verify orgs, moderate reviews |
+| `/api/deployments` | Receives the anonymous deployment ping of copies (domain, version, timestamp) |
+| `/api/cron/ping` | Daily cron that sends this copy's anonymous ping (see Privacy) |
+| `/api/admin/deployments` | Admin-only list of copies seen in the last 7 days |
 
 ---
 

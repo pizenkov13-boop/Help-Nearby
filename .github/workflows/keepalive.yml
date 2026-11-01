@@ -19,8 +19,8 @@ jobs:
         run: |
           set -euo pipefail
           if [ -z "$SUPABASE_URL" ] || [ -z "$SUPABASE_ANON_KEY" ]; then
-            echo "Missing NEXT_PUBLIC_SUPABASE_URL or NEXT_PUBLIC_SUPABASE_ANON_KEY secret" >&2
-            exit 1
+            echo "NEXT_PUBLIC_SUPABASE_URL / NEXT_PUBLIC_SUPABASE_ANON_KEY secrets are not set; skipping keepalive."
+            exit 0
           fi
           status=$(curl --silent --show-error --output /dev/null --write-out "%{http_code}" \
             --max-time 30 \

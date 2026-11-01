@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { siteConfig } from "@/lib/siteConfig";
 import { submitOrganization } from "@/lib/submit";
 import type { Category } from "@/lib/types";
 import { CATEGORIES } from "@/lib/categories";
@@ -11,6 +12,7 @@ function isCategory(value: unknown): value is Category {
 }
 
 export async function POST(request: Request) {
+  if (siteConfig.isCopy) return NextResponse.json({ error: "Not available." }, { status: 404 });
   try {
     const body = (await request.json()) as Record<string, unknown>;
 

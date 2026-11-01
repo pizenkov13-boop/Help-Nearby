@@ -31,15 +31,41 @@ export const MAIN_HOSTNAMES: ReadonlySet<string> = new Set([
   "help-nearby.org",
 ]);
 
+const siteUrl = text(process.env.NEXT_PUBLIC_SITE_URL, MAIN_SITE_URL).replace(/\/+$/, "");
+
+function hostnameOf(url: string): string {
+  try {
+    return new URL(url).hostname.toLowerCase();
+  } catch {
+    return "";
+  }
+}
+
+/**
+ * Copy mode: this deployment is not the main Help Nearby site. It is on when the site URL points to
+ * another domain, or when next.config.mjs detected a build from someone else's fork (NEXT_PUBLIC_IS_FORK).
+ * The main site sets neither, so it is never in copy mode.
+ */
+const isCopy =
+  !MAIN_HOSTNAMES.has(hostnameOf(siteUrl)) || process.env.NEXT_PUBLIC_IS_FORK === "true";
+
 export const siteConfig = {
+  /** True for sites deployed from the template: no main-site branding, contacts, partners or history. */
+  isCopy,
+  /** NEXT_PUBLIC_OPERATOR_NAME — who runs this copy (shown in the copyright line and privacy page). */
+  operatorName: text(process.env.NEXT_PUBLIC_OPERATOR_NAME, ""),
+  /** NEXT_PUBLIC_INSTAGRAM — Instagram handle or URL of the operator (copy mode only). */
+  instagram: text(process.env.NEXT_PUBLIC_INSTAGRAM, ""),
+  /** The assistant is always on for the main site; a copy has it only with its own AI key (set by next.config.mjs). */
+  chatEnabled: !isCopy || process.env.NEXT_PUBLIC_CHAT_ENABLED === "true",
   /** NEXT_PUBLIC_SITE_NAME — shown in page metadata and the PWA manifest. */
   name: text(process.env.NEXT_PUBLIC_SITE_NAME, "Help Nearby"),
   /** NEXT_PUBLIC_SITE_URL — canonical origin of this deployment (no trailing slash). */
-  url: text(process.env.NEXT_PUBLIC_SITE_URL, MAIN_SITE_URL).replace(/\/+$/, ""),
+  url: siteUrl,
   /** NEXT_PUBLIC_DEFAULT_LANGUAGE — first-visit language code (en, ru, es, fr, de, zh, ar). */
   defaultLanguage: text(process.env.NEXT_PUBLIC_DEFAULT_LANGUAGE, "en"),
   /** NEXT_PUBLIC_CONTACT_EMAIL — public contact address (footer, privacy page). */
-  contactEmail: text(process.env.NEXT_PUBLIC_CONTACT_EMAIL, "hello@help-nearby.org"),
+  contactEmail: text(process.env.NEXT_PUBLIC_CONTACT_EMAIL, isCopy ? "" : "hello@help-nearby.org"),
   /** NEXT_PUBLIC_MAP_CENTER ("lat,lng") — optional regional map center; null keeps "no default location". */
   mapCenter: parseCenter(process.env.NEXT_PUBLIC_MAP_CENTER),
   /** NEXT_PUBLIC_MAP_ZOOM — initial map zoom (1–19). */

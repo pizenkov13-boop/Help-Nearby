@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { siteConfig } from "@/lib/siteConfig";
 import { fetchApprovedReviews, submitReview } from "@/lib/reviews";
 import { getSupabaseConfigStatus } from "@/lib/supabase";
 
@@ -6,6 +7,7 @@ export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
 export async function GET() {
+  if (siteConfig.isCopy) return NextResponse.json({ error: "Not available." }, { status: 404 });
   try {
     const reviews = await fetchApprovedReviews();
     return NextResponse.json(reviews);
@@ -19,6 +21,7 @@ export async function GET() {
 }
 
 export async function POST(request: Request) {
+  if (siteConfig.isCopy) return NextResponse.json({ error: "Not available." }, { status: 404 });
   const config = getSupabaseConfigStatus();
   if (!config.configured) {
     console.error("[api/reviews POST] Supabase not configured", config);
