@@ -26,7 +26,7 @@
 3. **Нажмите Deploy.** Во время сборки таблицы создаются сами (`npm run setup`, идемпотентно, из [`supabase/schema.sql`](supabase/schema.sql)); SQL вручную выполнять не нужно.
 4. **Добавьте организации:** откройте `/admin` и подтверждайте заявки с `/submit`, либо загрузите CSV в таблицу `organizations` (Supabase → Table Editor → Insert → Import data from CSV; колонки как в [`supabase/schema.sql`](supabase/schema.sql), `verified` поставьте `true`). Демо-данные: [`supabase/seed_demo.sql`](supabase/seed_demo.sql) (три вымышленные организации, удалите их).
 
-**Запустил свою копию? Добавь строку в таблицу ниже через pull request, и мы покажем твой город.**
+**Запустил свою копию? Заполни [короткую форму](https://github.com/pizenkov13-boop/Help-Nearby/issues/new?template=add-deployment.yml) (New issue с шаблоном Add my city), и мы добавим твой город в таблицу ниже.**
 
 Переменные окружения. Ничего обязательного вручную задавать не нужно:
 
@@ -56,7 +56,7 @@ Anyone can run their own copy of Help Nearby for a city, region or community. Yo
 3. **Click Deploy.** During the build the tables are created for you (`npm run setup`, idempotent, from [`supabase/schema.sql`](supabase/schema.sql)); no SQL to run by hand.
 4. **Add organizations:** open `/admin` and verify community submissions from `/submit`, or bulk-load rows by importing a CSV into the `organizations` table (Supabase → Table Editor → Insert → Import data from CSV; columns follow [`supabase/schema.sql`](supabase/schema.sql), set `verified` to `true`). Demo data: [`supabase/seed_demo.sql`](supabase/seed_demo.sql) (three fictional organizations, delete them).
 
-**Launched your copy?** Add a row to the table below with a pull request and we'll showcase your city.
+**Launched your copy?** Fill in a [short form](https://github.com/pizenkov13-boop/Help-Nearby/issues/new?template=add-deployment.yml) (the New issue page with the Add my city template) and we'll add your city to the table below.
 
 Environment variables. Nothing is required by hand:
 
