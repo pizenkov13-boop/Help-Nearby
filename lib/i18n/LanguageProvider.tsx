@@ -10,6 +10,7 @@ import {
   type ReactNode,
 } from "react";
 import type { LanguageCode } from "@/lib/types";
+import { siteConfig } from "@/lib/siteConfig";
 import { LANGUAGES, translations, type TranslationKey } from "./translations";
 
 const STORAGE_KEY = "hn-language";
@@ -18,15 +19,19 @@ function isLanguageCode(value: string): value is LanguageCode {
   return LANGUAGES.some((l) => l.code === value);
 }
 
+const FALLBACK_LANGUAGE: LanguageCode = isLanguageCode(siteConfig.defaultLanguage)
+  ? siteConfig.defaultLanguage
+  : "en";
+
 function readStoredLanguage(): LanguageCode {
-  if (typeof window === "undefined") return "en";
+  if (typeof window === "undefined") return FALLBACK_LANGUAGE;
   try {
     const stored = localStorage.getItem(STORAGE_KEY);
     if (stored && isLanguageCode(stored)) return stored;
   } catch {
     /* ignore */
   }
-  return "en";
+  return FALLBACK_LANGUAGE;
 }
 
 function applyDocumentLanguage(code: LanguageCode) {
@@ -44,7 +49,7 @@ interface LanguageContextValue {
 const LanguageContext = createContext<LanguageContextValue | null>(null);
 
 export function LanguageProvider({ children }: { children: ReactNode }) {
-  const [language, setLanguageState] = useState<LanguageCode>("en");
+  const [language, setLanguageState] = useState<LanguageCode>(FALLBACK_LANGUAGE);
 
   useEffect(() => {
     const stored = readStoredLanguage();

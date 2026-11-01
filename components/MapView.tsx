@@ -20,6 +20,7 @@ import {
   verifiedCheckMarkup,
 } from "@/lib/categoryIconMarkup";
 import { getMapTileConfig } from "@/lib/mapTiles";
+import { siteConfig } from "@/lib/siteConfig";
 import { getOrganizationSource } from "@/lib/organizationSource";
 
 const DefaultIcon = L.icon({
@@ -313,7 +314,7 @@ export default function MapView({
     const touchScreen = window.matchMedia("(pointer: coarse)").matches;
     const map = L.map(container, {
       center,
-      zoom: 14,
+      zoom: siteConfig.mapZoom,
       scrollWheelZoom: true,
       dragging: !touchScreen,
       touchZoom: true,
