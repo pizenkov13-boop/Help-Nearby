@@ -25,6 +25,12 @@ function parseCenter(value: string | undefined): [number, number] | null {
 
 export const MAIN_SITE_URL = "https://www.help-nearby.org";
 
+/** Hostnames of the main site; every other host is a copy. */
+export const MAIN_HOSTNAMES: ReadonlySet<string> = new Set([
+  "www.help-nearby.org",
+  "help-nearby.org",
+]);
+
 export const siteConfig = {
   /** NEXT_PUBLIC_SITE_NAME — shown in page metadata and the PWA manifest. */
   name: text(process.env.NEXT_PUBLIC_SITE_NAME, "Help Nearby"),
@@ -43,6 +49,4 @@ export const siteConfig = {
     process.env.NEXT_PUBLIC_FOOTER_LINK_URL,
     "https://github.com/pizenkov13-boop/Help-Nearby",
   ),
-  /** NEXT_PUBLIC_HIDE_POWERED_BY=true removes the "Powered by HelpNearby" credit. */
-  showPoweredBy: process.env.NEXT_PUBLIC_HIDE_POWERED_BY?.trim() !== "true",
 } as const;

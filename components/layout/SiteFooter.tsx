@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import {
@@ -21,7 +21,7 @@ import { BrandLogo } from "@/components/BrandLogo";
 import { GithubIcon, InstagramIcon } from "@/components/icons/BrandIcons";
 import { CONTACT_EMAIL } from "@/lib/contactEmail";
 import { useLanguage } from "@/lib/i18n/LanguageProvider";
-import { MAIN_SITE_URL, siteConfig } from "@/lib/siteConfig";
+import { MAIN_HOSTNAMES, MAIN_SITE_URL, siteConfig } from "@/lib/siteConfig";
 
 const SDG_GOALS = [
   { id: "1", label: "UN Sustainable Development Goal 1: No Poverty" },
@@ -45,7 +45,13 @@ function HeartIcon() {
 }
 
 export function SiteFooter() {
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
+  // The authorship credit is not configurable. Copies are detected by hostname as well as by
+  // NEXT_PUBLIC_SITE_URL, so a copy that never set the latter still shows it after hydration.
+  const [isMainSite, setIsMainSite] = useState(siteConfig.url === MAIN_SITE_URL);
+  useEffect(() => {
+    setIsMainSite(MAIN_HOSTNAMES.has(window.location.hostname));
+  }, []);
   const [shareCopied, setShareCopied] = useState(false);
 
   const copyShareLink = useCallback(async () => {
@@ -199,14 +205,15 @@ export function SiteFooter() {
           </span>
           {" "}{t("footerForCommunities")}
         </p>
-        {siteConfig.showPoweredBy && siteConfig.url !== MAIN_SITE_URL ? (
-          <p className="made" data-testid="footer-powered-by">
-            Powered by{" "}
+        {isMainSite ? null : (
+          <p className="made" data-testid="footer-based-on">
+            {language === "ru" ? "На основе " : "Based on "}
             <a href={`${MAIN_SITE_URL}/`} target="_blank" rel="noopener">
               HelpNearby
             </a>
+            {language === "ru" ? ", автор Pavel Izenkin" : " by Pavel Izenkin"}
           </p>
-        ) : null}
+        )}
       </div>
     </footer>
   );
