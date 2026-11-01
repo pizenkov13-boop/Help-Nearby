@@ -167,11 +167,6 @@ export function getHoursDisplay(org: Organization): HoursDisplay {
   return { kind: "unknown" };
 }
 
-export function getDirectionsUrl(org: Organization): string {
-  const { lat, lng } = getOrganizationCoordinates(org);
-  return `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}`;
-}
-
 export function getPhoneTelUrl(phone: string): string {
   return `tel:${phone.replace(/[^\d+]/g, "")}`;
 }

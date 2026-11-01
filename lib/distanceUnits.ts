@@ -109,3 +109,15 @@ export function radiusInUnit(km: number, unit: DistanceUnit): number {
 export function unitLabel(unit: DistanceUnit, language: LanguageCode): string {
   return (UNIT_LABELS[language] ?? UNIT_LABELS.en)[unit];
 }
+
+/** A distance in kilometres (route length) for display, in the visitor's unit and language. */
+export function formatKm(km: number, unit: DistanceUnit, language: LanguageCode): string {
+  const labels = UNIT_LABELS[language] ?? UNIT_LABELS.en;
+  if (unit === "mi") {
+    const miles = km * MILES_PER_KM;
+    return miles < 0.1
+      ? `${Math.max(1, Math.round(miles * 5280))} ${labels.ft}`
+      : `${miles.toFixed(1)} ${labels.mi}`;
+  }
+  return km < 0.1 ? `${Math.max(1, Math.round(km * 1000))} ${labels.m}` : `${km.toFixed(1)} ${labels.km}`;
+}

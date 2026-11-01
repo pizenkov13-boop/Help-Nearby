@@ -34,10 +34,6 @@ import {
   type ViewModePreference,
 } from "@/lib/liteMode";
 import {
-  fetchRoute,
-  type RouteData,
-} from "@/lib/routing";
-import {
   purgeExpiredNearbyCache,
   readNearbyCache,
   writeNearbyCache,
@@ -83,6 +79,9 @@ const defaultFilters: FilterState = {
   searchQuery: "",
 };
 
+/** Routes are drawn on the route screen (components/route), not on the results map. */
+const noop = () => {};
+
 export function HomePage() {
   const { t, language } = useLanguage();
   const searchParams = useSearchParams();
@@ -127,12 +126,6 @@ export function HomePage() {
   const [orgsLoading, setOrgsLoading] = useState(true);
   const [sourcesLoading, setSourcesLoading] = useState(false);
   const [sourceStates, setSourceStates] = useState<NearbySourceStates | null>(null);
-  const [routeDestination, setRouteDestination] = useState<Organization | null>(
-    null,
-  );
-  const [route, setRoute] = useState<RouteData | null>(null);
-  const [routeLoading, setRouteLoading] = useState(false);
-  const [routeError, setRouteError] = useState<string | null>(null);
   const [slowByNetworkInfo, setSlowByNetworkInfo] = useState(false);
   const [viewPreference, setViewPreference] = useState<ViewModePreference | null>(
     null,
@@ -469,69 +462,6 @@ export function HomePage() {
     window.scrollTo({ top: Math.max(0, top), behavior: "smooth" });
   }, []);
 
-  const handleClearRoute = useCallback(() => {
-    setRouteDestination(null);
-    setRoute(null);
-    setRouteError(null);
-  }, []);
-
-  const handleGetDirections = useCallback(
-    async (org: Organization) => {
-      const location = userLocation;
-      if (!location) {
-        setRouteError(t("locationError"));
-        return;
-      }
-
-      const maxRadius =
-        searchRadiusMeters ?? getMaxRadiusMeters(liteModeActive);
-      const validated = validateOrganizationForNearby(org, location, maxRadius);
-      if (!validated) {
-        setRouteError(t("locationError"));
-        return;
-      }
-
-      let destination = organizationHasTrustedCoordinates(validated)
-        ? validated
-        : await resolveOrganizationCoordinates(validated);
-
-      destination =
-        validateOrganizationForNearby(destination, location, maxRadius) ??
-        validated;
-
-      const coords = getOrganizationCoordinates(destination);
-
-      if (liteModeActive) {
-        window.open(
-          `https://www.google.com/maps/dir/?api=1&destination=${coords.lat},${coords.lng}`,
-          "_blank",
-          "noopener,noreferrer",
-        );
-        return;
-      }
-
-      setSelected(destination);
-      setPhoneView("map");
-      setRouteDestination(destination);
-      setRoute(null);
-      setRouteError(null);
-      shouldScrollRef.current = true;
-      if (!mapExpanded) {
-        setMapExpanded(true);
-      } else {
-        scrollToMapTop();
-      }
-    },
-    [
-      userLocation,
-      searchRadiusMeters,
-      liteModeActive,
-      mapExpanded,
-      scrollToMapTop,
-      t,
-    ],
-  );
-
   /**
    * The one place that asks the browser for the position (only ever called from a tap). It never
    * leaves the page waiting: errors, a missing API and a prompt nobody answers all end in a message.
@@ -572,9 +502,6 @@ export function HomePage() {
     setStoredViewMode("lite");
     setViewPreference("lite");
     setLiteMapVisible(false);
-    setRouteDestination(null);
-    setRoute(null);
-    setRouteError(null);
   }, []);
 
   const hasUserLocation = userLocation !== null;
@@ -590,52 +517,6 @@ export function HomePage() {
       setUserLocation(location);
     });
   }, [mapExpanded, liteModeActive, hasUserLocation, searchPlace]);
-
-  useEffect(() => {
-    if (liteModeActive || !routeDestination) {
-      setRoute(null);
-      return;
-    }
-
-    const originRef = userLocationRef.current;
-    if (!originRef || !routeDestination) {
-      setRoute(null);
-      setRouteError(t("locationError"));
-      return;
-    }
-
-    const origin: UserLocation = {
-      lat: originRef.lat,
-      lng: originRef.lng,
-    };
-    const destination = getOrganizationCoordinates(routeDestination);
-    let cancelled = false;
-
-    async function loadRoute() {
-      setRouteLoading(true);
-      setRouteError(null);
-
-      try {
-        const data = await fetchRoute(origin, destination, "walking");
-        if (cancelled) return;
-        setRoute(data);
-      } catch (error) {
-        if (cancelled) return;
-        setRoute(null);
-        setRouteError(
-          error instanceof Error ? error.message : "Failed to load route",
-        );
-      } finally {
-        if (!cancelled) setRouteLoading(false);
-      }
-    }
-
-    void loadRoute();
-
-    return () => {
-      cancelled = true;
-    };
-  }, [routeDestination, userLocation, liteModeActive, t]);
 
   useEffect(() => {
     if (!mapExpanded || !shouldScrollRef.current) return;
@@ -710,7 +591,6 @@ export function HomePage() {
       setSearchPlace(place);
       setFilters((prev) => ({ ...prev, searchQuery: "" }));
       setSelected(null);
-      setRouteDestination(null);
       // Force the area-change effect to search even if this area was searched before.
       lastSearchAreaRef.current = null;
       setFlyTarget({ lat: place.lat, lng: place.lng, key: Date.now() });
@@ -977,10 +857,10 @@ export function HomePage() {
                       userLocation={userLocation}
                       yourLocationLabel={searchPlace?.name ?? t("yourLocation")}
                       flyTarget={flyTarget}
-                      route={route}
-                      routeDestination={routeDestination}
-                      routeLoading={routeLoading}
-                      onClearRoute={handleClearRoute}
+                      route={null}
+                      routeDestination={null}
+                      routeLoading={false}
+                      onClearRoute={noop}
                     />
                   </div>
                 )}
@@ -995,10 +875,10 @@ export function HomePage() {
                       yourLocationLabel={searchPlace?.name ?? t("yourLocation")}
                       flyTarget={flyTarget}
                       liteMode
-                      route={route}
-                      routeDestination={routeDestination}
-                      routeLoading={routeLoading}
-                      onClearRoute={handleClearRoute}
+                      route={null}
+                      routeDestination={null}
+                      routeLoading={false}
+                      onClearRoute={noop}
                     />
                   </div>
                 )}
@@ -1058,11 +938,7 @@ export function HomePage() {
                           ) : undefined
                         }
                         selectedId={selected?.id}
-                        onSelect={(org) => {
-                          setSelected(org);
-                          if (!org.verified) setPhoneView("map");
-                        }}
-                        onGetDirections={handleGetDirections}
+                        onSelect={setSelected}
                         onImpactRecorded={handleImpactRecorded}
                       />
                     )}

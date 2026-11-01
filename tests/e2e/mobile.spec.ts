@@ -189,7 +189,7 @@ for (const phone of PHONES) {
       }
       expect(await directions.evaluate((el) => getComputedStyle(el).whiteSpace)).toBe("nowrap");
 
-      // The switch brings the map in (and the list out); Get Directions does the same.
+      // The switch brings the map in (and the list out).
       await page.getByRole("button", { name: "Map", exact: true }).click();
       const map = page.locator(".leaflet-container");
       await expect(map).toBeVisible({ timeout: 15_000 });
@@ -219,11 +219,12 @@ for (const phone of PHONES) {
       expect(await noHorizontalScroll(page)).toBeLessThanOrEqual(0);
     });
 
-    test("results: Get Directions switches to the map", async ({ page }) => {
+    test("results: Get Directions opens the in-site route screen", async ({ page }) => {
       await openResults(page);
       await page.locator(".map-panel article").first().getByRole("button", { name: /Get Directions/i }).click();
-      await expect(page.locator(".leaflet-container")).toBeVisible({ timeout: 15_000 });
-      await expect(page.getByRole("button", { name: "Map", exact: true, pressed: true })).toBeVisible();
+      await expect(page.getByTestId("route-screen")).toBeVisible();
+      await expect(page.getByTestId("route-map")).toBeVisible({ timeout: 15_000 });
+      expect(await noHorizontalScroll(page)).toBeLessThanOrEqual(0);
     });
 
     test("home: tiles, main button and bottom bar are tidy, thumb-sized and cover nothing", async ({ page }) => {

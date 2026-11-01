@@ -63,10 +63,9 @@ test.describe("Recently added organizations", () => {
     await expect(first.getByText("Verified")).toBeVisible();
     await expect(first.getByText(/Added 3 days ago/)).toBeVisible();
     await expect(first.getByRole("link", { name: /Call Now/i })).toBeVisible();
-    await expect(first.getByRole("link", { name: /Directions/i })).toHaveAttribute(
-      "rel",
-      /noopener/,
-    );
+    // Directions open our own route screen: a button, never a link to another site.
+    await expect(first.getByRole("button", { name: /Directions/i })).toBeVisible();
+    await expect(first.getByRole("link", { name: /Directions/i })).toHaveCount(0);
   });
 
   test("shows an error state with retry", async ({ page }) => {

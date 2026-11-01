@@ -304,6 +304,17 @@ export type TranslationKey =
   | "emergencyLoading"
   | "emergencyNoResults"
   | "emergencyCall"
+  | "routeBack"
+  | "routeNeedTitle"
+  | "routeNeedText"
+  | "routeFailed"
+  | "routeRetry"
+  | "routeAllowLocation"
+  | "routeDeniedHelp"
+  | "routeDetails"
+  | "routeMin"
+  | "routeHr"
+  | "orgSheetClose"
   | "emergencyClose"
   | "emergencyLocationDenied"
   | "emergencyLoadError"
@@ -630,6 +641,17 @@ const en: Record<TranslationKey, string> = {
   emergencyNoResults:
     "No 24/7 organizations found near you. Try the full map or call your local emergency number.",
   emergencyCall: "Call now",
+  routeBack: "Back",
+  routeNeedTitle: "We need to know where you are",
+  routeNeedText: "To draw a route we need your starting point. Your position stays on your device and is not saved.",
+  routeAllowLocation: "Allow location",
+  routeDeniedHelp: "Location access is blocked. Allow it in your browser settings, then try again.",
+  routeFailed: "Could not build the route",
+  routeRetry: "Retry",
+  routeDetails: "Details",
+  routeMin: "min",
+  routeHr: "h",
+  orgSheetClose: "Close",
   emergencyClose: "Close",
   emergencyLocationDenied:
     "Location access is required to find the nearest 24/7 help. Please allow location and try again.",
@@ -967,6 +989,17 @@ const ru: Record<TranslationKey, string> = {
   emergencyNoResults:
     "Рядом нет организаций 24/7. Откройте карту или позвоните по местному номеру экстренной помощи.",
   emergencyCall: "Позвонить",
+  routeBack: "Назад",
+  routeNeedTitle: "Нужно знать, где вы находитесь",
+  routeNeedText: "Чтобы построить маршрут, нужна точка старта. Ваше местоположение остаётся на устройстве и не сохраняется.",
+  routeAllowLocation: "Разрешить определение места",
+  routeDeniedHelp: "Доступ к местоположению закрыт. Разрешите его в настройках браузера и попробуйте снова.",
+  routeFailed: "Не удалось построить маршрут",
+  routeRetry: "Повторить",
+  routeDetails: "Подробнее",
+  routeMin: "мин",
+  routeHr: "ч",
+  orgSheetClose: "Закрыть",
   emergencyClose: "Закрыть",
   emergencyLocationDenied:
     "Нужен доступ к геолокации, чтобы найти ближайшую помощь 24/7. Разрешите доступ и повторите.",
@@ -1309,6 +1342,17 @@ const es: Record<TranslationKey, string> = {
   emergencyNoResults:
     "No hay organizaciones 24/7 cerca. Usa el mapa completo o llama al número de emergencia local.",
   emergencyCall: "Llamar ahora",
+  routeBack: "Atrás",
+  routeNeedTitle: "Necesitamos saber dónde estás",
+  routeNeedText: "Para trazar la ruta necesitamos tu punto de partida. Tu ubicación se queda en tu dispositivo y no se guarda.",
+  routeAllowLocation: "Permitir ubicación",
+  routeDeniedHelp: "El acceso a la ubicación está bloqueado. Permítelo en los ajustes del navegador e inténtalo de nuevo.",
+  routeFailed: "No se pudo trazar la ruta",
+  routeRetry: "Reintentar",
+  routeDetails: "Detalles",
+  routeMin: "min",
+  routeHr: "h",
+  orgSheetClose: "Cerrar",
   emergencyClose: "Cerrar",
   emergencyLocationDenied:
     "Se necesita tu ubicación para encontrar ayuda 24/7 cercana. Permite el acceso e inténtalo de nuevo.",
@@ -1652,6 +1696,17 @@ const fr: Record<TranslationKey, string> = {
   emergencyNoResults:
     "Aucune organisation 24h/24 à proximité. Utilisez la carte complète ou le numéro d'urgence local.",
   emergencyCall: "Appeler",
+  routeBack: "Retour",
+  routeNeedTitle: "Nous devons savoir où vous êtes",
+  routeNeedText: "Pour tracer l'itinéraire, il faut votre point de départ. Votre position reste sur votre appareil et n'est pas enregistrée.",
+  routeAllowLocation: "Autoriser la localisation",
+  routeDeniedHelp: "L'accès à la position est bloqué. Autorisez-le dans les réglages du navigateur, puis réessayez.",
+  routeFailed: "Impossible de calculer l'itinéraire",
+  routeRetry: "Réessayer",
+  routeDetails: "Détails",
+  routeMin: "min",
+  routeHr: "h",
+  orgSheetClose: "Fermer",
   emergencyClose: "Fermer",
   emergencyLocationDenied:
     "La localisation est requise pour trouver l'aide 24h/24 la plus proche. Autorisez-la et réessayez.",
@@ -1996,6 +2051,17 @@ const de: Record<TranslationKey, string> = {
   emergencyNoResults:
     "Keine 24/7-Organisationen in der Nähe. Nutzen Sie die Karte oder die örtliche Notrufnummer.",
   emergencyCall: "Jetzt anrufen",
+  routeBack: "Zurück",
+  routeNeedTitle: "Wir müssen wissen, wo Sie sind",
+  routeNeedText: "Für die Route brauchen wir Ihren Startpunkt. Ihr Standort bleibt auf Ihrem Gerät und wird nicht gespeichert.",
+  routeAllowLocation: "Standort erlauben",
+  routeDeniedHelp: "Der Standortzugriff ist blockiert. Erlauben Sie ihn in den Browsereinstellungen und versuchen Sie es erneut.",
+  routeFailed: "Die Route konnte nicht berechnet werden",
+  routeRetry: "Erneut versuchen",
+  routeDetails: "Details",
+  routeMin: "Min.",
+  routeHr: "Std.",
+  orgSheetClose: "Schließen",
   emergencyClose: "Schließen",
   emergencyLocationDenied:
     "Standortzugriff ist nötig, um die nächste 24/7-Hilfe zu finden. Bitte erlauben und erneut versuchen.",
@@ -2313,6 +2379,17 @@ const zh: Record<TranslationKey, string> = {
   emergencyLoading: "正在加载附近 24/7 援助…",
   emergencyNoResults: "附近未找到 24/7 组织。请使用完整地图或拨打当地急救电话。",
   emergencyCall: "立即拨打",
+  routeBack: "返回",
+  routeNeedTitle: "我们需要知道您的位置",
+  routeNeedText: "绘制路线需要您的出发点。您的位置只保留在您的设备上，不会被保存。",
+  routeAllowLocation: "允许定位",
+  routeDeniedHelp: "定位权限已被阻止。请在浏览器设置中允许后重试。",
+  routeFailed: "无法规划路线",
+  routeRetry: "重试",
+  routeDetails: "详情",
+  routeMin: "分钟",
+  routeHr: "小时",
+  orgSheetClose: "关闭",
   emergencyClose: "关闭",
   emergencyLocationDenied: "需要位置权限以查找最近的 24/7 援助。请允许后重试。",
   emergencyLoadError: "无法加载列表，请重试。",
@@ -2648,6 +2725,17 @@ const ar: Record<TranslationKey, string> = {
   emergencyNoResults:
     "لا توجد منظمات على مدار الساعة بالقرب منك. استخدم الخريطة الكاملة أو رقم الطوارئ المحلي.",
   emergencyCall: "اتصل الآن",
+  routeBack: "رجوع",
+  routeNeedTitle: "نحتاج إلى معرفة مكانك",
+  routeNeedText: "لرسم المسار نحتاج إلى نقطة البداية. يبقى موقعك على جهازك ولا يتم حفظه.",
+  routeAllowLocation: "السماح بالموقع",
+  routeDeniedHelp: "تم حظر الوصول إلى الموقع. اسمح به من إعدادات المتصفح ثم حاول مرة أخرى.",
+  routeFailed: "تعذر إنشاء المسار",
+  routeRetry: "إعادة المحاولة",
+  routeDetails: "التفاصيل",
+  routeMin: "د",
+  routeHr: "س",
+  orgSheetClose: "إغلاق",
   emergencyClose: "إغلاق",
   emergencyLocationDenied:
     "يلزم الوصول إلى الموقع للعثور على أقرب مساعدة. اسمح بالموقع وحاول مرة أخرى.",
