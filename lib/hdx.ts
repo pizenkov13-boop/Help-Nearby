@@ -70,7 +70,9 @@ async function fetchHdxGroups(): Promise<HdxGroup[]> {
   const groups = await hdxGet<HdxGroup[]>("group_list", {
     all_fields: "true",
   });
-  groupListCache = groups ?? [];
+  // A failed or empty answer must not stick for the life of the server instance: retry on the next call.
+  if (!groups || groups.length === 0) return [];
+  groupListCache = groups;
   return groupListCache;
 }
 
