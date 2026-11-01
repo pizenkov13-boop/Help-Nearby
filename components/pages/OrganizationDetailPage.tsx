@@ -15,6 +15,7 @@ import { SiteLayout } from "@/components/layout/SiteLayout";
 import { OrganizationContactSection } from "@/components/pages/OrganizationContactSection";
 import { CategoryIcon } from "@/components/icons/CategoryIcon";
 import { CATEGORY_CONFIG } from "@/lib/categories";
+import { formatDistance, useDistanceUnit } from "@/lib/distanceUnits";
 import { useLanguage } from "@/lib/i18n/LanguageProvider";
 import {
   getDirectionsUrl,
@@ -57,7 +58,8 @@ function StarRating({ rating }: { rating: number }) {
 }
 
 export function OrganizationDetailPage({ org }: OrganizationDetailPageProps) {
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
+  const unit = useDistanceUnit();
   const cfg = CATEGORY_CONFIG[org.category];
   const source = getOrganizationSource(org);
   const openStatus = getOrganizationOpenStatus(org);
@@ -109,7 +111,7 @@ export function OrganizationDetailPage({ org }: OrganizationDetailPageProps) {
               {org.category}
             </span>
             {org.verified && (
-              <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-500/20 px-3 py-1 text-sm font-semibold text-emerald-400 ring-1 ring-emerald-500/30">
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-100 px-3 py-1 text-base font-semibold text-emerald-900 ring-1 ring-emerald-600/30 dark:bg-emerald-500/20 dark:text-emerald-200 dark:ring-emerald-500/30">
                 <BadgeCheck className="h-4 w-4" aria-hidden />
                 {t("verified")}
               </span>
@@ -117,10 +119,10 @@ export function OrganizationDetailPage({ org }: OrganizationDetailPageProps) {
             {openStatus !== "unknown" && (
               <span
                 className={cn(
-                  "inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-sm font-medium",
+                  "inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-base font-semibold",
                   open
-                    ? "bg-emerald-500/20 text-emerald-400"
-                    : "bg-gray-700/80 text-gray-400",
+                    ? "bg-emerald-100 text-emerald-900 dark:bg-emerald-500/20 dark:text-emerald-200"
+                    : "bg-slate-200 text-slate-800 dark:bg-gray-700 dark:text-gray-200",
                 )}
               >
                 <Clock className="h-4 w-4" />
@@ -138,7 +140,9 @@ export function OrganizationDetailPage({ org }: OrganizationDetailPageProps) {
             {org.distance && (
               <>
                 <span aria-hidden>·</span>
-                <span className="font-medium text-blue-400">{org.distance}</span>
+                <span className="text-lg font-bold text-blue-800 dark:text-blue-300">
+                  {formatDistance(org.distance, unit, language)}
+                </span>
               </>
             )}
             {source && (
@@ -176,7 +180,7 @@ export function OrganizationDetailPage({ org }: OrganizationDetailPageProps) {
           {org.phone?.trim() && (
             <a
               href={telUrl}
-              className="inline-flex flex-1 items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-emerald-500 to-emerald-600 px-6 py-4 text-lg font-semibold text-white shadow-lg shadow-emerald-500/25 transition-all hover:from-emerald-400 hover:to-emerald-500"
+              className="inline-flex min-h-14 flex-1 items-center justify-center gap-2 rounded-xl bg-emerald-700 px-6 py-4 text-lg font-bold text-white transition-colors hover:bg-emerald-600 active:bg-emerald-800"
             >
               <Phone className="h-5 w-5" />
               {t("callNow")}
@@ -186,9 +190,9 @@ export function OrganizationDetailPage({ org }: OrganizationDetailPageProps) {
             href={directionsUrl}
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex flex-1 items-center justify-center gap-2 rounded-xl border border-gray-300 bg-white px-6 py-4 text-lg font-semibold text-gray-900 transition-colors hover:border-blue-500/50 hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-800 dark:text-white dark:hover:bg-gray-700/50"
+            className="inline-flex min-h-14 flex-1 items-center justify-center gap-2 rounded-xl bg-blue-700 px-6 py-4 text-lg font-bold text-white transition-colors hover:bg-blue-600 active:bg-blue-800"
           >
-            <Navigation className="h-5 w-5 text-blue-400" />
+            <Navigation className="h-5 w-5" aria-hidden />
             {t("getDirections")}
           </a>
           <button

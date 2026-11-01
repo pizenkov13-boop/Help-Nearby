@@ -56,6 +56,8 @@ import {
 } from "@/lib/smartRadius";
 import type { Category, FilterState, Organization, UserLocation } from "@/lib/types";
 import { FIND_HELP_EVENT } from "@/lib/uiEvents";
+import { radiusInUnit, unitLabel, useDistanceUnit } from "@/lib/distanceUnits";
+import { List, Map as MapIcon } from "lucide-react";
 import { useLanguage } from "@/lib/i18n/LanguageProvider";
 import {
   formatSearchNearestOrgs,
@@ -88,6 +90,17 @@ export function HomePage() {
   const [filters, setFilters] = useState<FilterState>(defaultFilters);
   const [selected, setSelected] = useState<Organization | null>(null);
   const [mapExpanded, setMapExpanded] = useState(false);
+  const distanceUnit = useDistanceUnit();
+  // Phones show the list first; the map is one tap away (it replaces the list, it is not stacked above it).
+  const [phoneView, setPhoneView] = useState<"list" | "map">("list");
+  const [isPhone, setIsPhone] = useState(false);
+  useEffect(() => {
+    const query = window.matchMedia("(max-width: 1023px)");
+    const update = () => setIsPhone(query.matches);
+    update();
+    query.addEventListener("change", update);
+    return () => query.removeEventListener("change", update);
+  }, []);
   // overflow:hidden is only needed while the accordion animates; afterwards it would stop
   // the sticky search bar from sticking to the viewport.
   const [accordionSettled, setAccordionSettled] = useState(false);
@@ -498,6 +511,7 @@ export function HomePage() {
       }
 
       setSelected(destination);
+      setPhoneView("map");
       setRouteDestination(destination);
       setRoute(null);
       setRouteError(null);
@@ -858,15 +872,22 @@ export function HomePage() {
 
                 {userLocation && !orgsLoading && searchRadiusMeters != null && (
                   <div className="flex flex-wrap items-center gap-3">
-                    <p className="text-sm text-slate-600 dark:text-slate-400">
+                    <p className="text-base text-slate-700 dark:text-slate-300">
                       {searchMode === "nearest" && nearestFallbackKm != null
-                        ? formatSearchNearestOrgs(
-                            language,
-                            nearestFallbackKm,
-                          )
+                        ? formatSearchNearestOrgs(language, nearestFallbackKm, {
+                            value: radiusInUnit(nearestFallbackKm, distanceUnit),
+                            label: unitLabel(distanceUnit, language),
+                          })
                         : formatSearchRadiusWithin(
                             language,
                             metersToDisplayKm(searchRadiusMeters),
+                            {
+                              value: radiusInUnit(
+                                metersToDisplayKm(searchRadiusMeters),
+                                distanceUnit,
+                              ),
+                              label: unitLabel(distanceUnit, language),
+                            },
                           )}
                     </p>
                     {canExpandSearch && (
@@ -892,7 +913,7 @@ export function HomePage() {
                 )}
               >
                 <div className="min-w-0 max-lg:contents">
-                  <div className="sticky top-[calc(72px+env(safe-area-inset-top,0px))] z-30 bg-[var(--surface-card)] pb-1 pt-2 max-md:-mx-4 max-md:px-4 md:max-lg:-mx-7 md:max-lg:px-7 max-lg:order-1 lg:static lg:bg-transparent lg:p-0">
+                  <div className="results-sticky sticky top-[calc(72px+env(safe-area-inset-top,0px))] z-30 bg-[var(--surface-card)] pb-1 pt-2 max-md:-mx-4 max-md:px-4 md:max-lg:-mx-7 md:max-lg:px-7 max-lg:order-1 lg:static lg:bg-transparent lg:p-0">
                   <SearchBar
                     value={filters.searchQuery}
                     onChange={updateSearchQuery}
@@ -903,6 +924,30 @@ export function HomePage() {
                     placeSearching={placeSearching}
                     placeError={placeError}
                   />
+                  {!liteModeActive && userLocation && (
+                    <div
+                      className="view-seg lg:hidden"
+                      role="group"
+                      aria-label={t("viewList") + " / " + t("viewMap")}
+                    >
+                      {(["list", "map"] as const).map((view) => (
+                        <button
+                          key={view}
+                          type="button"
+                          aria-pressed={phoneView === view}
+                          onClick={() => setPhoneView(view)}
+                          className="view-seg-btn"
+                        >
+                          {view === "list" ? (
+                            <List className="h-5 w-5" aria-hidden />
+                          ) : (
+                            <MapIcon className="h-5 w-5" aria-hidden />
+                          )}
+                          {view === "list" ? t("viewList") : t("viewMap")}
+                        </button>
+                      ))}
+                    </div>
+                  )}
                   </div>
                   <div className="min-w-0 max-lg:order-2">
                     <Filters filters={filters} onChange={setFilters} />
@@ -922,8 +967,8 @@ export function HomePage() {
                   </button>
                 </div>
 
-                {!liteModeActive && userLocation && mapExpanded && (
-                  <div className="isolate h-[45dvh] max-h-[420px] min-h-[260px] overflow-hidden rounded-brand border border-slate-200 shadow-lg dark:border-white/10 max-lg:order-3 lg:h-[520px] lg:max-h-none">
+                {!liteModeActive && userLocation && mapExpanded && (!isPhone || phoneView === "map") && (
+                  <div className="isolate h-[45dvh] max-h-[420px] min-h-[260px] max-lg:h-[calc(100dvh-400px)] max-lg:max-h-none max-lg:min-h-[320px] overflow-hidden rounded-brand border border-slate-200 shadow-lg dark:border-white/10 max-lg:order-3 lg:h-[520px] lg:max-h-none">
                     <MapView
                       key="full-map"
                       mapVisible={mapExpanded}
@@ -960,8 +1005,9 @@ export function HomePage() {
 
                 <div
                   className={cn(
-                    "flex w-full min-w-0 max-w-full flex-col overflow-hidden rounded-brand border border-slate-200 bg-white/80 dark:border-white/10 dark:bg-surface-card",
+                    "results-pane flex w-full min-w-0 max-w-full flex-col overflow-hidden rounded-brand border border-slate-200 bg-white/80 dark:border-white/10 dark:bg-surface-card",
                     "max-lg:order-4",
+                    !liteModeActive && phoneView === "map" && "max-lg:hidden",
                     liteModeActive ? "min-h-[320px]" : "lg:max-h-[520px]",
                   )}
                 >
@@ -1012,7 +1058,10 @@ export function HomePage() {
                           ) : undefined
                         }
                         selectedId={selected?.id}
-                        onSelect={setSelected}
+                        onSelect={(org) => {
+                          setSelected(org);
+                          if (!org.verified) setPhoneView("map");
+                        }}
                         onGetDirections={handleGetDirections}
                         onImpactRecorded={handleImpactRecorded}
                       />

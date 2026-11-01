@@ -39,6 +39,10 @@ export type TranslationKey =
   | "navFind"
   | "homeNeedTitle"
   | "navChat"
+  | "navUrgent"
+  | "heroTrust"
+  | "viewList"
+  | "viewMap"
   | "howItWorksTitle"
   | "howItWorksStep1Title"
   | "howItWorksStep1Description"
@@ -321,10 +325,14 @@ const en: Record<TranslationKey, string> = {
   heroTitle: "Find Help Near You",
   heroSubtitle:
     "Instant access to free food, shelter, and medical care — anywhere in the world. No barriers, no sign-up, no cost.",
-  heroCta: "Find Help Near Me",
+  heroCta: "Find help near me",
   navFind: "Find",
   homeNeedTitle: "What do you need?",
   navChat: "Chat",
+  navUrgent: "Urgent",
+  heroTrust: "Free · no sign-up · UN & OpenStreetMap data",
+  viewList: "List",
+  viewMap: "Map",
   howItWorksTitle: "How It Works",
   howItWorksStep1Title: "Share Your Location",
   howItWorksStep1Description:
@@ -639,10 +647,14 @@ const ru: Record<TranslationKey, string> = {
   heroTitle: "Найдите помощь рядом с вами",
   heroSubtitle:
     "Мгновенный доступ к бесплатной еде, жилью и медицинской помощи — в любой точке мира. Без барьеров, без регистрации, бесплатно.",
-  heroCta: "Найти помощь рядом со мной",
+  heroCta: "Помощь рядом со мной",
   navFind: "Найти",
   homeNeedTitle: "Что вам нужно?",
   navChat: "Чат",
+  navUrgent: "Срочно",
+  heroTrust: "Бесплатно · без регистрации · данные ООН и OpenStreetMap",
+  viewList: "Список",
+  viewMap: "Карта",
   howItWorksTitle: "Как это работает",
   howItWorksStep1Title: "Укажите своё местоположение",
   howItWorksStep1Description:
@@ -972,10 +984,14 @@ const es: Record<TranslationKey, string> = {
   heroTitle: "Encuentra ayuda cerca de ti",
   heroSubtitle:
     "Acceso instantáneo a comida, refugio y atención médica gratuitas — en cualquier parte del mundo. Sin barreras, sin registro, sin costo.",
-  heroCta: "Encontrar ayuda cerca de mí",
+  heroCta: "Ayuda cerca de mí",
   navFind: "Buscar",
   homeNeedTitle: "¿Qué necesitas?",
   navChat: "Chat",
+  navUrgent: "Urgente",
+  heroTrust: "Gratis · sin registro · datos de la ONU y OpenStreetMap",
+  viewList: "Lista",
+  viewMap: "Mapa",
   howItWorksTitle: "Cómo funciona",
   howItWorksStep1Title: "Comparte tu ubicación",
   howItWorksStep1Description:
@@ -1310,10 +1326,14 @@ const fr: Record<TranslationKey, string> = {
   heroTitle: "Trouvez de l'aide près de vous",
   heroSubtitle:
     "Accès instantané à la nourriture, l'hébergement et les soins médicaux gratuits — partout dans le monde. Sans barrières, sans inscription, sans frais.",
-  heroCta: "Trouver de l'aide près de moi",
+  heroCta: "Aide près de moi",
   navFind: "Chercher",
   homeNeedTitle: "De quoi avez-vous besoin ?",
   navChat: "Chat",
+  navUrgent: "Urgence",
+  heroTrust: "Gratuit · sans inscription · données de l'ONU et d'OpenStreetMap",
+  viewList: "Liste",
+  viewMap: "Carte",
   howItWorksTitle: "Comment ça marche",
   howItWorksStep1Title: "Partagez votre position",
   howItWorksStep1Description:
@@ -1649,10 +1669,14 @@ const de: Record<TranslationKey, string> = {
   heroTitle: "Hilfe in Ihrer Nähe finden",
   heroSubtitle:
     "Sofortiger Zugang zu kostenloser Verpflegung, Unterkunft und medizinischer Versorgung — weltweit. Keine Hürden, keine Anmeldung, keine Kosten.",
-  heroCta: "Hilfe in meiner Nähe finden",
+  heroCta: "Hilfe in meiner Nähe",
   navFind: "Suchen",
   homeNeedTitle: "Was brauchen Sie?",
   navChat: "Chat",
+  navUrgent: "Notfall",
+  heroTrust: "Kostenlos · ohne Anmeldung · Daten von UN und OpenStreetMap",
+  viewList: "Liste",
+  viewMap: "Karte",
   howItWorksTitle: "So funktioniert es",
   howItWorksStep1Title: "Standort teilen",
   howItWorksStep1Description:
@@ -1989,10 +2013,14 @@ const zh: Record<TranslationKey, string> = {
   heroTitle: "在您附近寻找帮助",
   heroSubtitle:
     "随时随地即时获取免费食物、住所和医疗援助。无门槛、无需注册、完全免费。",
-  heroCta: "在我附近寻找帮助",
+  heroCta: "查找附近帮助",
   navFind: "查找",
   homeNeedTitle: "您需要什么？",
   navChat: "聊天",
+  navUrgent: "紧急",
+  heroTrust: "免费 · 无需注册 · 联合国与 OpenStreetMap 数据",
+  viewList: "列表",
+  viewMap: "地图",
   howItWorksTitle: "使用方法",
   howItWorksStep1Title: "分享您的位置",
   howItWorksStep1Description:
@@ -2301,10 +2329,14 @@ const ar: Record<TranslationKey, string> = {
   heroTitle: "اعثر على المساعدة بالقرب منك",
   heroSubtitle:
     "وصول فوري إلى الطعام والمأوى والرعاية الطبية المجانية — في أي مكان في العالم. بلا عوائق، بلا تسجيل، بلا تكلفة.",
-  heroCta: "اعثر على المساعدة بالقرب مني",
+  heroCta: "مساعدة قربي",
   navFind: "بحث",
   homeNeedTitle: "ماذا تحتاج؟",
   navChat: "دردشة",
+  navUrgent: "طوارئ",
+  heroTrust: "مجاني · بدون تسجيل · بيانات الأمم المتحدة وOpenStreetMap",
+  viewList: "قائمة",
+  viewMap: "خريطة",
   howItWorksTitle: "كيف يعمل",
   howItWorksStep1Title: "شارك موقعك",
   howItWorksStep1Description:
@@ -2654,22 +2686,34 @@ export function formatImpactCounter(
   return template.replace("{count}", String(count));
 }
 
+/** Replaces the kilometre figure of a template with the visitor's unit, e.g. "3.1 mi". */
+function fillDistance(
+  template: string,
+  km: number,
+  unit?: { value: number; label: string },
+): string {
+  if (!unit) return template.replace("{km}", String(km));
+  return template.replace(/\{km\}\s*[^\s)）]+/, `${unit.value} ${unit.label}`);
+}
+
 export function formatSearchRadiusWithin(
   language: LanguageCode,
   km: number,
+  unit?: { value: number; label: string },
 ): string {
   const template =
     translations[language].searchRadiusWithin ??
     translations.en.searchRadiusWithin;
-  return template.replace("{km}", String(km));
+  return fillDistance(template, km, unit);
 }
 
 export function formatSearchNearestOrgs(
   language: LanguageCode,
   km: number,
+  unit?: { value: number; label: string },
 ): string {
   const template =
     translations[language].searchNearestOrgs ??
     translations.en.searchNearestOrgs;
-  return template.replace("{km}", String(km));
+  return fillDistance(template, km, unit);
 }

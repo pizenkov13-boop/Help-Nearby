@@ -51,10 +51,21 @@ export const newsreaderLatinExt = localFont({
   declarations: [{ prop: "unicode-range", value: "U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF" }],
 });
 
-/** Class names that define the four font variables on <html>. */
+/** Arabic script (Noto Sans Arabic, SIL OFL, see OFL-Noto-Sans-Arabic.txt): fetched only for pages that contain Arabic letters. */
+export const notoSansArabic = localFont({
+  src: [{ path: "./fonts/noto-sans-arabic-arabic-wght-normal.woff2", weight: "100 900", style: "normal" }],
+  variable: "--font-noto-arabic",
+  display: "swap",
+  preload: false,
+  adjustFontFallback: false,
+  declarations: [{ prop: "unicode-range", value: "U+0600-06FF,U+0750-077F,U+0870-088E,U+0890-0891,U+0897-08E1,U+08E3-08FF,U+200C-200E,U+2010-2011,U+204F,U+2E41,U+FB50-FDFF,U+FE70-FE74,U+FE76-FEFC,U+0609,U+060C,U+061B,U+061F" }],
+});
+
+/** Class names that define the font variables on <html>. */
 export const fontVariableClasses = [
   dmSansLatin.variable,
   dmSansLatinExt.variable,
   newsreaderLatin.variable,
   newsreaderLatinExt.variable,
+  notoSansArabic.variable,
 ];
