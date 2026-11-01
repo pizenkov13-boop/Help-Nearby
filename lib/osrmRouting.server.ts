@@ -5,9 +5,11 @@ import { distanceMiles } from "@/lib/geo";
 import { snapToNearestWalkingRoad } from "@/lib/osrmSnap";
 
 const USER_AGENT = "HelpNearby/1.0 (help-nearby.app)";
-const OSRM_ROUTE = "https://router.project-osrm.org/route/v1/walking";
-const OSM_DE_ROUTE =
-  "https://routing.openstreetmap.de/routed-foot/route/v1/foot";
+// The public OSRM demo server answers every profile with its car network: walking prefers the OpenStreetMap
+// foot service and uses the demo server last, with a walking pace for the time.
+const OSRM_WALKING_FALLBACK = "https://router.project-osrm.org/route/v1/walking";
+const OSM_DE_FOOT = "https://routing.openstreetmap.de/routed-foot/route/v1/foot";
+const WALKING_SPEED_MS = 1.4;
 
 interface OsrmRouteLeg {
   distance: number;
@@ -43,7 +45,11 @@ function toRouteData(route: OsrmRouteLeg, mode: RoutingMode): RouteData {
   };
 }
 
-async function fetchRouteFromUrl(url: string): Promise<RouteData | null> {
+async function fetchRouteFromUrl(
+  url: string,
+  mode: RoutingMode,
+  walkingPace = false,
+): Promise<RouteData | null> {
   const response = await fetch(url, {
     headers: { Accept: "application/json", "User-Agent": USER_AGENT },
     signal: AbortSignal.timeout(30_000),
@@ -66,7 +72,11 @@ async function fetchRouteFromUrl(url: string): Promise<RouteData | null> {
     return null;
   }
 
-  return toRouteData(data.routes[0], "walking");
+  const route = data.routes[0];
+  return toRouteData(
+    walkingPace ? { ...route, duration: route.distance / WALKING_SPEED_MS } : route,
+    mode,
+  );
 }
 
 /** Straight segment from the road endpoint to the exact building marker. */
@@ -93,22 +103,8 @@ function extendRouteToExactDestination(
   };
 }
 
-async function fetchOsrmWalkingRoute(
-  from: RoutePoint,
-  to: RoutePoint,
-): Promise<RouteData | null> {
-  const coords = `${from.lng},${from.lat};${to.lng},${to.lat}`;
-  const url = `${OSRM_ROUTE}/${coords}?overview=full&geometries=geojson`;
-  return fetchRouteFromUrl(url);
-}
-
-async function fetchOsmDeFootRoute(
-  from: RoutePoint,
-  to: RoutePoint,
-): Promise<RouteData | null> {
-  const coords = `${from.lng},${from.lat};${to.lng},${to.lat}`;
-  const url = `${OSM_DE_ROUTE}/${coords}?overview=full&geometries=geojson`;
-  return fetchRouteFromUrl(url);
+function routeUrl(base: string, from: RoutePoint, to: RoutePoint): string {
+  return `${base}/${from.lng},${from.lat};${to.lng},${to.lat}?overview=full&geometries=geojson`;
 }
 
 export async function fetchSnappedWalkingRoute(
@@ -122,11 +118,11 @@ export async function fetchSnappedWalkingRoute(
     snapToNearestWalkingRoad(toLng, toLat),
   ]);
 
-  const osrm = await fetchOsrmWalkingRoute(from, to);
-  if (osrm) return extendRouteToExactDestination(osrm, toLat, toLng);
+  const foot = await fetchRouteFromUrl(routeUrl(OSM_DE_FOOT, from, to), "walking");
+  if (foot) return extendRouteToExactDestination(foot, toLat, toLng);
 
-  const osmDe = await fetchOsmDeFootRoute(from, to);
-  if (osmDe) return extendRouteToExactDestination(osmDe, toLat, toLng);
+  const demo = await fetchRouteFromUrl(routeUrl(OSRM_WALKING_FALLBACK, from, to), "walking", true);
+  if (demo) return extendRouteToExactDestination(demo, toLat, toLng);
 
   throw new Error("No walking route found.");
 }

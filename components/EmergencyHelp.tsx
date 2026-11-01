@@ -5,6 +5,7 @@ import { Loader2, LifeBuoy, MapPin, Phone, X } from "lucide-react";
 import { NEARBY_RADIUS_METERS } from "@/lib/constants";
 import { formatDistance, useDistanceUnit } from "@/lib/distanceUnits";
 import { useLanguage } from "@/lib/i18n/LanguageProvider";
+import { openOrganizationSheet } from "@/lib/orgActions";
 import { getPhoneTelUrl } from "@/lib/orgUtils";
 import { requestPosition } from "@/lib/locationRequest";
 import { postJson } from "@/lib/postJson";
@@ -180,7 +181,13 @@ export function EmergencyHelp() {
                         >
                           <div className="mb-2 flex items-start justify-between gap-2">
                             <h3 className="font-semibold text-slate-900 dark:text-white">
-                              {org.name}
+                              <button
+                                type="button"
+                                onClick={() => openOrganizationSheet(org)}
+                                className="text-start underline-offset-2 hover:underline"
+                              >
+                                {org.name}
+                              </button>
                             </h3>
                             {org.distance && (
                               <span className="shrink-0 text-lg font-bold text-red-800 dark:text-red-200">

@@ -3,6 +3,8 @@
 import { ChatWidget } from "@/components/ChatWidget";
 import { EmergencyHelp } from "@/components/EmergencyHelp";
 import { BottomBar } from "@/components/layout/BottomBar";
+import { OrganizationSheet } from "@/components/route/OrganizationSheet";
+import { RouteScreen } from "@/components/route/RouteScreen";
 import { Header } from "@/components/layout/Header";
 import { ScrollToHash } from "@/components/layout/ScrollToHash";
 import { useLanguage } from "@/lib/i18n/LanguageProvider";
@@ -28,6 +30,8 @@ export function SiteLayout({ children }: SiteLayoutProps) {
       <SiteFooter />
       {siteConfig.chatEnabled ? <ChatWidget /> : null}
       <BottomBar />
+      <OrganizationSheet />
+      <RouteScreen />
     </div>
   );
 }

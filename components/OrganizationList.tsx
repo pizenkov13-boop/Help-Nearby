@@ -17,7 +17,6 @@ interface OrganizationListProps {
   emptyAction?: ReactNode;
   selectedId?: string;
   onSelect: (org: Organization) => void;
-  onGetDirections?: (org: Organization) => void;
   onImpactRecorded?: () => void;
   isLoading?: boolean;
 }
@@ -29,7 +28,6 @@ export function OrganizationList({
   emptyAction,
   selectedId,
   onSelect,
-  onGetDirections,
   onImpactRecorded,
   isLoading = false,
 }: OrganizationListProps) {
@@ -68,7 +66,6 @@ export function OrganizationList({
               org={org}
               selected={selectedId === org.id}
               onSelect={onSelect}
-              onGetDirections={onGetDirections}
               onImpactRecorded={onImpactRecorded}
             />
           ))}

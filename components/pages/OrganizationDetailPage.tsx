@@ -18,10 +18,11 @@ import { CATEGORY_CONFIG } from "@/lib/categories";
 import { formatDistance, useDistanceUnit } from "@/lib/distanceUnits";
 import { useLanguage } from "@/lib/i18n/LanguageProvider";
 import {
-  getDirectionsUrl,
   getPhoneTelUrl,
   getOrganizationOpenStatus,
 } from "@/lib/orgUtils";
+import { openRoute } from "@/lib/orgActions";
+import { isApproximateLocation } from "@/lib/organizationCoordinates";
 import { getOrganizationSource } from "@/lib/organizationSource";
 import type { Organization } from "@/lib/types";
 import { cn } from "@/lib/utils";
@@ -77,7 +78,6 @@ export function OrganizationDetailPage({ org }: OrganizationDetailPageProps) {
     }
   }, []);
 
-  const directionsUrl = getDirectionsUrl(org);
   const telUrl = getPhoneTelUrl(org.phone);
 
   return (
@@ -186,15 +186,16 @@ export function OrganizationDetailPage({ org }: OrganizationDetailPageProps) {
               {t("callNow")}
             </a>
           )}
-          <a
-            href={directionsUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex min-h-14 flex-1 items-center justify-center gap-2 rounded-xl bg-blue-700 px-6 py-4 text-lg font-bold text-white transition-colors hover:bg-blue-600 active:bg-blue-800"
-          >
-            <Navigation className="h-5 w-5" aria-hidden />
-            {t("getDirections")}
-          </a>
+          {!isApproximateLocation(org) && (
+            <button
+              type="button"
+              onClick={() => openRoute(org)}
+              className="inline-flex min-h-14 flex-1 items-center justify-center gap-2 rounded-xl bg-blue-700 px-6 py-4 text-lg font-bold text-white transition-colors hover:bg-blue-600 active:bg-blue-800"
+            >
+              <Navigation className="h-5 w-5" aria-hidden />
+              {t("getDirections")}
+            </button>
+          )}
           <button
             type="button"
             onClick={handleShare}

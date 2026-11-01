@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import {
   BadgeCheck,
   Clock,
@@ -14,11 +13,8 @@ import { formatDistance, useDistanceUnit } from "@/lib/distanceUnits";
 import { useLanguage } from "@/lib/i18n/LanguageProvider";
 import type { TranslationKey } from "@/lib/i18n/translations";
 import { recordImpactClick } from "@/lib/impact.client";
-import {
-  getDirectionsUrl,
-  getPhoneTelUrl,
-  getOrganizationOpenStatus,
-} from "@/lib/orgUtils";
+import { openOrganizationSheet, openRoute } from "@/lib/orgActions";
+import { getPhoneTelUrl, getOrganizationOpenStatus } from "@/lib/orgUtils";
 import {
   isApproximateLocation,
   isOverpassOrganization,
@@ -60,7 +56,6 @@ function formatAddedDate(iso: string | undefined, locale: string): string | null
 interface OrganizationCardProps {
   org: Organization;
   onSelect?: (org: Organization) => void;
-  onGetDirections?: (org: Organization) => void;
   onImpactRecorded?: () => void;
   selected?: boolean;
   /** Show city, description and an "Added …" line (used on /recent). */
@@ -70,7 +65,6 @@ interface OrganizationCardProps {
 export function OrganizationCard({
   org,
   onSelect,
-  onGetDirections,
   onImpactRecorded,
   selected,
   addedLabel,
@@ -80,7 +74,6 @@ export function OrganizationCard({
   const source = getOrganizationSource(org);
   const openStatus = getOrganizationOpenStatus(org);
   const open = openStatus === "open";
-  const directionsUrl = getDirectionsUrl(org);
   const telUrl = getPhoneTelUrl(org.phone);
   const hasPhone = Boolean(org.phone?.trim());
   // Country-level OCHA entries have no confirmed address, so no directions are offered.
@@ -97,11 +90,12 @@ export function OrganizationCard({
   const handleDirectionsClick = () => {
     recordImpactClick(org.id, "directions");
     onImpactRecorded?.();
-    onGetDirections?.(org);
+    openRoute(org);
   };
 
   const handleCardOpen = () => {
     onSelect?.(org);
+    openOrganizationSheet(org);
   };
 
   const actionBase =
@@ -135,23 +129,13 @@ export function OrganizationCard({
 
           <div className="min-w-0">
             <h3 className="text-lg font-bold leading-snug text-slate-900 break-words break-anywhere group-hover:text-blue-700 dark:text-white dark:group-hover:text-blue-300">
-              {org.verified ? (
-                <Link
-                  href={`/org/${org.slug}`}
-                  onClick={handleCardOpen}
-                  className={STRETCH}
-                >
-                  {org.name}
-                </Link>
-              ) : (
-                <button
-                  type="button"
-                  onClick={handleCardOpen}
-                  className={cn(STRETCH, "text-start")}
-                >
-                  {org.name}
-                </button>
-              )}
+              <button
+                type="button"
+                onClick={handleCardOpen}
+                className={cn(STRETCH, "text-start")}
+              >
+                {org.name}
+              </button>
             </h3>
             {(org.country || (addedLabel && org.city)) && (
               <p className="org-sub mt-0.5 text-base text-slate-700 break-words break-anywhere dark:text-gray-300">
@@ -273,27 +257,12 @@ export function OrganizationCard({
               {t("callNow")}
             </a>
           )}
-          {!approximate &&
-            (onGetDirections ? (
-              <button type="button" onClick={handleDirectionsClick} className={routeClass}>
-                <Navigation className="h-5 w-5 shrink-0" aria-hidden />
-                {t("getDirections")}
-              </button>
-            ) : (
-              <a
-                href={directionsUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                onClick={() => {
-                  recordImpactClick(org.id, "directions");
-                  onImpactRecorded?.();
-                }}
-                className={routeClass}
-              >
-                <Navigation className="h-5 w-5 shrink-0" aria-hidden />
-                {t("getDirections")}
-              </a>
-            ))}
+          {!approximate && (
+            <button type="button" onClick={handleDirectionsClick} className={routeClass}>
+              <Navigation className="h-5 w-5 shrink-0" aria-hidden />
+              {t("getDirections")}
+            </button>
+          )}
         </div>
       )}
     </article>

@@ -5,7 +5,6 @@ export {
   formatDaySchedule,
   formatTime12h,
   formatWeeklyHours,
-  getDirectionsUrl,
   getPhoneTelUrl,
   isOrganizationOpen,
   slugify,
