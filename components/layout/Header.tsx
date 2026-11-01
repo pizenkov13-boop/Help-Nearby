@@ -11,6 +11,11 @@ import { MobileMenu } from "@/components/layout/MobileMenu";
 import { AnchorNavLink } from "@/components/navigation/AnchorNavLink";
 import { useLanguage } from "@/lib/i18n/LanguageProvider";
 import { openEmergencyHelp } from "@/lib/emergencyEvents";
+import {
+  LANGUAGE_STATE_EVENT,
+  LANGUAGE_TOGGLE_EVENT,
+  dispatchUiEvent,
+} from "@/lib/uiEvents";
 import type { LanguageCode } from "@/lib/types";
 import { cn } from "@/lib/utils";
 import { siteConfig } from "@/lib/siteConfig";
@@ -95,6 +100,21 @@ export function Header() {
   }, []);
 
   const closeMenu = useCallback(() => setMenuOpen(false), []);
+
+  // The phone bottom bar opens the language sheet through these events.
+  useEffect(() => {
+    const toggle = () => {
+      setMenuOpen(false);
+      setAboutOpen(false);
+      setWhyOpen(false);
+      setLangOpen((open) => !open);
+    };
+    window.addEventListener(LANGUAGE_TOGGLE_EVENT, toggle);
+    return () => window.removeEventListener(LANGUAGE_TOGGLE_EVENT, toggle);
+  }, []);
+  useEffect(() => {
+    dispatchUiEvent(LANGUAGE_STATE_EVENT, langOpen);
+  }, [langOpen]);
 
   const aboutItems = [
     { label: t("navOurStory"), href: "/about#our-story" },

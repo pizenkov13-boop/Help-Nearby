@@ -54,7 +54,8 @@ import {
   metersToDisplayKm,
   type SearchRadiusMode,
 } from "@/lib/smartRadius";
-import type { FilterState, Organization, UserLocation } from "@/lib/types";
+import type { Category, FilterState, Organization, UserLocation } from "@/lib/types";
+import { FIND_HELP_EVENT } from "@/lib/uiEvents";
 import { useLanguage } from "@/lib/i18n/LanguageProvider";
 import {
   formatSearchNearestOrgs,
@@ -655,6 +656,24 @@ export function HomePage() {
     askForLocation();
   }, [mapExpanded, userLocation, openMapAccordion, scrollToMapTop, askForLocation]);
 
+  const handleSelectCategory = useCallback(
+    (category: Category) => {
+      setFilters((prev) => ({ ...prev, category }));
+      handleFindHelp();
+    },
+    [handleFindHelp],
+  );
+
+  // "Find Help Near Me" and the phone bottom bar's Find search every category.
+  const handleFindAll = useCallback(() => {
+    setFilters((prev) => (prev.category === "all" ? prev : { ...prev, category: "all" }));
+    handleFindHelp();
+  }, [handleFindHelp]);
+  useEffect(() => {
+    window.addEventListener(FIND_HELP_EVENT, handleFindAll);
+    return () => window.removeEventListener(FIND_HELP_EVENT, handleFindAll);
+  }, [handleFindAll]);
+
   useEffect(() => {
     if (
       searchParams.get("find") !== "1" ||
@@ -754,7 +773,8 @@ export function HomePage() {
   return (
     <SiteLayout>
       <Hero
-        onFindHelp={handleFindHelp}
+        onFindHelp={handleFindAll}
+        onSelectCategory={handleSelectCategory}
         isLocating={isLocating}
         liteModeActive={liteModeActive}
       />

@@ -107,13 +107,13 @@ for (const phone of PHONES) {
       await expect(page.locator("html")).toHaveAttribute("lang", "es");
     });
 
-    test("header: emergency is one tap away and the menu opens", async ({ page }) => {
+    test("emergency is one tap away in the bottom bar and the menu opens", async ({ page }) => {
       await page.goto("/");
-      const emergency = page.locator(".emergency-icon-btn");
+      const emergency = page.getByRole("button", { name: "Emergency Help" });
       await expect(emergency).toBeVisible();
       const box = (await emergency.boundingBox())!;
-      expect(box.width).toBeGreaterThanOrEqual(44);
-      expect(box.height).toBeGreaterThanOrEqual(44);
+      expect(box.width).toBeGreaterThanOrEqual(48);
+      expect(box.height).toBeGreaterThanOrEqual(48);
       await emergency.click();
       await expect(page.getByRole("dialog")).toBeVisible();
       await page.keyboard.press("Escape");
@@ -180,6 +180,69 @@ for (const phone of PHONES) {
       expect(await search.evaluate((el) => el.getBoundingClientRect().top)).toBeGreaterThanOrEqual(0);
 
       expect(await noHorizontalScroll(page)).toBeLessThanOrEqual(0);
+    });
+
+    test("home: category tiles and bottom bar are thumb-sized, in the thumb zone, and cover nothing", async ({ page }) => {
+      await page.goto("/");
+      const tiles = page.locator(".hero-tile");
+      await expect(tiles).toHaveCount(5);
+      for (const b of await tiles.evaluateAll((els) => els.map((el) => el.getBoundingClientRect()))) {
+        expect(b.width).toBeGreaterThanOrEqual(48);
+        expect(b.height).toBeGreaterThanOrEqual(48);
+        expect(b.right).toBeLessThanOrEqual(phone.width);
+      }
+      // The tile labels are not clipped.
+      for (const clipped of await tiles.evaluateAll((els) => els.map((el) => el.scrollWidth > el.clientWidth + 1))) {
+        expect(clipped).toBe(false);
+      }
+
+      const bar = page.locator(".bottom-bar");
+      await expect(bar).toBeVisible();
+      const barBox = (await bar.boundingBox())!;
+      expect(Math.round(barBox.y + barBox.height)).toBe(phone.height);
+      for (const b of await bar.locator(".bb-item").evaluateAll((els) => els.map((el) => el.getBoundingClientRect()))) {
+        expect(b.width).toBeGreaterThanOrEqual(48);
+        expect(b.height).toBeGreaterThanOrEqual(48);
+      }
+      // The round chat button is gone on phones (the bar has a chat item).
+      await expect(page.locator("button.fixed.rounded-full")).toBeHidden();
+
+      // Scrolled to the very end, the last line of the footer sits above the bar.
+      await page.evaluate(() =>
+        window.scrollTo({ top: document.documentElement.scrollHeight, behavior: "instant" }),
+      );
+      await expect
+        .poll(() => page.locator("footer").evaluate((el) => el.getBoundingClientRect().bottom))
+        .toBeLessThanOrEqual(barBox.y + 1);
+      expect(await noHorizontalScroll(page)).toBeLessThanOrEqual(0);
+    });
+
+    test("home: a category tile starts the search with that category selected", async ({ page }) => {
+      await grantNycLocation(page);
+      await page.goto("/");
+      await page.locator(".hero-tile", { hasText: "Shelter" }).click();
+      await expect(page.locator("#org-search")).toBeVisible({ timeout: 30_000 });
+      await expect(page.getByRole("button", { name: "Shelter", pressed: true })).toBeVisible();
+    });
+
+    test("a tile searches that category, Find Help Near Me searches all of them", async ({ page }) => {
+      await grantNycLocation(page);
+      await page.goto("/");
+      await page.locator(".hero-tile", { hasText: "Food" }).click();
+      const cards = page.locator(".map-panel article");
+      await expect(cards.first()).toBeVisible({ timeout: 30_000 });
+      await expect(cards).toHaveCount(1);
+      await expect(cards.first()).toContainText("E2E Test Food Bank");
+
+      await page.getByRole("button", { name: /Find Help Near Me/i }).click();
+      await expect(cards).toHaveCount(2);
+    });
+
+    test("bottom bar: Find starts the search", async ({ page }) => {
+      await grantNycLocation(page);
+      await page.goto("/");
+      await page.locator(".bottom-bar").getByRole("button", { name: "Find" }).click();
+      await expect(page.locator("#org-search")).toBeVisible({ timeout: 30_000 });
     });
 
     test("chat opens full screen with the input pinned to the bottom", async ({ page }) => {

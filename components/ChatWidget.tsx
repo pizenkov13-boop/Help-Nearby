@@ -4,6 +4,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { Bot, Loader2, MessageCircle, Send, X } from "lucide-react";
 import { ChatMessageText } from "@/components/ChatMessageText";
 import { getChatContext } from "@/lib/chatClientContext";
+import { CHAT_OPEN_EVENT } from "@/lib/uiEvents";
 import { useLanguage } from "@/lib/i18n/LanguageProvider";
 import { cn } from "@/lib/utils";
 
@@ -38,6 +39,11 @@ export function ChatWidget() {
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
+  useEffect(() => {
+    const openChat = () => setOpen(true);
+    window.addEventListener(CHAT_OPEN_EVENT, openChat);
+    return () => window.removeEventListener(CHAT_OPEN_EVENT, openChat);
+  }, []);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [messages, setMessages] = useState<Message[]>([
@@ -54,7 +60,7 @@ export function ChatWidget() {
   useEffect(() => {
     if (!open) return;
     const vv = window.visualViewport;
-    const phone = window.matchMedia("(max-width: 639px)");
+    const phone = window.matchMedia("(max-width: 767px)");
     const update = () => {
       setViewport(vv && phone.matches ? { height: vv.height, top: vv.offsetTop } : null);
     };
@@ -153,7 +159,7 @@ export function ChatWidget() {
     <>
       {open && (
         <div
-          className="fixed bottom-24 right-4 z-50 flex h-[min(480px,70vh)] w-[min(380px,calc(100vw-2rem))] flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-2xl shadow-blue-500/10 animate-fade-in dark:border-gray-700 dark:bg-gray-900 sm:right-6 max-sm:inset-x-0 max-sm:bottom-0 max-sm:top-0 max-sm:h-dvh max-sm:w-full max-sm:rounded-none max-sm:border-0"
+          className="fixed bottom-24 right-4 z-50 flex h-[min(480px,70vh)] w-[min(380px,calc(100vw-2rem))] flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-2xl shadow-blue-500/10 animate-fade-in dark:border-gray-700 dark:bg-gray-900 sm:right-6 max-md:inset-x-0 max-md:bottom-0 max-md:top-0 max-md:h-dvh max-md:w-full max-md:rounded-none max-md:border-0"
           style={
             viewport
               ? { height: viewport.height, top: viewport.top, bottom: "auto" }
@@ -246,7 +252,8 @@ export function ChatWidget() {
         className={cn(
           "fixed bottom-[max(1rem,calc(env(safe-area-inset-bottom)+0.5rem))] right-3 z-50 flex h-12 w-12 items-center justify-center rounded-full bg-gradient-to-r from-blue-500 to-emerald-500 text-white shadow-lg transition-all hover:scale-110 animate-pulse-soft sm:bottom-6 sm:right-6 sm:h-14 sm:w-14",
           // On phones the open chat is full-screen and has its own close button.
-          open && "scale-95 max-sm:hidden",
+          "max-md:hidden",
+          open && "scale-95",
           // animate-pulse-soft would otherwise keep the opacity animated and override the fade-out.
           fabHidden && !open && "max-sm:pointer-events-none max-sm:translate-y-24 max-sm:animate-none max-sm:opacity-0",
         )}

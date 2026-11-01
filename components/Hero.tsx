@@ -1,17 +1,30 @@
 "use client";
 
-import { Loader2 } from "lucide-react";
+import { Loader2, Search } from "lucide-react";
+import { CategoryIcon } from "@/components/icons/CategoryIcon";
+import { CATEGORIES } from "@/lib/categories";
 import { useLanguage } from "@/lib/i18n/LanguageProvider";
+import type { Category } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
 interface HeroProps {
   onFindHelp: () => void;
+  onSelectCategory: (category: Category) => void;
   isLocating: boolean;
   liteModeActive?: boolean;
 }
 
-export function Hero({ onFindHelp, isLocating }: HeroProps) {
+export function Hero({ onFindHelp, onSelectCategory, isLocating }: HeroProps) {
   const { t } = useLanguage();
+
+  const categoryLabel = (cat: Category) =>
+    ({
+      food: t("categoryFood"),
+      shelter: t("categoryShelter"),
+      medical: t("categoryMedical"),
+      clothing: t("categoryClothing"),
+      volunteer: t("categoryVolunteer"),
+    })[cat];
 
   return (
     <section className="hero" id="hero">
@@ -24,22 +37,43 @@ export function Hero({ onFindHelp, isLocating }: HeroProps) {
           <h1>{t("heroTitle")}</h1>
           <p className="lead">{t("heroSubtitle")}</p>
 
+          <div className="hero-tiles-wrap">
+            <h2 className="hero-tiles-title">{t("homeNeedTitle")}</h2>
+            <ul className="hero-tiles">
+              {CATEGORIES.map((cat) => (
+                <li key={cat}>
+                  <button
+                    type="button"
+                    className={cn("hero-tile", `tile-${cat}`)}
+                    onClick={() => onSelectCategory(cat)}
+                    disabled={isLocating}
+                  >
+                    <span className="tile-icon" aria-hidden>
+                      <CategoryIcon category={cat} />
+                    </span>
+                    {categoryLabel(cat)}
+                  </button>
+                </li>
+              ))}
+            </ul>
+          </div>
+
           <button
             type="button"
-            className={cn("cta cta-light")}
+            className="hero-cta-main"
             onClick={onFindHelp}
             disabled={isLocating}
           >
             {isLocating ? (
               <>
-                <Loader2
-                  className="inline-block animate-spin"
-                  style={{ width: 18, height: 18 }}
-                />
+                <Loader2 className="animate-spin" style={{ width: 22, height: 22 }} aria-hidden />
                 {t("locating")}
               </>
             ) : (
-              t("heroCta")
+              <>
+                <Search style={{ width: 22, height: 22 }} aria-hidden />
+                {t("heroCta")}
+              </>
             )}
           </button>
         </div>
