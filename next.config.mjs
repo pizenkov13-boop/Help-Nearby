@@ -1,7 +1,28 @@
 import { CONTENT_SECURITY_POLICY } from "./config/contentSecurityPolicy.mjs";
 
+const MAIN_REPO_OWNER = "pizenkov13-boop";
+
+/**
+ * Build-time flags for sites deployed from the template. On Vercel the repository owner tells a fork
+ * from the main site, so a copy is recognised even if its operator sets no variables at all.
+ */
+function copyModeEnv() {
+  const owner = process.env.VERCEL_GIT_REPO_OWNER?.trim().toLowerCase();
+  const isFork = Boolean(owner) && owner !== MAIN_REPO_OWNER;
+  const env = { NEXT_PUBLIC_IS_FORK: isFork ? "true" : "false" };
+  if (isFork) {
+    env.NEXT_PUBLIC_CHAT_ENABLED = process.env.AITUNNEL_API_KEY?.trim() ? "true" : "false";
+    const production = process.env.VERCEL_PROJECT_PRODUCTION_URL?.trim();
+    if (!process.env.NEXT_PUBLIC_SITE_URL?.trim() && production) {
+      env.NEXT_PUBLIC_SITE_URL = `https://${production}`;
+    }
+  }
+  return env;
+}
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  env: copyModeEnv(),
   output: "standalone",
   transpilePackages: ["leaflet", "react-leaflet"],
   // Next.js 16 defaults to Turbopack; empty config acknowledges custom webpack (dev only).

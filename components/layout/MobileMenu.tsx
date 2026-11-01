@@ -13,6 +13,7 @@ import { useLanguage } from "@/lib/i18n/LanguageProvider";
 import { LANGUAGES, LANGUAGE_NATIVE_NAMES } from "@/lib/i18n/translations";
 import type { LanguageCode } from "@/lib/types";
 import { cn } from "@/lib/utils";
+import { siteConfig } from "@/lib/siteConfig";
 
 interface MobileMenuProps {
   open: boolean;
@@ -134,10 +135,12 @@ export function MobileMenu({ open, onClose }: MobileMenuProps) {
 
   if (!open || !mounted) return null;
 
-  const aboutItems = [
-    { label: t("navOurStory"), href: "/about#our-story" },
-    { label: t("navHowItWorks"), href: "/about#how-it-works" },
-  ];
+  const aboutItems = siteConfig.isCopy
+    ? []
+    : [
+        { label: t("navOurStory"), href: "/about#our-story" },
+        { label: t("navHowItWorks"), href: "/about#how-it-works" },
+      ];
   const whyItems = [
     { label: t("navTheProblem"), href: "/why-it-matters#the-problem" },
     { label: t("navOurSolution"), href: "/why-it-matters#our-solution" },
@@ -208,36 +211,40 @@ export function MobileMenu({ open, onClose }: MobileMenuProps) {
             </AnchorNavLink>
           ))}
 
-          <Link
-            href="/why-it-matters"
-            className={cn("mm-link", active("/why-it-matters") && "active")}
-            aria-current={active("/why-it-matters") ? "page" : undefined}
-            onClick={close}
-          >
-            {t("navWhy")}
-          </Link>
-          {whyItems.map((item) => (
-            <AnchorNavLink key={item.href} href={item.href} className="mm-link mm-sub" onNavigate={close}>
-              {item.label}
-            </AnchorNavLink>
-          ))}
+          {!siteConfig.isCopy && (
+            <>
+              <Link
+                href="/why-it-matters"
+                className={cn("mm-link", active("/why-it-matters") && "active")}
+                aria-current={active("/why-it-matters") ? "page" : undefined}
+                onClick={close}
+              >
+                {t("navWhy")}
+              </Link>
+              {whyItems.map((item) => (
+                <AnchorNavLink key={item.href} href={item.href} className="mm-link mm-sub" onNavigate={close}>
+                  {item.label}
+                </AnchorNavLink>
+              ))}
 
-          <Link
-            href="/reviews"
-            className={cn("mm-link", active("/reviews") && "active")}
-            aria-current={active("/reviews") ? "page" : undefined}
-            onClick={close}
-          >
-            {t("navReviews")}
-          </Link>
-          <Link
-            href="/recent"
-            className={cn("mm-link", active("/recent") && "active")}
-            aria-current={active("/recent") ? "page" : undefined}
-            onClick={close}
-          >
-            {t("navRecent")}
-          </Link>
+              <Link
+                href="/reviews"
+                className={cn("mm-link", active("/reviews") && "active")}
+                aria-current={active("/reviews") ? "page" : undefined}
+                onClick={close}
+              >
+                {t("navReviews")}
+              </Link>
+              <Link
+                href="/recent"
+                className={cn("mm-link", active("/recent") && "active")}
+                aria-current={active("/recent") ? "page" : undefined}
+                onClick={close}
+              >
+                {t("navRecent")}
+              </Link>
+            </>
+          )}
         </nav>
 
         <section className="mm-section" aria-labelledby="mm-lang-title">

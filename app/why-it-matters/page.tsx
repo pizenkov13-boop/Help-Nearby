@@ -1,4 +1,6 @@
 import type { Metadata } from "next";
+import { notFound } from "next/navigation";
+import { siteConfig } from "@/lib/siteConfig";
 import { WhyItMattersContent } from "@/components/pages/WhyItMattersContent";
 
 export const metadata: Metadata = {
@@ -8,5 +10,6 @@ export const metadata: Metadata = {
 };
 
 export default function WhyItMattersPage() {
+  if (siteConfig.isCopy) notFound();
   return <WhyItMattersContent />;
 }

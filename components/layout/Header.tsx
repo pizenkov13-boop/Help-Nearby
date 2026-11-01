@@ -13,6 +13,7 @@ import { useLanguage } from "@/lib/i18n/LanguageProvider";
 import { openEmergencyHelp } from "@/lib/emergencyEvents";
 import type { LanguageCode } from "@/lib/types";
 import { cn } from "@/lib/utils";
+import { siteConfig } from "@/lib/siteConfig";
 
 interface NavSectionMenuProps {
   href: string;
@@ -160,51 +161,65 @@ export function Header() {
               {t("navHome")}
             </Link>
 
-            <NavSectionMenu
-              href="/about"
-              label={t("navAbout")}
-              items={aboutItems}
-              toggleAriaLabel={t("openMenu")}
-              active={isAboutActive}
-              open={aboutOpen}
-              onToggle={() => {
-                setWhyOpen(false);
-                setLangOpen(false);
-                setAboutOpen((o) => !o);
-              }}
-              onClose={closeAll}
-            />
+            {siteConfig.isCopy ? (
+              <Link
+                href="/about"
+                className={cn("nav-link", isAboutActive && "active")}
+                onClick={closeAll}
+              >
+                {t("navAbout")}
+              </Link>
+            ) : (
+              <NavSectionMenu
+                href="/about"
+                label={t("navAbout")}
+                items={aboutItems}
+                toggleAriaLabel={t("openMenu")}
+                active={isAboutActive}
+                open={aboutOpen}
+                onToggle={() => {
+                  setWhyOpen(false);
+                  setLangOpen(false);
+                  setAboutOpen((o) => !o);
+                }}
+                onClose={closeAll}
+              />
+            )}
 
-            <NavSectionMenu
-              href="/why-it-matters"
-              label={t("navWhy")}
-              items={whyItems}
-              toggleAriaLabel={t("openMenu")}
-              active={isWhyActive}
-              open={whyOpen}
-              onToggle={() => {
-                setAboutOpen(false);
-                setLangOpen(false);
-                setWhyOpen((o) => !o);
-              }}
-              onClose={closeAll}
-            />
+            {!siteConfig.isCopy && (
+              <>
+                <NavSectionMenu
+                  href="/why-it-matters"
+                  label={t("navWhy")}
+                  items={whyItems}
+                  toggleAriaLabel={t("openMenu")}
+                  active={isWhyActive}
+                  open={whyOpen}
+                  onToggle={() => {
+                    setAboutOpen(false);
+                    setLangOpen(false);
+                    setWhyOpen((o) => !o);
+                  }}
+                  onClose={closeAll}
+                />
 
-            <Link
-              href="/reviews"
-              className={cn("nav-link", pathname === "/reviews" && "active")}
-              onClick={closeAll}
-            >
-              {t("navReviewsShort")}
-            </Link>
+                <Link
+                  href="/reviews"
+                  className={cn("nav-link", pathname === "/reviews" && "active")}
+                  onClick={closeAll}
+                >
+                  {t("navReviewsShort")}
+                </Link>
 
-            <Link
-              href="/recent"
-              className={cn("nav-link", pathname === "/recent" && "active")}
-              onClick={closeAll}
-            >
-              {t("navRecent")}
-            </Link>
+                <Link
+                  href="/recent"
+                  className={cn("nav-link", pathname === "/recent" && "active")}
+                  onClick={closeAll}
+                >
+                  {t("navRecent")}
+                </Link>
+              </>
+            )}
           </nav>
 
           <div className="header-toolbar">

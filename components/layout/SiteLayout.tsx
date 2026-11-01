@@ -5,6 +5,7 @@ import { EmergencyHelp } from "@/components/EmergencyHelp";
 import { Header } from "@/components/layout/Header";
 import { ScrollToHash } from "@/components/layout/ScrollToHash";
 import { useLanguage } from "@/lib/i18n/LanguageProvider";
+import { siteConfig } from "@/lib/siteConfig";
 import { SiteFooter } from "./SiteFooter";
 
 interface SiteLayoutProps {
@@ -24,7 +25,7 @@ export function SiteLayout({ children }: SiteLayoutProps) {
       <EmergencyHelp />
       <main className="flex-1">{children}</main>
       <SiteFooter />
-      <ChatWidget />
+      {siteConfig.chatEnabled ? <ChatWidget /> : null}
     </div>
   );
 }

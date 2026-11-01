@@ -1,4 +1,6 @@
 import type { Metadata } from "next";
+import { notFound } from "next/navigation";
+import { siteConfig } from "@/lib/siteConfig";
 import { SubmitPage } from "@/components/pages/SubmitPage";
 
 export const metadata: Metadata = {
@@ -8,5 +10,6 @@ export const metadata: Metadata = {
 };
 
 export default function Submit() {
+  if (siteConfig.isCopy) notFound();
   return <SubmitPage />;
 }

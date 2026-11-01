@@ -44,6 +44,94 @@ function HeartIcon() {
   );
 }
 
+/** Mandatory credit on every copy. It is not configurable. */
+function PoweredBy({ language }: { language: string }) {
+  return (
+    <p className="made" data-testid="footer-powered-by">
+      {language === "ru" ? "Работает на " : "Powered by "}
+      <a href={`${MAIN_SITE_URL}/`} target="_blank" rel="noopener">
+        HelpNearby
+      </a>
+    </p>
+  );
+}
+
+function instagramHref(value: string): string {
+  if (/^https?:\/\//i.test(value)) return value;
+  return `https://www.instagram.com/${value.replace(/^@/, "")}`;
+}
+
+/** Footer of a copy: no main-site contacts, partners, SDG block or review/submit links. */
+function CopySiteFooter() {
+  const { t, language } = useLanguage();
+  const { operatorName, instagram, contactEmail } = siteConfig;
+
+  return (
+    <footer>
+      <div className="footer-top">
+        <div className="footer-brand">
+          <Link href="/" className="brand">
+            <BrandLogo barId="hn-bar-footer" />
+            <span>{siteConfig.name}</span>
+          </Link>
+          <p>{t("footerTagline")}</p>
+        </div>
+
+        <div>
+          <h4>{t("footerQuickLinks")}</h4>
+          <ul>
+            <li>
+              <Link href="/">
+                <House className="ui-icon" aria-hidden />
+                {t("navHome")}
+              </Link>
+            </li>
+            <li>
+              <Link href="/about">
+                <BookOpen className="ui-icon" aria-hidden />
+                {t("navAbout")}
+              </Link>
+            </li>
+            <li>
+              <Link href="/privacy">
+                <ShieldCheck className="ui-icon" aria-hidden />
+                {t("navPrivacy")}
+              </Link>
+            </li>
+          </ul>
+        </div>
+
+        <div>
+          <h4>{t("footerContact")}</h4>
+          <div className="contact-list">
+            {instagram ? (
+              <a className="contact-btn" href={instagramHref(instagram)} target="_blank" rel="noopener noreferrer">
+                <InstagramIcon className="ui-icon" aria-hidden />
+                {instagram.startsWith("http") ? "Instagram" : `@${instagram.replace(/^@/, "")}`}
+              </a>
+            ) : null}
+            {contactEmail ? (
+              <a className="contact-btn" href={`mailto:${contactEmail}`} data-testid="footer-contact-email">
+                <Mail className="ui-icon" aria-hidden />
+                {contactEmail}
+              </a>
+            ) : null}
+            <a className="contact-btn" href={GITHUB_URL} target="_blank" rel="noopener noreferrer">
+              <GithubIcon className="ui-icon" aria-hidden />
+              {t("footerGitHub")}
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <div className="footer-bottom">
+        {operatorName ? <p>{`© ${new Date().getFullYear()} ${operatorName}`}</p> : null}
+        <PoweredBy language={language} />
+      </div>
+    </footer>
+  );
+}
+
 export function SiteFooter() {
   const { t, language } = useLanguage();
   // The authorship credit is not configurable. Copies are detected by hostname as well as by
@@ -81,6 +169,8 @@ export function SiteFooter() {
 
     await copyShareLink();
   }, [copyShareLink, t]);
+
+  if (siteConfig.isCopy) return <CopySiteFooter />;
 
   return (
     <footer>
@@ -205,15 +295,7 @@ export function SiteFooter() {
           </span>
           {" "}{t("footerForCommunities")}
         </p>
-        {isMainSite ? null : (
-          <p className="made" data-testid="footer-based-on">
-            {language === "ru" ? "На основе " : "Based on "}
-            <a href={`${MAIN_SITE_URL}/`} target="_blank" rel="noopener">
-              HelpNearby
-            </a>
-            {language === "ru" ? ", автор Pavel Izenkin" : " by Pavel Izenkin"}
-          </p>
-        )}
+        {isMainSite ? null : <PoweredBy language={language} />}
       </div>
     </footer>
   );

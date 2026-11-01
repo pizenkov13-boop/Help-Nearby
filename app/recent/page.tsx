@@ -1,4 +1,6 @@
 import type { Metadata } from "next";
+import { notFound } from "next/navigation";
+import { siteConfig } from "@/lib/siteConfig";
 import { RecentPage } from "@/components/pages/RecentPage";
 import {
   fetchRecentOrganizations,
@@ -28,6 +30,7 @@ function withTimeout<T>(promise: Promise<T>, fallback: T): Promise<T> {
 }
 
 export default async function Recent() {
+  if (siteConfig.isCopy) notFound();
   const [initial, countries] = await Promise.all([
     withTimeout(fetchRecentOrganizations(), {
       organizations: [],
