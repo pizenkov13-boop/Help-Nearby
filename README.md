@@ -25,7 +25,7 @@ The project was built by **Pavel Izenkin**, 16, from Russia — with the goal of
 |---|---|
 | **Initial prototype (Webflow)** | April 16 – May 12, 2026 |
 | **Production platform (Next.js)** | May 17, 2026 – present · [www.help-nearby.org](https://www.help-nearby.org/) |
-| **Prize submission** | Zayed Sustainability Prize **2027** — Global High Schools category |
+| **Prize submission** | Подали заявку на Zayed Sustainability Prize 2027 (Global High Schools). В финал не вышли.<br>Applied to the Zayed Sustainability Prize 2027 (Global High Schools). Did not advance to the finals. |
 | **Prototype reach (Webflow, April–May 2026)** | Users from **24 countries** in the first month (Webflow analytics) |
 | **Production analytics (Next.js)** | [Vercel Web Analytics](https://vercel.com/docs/analytics) — cookie-less, aggregated page views; exact counts are in the Vercel dashboard (not duplicated here to avoid stale figures) |
 
