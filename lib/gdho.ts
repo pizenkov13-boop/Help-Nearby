@@ -1,6 +1,5 @@
 import "server-only";
 
-import { OCHA_USER_AGENT } from "@/lib/ochaHttp.server";
 import { slugify } from "@/lib/orgUtils";
 import type { Category, Organization } from "@/lib/types";
 
@@ -67,7 +66,7 @@ export async function fetchGdhoOrganizationsForCountry(
     const response = await fetch(url, {
       headers: {
         Accept: "text/csv",
-        "User-Agent": OCHA_USER_AGENT,
+        "User-Agent": "HelpNearby/1.0 (help-nearby.app)",
       },
       signal: AbortSignal.timeout(GDHO_TIMEOUT_MS),
       next: { revalidate: 86400 },
