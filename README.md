@@ -147,7 +147,6 @@ These are used as data sources only; the project is independent and is not opera
    | `NEXT_PUBLIC_MAP_CENTER` | нет | Центр карты региона в виде `lat,lng` (зарезервировано; сейчас приложение стартует с местоположения посетителя) |
    | `NEXT_PUBLIC_MAP_ZOOM` | нет | Начальный зум карты, 1–19 (по умолчанию `14`) |
    | `NEXT_PUBLIC_FOOTER_LINK_URL` | нет | Ссылка на проект в подвале (по умолчанию — этот репозиторий) |
-   | `NEXT_PUBLIC_HIDE_POWERED_BY` | нет | `true` убирает подпись «Powered by HelpNearby» |
    | `DISABLE_PING` | нет | `true` отключает анонимный пинг копии (см. [Приватность](#приватность-и-анонимный-пинг)) |
    | `RELIEFWEB_APPNAME` | нет | Ваш зарегистрированный [appname ReliefWeb](https://apidoc.reliefweb.int/); без него результаты ReliefWeb пропускаются |
    | `AITUNNEL_API_KEY`, `AITUNNEL_BASE_URL`, `AITUNNEL_MODEL` | нет | Включают экспериментального ИИ-ассистента |
@@ -198,7 +197,6 @@ Anyone can run their own copy of Help Nearby for a city, region or community. Yo
    | `NEXT_PUBLIC_MAP_CENTER` | no | Regional map center as `lat,lng` (reserved; the app currently starts from the visitor's own location) |
    | `NEXT_PUBLIC_MAP_ZOOM` | no | Initial map zoom, 1–19 (default `14`) |
    | `NEXT_PUBLIC_FOOTER_LINK_URL` | no | Project link in the footer (default: this repository) |
-   | `NEXT_PUBLIC_HIDE_POWERED_BY` | no | `true` removes the "Powered by HelpNearby" credit |
    | `DISABLE_PING` | no | `true` turns off the anonymous deployment ping (see [Privacy](#privacy-and-the-anonymous-ping)) |
    | `RELIEFWEB_APPNAME` | no | Your registered [ReliefWeb appname](https://apidoc.reliefweb.int/); without it ReliefWeb results are skipped |
    | `AITUNNEL_API_KEY`, `AITUNNEL_BASE_URL`, `AITUNNEL_MODEL` | no | Enable the experimental AI assistant |
@@ -228,7 +226,11 @@ Anyone can run their own copy of Help Nearby for a city, region or community. Yo
 
 **RU:** Проект распространяется под лицензией MIT. Запуск, изменение и использование для помощи людям разрешены. ЗАПРЕЩЕНО выдавать HelpNearby или его производные за собственную оригинальную разработку. Нельзя подавать его как свой проект на конкурсы, гранты, в программы поступления, в волонтёрские и любые другие организации. Это нарушение правил конкурсов и академической честности. Каждый запуск HelpNearby регистрируется (домен и версия, см. раздел Privacy): мы видим, где он работает. Присвоение авторства фиксируется, и мы сообщаем о нём организаторам конкурсов и программ. Обязательно сохраняйте файл LICENSE и подпись "Powered by HelpNearby" и указывайте, что ваш сайт основан на HelpNearby. Автор: Pavel Izenkin.
 
+Подпись в футере («На основе HelpNearby, автор Pavel Izenkin») обязательна: она показывается на каждой копии автоматически, не отключается настройками, и удалять её нельзя.
+
 **EN:** This project is released under the MIT license. Running, modifying and using it to help people is allowed. It is PROHIBITED to present HelpNearby or its derivatives as your own original work. Do not submit it as your own project to competitions, grants, admissions programs, volunteer or any other organizations. This violates competition rules and academic integrity. Every HelpNearby deployment is registered (domain and version, see Privacy): we can see where it runs. Misrepresenting authorship is documented and reported to the organizers of competitions and programs. You must keep the LICENSE file and the "Powered by HelpNearby" attribution, and state that your site is based on HelpNearby. Author: Pavel Izenkin.
+
+The footer credit ("Based on HelpNearby by Pavel Izenkin") is mandatory: it is shown on every copy automatically, cannot be turned off by configuration, and must not be removed.
 
 ---
 
