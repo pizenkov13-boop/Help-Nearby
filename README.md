@@ -26,8 +26,6 @@
 3. **Нажмите Deploy.** Во время сборки таблицы создаются сами (`npm run setup`, идемпотентно, из [`supabase/schema.sql`](supabase/schema.sql)); SQL вручную выполнять не нужно.
 4. **Добавьте организации:** откройте `/admin` и подтверждайте заявки с `/submit`, либо загрузите CSV в таблицу `organizations` (Supabase → Table Editor → Insert → Import data from CSV; колонки как в [`supabase/schema.sql`](supabase/schema.sql), `verified` поставьте `true`). Демо-данные: [`supabase/seed_demo.sql`](supabase/seed_demo.sql) (три вымышленные организации, удалите их).
 
-Без базы данных сайт тоже работает: поиск идёт по OpenStreetMap и открытым гуманитарным источникам, а `/admin` и форма добавления организации отвечают, что база не подключена.
-
 **Запустил свою копию? Добавь строку в таблицу ниже через pull request, и мы покажем твой город.**
 
 Переменные окружения. Ничего обязательного вручную задавать не нужно:
@@ -36,21 +34,16 @@
 |------------|--------|----------|
 | `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY`, `POSTGRES_URL_NON_POOLING` | интеграция Supabase (автоматически) | Доступ к базе и создание таблиц при сборке |
 | `ADMIN_PASSWORD` | вы (рекомендуется) | Пароль для `/admin`; без него админка выключена |
-| `ADMIN_SESSION_SECRET` | необязательно | Строка от 32 символов для подписи cookie админа; по умолчанию вычисляется из серверного ключа Supabase |
-| `NEXT_PUBLIC_SITE_NAME` | необязательно | Название сайта в метаданных и манифесте PWA (по умолчанию `Help Nearby`) |
-| `NEXT_PUBLIC_SITE_URL` | необязательно | Основной адрес вашего сайта, например `https://help.example.org` |
-| `NEXT_PUBLIC_DEFAULT_LANGUAGE` | необязательно | Язык при первом визите: `en`, `ru`, `es`, `fr`, `de`, `zh`, `ar` (по умолчанию `en`) |
-| `NEXT_PUBLIC_CONTACT_EMAIL` | необязательно | Публичный контактный адрес в подвале и на странице приватности |
-| `NEXT_PUBLIC_MAP_CENTER` | необязательно | Центр карты региона в виде `lat,lng` (зарезервировано; сейчас приложение стартует с местоположения посетителя) |
-| `NEXT_PUBLIC_MAP_ZOOM` | необязательно | Начальный зум карты, 1–19 (по умолчанию `14`) |
-| `NEXT_PUBLIC_FOOTER_LINK_URL` | необязательно | Ссылка на проект в подвале (по умолчанию — этот репозиторий) |
-| `DISABLE_PING` | необязательно | `true` отключает анонимный пинг копии (см. [Приватность](#приватность-и-анонимный-пинг)) |
-| `RELIEFWEB_APPNAME` | необязательно | Ваш зарегистрированный [appname ReliefWeb](https://apidoc.reliefweb.int/); без него результаты ReliefWeb пропускаются |
-| `AITUNNEL_API_KEY`, `AITUNNEL_BASE_URL`, `AITUNNEL_MODEL` | необязательно | Включают экспериментального ИИ-ассистента |
-| `NEXT_PUBLIC_MAP_TILES_URL`, `NEXT_PUBLIC_MAP_TILES_ATTRIBUTION` | необязательно | Свой провайдер тайлов карты |
-| `DEBUG_TOKEN` | необязательно | Включает диагностический маршрут `/api/debug/sources` |
 
 Ручной вариант (без интеграции): создайте проект Supabase, выполните [`supabase/schema.sql`](supabase/schema.sql) в SQL Editor и задайте `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY` и `SUPABASE_SERVICE_ROLE_KEY` сами. Храните ключи в секрете и никогда не коммитьте их.
+
+## Авторство
+
+Проект распространяется под лицензией MIT. Запуск, изменение и использование для помощи людям разрешены. ЗАПРЕЩЕНО выдавать HelpNearby или его производные за собственную оригинальную разработку. Нельзя подавать его как свой проект на конкурсы, гранты, в программы поступления, в волонтёрские и любые другие организации. Это нарушение правил конкурсов и академической честности. Запуски HelpNearby регистрируются (домен и версия, см. раздел Privacy): мы видим, где он работает. Присвоение авторства фиксируется, и мы сообщаем о нём организаторам конкурсов и программ. Обязательно сохраняйте файл LICENSE и подпись "Powered by HelpNearby" и указывайте, что ваш сайт основан на HelpNearby. Автор: Pavel Izenkin.
+
+Подпись в футере («Работает на HelpNearby») обязательна: она показывается на каждой копии автоматически, не отключается настройками, и удалять её нельзя.
+
+Допустимая формулировка: «Запустил и веду местную версию открытой платформы HelpNearby (автор Pavel Izenkin) в <город>». Недопустимо: «создал», «разработал», «мой проект», а также ссылаться на страницу HelpNearby на платформе ООН как на свою: она относится только к основному проекту.
 
 ## Run it in your city
 
@@ -63,8 +56,6 @@ Anyone can run their own copy of Help Nearby for a city, region or community. Yo
 3. **Click Deploy.** During the build the tables are created for you (`npm run setup`, idempotent, from [`supabase/schema.sql`](supabase/schema.sql)); no SQL to run by hand.
 4. **Add organizations:** open `/admin` and verify community submissions from `/submit`, or bulk-load rows by importing a CSV into the `organizations` table (Supabase → Table Editor → Insert → Import data from CSV; columns follow [`supabase/schema.sql`](supabase/schema.sql), set `verified` to `true`). Demo data: [`supabase/seed_demo.sql`](supabase/seed_demo.sql) (three fictional organizations, delete them).
 
-The site also works without a database: search uses OpenStreetMap and open humanitarian sources, and `/admin` and the organization form say that no database is connected.
-
 **Launched your copy?** Add a row to the table below with a pull request and we'll showcase your city.
 
 Environment variables. Nothing is required by hand:
@@ -73,33 +64,12 @@ Environment variables. Nothing is required by hand:
 |----------|--------|-------------|
 | `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY`, `POSTGRES_URL_NON_POOLING` | Supabase integration (automatic) | Database access and table creation at build time |
 | `ADMIN_PASSWORD` | you (recommended) | Password for `/admin`; without it the admin area is off |
-| `ADMIN_SESSION_SECRET` | optional | Random string of 32+ characters that signs the admin cookie; derived from the server-side Supabase key by default |
-| `NEXT_PUBLIC_SITE_NAME` | optional | Site name in page metadata and the PWA manifest (default `Help Nearby`) |
-| `NEXT_PUBLIC_SITE_URL` | optional | Canonical origin of your site, e.g. `https://help.example.org` |
-| `NEXT_PUBLIC_DEFAULT_LANGUAGE` | optional | First-visit language: `en`, `ru`, `es`, `fr`, `de`, `zh`, `ar` (default `en`) |
-| `NEXT_PUBLIC_CONTACT_EMAIL` | optional | Public contact address shown in the footer and privacy page |
-| `NEXT_PUBLIC_MAP_CENTER` | optional | Regional map center as `lat,lng` (reserved; the app currently starts from the visitor's own location) |
-| `NEXT_PUBLIC_MAP_ZOOM` | optional | Initial map zoom, 1–19 (default `14`) |
-| `NEXT_PUBLIC_FOOTER_LINK_URL` | optional | Project link in the footer (default: this repository) |
-| `DISABLE_PING` | optional | `true` turns off the anonymous deployment ping (see [Privacy](#privacy-and-the-anonymous-ping)) |
-| `RELIEFWEB_APPNAME` | optional | Your registered [ReliefWeb appname](https://apidoc.reliefweb.int/); without it ReliefWeb results are skipped |
-| `AITUNNEL_API_KEY`, `AITUNNEL_BASE_URL`, `AITUNNEL_MODEL` | optional | Enable the experimental AI assistant |
-| `NEXT_PUBLIC_MAP_TILES_URL`, `NEXT_PUBLIC_MAP_TILES_ATTRIBUTION` | optional | Custom map tile provider |
-| `DEBUG_TOKEN` | optional | Enables the `/api/debug/sources` diagnostics route |
 
 Manual alternative (no integration): create a Supabase project, run [`supabase/schema.sql`](supabase/schema.sql) in the SQL Editor and set `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY` and `SUPABASE_SERVICE_ROLE_KEY` yourself. Keep the keys secret and never commit them.
 
----
+## Attribution
 
-## Attribution / Авторство
-
-**RU:** Проект распространяется под лицензией MIT. Запуск, изменение и использование для помощи людям разрешены. ЗАПРЕЩЕНО выдавать HelpNearby или его производные за собственную оригинальную разработку. Нельзя подавать его как свой проект на конкурсы, гранты, в программы поступления, в волонтёрские и любые другие организации. Это нарушение правил конкурсов и академической честности. Запуски HelpNearby регистрируются (домен и версия, см. раздел Privacy): мы видим, где он работает. Присвоение авторства фиксируется, и мы сообщаем о нём организаторам конкурсов и программ. Обязательно сохраняйте файл LICENSE и подпись "Powered by HelpNearby" и указывайте, что ваш сайт основан на HelpNearby. Автор: Pavel Izenkin.
-
-Подпись в футере («Работает на HelpNearby») обязательна: она показывается на каждой копии автоматически, не отключается настройками, и удалять её нельзя.
-
-Допустимая формулировка: «Запустил и веду местную версию открытой платформы HelpNearby (автор Pavel Izenkin) в <город>». Недопустимо: «создал», «разработал», «мой проект», а также ссылаться на страницу HelpNearby на платформе ООН как на свою: она относится только к основному проекту.
-
-**EN:** This project is released under the MIT license. Running, modifying and using it to help people is allowed. It is PROHIBITED to present HelpNearby or its derivatives as your own original work. Do not submit it as your own project to competitions, grants, admissions programs, volunteer or any other organizations. This violates competition rules and academic integrity. HelpNearby deployments are registered (domain and version, see Privacy): we can see where it runs. Misrepresenting authorship is documented and reported to the organizers of competitions and programs. You must keep the LICENSE file and the "Powered by HelpNearby" attribution, and state that your site is based on HelpNearby. Author: Pavel Izenkin.
+This project is released under the MIT license. Running, modifying and using it to help people is allowed. It is PROHIBITED to present HelpNearby or its derivatives as your own original work. Do not submit it as your own project to competitions, grants, admissions programs, volunteer or any other organizations. This violates competition rules and academic integrity. HelpNearby deployments are registered (domain and version, see Privacy): we can see where it runs. Misrepresenting authorship is documented and reported to the organizers of competitions and programs. You must keep the LICENSE file and the "Powered by HelpNearby" attribution, and state that your site is based on HelpNearby. Author: Pavel Izenkin.
 
 The footer credit ("Powered by HelpNearby") is mandatory: it is shown on every copy automatically, cannot be turned off by configuration, and must not be removed.
 
@@ -111,14 +81,14 @@ Acceptable wording: "Launched and operate a local version of the open-source Hel
 
 - **Посетители:** на основном сайте используется аналитика без cookie (только агрегированные просмотры страниц); в браузере хранятся лишь настройки языка и темы. Подробности — на странице приватности в приложении.
 - **Анонимный пинг копий:** копия Help Nearby на любом домене, кроме `www.help-nearby.org`, раз в сутки отправляет один запрос на `https://www.help-nearby.org/api/deployments` ровно с тремя полями: `domain` (имя хоста вашего сайта), `version` (версия приложения) и `timestamp`. В нём нет данных посетителей, поисковых запросов и ключей. Как любой HTTP-запрос, он приходит на наш сервер с IP-адреса вашего сервера; адрес используется только для ограничения частоты в памяти и не сохраняется. Это позволяет проекту видеть, сколько копий живы. Пинг отправляет ежедневный cron Vercel из [`vercel.json`](vercel.json) через [`lib/ping.server.ts`](lib/ping.server.ts).
-- **Как отключить:** задайте `DISABLE_PING=true` в переменных окружения (или удалите запись cron в `vercel.json`).
+- Отключить: `DISABLE_PING=true`.
 - **Наша сторона:** принимающий маршрут проверяет и ограничивает запросы и хранит в таблице `deployments` только домен, версию, время первого и последнего пинга.
 
 ## Privacy and the anonymous ping
 
 - **Visitors:** the app uses cookie-less, aggregated page-view analytics on the main site and stores a language/theme preference in the browser only. See the in-app privacy page for details.
 - **Anonymous deployment ping (copies only):** a copy of Help Nearby running on any domain other than `www.help-nearby.org` sends one request per day to `https://www.help-nearby.org/api/deployments` with exactly three fields: `domain` (the hostname of your site), `version` (the app version) and `timestamp`. It contains no visitor data, no search queries, no data about your visitors and no keys. Like any HTTP request it reaches our server from your server's IP address, which is used only for in-memory rate limiting and is not stored. It lets the project see how many copies are alive. The ping is sent by the daily Vercel cron in [`vercel.json`](vercel.json) through [`lib/ping.server.ts`](lib/ping.server.ts).
-- **Turn it off:** set `DISABLE_PING=true` in your environment variables (or delete the cron entry in `vercel.json`).
+- Turn off: `DISABLE_PING=true`.
 - **Our side:** the receiving endpoint validates and rate-limits requests and stores only the domain, version, first-seen and last-seen times in a `deployments` table.
 
 ---
@@ -397,6 +367,50 @@ Please do not include API keys or `.env.local` in submissions.
 Built with support from the open-source community, OpenStreetMap contributors, Supabase, and AITunnel.
 
 Community partner: [Kindness Corporation](https://www.kindnesscorporation.ru/)
+
+---
+
+## Дополнительные настройки / Optional settings
+
+Всё необязательно, у каждой переменной есть значение по умолчанию. Без базы данных сайт работает на данных OpenStreetMap, а `/admin` и форма добавления организации сообщают, что база не подключена.
+
+| Переменная | Описание |
+|------------|----------|
+| `ADMIN_SESSION_SECRET` | Строка от 32 символов для подписи cookie админа; по умолчанию вычисляется из серверного ключа Supabase |
+| `NEXT_PUBLIC_SITE_NAME` | Название сайта в метаданных и манифесте PWA (по умолчанию `Help Nearby`) |
+| `NEXT_PUBLIC_SITE_URL` | Основной адрес вашего сайта, например `https://help.example.org` |
+| `NEXT_PUBLIC_DEFAULT_LANGUAGE` | Язык при первом визите: `en`, `ru`, `es`, `fr`, `de`, `zh`, `ar` (по умолчанию `en`) |
+| `NEXT_PUBLIC_CONTACT_EMAIL` | Публичный контактный адрес в подвале и на странице приватности |
+| `NEXT_PUBLIC_MAP_CENTER` | Центр карты региона в виде `lat,lng` (зарезервировано; сейчас приложение стартует с местоположения посетителя) |
+| `NEXT_PUBLIC_MAP_ZOOM` | Начальный зум карты, 1–19 (по умолчанию `14`) |
+| `NEXT_PUBLIC_FOOTER_LINK_URL` | Ссылка на проект в подвале (по умолчанию — этот репозиторий) |
+| `DISABLE_PING` | `true` отключает анонимный пинг копии (см. [Приватность](#приватность-и-анонимный-пинг)) |
+| `RELIEFWEB_APPNAME` | Ваш зарегистрированный [appname ReliefWeb](https://apidoc.reliefweb.int/); без него результаты ReliefWeb пропускаются |
+| `AITUNNEL_API_KEY`, `AITUNNEL_BASE_URL`, `AITUNNEL_MODEL` | Включают экспериментального ИИ-ассистента |
+| `NEXT_PUBLIC_MAP_TILES_URL`, `NEXT_PUBLIC_MAP_TILES_ATTRIBUTION` | Свой провайдер тайлов карты |
+| `DEBUG_TOKEN` | Включает диагностический маршрут `/api/debug/sources` |
+| `NEXT_PUBLIC_OPERATOR_NAME` | Кто ведёт копию: показывается в строке © и на странице приватности |
+| `NEXT_PUBLIC_INSTAGRAM` | Instagram оператора (ник или ссылка) в футере копии |
+
+Everything here is optional and has a default. Without a database the site runs on OpenStreetMap data, and `/admin` and the organization form say that no database is connected.
+
+| Variable | Description |
+|----------|-------------|
+| `ADMIN_SESSION_SECRET` | Random string of 32+ characters that signs the admin cookie; derived from the server-side Supabase key by default |
+| `NEXT_PUBLIC_SITE_NAME` | Site name in page metadata and the PWA manifest (default `Help Nearby`) |
+| `NEXT_PUBLIC_SITE_URL` | Canonical origin of your site, e.g. `https://help.example.org` |
+| `NEXT_PUBLIC_DEFAULT_LANGUAGE` | First-visit language: `en`, `ru`, `es`, `fr`, `de`, `zh`, `ar` (default `en`) |
+| `NEXT_PUBLIC_CONTACT_EMAIL` | Public contact address shown in the footer and privacy page |
+| `NEXT_PUBLIC_MAP_CENTER` | Regional map center as `lat,lng` (reserved; the app currently starts from the visitor's own location) |
+| `NEXT_PUBLIC_MAP_ZOOM` | Initial map zoom, 1–19 (default `14`) |
+| `NEXT_PUBLIC_FOOTER_LINK_URL` | Project link in the footer (default: this repository) |
+| `DISABLE_PING` | `true` turns off the anonymous deployment ping (see [Privacy](#privacy-and-the-anonymous-ping)) |
+| `RELIEFWEB_APPNAME` | Your registered [ReliefWeb appname](https://apidoc.reliefweb.int/); without it ReliefWeb results are skipped |
+| `AITUNNEL_API_KEY`, `AITUNNEL_BASE_URL`, `AITUNNEL_MODEL` | Enable the experimental AI assistant |
+| `NEXT_PUBLIC_MAP_TILES_URL`, `NEXT_PUBLIC_MAP_TILES_ATTRIBUTION` | Custom map tile provider |
+| `DEBUG_TOKEN` | Enables the `/api/debug/sources` diagnostics route |
+| `NEXT_PUBLIC_OPERATOR_NAME` | Who runs the copy: shown in the © line and on the privacy page |
+| `NEXT_PUBLIC_INSTAGRAM` | The operator's Instagram (handle or URL) in the copy footer |
 
 ---
 
