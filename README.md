@@ -122,6 +122,59 @@ These are used as data sources only; the project is independent and is not opera
 
 ---
 
+## Run it in your city
+
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Fpizenkov13-boop%2FHelp-Nearby&env=NEXT_PUBLIC_SUPABASE_URL,NEXT_PUBLIC_SUPABASE_ANON_KEY,SUPABASE_SERVICE_ROLE_KEY,ADMIN_PASSWORD,ADMIN_SESSION_SECRET&envDescription=Supabase%20project%20keys%20and%20admin%20credentials%20(see%20README%2C%20Run%20it%20in%20your%20city)&envLink=https%3A%2F%2Fgithub.com%2Fpizenkov13-boop%2FHelp-Nearby%23run-it-in-your-city&project-name=help-nearby&repository-name=help-nearby)
+
+Anyone can run their own copy of Help Nearby for a city, region or community. You need free accounts on GitHub, [Supabase](https://supabase.com/) and [Vercel](https://vercel.com/).
+
+1. **Fork the repository** (or use it as a template) on GitHub.
+2. **Create a Supabase project** at [supabase.com](https://supabase.com/). Note the project URL, the `anon` key and the `service_role` key (Project Settings → API).
+3. **Run the SQL.** In Supabase → SQL Editor, run [`supabase/schema.sql`](supabase/schema.sql) on the empty project. Optionally run [`supabase/seed_demo.sql`](supabase/seed_demo.sql) too: it adds three fictional example organizations that you should delete or replace.
+4. **Set the environment variables** (Vercel → Project → Settings → Environment Variables, or `.env.local` locally). Keep the keys secret and never commit them.
+
+   | Variable | Required | Description |
+   |----------|----------|-------------|
+   | `NEXT_PUBLIC_SUPABASE_URL` | yes | Supabase project URL |
+   | `NEXT_PUBLIC_SUPABASE_ANON_KEY` | yes | Supabase anon (public) key |
+   | `SUPABASE_SERVICE_ROLE_KEY` | yes | Server-only key used for moderation and counters |
+   | `ADMIN_PASSWORD` | yes | Password for `/admin` |
+   | `ADMIN_SESSION_SECRET` | yes | Random string of 32+ characters that signs the admin session cookie |
+   | `NEXT_PUBLIC_SITE_NAME` | no | Site name in page metadata and the PWA manifest (default `Help Nearby`) |
+   | `NEXT_PUBLIC_SITE_URL` | no | Canonical origin of your site, e.g. `https://help.example.org` |
+   | `NEXT_PUBLIC_DEFAULT_LANGUAGE` | no | First-visit language: `en`, `ru`, `es`, `fr`, `de`, `zh`, `ar` (default `en`) |
+   | `NEXT_PUBLIC_CONTACT_EMAIL` | no | Public contact address shown in the footer and privacy page |
+   | `NEXT_PUBLIC_MAP_CENTER` | no | Regional map center as `lat,lng` (reserved; the app currently starts from the visitor's own location) |
+   | `NEXT_PUBLIC_MAP_ZOOM` | no | Initial map zoom, 1–19 (default `14`) |
+   | `NEXT_PUBLIC_FOOTER_LINK_URL` | no | Project link in the footer (default: this repository) |
+   | `NEXT_PUBLIC_HIDE_POWERED_BY` | no | `true` removes the "Powered by HelpNearby" credit |
+   | `DISABLE_PING` | no | `true` turns off the anonymous deployment ping (see [Privacy](#privacy)) |
+   | `RELIEFWEB_APPNAME` | no | Your registered [ReliefWeb appname](https://apidoc.reliefweb.int/); without it ReliefWeb results are skipped |
+   | `AITUNNEL_API_KEY`, `AITUNNEL_BASE_URL`, `AITUNNEL_MODEL` | no | Enable the experimental AI assistant |
+   | `NEXT_PUBLIC_MAP_TILES_URL`, `NEXT_PUBLIC_MAP_TILES_ATTRIBUTION` | no | Custom map tile provider |
+   | `DEBUG_TOKEN` | no | Enables the `/api/debug/sources` diagnostics route |
+
+5. **Deploy on Vercel** (use the button above or import your fork), then **add organizations**: sign in at `/admin` to verify community submissions from `/submit`, or bulk-load rows by importing a CSV into the `organizations` table (Supabase → Table Editor → Insert → Import data from CSV; columns follow [`supabase/schema.sql`](supabase/schema.sql), set `verified` to `true`).
+
+**Launched yours?** Write to hello@help-nearby.org or add a row to the table below with a pull request.
+
+### Where it runs
+
+| City | Country | Site | Run by |
+|------|---------|------|--------|
+| Paris / Global | France / Worldwide | [www.help-nearby.org](https://www.help-nearby.org/) | Pavel Izenkin |
+
+---
+
+## Privacy
+
+- **Visitors:** the app uses cookie-less, aggregated page-view analytics on the main site and stores a language/theme preference in the browser only. See the in-app privacy page for details.
+- **Anonymous deployment ping (copies only):** a copy of Help Nearby running on any domain other than `www.help-nearby.org` sends one request per day to `https://www.help-nearby.org/api/deployments` with exactly three fields: `domain` (the hostname of your site), `version` (the app version) and `timestamp`. It contains no visitor data, no search queries, no data about your visitors and no keys. Like any HTTP request it reaches our server from your server's IP address, which is used only for in-memory rate limiting and is not stored. It lets the project see how many copies are alive. The ping is sent by the daily Vercel cron in [`vercel.json`](vercel.json) through [`lib/ping.server.ts`](lib/ping.server.ts).
+- **Turn it off:** set `DISABLE_PING=true` in your environment variables (or delete the cron entry in `vercel.json`).
+- **Our side:** the receiving endpoint validates and rate-limits requests and stores only the domain, version, first-seen and last-seen times in a `deployments` table.
+
+---
+
 ## Live deployment
 
 | Environment | URL |
@@ -192,23 +245,7 @@ The job fails if the REST request does not return HTTP 200.
 
 ### 3. Database setup
 
-Run migrations in order in the Supabase SQL Editor, then apply regional seed files:
-
-```
-supabase/migrations/20250319000000_create_organizations.sql
-supabase/migrations/20250319000001_seed_organizations.sql
-… (see supabase/migrations/ for full list)
-```
-
-Quick regional seeds (run in Supabase SQL Editor):
-
-```
-supabase/RUN_NOCHLEZHKA.sql
-supabase/RUN_SUDAN_RED_CRESCENT.sql
-supabase/RUN_KAZAKHSTAN_RED_CRESCENT.sql
-supabase/RUN_UAE_RED_CRESCENT.sql
-supabase/RUN_BELARUS_RED_CROSS.sql
-```
+Run [`supabase/schema.sql`](supabase/schema.sql) in the Supabase SQL Editor (clean schema, all migrations combined). Optional example data: [`supabase/seed_demo.sql`](supabase/seed_demo.sql). The step-by-step migrations in `supabase/migrations/` and the regional `supabase/RUN_*.sql` seeds remain for the main site's history.
 
 ### 4. Run locally
 

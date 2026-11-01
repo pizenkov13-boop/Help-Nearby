@@ -1,10 +1,11 @@
 import type { MetadataRoute } from "next";
+import { siteConfig } from "@/lib/siteConfig";
 
 /** Served as /manifest.webmanifest (all icons are generated from one logo: npm run icons:generate). */
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: "Help Nearby",
-    short_name: "Help Nearby",
+    name: siteConfig.name,
+    short_name: siteConfig.name,
     description:
       "Find food banks, shelters, medical aid, and volunteer opportunities near you.",
     start_url: "/",

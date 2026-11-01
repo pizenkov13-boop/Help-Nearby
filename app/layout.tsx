@@ -6,9 +6,10 @@ import "leaflet/dist/leaflet.css";
 import "./globals.css";
 import { fontVariableClasses } from "./fonts";
 import { cn } from "@/lib/utils";
+import { siteConfig } from "@/lib/siteConfig";
 
-const SITE_URL = "https://www.help-nearby.org";
-const SITE_TITLE = "Help Nearby — Find Help Near You";
+const SITE_URL = siteConfig.url;
+const SITE_TITLE = `${siteConfig.name} — Find Help Near You`;
 const SITE_DESCRIPTION =
   "Discover food banks, shelters, medical aid, clothing donations, and volunteer opportunities near you.";
 
@@ -20,7 +21,7 @@ export const metadata: Metadata = {
   manifest: "/manifest.webmanifest",
   openGraph: {
     type: "website",
-    siteName: "Help Nearby",
+    siteName: siteConfig.name,
     title: SITE_TITLE,
     description: SITE_DESCRIPTION,
     images: [{ url: "/og-image.png", width: 1200, height: 630, alt: "Help Nearby" }],

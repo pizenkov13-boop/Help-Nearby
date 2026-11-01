@@ -21,6 +21,7 @@ import { BrandLogo } from "@/components/BrandLogo";
 import { GithubIcon, InstagramIcon } from "@/components/icons/BrandIcons";
 import { CONTACT_EMAIL } from "@/lib/contactEmail";
 import { useLanguage } from "@/lib/i18n/LanguageProvider";
+import { MAIN_SITE_URL, siteConfig } from "@/lib/siteConfig";
 
 const SDG_GOALS = [
   { id: "1", label: "UN Sustainable Development Goal 1: No Poverty" },
@@ -32,8 +33,8 @@ const SDG_GOALS = [
 const INSTAGRAM_URL =
   "https://www.instagram.com/help.nearby1?igsh=MWx4ZzYxMnA2MXR5Mg%3D%3D&utm_source=qr";
 const UN_SDG_URL = "https://sdgs.un.org/partnerships/helpnearby";
-const SITE_URL = "https://www.help-nearby.org";
-const GITHUB_URL = "https://github.com/pizenkov13-boop/Help-Nearby";
+const SITE_URL = siteConfig.url;
+const GITHUB_URL = siteConfig.footerLinkUrl;
 
 function HeartIcon() {
   return (
@@ -198,6 +199,14 @@ export function SiteFooter() {
           </span>
           {" "}{t("footerForCommunities")}
         </p>
+        {siteConfig.showPoweredBy && siteConfig.url !== MAIN_SITE_URL ? (
+          <p className="made" data-testid="footer-powered-by">
+            Powered by{" "}
+            <a href={`${MAIN_SITE_URL}/`} target="_blank" rel="noopener">
+              HelpNearby
+            </a>
+          </p>
+        ) : null}
       </div>
     </footer>
   );
