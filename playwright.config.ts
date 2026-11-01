@@ -21,7 +21,7 @@ export default defineConfig({
   projects: [
     {
       name: "chromium",
-      testIgnore: /\.webkit\.spec\.ts$/,
+      testIgnore: /\.webkit\.spec\.ts$|copy-mode\.spec\.ts$/,
       use: { ...devices["Desktop Chrome"] },
     },
     // iOS Safari engine: the phone menu bug only reproduced on WebKit.

@@ -53,7 +53,12 @@ for (const phone of PHONES) {
     test("no horizontal page scroll on the main pages", async ({ page }) => {
       for (const route of ["/", "/recent", "/about", "/why-it-matters", "/reviews", "/submit"]) {
         await page.goto(route);
-        await page.waitForLoadState("networkidle");
+        // networkidle never settles here (analytics script, background fetches): wait for real content.
+        await page.waitForLoadState("domcontentloaded");
+        await expect(page.locator("main")).toBeVisible();
+        if (route === "/") {
+          await expect(page.getByRole("button", { name: /Find Help Near Me/i })).toBeVisible();
+        }
         expect(await noHorizontalScroll(page), `${route} overflows`).toBeLessThanOrEqual(0);
       }
     });
