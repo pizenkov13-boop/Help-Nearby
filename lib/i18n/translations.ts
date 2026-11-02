@@ -278,6 +278,7 @@ export type TranslationKey =
   | "listOnlyBadge"
   | "loadFailed"
   | "loadRetry"
+  | "loadOffline"
   | "osmUnavailableNotice"
   | "catalogUnavailableNotice"
   | "unverifiedOsmBadge"
@@ -614,6 +615,7 @@ const en: Record<TranslationKey, string> = {
   listOnlyBadge: "Country-level listing · not on the map",
   loadFailed: "Couldn't load organizations.",
   loadRetry: "Try again",
+  loadOffline: "No connection. Check your internet and try again.",
   osmUnavailableNotice: "OpenStreetMap is temporarily unavailable — showing verified organizations only",
   catalogUnavailableNotice: "The verified catalog is temporarily unavailable — showing OpenStreetMap results only",
   unverifiedOsmBadge: "Unverified · OpenStreetMap",
@@ -960,6 +962,7 @@ const ru: Record<TranslationKey, string> = {
   listOnlyBadge: "Запись уровня страны · нет на карте",
   loadFailed: "Не удалось загрузить организации.",
   loadRetry: "Повторить",
+  loadOffline: "Нет соединения. Проверьте интернет и попробуйте снова.",
   osmUnavailableNotice: "OpenStreetMap временно недоступен — показаны только проверенные организации",
   catalogUnavailableNotice: "Каталог проверенных организаций временно недоступен — показаны только данные OpenStreetMap",
   unverifiedOsmBadge: "Не проверено · OpenStreetMap",
@@ -1059,7 +1062,7 @@ const es: Record<TranslationKey, string> = {
   openNow: "Abierto",
   closed: "Cerrado",
   getDirections: "Cómo llegar",
-  callNow: "Llamar ahora",
+  callNow: "Llamar",
   mapTitle: "Mapa cercano",
   chatTitle: "Asistente IA",
   chatSend: "Enviar",
@@ -1313,6 +1316,7 @@ const es: Record<TranslationKey, string> = {
   listOnlyBadge: "Registro a nivel de país · no está en el mapa",
   loadFailed: "No se pudieron cargar las organizaciones.",
   loadRetry: "Reintentar",
+  loadOffline: "Sin conexión. Revisa internet e inténtalo de nuevo.",
   osmUnavailableNotice: "OpenStreetMap no está disponible por ahora — solo se muestran organizaciones verificadas",
   catalogUnavailableNotice: "El catálogo verificado no está disponible por ahora — solo se muestran resultados de OpenStreetMap",
   unverifiedOsmBadge: "Sin verificar · OpenStreetMap",
@@ -1667,6 +1671,7 @@ const fr: Record<TranslationKey, string> = {
   listOnlyBadge: "Fiche au niveau du pays · absente de la carte",
   loadFailed: "Impossible de charger les organisations.",
   loadRetry: "Réessayer",
+  loadOffline: "Pas de connexion. Vérifiez internet et réessayez.",
   osmUnavailableNotice: "OpenStreetMap est temporairement indisponible — seules les organisations vérifiées sont affichées",
   catalogUnavailableNotice: "Le catalogue vérifié est temporairement indisponible — seuls les résultats OpenStreetMap sont affichés",
   unverifiedOsmBadge: "Non vérifié · OpenStreetMap",
@@ -1766,7 +1771,7 @@ const de: Record<TranslationKey, string> = {
   openNow: "Geöffnet",
   closed: "Geschlossen",
   getDirections: "Route",
-  callNow: "Jetzt anrufen",
+  callNow: "Anrufen",
   mapTitle: "Karte in der Nähe",
   chatTitle: "KI-Assistent",
   chatSend: "Senden",
@@ -2022,6 +2027,7 @@ const de: Record<TranslationKey, string> = {
   listOnlyBadge: "Eintrag auf Länderebene · nicht auf der Karte",
   loadFailed: "Organisationen konnten nicht geladen werden.",
   loadRetry: "Erneut versuchen",
+  loadOffline: "Keine Verbindung. Prüfen Sie das Internet und versuchen Sie es erneut.",
   osmUnavailableNotice: "OpenStreetMap ist vorübergehend nicht erreichbar — es werden nur geprüfte Organisationen angezeigt",
   catalogUnavailableNotice: "Der geprüfte Katalog ist vorübergehend nicht erreichbar — es werden nur OpenStreetMap-Ergebnisse angezeigt",
   unverifiedOsmBadge: "Nicht verifiziert · OpenStreetMap",
@@ -2353,6 +2359,7 @@ const zh: Record<TranslationKey, string> = {
   listOnlyBadge: "国家级条目 · 不在地图上",
   loadFailed: "无法加载机构。",
   loadRetry: "重试",
+  loadOffline: "没有网络连接。请检查网络后重试。",
   osmUnavailableNotice: "OpenStreetMap 暂时不可用——仅显示已验证的机构",
   catalogUnavailableNotice: "已验证目录暂时不可用——仅显示 OpenStreetMap 结果",
   unverifiedOsmBadge: "未验证 · OpenStreetMap",
@@ -2696,6 +2703,7 @@ const ar: Record<TranslationKey, string> = {
   listOnlyBadge: "إدخال على مستوى الدولة · غير موجود على الخريطة",
   loadFailed: "تعذّر تحميل المؤسسات.",
   loadRetry: "إعادة المحاولة",
+  loadOffline: "لا يوجد اتصال. تحقق من الإنترنت وحاول مرة أخرى.",
   osmUnavailableNotice: "OpenStreetMap غير متاح مؤقتًا — تُعرض المؤسسات الموثّقة فقط",
   catalogUnavailableNotice: "الدليل الموثّق غير متاح مؤقتًا — تُعرض نتائج OpenStreetMap فقط",
   unverifiedOsmBadge: "غير موثّق · OpenStreetMap",

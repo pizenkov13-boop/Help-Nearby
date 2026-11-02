@@ -8,7 +8,7 @@ import { formatDistance, useDistanceUnit } from "@/lib/distanceUnits";
 import { useLanguage } from "@/lib/i18n/LanguageProvider";
 import type { TranslationKey } from "@/lib/i18n/translations";
 import { recordImpactClick } from "@/lib/impact.client";
-import { ORG_SHEET_OPEN_EVENT, SHEET_CLOSE_EVENT, openRoute } from "@/lib/orgActions";
+import { ORG_SHEET_OPEN_EVENT, SHEET_CLOSE_EVENT, openRoute, restoreTrigger } from "@/lib/orgActions";
 import { getOrganizationOpenStatus, getPhoneTelUrl } from "@/lib/orgUtils";
 import { isApproximateLocation, isOverpassOrganization } from "@/lib/organizationCoordinates";
 import { getOrganizationSource } from "@/lib/organizationSource";
@@ -39,7 +39,12 @@ export function OrganizationSheet() {
   const [org, setOrg] = useState<Organization | null>(null);
   const closeRef = useRef<HTMLButtonElement>(null);
 
-  const close = useCallback(() => setOrg(null), []);
+  const close = useCallback(() => {
+    setOrg(null);
+    restoreTrigger();
+  }, []);
+  // Handing over to the route screen keeps the remembered trigger for when that screen is closed.
+  const handOver = useCallback(() => setOrg(null), []);
 
   useEffect(() => {
     const onOpen = (event: Event) => {
@@ -47,12 +52,12 @@ export function OrganizationSheet() {
       if (next) setOrg(next);
     };
     window.addEventListener(ORG_SHEET_OPEN_EVENT, onOpen);
-    window.addEventListener(SHEET_CLOSE_EVENT, close);
+    window.addEventListener(SHEET_CLOSE_EVENT, handOver);
     return () => {
       window.removeEventListener(ORG_SHEET_OPEN_EVENT, onOpen);
-      window.removeEventListener(SHEET_CLOSE_EVENT, close);
+      window.removeEventListener(SHEET_CLOSE_EVENT, handOver);
     };
-  }, [close]);
+  }, [handOver]);
 
   useEffect(() => {
     if (!org) return;
@@ -84,7 +89,7 @@ export function OrganizationSheet() {
   return (
     <div className="os-layer" data-testid="org-sheet">
       <button type="button" className="os-backdrop" aria-label={t("orgSheetClose")} onClick={close} tabIndex={-1} />
-      <section className="os-sheet" role="dialog" aria-modal="true" aria-label={org.name}>
+      <section className="os-sheet" role="dialog" aria-modal="true" aria-labelledby="os-title">
         <div className="os-grip" aria-hidden />
         <div className="os-head">
           <span className="os-cat">
@@ -96,7 +101,7 @@ export function OrganizationSheet() {
           </button>
         </div>
 
-        <h2 className="os-name">{org.name}</h2>
+        <h2 id="os-title" className="os-name">{org.name}</h2>
 
         {org.distance && (
           <p className="os-dist" data-testid="sheet-distance">
@@ -173,7 +178,7 @@ export function OrganizationSheet() {
         </div>
 
         {org.verified && org.slug && (
-          <Link href={`/org/${org.slug}`} className="os-more" onClick={close}>
+          <Link href={`/org/${org.slug}`} className="os-more" onClick={handOver}>
             {t("routeDetails")}
           </Link>
         )}

@@ -166,13 +166,13 @@ export function RouteScreen() {
   const needLocation = phase === "need-location" || phase === "locating";
 
   return (
-    <div className="rt-screen" role="dialog" aria-modal="true" aria-label={org.name} data-testid="route-screen">
+    <div className="rt-screen" role="dialog" aria-modal="true" aria-labelledby="rt-title" data-testid="route-screen">
       <header className="rt-head">
         <button ref={backRef} type="button" className="rt-back" onClick={() => close(true)}>
           <ArrowLeft aria-hidden className="rtl:rotate-180" />
           {t("routeBack")}
         </button>
-        <h2 className="rt-title">{org.name}</h2>
+        <h2 id="rt-title" className="rt-title">{org.name}</h2>
       </header>
 
       <div className="rt-mapwrap">

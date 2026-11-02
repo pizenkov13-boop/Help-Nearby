@@ -911,7 +911,9 @@ export function HomePage() {
                         searchQuery={filters.searchQuery}
                         emptyMessage={
                           loadFailed
-                            ? t("loadFailed")
+                            ? typeof navigator !== "undefined" && navigator.onLine === false
+                              ? t("loadOffline")
+                              : t("loadFailed")
                             : nothingHere
                               ? t("noOrgsHereExpand")
                               : undefined

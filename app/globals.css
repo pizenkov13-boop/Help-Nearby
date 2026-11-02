@@ -2307,3 +2307,69 @@ html.dark .os-badge.warn { color: #e6c27a; background: #2e2718; }
 .rt-primary:disabled { opacity: 0.7; }
 .rt-primary svg { width: 20px; height: 20px; }
 @media (prefers-reduced-motion: reduce) { .os-sheet { animation: none; } .os-btn { transition: none; } }
+
+/* ================= languages, scripts, focus and motion (all screens) ================= */
+/* One visual size for every script: Latin, Arabic and CJK text share the same px sizes; only the heading (below) is trimmed for Arabic, whose glyphs run larger. */
+html[lang="zh"] body, html[lang="zh"] button, html[lang="zh"] input {
+  font-family: var(--font-dm-sans, "DM Sans"), "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "Noto Sans CJK SC", "Noto Sans SC", system-ui, sans-serif;
+}
+html[lang="zh"] { --hn-leading: 1.6; letter-spacing: 0; }
+html[lang="ar"] { --hn-leading: 1.65; letter-spacing: 0; }
+html[lang="zh"] :is(p, li, .os-line, .os-src, .org-sub, .hero-trust, .rt-need p),
+html[lang="ar"] :is(p, li, .os-line, .os-src, .org-sub, .hero-trust, .rt-need p) { line-height: var(--hn-leading); }
+html[lang="zh"] :is(h1, h2, h3), html[lang="ar"] :is(h1, h2, h3) { letter-spacing: 0; }
+html[lang="zh"] .hero h1 { line-height: 1.35; }
+
+/* Long words wrap inside their box instead of leaving it; German, Spanish and French hyphenate. */
+:is(.hero-tile, .os-name, .os-line, .os-src, .org-card h3, .org-card p, .urgent-item h3, .urgent-item p, .rt-need p, .rt-title, .hero-trust span) {
+  overflow-wrap: anywhere;
+  min-width: 0;
+}
+:is(h1, h2, h3, .hero-tile, .os-name, .rt-need h3) { text-wrap: balance; }
+html:is([lang="de"], [lang="es"], [lang="fr"]) :is(p, .os-name, .os-line, .os-src, .hero-trust span, .org-card h3, .urgent-item h3, .rt-need p, .hero-tile) {
+  hyphens: auto;
+  -webkit-hyphens: auto;
+}
+.os-btn, .rt-primary, .org-btn { white-space: normal; text-align: center; line-height: 1.25; padding-block: 8px; }
+.org-btn { height: auto !important; padding-inline: 8px !important; gap: 6px !important; }
+.org-btn svg { flex: none; }
+.tel { direction: ltr; unicode-bidi: isolate; display: inline-block; }
+
+/* Language list: names start at the reading edge in every direction. */
+.lang-item { text-align: start; }
+.lang-item-code { color: var(--hn-muted); }
+
+/* Skeleton cards follow the theme instead of fixed dark gray. */
+.sk-bar { background: var(--hn-line-strong); }
+html.dark .sk-bar { background: #3a4658; }
+
+/* A visible keyboard focus ring everywhere. */
+:where(a, button, input, select, textarea, summary, [tabindex]:not([tabindex="-1"])):focus-visible {
+  outline: 3px solid var(--hn-accent-text);
+  outline-offset: 2px;
+  border-radius: 6px;
+}
+.os-backdrop:focus-visible { outline: 0; }
+
+/* Phones with short screens (360x740 and below): keep the first screen compact in every language. */
+@media (max-width: 768px) and (max-height: 800px) {
+  .hero-inner { padding-top: var(--sp-2); }
+  .hero h1 { font-size: clamp(24px, 7.4vw, 28px); }
+  .hero-cta-main { min-height: 52px; margin-top: var(--sp-2); }
+  .hero-sub { margin-top: var(--sp-2); }
+  .hero-tiles { min-height: 176px; gap: var(--sp-1); }
+  .hero-tile { min-height: 80px; padding: 12px; gap: var(--sp-1); }
+  .hero-tile .tile-icon { width: 40px; height: 40px; }
+  .hero-row { min-height: 56px; margin-top: var(--sp-1); }
+  .hero-how { min-height: 48px; margin-top: 0; }
+}
+html[lang="ar"] .hero h1 { font-size: calc(var(--fs-title) * 0.9); }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

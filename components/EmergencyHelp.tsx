@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { Loader2, LifeBuoy, MapPin, Phone, X } from "lucide-react";
 import { NEARBY_RADIUS_METERS } from "@/lib/constants";
 import { formatDistance, useDistanceUnit } from "@/lib/distanceUnits";
@@ -62,7 +62,12 @@ export function EmergencyHelp() {
     });
   }, [loadEmergencyList, t]);
 
+  const triggerRef = useRef<HTMLElement | null>(null);
+  const closeButtonRef = useRef<HTMLButtonElement>(null);
+
   const handleOpen = useCallback(() => {
+    const active = document.activeElement as HTMLElement | null;
+    if (active && active !== document.body) triggerRef.current = active;
     setOpen(true);
     requestLocationAndLoad();
   }, [requestLocationAndLoad]);
@@ -79,16 +84,21 @@ export function EmergencyHelp() {
     setState("idle");
     setOrganizations([]);
     setErrorMessage(null);
+    const trigger = triggerRef.current;
+    triggerRef.current = null;
+    if (trigger && document.contains(trigger)) trigger.focus();
   }, []);
 
   useEffect(() => {
     if (!open) return;
 
     const onKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Escape") handleClose();
+      // An organization sheet or the route screen on top handles Esc first.
+      if (e.key === "Escape" && !document.querySelector(".os-layer, .rt-screen")) handleClose();
     };
 
     document.body.style.overflow = "hidden";
+    closeButtonRef.current?.focus();
     window.addEventListener("keydown", onKeyDown);
 
     return () => {
@@ -130,6 +140,7 @@ export function EmergencyHelp() {
                 </p>
               </div>
               <button
+                ref={closeButtonRef}
                 type="button"
                 onClick={handleClose}
                 className="shrink-0 rounded-lg p-2 text-red-700 transition-colors hover:bg-red-100 hover:text-red-900 dark:text-red-100 dark:hover:bg-red-500/30 dark:hover:text-white"
@@ -202,7 +213,7 @@ export function EmergencyHelp() {
                               className="mb-2 inline-flex items-center gap-2 text-base font-bold text-emerald-700 hover:text-emerald-600 dark:text-emerald-400 dark:hover:text-emerald-300"
                             >
                               <Phone className="h-4 w-4 shrink-0" />
-                              {org.phone}
+                              <span className="tel">{org.phone}</span>
                             </a>
                           ) : (
                             <p className="mb-2 text-sm text-amber-800 dark:text-amber-300">
