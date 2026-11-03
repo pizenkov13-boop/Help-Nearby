@@ -74,6 +74,25 @@ for (const size of [
       expect(routeBox.x).toBeGreaterThan(callBox.x);
     });
 
+    test("Filters: the funnel icon is centred on the title line and the title is not oversized", async ({ page }) => {
+      await page.goto("/");
+      await page.locator(".hero-tile", { hasText: "Food" }).click();
+      const title = page.locator(".map-panel aside h2");
+      await expect(title).toBeVisible({ timeout: 30_000 });
+      const m = await title.evaluate((el) => {
+        const icon = el.parentElement!.querySelector("svg")!.getBoundingClientRect();
+        const text = el.getBoundingClientRect();
+        return {
+          dy: icon.top + icon.height / 2 - (text.top + text.height / 2),
+          size: parseFloat(getComputedStyle(el).fontSize),
+          mb: parseFloat(getComputedStyle(el).marginBottom),
+        };
+      });
+      expect(Math.abs(m.dy)).toBeLessThan(1.5);
+      expect(m.size).toBeLessThanOrEqual(16);
+      expect(m.mb).toBe(0);
+    });
+
     test("footer links Telegram, not Instagram", async ({ page }) => {
       await page.goto("/");
       await expect(page.locator('footer a[href*="t.me"]').first()).toBeVisible();

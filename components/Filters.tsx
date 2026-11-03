@@ -40,10 +40,11 @@ export function Filters({ filters, onChange }: FiltersProps) {
     >
       <div className="mb-4 hidden items-center gap-2 text-slate-900 dark:text-white lg:flex">
         <Filter
-          className="size-5 shrink-0 text-blue-500 dark:text-blue-400"
+          className="size-4 shrink-0 text-blue-500 dark:text-blue-400"
           aria-hidden
         />
-        <h2 className="m-0 text-base font-semibold leading-5">{t("filtersTitle")}</h2>
+        {/* `!` beats the global `.map-panel h2` (1.5rem, 1.5rem bottom margin), which pushed the icon below the text. */}
+        <h2 className="!m-0 !text-base !font-semibold !leading-5">{t("filtersTitle")}</h2>
       </div>
 
       <div

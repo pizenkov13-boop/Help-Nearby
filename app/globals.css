@@ -873,7 +873,7 @@ body {
     footer ul { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 12px; }
     footer ul a {
       display: inline-flex;
-      align-items: center;
+      align-items: flex-start;
       gap: 10px;
       font-size: 14px;
       color: var(--text-dim);
@@ -881,8 +881,10 @@ body {
     }
     footer ul a:hover { color: var(--heading); }
     footer ul svg {
-      width: 16px; height: 16px;
+      width: 18px; height: 18px;
       flex-shrink: 0;
+      /* centre the icon on the first text line, also when the label wraps */
+      margin-top: calc((1lh - 18px) / 2);
       color: var(--text-fade);
     }
   
