@@ -110,7 +110,6 @@ export type TranslationKey =
   | "footerTagline"
   | "footerQuickLinks"
   | "footerContact"
-  | "footerInstagram"
   | "footerPartnerLabel"
   | "footerPartnerTelegram"
   | "footerPartnerWebsite"
@@ -416,7 +415,6 @@ const en: Record<TranslationKey, string> = {
   footerTagline: "Connecting people to the help they need. Fast, free, accessible.",
   footerQuickLinks: "Quick Links",
   footerContact: "Social media",
-  footerInstagram: "Inst: @help.nearby1",
   footerPartnerLabel: "Our Partner",
   footerPartnerTelegram: "tg: The Kindness Corp.",
   footerPartnerWebsite: "Web: kindnesscorporation.ru",
@@ -760,7 +758,6 @@ const ru: Record<TranslationKey, string> = {
     "Соединяем людей с помощью, которая им нужна. Быстро, бесплатно, доступно.",
   footerQuickLinks: "Быстрые ссылки",
   footerContact: "Соцсети",
-  footerInstagram: "Inst: @help.nearby1",
   footerPartnerLabel: "Наш партнёр",
   footerPartnerTelegram: "tg: The Kindness Corp.",
   footerPartnerWebsite: "Web: kindnesscorporation.ru",
@@ -1109,7 +1106,6 @@ const es: Record<TranslationKey, string> = {
     "Conectamos a las personas con la ayuda que necesitan. Rápido, gratis y accesible.",
   footerQuickLinks: "Enlaces rápidos",
   footerContact: "Redes sociales",
-  footerInstagram: "Inst: @help.nearby1",
   footerPartnerLabel: "Nuestro socio",
   footerPartnerTelegram: "tg: The Kindness Corp.",
   footerPartnerWebsite: "Web: kindnesscorporation.ru",
@@ -1463,7 +1459,6 @@ const fr: Record<TranslationKey, string> = {
     "Relier les personnes à l'aide dont elles ont besoin. Rapide, gratuit, accessible.",
   footerQuickLinks: "Liens rapides",
   footerContact: "Réseaux sociaux",
-  footerInstagram: "Inst: @help.nearby1",
   footerPartnerLabel: "Notre partenaire",
   footerPartnerTelegram: "tg: The Kindness Corp.",
   footerPartnerWebsite: "Web: kindnesscorporation.ru",
@@ -1818,7 +1813,6 @@ const de: Record<TranslationKey, string> = {
     "Wir verbinden Menschen mit der Hilfe, die sie brauchen. Schnell, kostenlos, zugänglich.",
   footerQuickLinks: "Schnellzugriffe",
   footerContact: "Soziale Medien",
-  footerInstagram: "Inst: @help.nearby1",
   footerPartnerLabel: "Unser Partner",
   footerPartnerTelegram: "tg: The Kindness Corp.",
   footerPartnerWebsite: "Web: kindnesscorporation.ru",
@@ -2171,7 +2165,6 @@ const zh: Record<TranslationKey, string> = {
   footerTagline: "将人们与所需帮助连接起来。快速、免费、可及。",
   footerQuickLinks: "快捷链接",
   footerContact: "社交媒体",
-  footerInstagram: "Inst: @help.nearby1",
   footerPartnerLabel: "我们的合作伙伴",
   footerPartnerTelegram: "tg: The Kindness Corp.",
   footerPartnerWebsite: "Web: kindnesscorporation.ru",
@@ -2500,7 +2493,6 @@ const ar: Record<TranslationKey, string> = {
   footerTagline: "نصل الناس بالمساعدة التي يحتاجونها. بسرعة، مجاناً، وبسهولة الوصول.",
   footerQuickLinks: "روابط سريعة",
   footerContact: "وسائل التواصل",
-  footerInstagram: "Inst: @help.nearby1",
   footerPartnerLabel: "شريكنا",
   footerPartnerTelegram: "tg: The Kindness Corp.",
   footerPartnerWebsite: "Web: kindnesscorporation.ru",

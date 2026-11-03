@@ -18,7 +18,7 @@ import {
   Target,
 } from "lucide-react";
 import { BrandLogo } from "@/components/BrandLogo";
-import { GithubIcon, InstagramIcon } from "@/components/icons/BrandIcons";
+import { GithubIcon, InstagramIcon, TelegramIcon } from "@/components/icons/BrandIcons";
 import { CONTACT_EMAIL } from "@/lib/contactEmail";
 import { useLanguage } from "@/lib/i18n/LanguageProvider";
 import { MAIN_HOSTNAMES, MAIN_SITE_URL, siteConfig } from "@/lib/siteConfig";
@@ -30,8 +30,7 @@ const SDG_GOALS = [
   { id: "10", label: "UN Sustainable Development Goal 10: Reduced Inequalities" },
 ] as const;
 
-const INSTAGRAM_URL =
-  "https://www.instagram.com/help.nearby1?igsh=MWx4ZzYxMnA2MXR5Mg%3D%3D&utm_source=qr";
+const TELEGRAM_URL = "https://t.me/helpnearby_org";
 const UN_SDG_URL = "https://sdgs.un.org/partnerships/helpnearby";
 const SITE_URL = siteConfig.url;
 const GITHUB_URL = siteConfig.footerLinkUrl;
@@ -234,9 +233,9 @@ export function SiteFooter() {
         <div>
           <h4>{t("footerContact")}</h4>
           <div className="contact-list">
-            <a className="contact-btn" href={INSTAGRAM_URL} target="_blank" rel="noopener noreferrer">
-              <InstagramIcon className="ui-icon" aria-hidden />
-              {t("footerInstagram")}
+            <a className="contact-btn" href={TELEGRAM_URL} target="_blank" rel="noopener noreferrer">
+              <TelegramIcon className="ui-icon" aria-hidden />
+              Telegram
             </a>
             <a className="contact-btn" href={`mailto:${CONTACT_EMAIL}`} data-testid="footer-contact-email">
               <Mail className="ui-icon" aria-hidden />

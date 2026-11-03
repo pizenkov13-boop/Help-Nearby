@@ -15,7 +15,7 @@ test.describe("copy mode", () => {
     await expect(footer).toBeVisible();
 
     const text = await footer.innerText();
-    expect(text).not.toMatch(/help\.nearby1/i);
+    expect(text).not.toMatch(/help\.nearby1|helpnearby_org/i);
     expect(text).not.toMatch(/kindness/i);
     expect(text).not.toMatch(/sustainable development goals/i);
     expect(text).not.toMatch(/hello@help-nearby\.org/i);
@@ -23,7 +23,7 @@ test.describe("copy mode", () => {
     const hrefs = await footer.locator("a").evaluateAll((links) =>
       links.map((link) => link.getAttribute("href") ?? ""),
     );
-    expect(hrefs.join(" ")).not.toMatch(/instagram\.com\/help\.nearby1|kindness|sdgs\.un\.org|hello@help-nearby\.org/i);
+    expect(hrefs.join(" ")).not.toMatch(/t\.me\/helpnearby_org|kindness|sdgs\.un\.org|hello@help-nearby\.org/i);
     expect(await footer.locator("img[src*='sdg']").count()).toBe(0);
 
     const credit = footer.getByTestId("footer-powered-by");

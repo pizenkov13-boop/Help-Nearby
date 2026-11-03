@@ -10,6 +10,11 @@ export const InstagramIcon = createLucideIcon("Instagram", [
   ["line", { x1: "17.5", x2: "17.51", y1: "6.5", y2: "6.5", key: "ig-dot" }],
 ]);
 
+export const TelegramIcon = createLucideIcon("Telegram", [
+  ["path", { d: "M21.5 3 2.5 10.4l6.2 2.4L10.9 20l3.4-4.3 4.6 3.4z", key: "tg-plane" }],
+  ["path", { d: "M8.7 12.8 21.5 3", key: "tg-fold" }],
+]);
+
 export const GithubIcon = createLucideIcon("Github", [
   [
     "path",

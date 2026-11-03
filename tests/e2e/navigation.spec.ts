@@ -48,10 +48,10 @@ test.describe("Navigation", () => {
 
     const footer = page.locator("footer");
     await expect(footer.getByRole("link", { name: /Home/i })).toBeVisible();
-    await expect(footer.getByRole("link", { name: /help\.nearby1/i })).toHaveAttribute(
-      "href",
-      /instagram\.com/,
-    );
+    const telegram = footer.getByRole("link", { name: "Telegram", exact: true });
+    await expect(telegram).toHaveAttribute("href", "https://t.me/helpnearby_org");
+    await expect(telegram).toHaveAttribute("target", "_blank");
+    await expect(telegram).toHaveAttribute("rel", "noopener noreferrer");
     await expect(footer.getByRole("link", { name: /Kindness Corp/i })).toHaveAttribute(
       "href",
       /t\.me/,
