@@ -25,6 +25,7 @@ import { openRoute } from "@/lib/orgActions";
 import { isApproximateLocation } from "@/lib/organizationCoordinates";
 import { getOrganizationSource } from "@/lib/organizationSource";
 import type { Organization } from "@/lib/types";
+import { useIsPhone } from "@/lib/usePhone";
 import { cn } from "@/lib/utils";
 
 interface OrganizationDetailPageProps {
@@ -60,6 +61,8 @@ function StarRating({ rating }: { rating: number }) {
 
 export function OrganizationDetailPage({ org }: OrganizationDetailPageProps) {
   const { t, language } = useLanguage();
+  // Desktop keeps the original look; the larger, higher-contrast styling is for phones only.
+  const phone = useIsPhone();
   const unit = useDistanceUnit();
   const cfg = CATEGORY_CONFIG[org.category];
   const source = getOrganizationSource(org);
@@ -111,7 +114,13 @@ export function OrganizationDetailPage({ org }: OrganizationDetailPageProps) {
               {org.category}
             </span>
             {org.verified && (
-              <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-100 px-3 py-1 text-base font-semibold text-emerald-900 ring-1 ring-emerald-600/30 dark:bg-emerald-500/20 dark:text-emerald-200 dark:ring-emerald-500/30">
+              <span
+                className={
+                  phone
+                    ? "inline-flex items-center gap-1.5 rounded-full bg-emerald-100 px-3 py-1 text-base font-semibold text-emerald-900 ring-1 ring-emerald-600/30 dark:bg-emerald-500/20 dark:text-emerald-200 dark:ring-emerald-500/30"
+                    : "inline-flex items-center gap-1.5 rounded-full bg-emerald-500/20 px-3 py-1 text-sm font-semibold text-emerald-400 ring-1 ring-emerald-500/30"
+                }
+              >
                 <BadgeCheck className="h-4 w-4" aria-hidden />
                 {t("verified")}
               </span>
@@ -119,10 +128,15 @@ export function OrganizationDetailPage({ org }: OrganizationDetailPageProps) {
             {openStatus !== "unknown" && (
               <span
                 className={cn(
-                  "inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-base font-semibold",
+                  "inline-flex items-center gap-1.5 rounded-full px-3 py-1",
+                  phone ? "text-base font-semibold" : "text-sm font-medium",
                   open
-                    ? "bg-emerald-100 text-emerald-900 dark:bg-emerald-500/20 dark:text-emerald-200"
-                    : "bg-slate-200 text-slate-800 dark:bg-gray-700 dark:text-gray-200",
+                    ? phone
+                      ? "bg-emerald-100 text-emerald-900 dark:bg-emerald-500/20 dark:text-emerald-200"
+                      : "bg-emerald-500/20 text-emerald-400"
+                    : phone
+                      ? "bg-slate-200 text-slate-800 dark:bg-gray-700 dark:text-gray-200"
+                      : "bg-gray-700/80 text-gray-400",
                 )}
               >
                 <Clock className="h-4 w-4" />
@@ -140,7 +154,7 @@ export function OrganizationDetailPage({ org }: OrganizationDetailPageProps) {
             {org.distance && (
               <>
                 <span aria-hidden>·</span>
-                <span className="text-lg font-bold text-blue-800 dark:text-blue-300">
+                <span className={phone ? "text-lg font-bold text-blue-800 dark:text-blue-300" : "font-medium text-blue-400"}>
                   {formatDistance(org.distance, unit, language)}
                 </span>
               </>
@@ -180,7 +194,11 @@ export function OrganizationDetailPage({ org }: OrganizationDetailPageProps) {
           {org.phone?.trim() && (
             <a
               href={telUrl}
-              className="inline-flex min-h-14 flex-1 items-center justify-center gap-2 rounded-xl bg-emerald-700 px-6 py-4 text-lg font-bold text-white transition-colors hover:bg-emerald-600 active:bg-emerald-800"
+              className={
+                phone
+                  ? "inline-flex min-h-14 flex-1 items-center justify-center gap-2 rounded-xl bg-emerald-700 px-6 py-4 text-lg font-bold text-white transition-colors hover:bg-emerald-600 active:bg-emerald-800"
+                  : "inline-flex flex-1 items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-emerald-500 to-emerald-600 px-6 py-4 text-lg font-semibold text-white shadow-lg shadow-emerald-500/25 transition-all hover:from-emerald-400 hover:to-emerald-500"
+              }
             >
               <Phone className="h-5 w-5" />
               {t("callNow")}
@@ -190,9 +208,13 @@ export function OrganizationDetailPage({ org }: OrganizationDetailPageProps) {
             <button
               type="button"
               onClick={() => openRoute(org)}
-              className="inline-flex min-h-14 flex-1 items-center justify-center gap-2 rounded-xl bg-blue-700 px-6 py-4 text-lg font-bold text-white transition-colors hover:bg-blue-600 active:bg-blue-800"
+              className={
+                phone
+                  ? "inline-flex min-h-14 flex-1 items-center justify-center gap-2 rounded-xl bg-blue-700 px-6 py-4 text-lg font-bold text-white transition-colors hover:bg-blue-600 active:bg-blue-800"
+                  : "inline-flex flex-1 items-center justify-center gap-2 rounded-xl border border-gray-300 bg-white px-6 py-4 text-lg font-semibold text-gray-900 transition-colors hover:border-blue-500/50 hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-800 dark:text-white dark:hover:bg-gray-700/50"
+              }
             >
-              <Navigation className="h-5 w-5" aria-hidden />
+              <Navigation className={phone ? "h-5 w-5" : "h-5 w-5 text-blue-400"} aria-hidden />
               {t("getDirections")}
             </button>
           )}

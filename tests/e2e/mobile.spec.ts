@@ -232,8 +232,10 @@ for (const phone of PHONES) {
       await page.goto("/");
       // Tiles fade in one after another: measure once the entrance animation has finished.
       await page.evaluate(() => Promise.all(document.getAnimations().map((anim) => anim.finished.catch(() => undefined))));
-      const tiles = page.locator(".hero-tile");
+      // Four category tiles in a 2x2 grid; volunteering is the fifth tile, laid out as the row below them.
+      const tiles = page.locator(".hero-tile:not(.hero-row)");
       await expect(tiles).toHaveCount(4);
+      await expect(page.locator(".hero-tile")).toHaveCount(5);
       const rects = await tiles.evaluateAll((els) => els.map((el) => el.getBoundingClientRect()));
       for (const b of rects) {
         expect(b.width).toBeGreaterThanOrEqual(48);

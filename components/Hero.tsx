@@ -2,6 +2,7 @@
 
 import { ChevronRight, Loader2, Search, ShieldCheck } from "lucide-react";
 import { CategoryIcon } from "@/components/icons/CategoryIcon";
+import { CATEGORIES } from "@/lib/categories";
 import { useLanguage } from "@/lib/i18n/LanguageProvider";
 import type { Category } from "@/lib/types";
 import { cn } from "@/lib/utils";
@@ -12,9 +13,6 @@ interface HeroProps {
   isLocating: boolean;
   liteModeActive?: boolean;
 }
-
-/** The four needs shown as tiles; volunteering is the quiet row under them. */
-const TILE_CATEGORIES: Category[] = ["food", "shelter", "medical", "clothing"];
 
 export function Hero({ onFindHelp, onSelectCategory, isLocating }: HeroProps) {
   const { t } = useLanguage();
@@ -41,13 +39,14 @@ export function Hero({ onFindHelp, onSelectCategory, isLocating }: HeroProps) {
             <p className="lead">{t("heroSubtitle")}</p>
 
             <div className="hero-tiles-wrap">
-              <h2 className="hero-sub">{t("homeNeedTitle")}</h2>
+              <h2 className="hero-sub hero-tiles-title">{t("homeNeedTitle")}</h2>
+              {/* Desktop: five tiles in a row. Phones: a 2x2 grid with volunteering as the quiet row below. */}
               <ul className="hero-tiles">
-                {TILE_CATEGORIES.map((cat) => (
+                {CATEGORIES.map((cat) => (
                   <li key={cat}>
                     <button
                       type="button"
-                      className={cn("hero-tile", `tile-${cat}`)}
+                      className={cn("hero-tile", `tile-${cat}`, cat === "volunteer" && "hero-row")}
                       onClick={() => onSelectCategory(cat)}
                       disabled={isLocating}
                     >
@@ -59,15 +58,6 @@ export function Hero({ onFindHelp, onSelectCategory, isLocating }: HeroProps) {
                   </li>
                 ))}
               </ul>
-              <button
-                type="button"
-                className="hero-row"
-                onClick={() => onSelectCategory("volunteer")}
-                disabled={isLocating}
-              >
-                <CategoryIcon category="volunteer" />
-                {categoryLabel("volunteer")}
-              </button>
             </div>
 
             <button

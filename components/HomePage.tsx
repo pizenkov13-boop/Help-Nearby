@@ -52,6 +52,7 @@ import {
 } from "@/lib/smartRadius";
 import type { Category, FilterState, Organization, UserLocation } from "@/lib/types";
 import { FIND_HELP_EVENT } from "@/lib/uiEvents";
+import { useIsPhone } from "@/lib/usePhone";
 import { radiusInUnit, unitLabel, useDistanceUnit } from "@/lib/distanceUnits";
 import { List, Map as MapIcon } from "lucide-react";
 import { useLanguage } from "@/lib/i18n/LanguageProvider";
@@ -92,14 +93,8 @@ export function HomePage() {
   const distanceUnit = useDistanceUnit();
   // Phones show the list first; the map is one tap away (it replaces the list, it is not stacked above it).
   const [phoneView, setPhoneView] = useState<"list" | "map">("list");
-  const [isPhone, setIsPhone] = useState(false);
-  useEffect(() => {
-    const query = window.matchMedia("(max-width: 1023px)");
-    const update = () => setIsPhone(query.matches);
-    update();
-    query.addEventListener("change", update);
-    return () => query.removeEventListener("change", update);
-  }, []);
+  // Phones only (up to 768px); tablets and desktops keep the original map-above-list layout.
+  const isPhone = useIsPhone();
   // overflow:hidden is only needed while the accordion animates; afterwards it would stop
   // the sticky search bar from sticking to the viewport.
   const [accordionSettled, setAccordionSettled] = useState(false);
@@ -752,7 +747,7 @@ export function HomePage() {
 
                 {userLocation && !orgsLoading && searchRadiusMeters != null && (
                   <div className="flex flex-wrap items-center gap-3">
-                    <p className="text-base text-slate-700 dark:text-slate-300">
+                    <p className="radius-note text-sm text-slate-600 dark:text-slate-400">
                       {searchMode === "nearest" && nearestFallbackKm != null
                         ? formatSearchNearestOrgs(language, nearestFallbackKm, {
                             value: radiusInUnit(nearestFallbackKm, distanceUnit),
@@ -804,9 +799,9 @@ export function HomePage() {
                     placeSearching={placeSearching}
                     placeError={placeError}
                   />
-                  {!liteModeActive && userLocation && (
+                  {!liteModeActive && userLocation && isPhone && (
                     <div
-                      className="view-seg lg:hidden"
+                      className="view-seg"
                       role="group"
                       aria-label={t("viewList") + " / " + t("viewMap")}
                     >
@@ -848,7 +843,7 @@ export function HomePage() {
                 </div>
 
                 {!liteModeActive && userLocation && mapExpanded && (!isPhone || phoneView === "map") && (
-                  <div className="isolate h-[45dvh] max-h-[420px] min-h-[260px] max-lg:h-[calc(100dvh-400px)] max-lg:max-h-none max-lg:min-h-[320px] overflow-hidden rounded-brand border border-slate-200 shadow-lg dark:border-white/10 max-lg:order-3 lg:h-[520px] lg:max-h-none">
+                  <div className="isolate h-[45dvh] max-h-[420px] min-h-[260px] max-[768px]:h-[calc(100dvh-400px)] max-[768px]:max-h-none max-[768px]:min-h-[320px] overflow-hidden rounded-brand border border-slate-200 shadow-lg dark:border-white/10 max-lg:order-3 lg:h-[520px] lg:max-h-none">
                     <MapView
                       key="full-map"
                       mapVisible={mapExpanded}
@@ -887,7 +882,7 @@ export function HomePage() {
                   className={cn(
                     "results-pane flex w-full min-w-0 max-w-full flex-col overflow-hidden rounded-brand border border-slate-200 bg-white/80 dark:border-white/10 dark:bg-surface-card",
                     "max-lg:order-4",
-                    !liteModeActive && phoneView === "map" && "max-lg:hidden",
+                    !liteModeActive && isPhone && phoneView === "map" && "hidden",
                     liteModeActive ? "min-h-[320px]" : "lg:max-h-[520px]",
                   )}
                 >

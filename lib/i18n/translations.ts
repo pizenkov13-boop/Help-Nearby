@@ -336,7 +336,7 @@ const en: Record<TranslationKey, string> = {
   heroTitle: "Find Help Near You",
   heroSubtitle:
     "Instant access to free food, shelter, and medical care — anywhere in the world. No barriers, no sign-up, no cost.",
-  heroCta: "Find help near me",
+  heroCta: "Find Help Near Me",
   navFind: "Find",
   homeNeedTitle: "What do you need?",
   navChat: "Chat",
@@ -669,7 +669,7 @@ const ru: Record<TranslationKey, string> = {
   heroTitle: "Найдите помощь рядом с вами",
   heroSubtitle:
     "Мгновенный доступ к бесплатной еде, жилью и медицинской помощи — в любой точке мира. Без барьеров, без регистрации, бесплатно.",
-  heroCta: "Помощь рядом со мной",
+  heroCta: "Найти помощь рядом со мной",
   navFind: "Найти",
   homeNeedTitle: "Что вам нужно?",
   navChat: "Чат",
@@ -1017,7 +1017,7 @@ const es: Record<TranslationKey, string> = {
   heroTitle: "Encuentra ayuda cerca de ti",
   heroSubtitle:
     "Acceso instantáneo a comida, refugio y atención médica gratuitas — en cualquier parte del mundo. Sin barreras, sin registro, sin costo.",
-  heroCta: "Ayuda cerca de mí",
+  heroCta: "Encontrar ayuda cerca de mí",
   navFind: "Buscar",
   homeNeedTitle: "¿Qué necesitas?",
   navChat: "Chat",
@@ -1059,7 +1059,7 @@ const es: Record<TranslationKey, string> = {
   openNow: "Abierto",
   closed: "Cerrado",
   getDirections: "Cómo llegar",
-  callNow: "Llamar",
+  callNow: "Llamar ahora",
   mapTitle: "Mapa cercano",
   chatTitle: "Asistente IA",
   chatSend: "Enviar",
@@ -1370,7 +1370,7 @@ const fr: Record<TranslationKey, string> = {
   heroTitle: "Trouvez de l'aide près de vous",
   heroSubtitle:
     "Accès instantané à la nourriture, l'hébergement et les soins médicaux gratuits — partout dans le monde. Sans barrières, sans inscription, sans frais.",
-  heroCta: "Aide près de moi",
+  heroCta: "Trouver de l'aide près de moi",
   navFind: "Chercher",
   homeNeedTitle: "De quoi avez-vous besoin ?",
   navChat: "Chat",
@@ -1724,7 +1724,7 @@ const de: Record<TranslationKey, string> = {
   heroTitle: "Hilfe in Ihrer Nähe finden",
   heroSubtitle:
     "Sofortiger Zugang zu kostenloser Verpflegung, Unterkunft und medizinischer Versorgung — weltweit. Keine Hürden, keine Anmeldung, keine Kosten.",
-  heroCta: "Hilfe in meiner Nähe",
+  heroCta: "Hilfe in meiner Nähe finden",
   navFind: "Suchen",
   homeNeedTitle: "Was brauchen Sie?",
   navChat: "Chat",
@@ -1766,7 +1766,7 @@ const de: Record<TranslationKey, string> = {
   openNow: "Geöffnet",
   closed: "Geschlossen",
   getDirections: "Route",
-  callNow: "Anrufen",
+  callNow: "Jetzt anrufen",
   mapTitle: "Karte in der Nähe",
   chatTitle: "KI-Assistent",
   chatSend: "Senden",
@@ -2079,7 +2079,7 @@ const zh: Record<TranslationKey, string> = {
   heroTitle: "在您附近寻找帮助",
   heroSubtitle:
     "随时随地即时获取免费食物、住所和医疗援助。无门槛、无需注册、完全免费。",
-  heroCta: "查找附近帮助",
+  heroCta: "在我附近寻找帮助",
   navFind: "查找",
   homeNeedTitle: "您需要什么？",
   navChat: "聊天",
@@ -2406,7 +2406,7 @@ const ar: Record<TranslationKey, string> = {
   heroTitle: "اعثر على المساعدة بالقرب منك",
   heroSubtitle:
     "وصول فوري إلى الطعام والمأوى والرعاية الطبية المجانية — في أي مكان في العالم. بلا عوائق، بلا تسجيل، بلا تكلفة.",
-  heroCta: "مساعدة قربي",
+  heroCta: "اعثر على المساعدة بالقرب مني",
   navFind: "بحث",
   homeNeedTitle: "ماذا تحتاج؟",
   navChat: "دردشة",

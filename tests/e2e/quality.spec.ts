@@ -50,7 +50,7 @@ for (const lang of LANGS) {
         await mockNearbyApi(page);
         await page.goto("/");
         await expect(page.locator("html")).toHaveAttribute("lang", lang.code);
-        await expect(page.locator(".hero-tile")).toHaveCount(4);
+        await expect(page.locator(".hero-tile")).toHaveCount(5);
         await page.evaluate(() => Promise.all(document.getAnimations().map((a) => a.finished.catch(() => undefined))));
         expect(await layoutProblems(page)).toEqual([]);
         await expect(page.locator(".hero-trust")).toContainText(lang.trust);
@@ -62,7 +62,7 @@ for (const lang of LANGS) {
         await mockNearbyApi(page);
         await grantNycLocation(page);
         await page.goto("/");
-        await expect(page.locator(".hero-tile")).toHaveCount(4);
+        await expect(page.locator(".hero-tile")).toHaveCount(5);
         await page.locator(".header .lang-btn").click();
         await expect(page.locator(".lang-sheet")).toBeVisible();
         expect(await layoutProblems(page)).toEqual([]);
@@ -143,7 +143,7 @@ test.describe("Keyboard, focus and motion", () => {
   test("keyboard focus is visible and icon buttons have names", async ({ page }) => {
     await preferFullMode(page);
     await page.goto("/");
-    await expect(page.locator(".hero-tile")).toHaveCount(4);
+    await expect(page.locator(".hero-tile")).toHaveCount(5);
     // Tab until something real has the focus (the first stops are the logo and the header buttons).
     for (let i = 0; i < 6; i++) {
       await page.keyboard.press("Tab");
@@ -172,7 +172,7 @@ test.describe("Keyboard, focus and motion", () => {
     const page = await context.newPage();
     await preferFullMode(page);
     await page.goto("/");
-    await expect(page.locator(".hero-tile")).toHaveCount(4);
+    await expect(page.locator(".hero-tile")).toHaveCount(5);
     const durations = await page.evaluate(() =>
       Array.from(document.querySelectorAll(".hero-tile, .hero-cta-main, .bb-item")).map((el) => {
         const cs = getComputedStyle(el);

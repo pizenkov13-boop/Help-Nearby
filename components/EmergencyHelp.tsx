@@ -195,13 +195,13 @@ export function EmergencyHelp() {
                               <button
                                 type="button"
                                 onClick={() => openOrganizationSheet(org)}
-                                className="text-start underline-offset-2 hover:underline"
+                                className="text-start"
                               >
                                 {org.name}
                               </button>
                             </h3>
                             {org.distance && (
-                              <span className="shrink-0 text-lg font-bold text-red-800 dark:text-red-200">
+                              <span className="urgent-dist shrink-0 text-xs font-medium text-red-300">
                                 {formatDistance(org.distance, unit, language)}
                               </span>
                             )}
@@ -216,7 +216,7 @@ export function EmergencyHelp() {
                               <span className="tel">{org.phone}</span>
                             </a>
                           ) : (
-                            <p className="mb-2 text-sm text-amber-800 dark:text-amber-300">
+                            <p className="mb-2 urgent-nophone text-sm text-amber-400/90">
                               {t("emergencyNoPhone")}
                             </p>
                           )}
@@ -235,7 +235,7 @@ export function EmergencyHelp() {
                           {org.phone?.trim() && (
                             <a
                               href={getPhoneTelUrl(org.phone)}
-                              className="mt-3 flex w-full items-center justify-center gap-2 rounded-lg bg-emerald-700 py-2.5 text-sm font-semibold text-white hover:bg-emerald-600"
+                              className="mt-3 flex w-full items-center justify-center gap-2 rounded-lg urgent-call bg-emerald-600 py-2.5 text-sm font-semibold text-white hover:bg-emerald-500"
                             >
                               <Phone className="h-4 w-4" />
                               {t("emergencyCall")}
