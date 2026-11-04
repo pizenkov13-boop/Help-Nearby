@@ -14,6 +14,7 @@ import {
   Plus,
   Send,
   Share2,
+  Info,
   ShieldCheck,
   Target,
 } from "lucide-react";
@@ -95,6 +96,12 @@ function CopySiteFooter() {
               <Link href="/privacy">
                 <ShieldCheck className="ui-icon" aria-hidden />
                 {t("navPrivacy")}
+              </Link>
+            </li>
+            <li>
+              <Link href="/disclaimer">
+                <Info className="ui-icon" aria-hidden />
+                {t("navDisclaimer")}
               </Link>
             </li>
           </ul>
@@ -225,6 +232,12 @@ export function SiteFooter() {
               <Link href="/privacy">
                 <ShieldCheck className="ui-icon" aria-hidden />
                 {t("navPrivacy")}
+              </Link>
+            </li>
+            <li>
+              <Link href="/disclaimer">
+                <Info className="ui-icon" aria-hidden />
+                {t("navDisclaimer")}
               </Link>
             </li>
           </ul>

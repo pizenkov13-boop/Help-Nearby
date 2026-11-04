@@ -43,6 +43,17 @@ test.describe("Navigation", () => {
     ).toBeVisible();
   });
 
+  test("footer links to the disclaimer page, in English and Russian", async ({ page }) => {
+    await page.goto("/");
+    await page.locator("footer").getByRole("link", { name: "Disclaimer" }).click();
+    await expect(page).toHaveURL(/\/disclaimer$/);
+    await expect(page.getByTestId("disclaimer-page")).toContainText("reference only and may be inaccurate or out of date");
+
+    await page.getByRole("button", { name: /language/i }).click();
+    await page.getByRole("menuitem", { name: "Русский" }).click();
+    await expect(page.getByTestId("disclaimer-page")).toContainText("Информация справочная и может быть неточной или устаревшей");
+  });
+
   test("footer links and external contacts are present", async ({ page }) => {
     await page.goto("/");
 

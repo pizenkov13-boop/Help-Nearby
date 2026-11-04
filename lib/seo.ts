@@ -12,10 +12,11 @@ const MAIN_SITEMAP_PATHS = [
   "/recent",
   "/submit",
   "/privacy",
+  "/disclaimer",
 ] as const;
 
 /** A copy has no history, reviews, submissions or recent-additions pages. */
-const COPY_SITEMAP_PATHS = ["/", "/about", "/privacy"] as const;
+const COPY_SITEMAP_PATHS = ["/", "/about", "/privacy", "/disclaimer"] as const;
 
 export const STATIC_SITEMAP_PATHS: readonly string[] = siteConfig.isCopy
   ? COPY_SITEMAP_PATHS

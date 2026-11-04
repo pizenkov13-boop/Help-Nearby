@@ -97,6 +97,8 @@ export type TranslationKey =
   | "navReviews"
   | "navReviewsShort"
   | "navPrivacy"
+  | "navDisclaimer"
+  | "disclaimerText"
   | "navRecent"
   | "recentTitle"
   | "recentSubtitle"
@@ -402,6 +404,8 @@ const en: Record<TranslationKey, string> = {
   navReviews: "Reviews & Suggestions",
   navReviewsShort: "Reviews",
   navPrivacy: "Privacy",
+  navDisclaimer: "Disclaimer",
+  disclaimerText: "The information is for reference only and may be inaccurate or out of date. Before you go, check by phone or on the organization's website. If life is in danger, call your local emergency services.",
   navRecent: "Recently added",
   recentTitle: "Recently added organizations",
   recentSubtitle: "Newly verified organizations added to Help Nearby, newest first.",
@@ -737,6 +741,8 @@ const ru: Record<TranslationKey, string> = {
   navReviews: "Отзывы и предложения",
   navReviewsShort: "Отзывы",
   navPrivacy: "Конфиденциальность",
+  navDisclaimer: "Отказ от ответственности",
+  disclaimerText: "Информация справочная и может быть неточной или устаревшей. Перед визитом проверь по телефону или на сайте организации. При угрозе жизни звони в местные экстренные службы.",
   navRecent: "Недавно добавлены",
   recentTitle: "Недавно добавленные организации",
   recentSubtitle: "Новые проверенные организации в Help Nearby — сначала самые свежие.",
@@ -1085,6 +1091,8 @@ const es: Record<TranslationKey, string> = {
   navReviews: "Reseñas y sugerencias",
   navReviewsShort: "Reseñas",
   navPrivacy: "Privacidad",
+  navDisclaimer: "Aviso legal",
+  disclaimerText: "La información es solo orientativa y puede ser inexacta o estar desactualizada. Antes de ir, comprueba por teléfono o en el sitio web de la organización. Si tu vida corre peligro, llama a los servicios de emergencia locales.",
   navRecent: "Añadidas recientemente",
   recentTitle: "Organizaciones añadidas recientemente",
   recentSubtitle: "Organizaciones recién verificadas en Help Nearby, las más nuevas primero.",
@@ -1438,6 +1446,8 @@ const fr: Record<TranslationKey, string> = {
   navReviews: "Avis et suggestions",
   navReviewsShort: "Avis",
   navPrivacy: "Confidentialité",
+  navDisclaimer: "Avertissement",
+  disclaimerText: "Les informations sont données à titre indicatif et peuvent être inexactes ou périmées. Avant de vous déplacer, vérifiez par téléphone ou sur le site de l'organisation. En cas de danger de mort, appelez les services d'urgence locaux.",
   navRecent: "Ajouts récents",
   recentTitle: "Organisations récemment ajoutées",
   recentSubtitle: "Organisations nouvellement vérifiées sur Help Nearby, les plus récentes d'abord.",
@@ -1792,6 +1802,8 @@ const de: Record<TranslationKey, string> = {
   navReviews: "Bewertungen und Vorschläge",
   navReviewsShort: "Reviews",
   navPrivacy: "Datenschutz",
+  navDisclaimer: "Haftungsausschluss",
+  disclaimerText: "Die Angaben dienen nur zur Orientierung und können ungenau oder veraltet sein. Prüfen Sie vor dem Besuch telefonisch oder auf der Website der Organisation. Bei Lebensgefahr rufen Sie den örtlichen Notruf an.",
   navRecent: "Neu hinzugefügt",
   recentTitle: "Kürzlich hinzugefügte Organisationen",
   recentSubtitle: "Neu verifizierte Organisationen bei Help Nearby, die neuesten zuerst.",
@@ -2145,6 +2157,8 @@ const zh: Record<TranslationKey, string> = {
   navReviews: "评价与建议",
   navReviewsShort: "评价",
   navPrivacy: "隐私",
+  navDisclaimer: "免责声明",
+  disclaimerText: "本网站信息仅供参考，可能不准确或已过时。前往之前，请通过电话或机构网站核实。如遇生命危险，请拨打当地紧急服务电话。",
   navRecent: "最新添加",
   recentTitle: "最近添加的组织",
   recentSubtitle: "Help Nearby 上新近验证的组织，按最新排序。",
@@ -2473,6 +2487,8 @@ const ar: Record<TranslationKey, string> = {
   navReviews: "التقييمات والاقتراحات",
   navReviewsShort: "التقييمات",
   navPrivacy: "الخصوصية",
+  navDisclaimer: "إخلاء المسؤولية",
+  disclaimerText: "المعلومات للاسترشاد فقط وقد تكون غير دقيقة أو قديمة. قبل الزيارة، تحقق عبر الهاتف أو موقع المؤسسة. في حال تهديد الحياة، اتصل بخدمات الطوارئ المحلية.",
   navRecent: "أُضيفت حديثًا",
   recentTitle: "المنظمات المضافة حديثًا",
   recentSubtitle: "منظمات تم التحقق منها حديثًا على Help Nearby، الأحدث أولًا.",
