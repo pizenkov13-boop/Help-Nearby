@@ -28,7 +28,7 @@
 3. **В блоке интеграций нажми Add рядом с Supabase** (бесплатный тариф): проект базы и все ключи создаются и подставляются автоматически.
 4. **Придумай `ADMIN_PASSWORD`** (пароль администратора для `/admin`) и запиши его.
 5. **Нажми Deploy.** Через пару минут сайт готов. Во время сборки таблицы создаются сами (`npm run setup`, идемпотентно, из [`supabase/schema.sql`](supabase/schema.sql)); SQL вручную выполнять не нужно.
-6. **Добавьте организации:** откройте `/admin` и подтверждайте заявки с `/submit`, либо загрузите CSV в таблицу `organizations` (Supabase → Table Editor → Insert → Import data from CSV; колонки как в [`supabase/schema.sql`](supabase/schema.sql), `verified` поставьте `true`). Демо-данные: [`supabase/seed_demo.sql`](supabase/seed_demo.sql) (три вымышленные организации, удалите их).
+6. **Добавь организации:** открой `/admin` и подтверждай заявки с `/submit`, либо загрузи CSV в таблицу `organizations` (Supabase → Table Editor → Insert → Import data from CSV; колонки как в [`supabase/schema.sql`](supabase/schema.sql), `verified` поставь `true`). Демо-данные: [`supabase/seed_demo.sql`](supabase/seed_demo.sql) (три вымышленные организации, удали их).
 
 **Если застрял**
 
@@ -44,9 +44,9 @@
 | Переменная | Откуда | Описание |
 |------------|--------|----------|
 | `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY`, `POSTGRES_URL_NON_POOLING` | интеграция Supabase (автоматически) | Доступ к базе и создание таблиц при сборке |
-| `ADMIN_PASSWORD` | вы (рекомендуется) | Пароль для `/admin`; без него админка выключена |
+| `ADMIN_PASSWORD` | ты (рекомендуется) | Пароль для `/admin`; без него админка выключена |
 
-Ручной вариант (без интеграции): создайте проект Supabase, выполните [`supabase/schema.sql`](supabase/schema.sql) в SQL Editor и задайте `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY` и `SUPABASE_SERVICE_ROLE_KEY` сами. Храните ключи в секрете и никогда не коммитьте их.
+Ручной вариант (без интеграции): создай проект Supabase, выполни [`supabase/schema.sql`](supabase/schema.sql) в SQL Editor и задай `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY` и `SUPABASE_SERVICE_ROLE_KEY` сам. Храни ключи в секрете и никогда не коммить их.
 
 ## Авторство
 
