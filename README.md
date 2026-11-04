@@ -143,7 +143,7 @@ Acceptable wording: "Launched and operate a local version of the open-source Hel
 
 **Help Nearby** is a free, open-source web platform that helps people in crisis find local assistance organizations. It combines a **verified catalog** stored in Supabase with **live OpenStreetMap data** from the Overpass API, then shows results on an interactive map or in a lightweight list view.
 
-The project was built by **Pavel Izenkin**, 16 — with the goal of making trusted help easy to find on any device, in any language, even on slow networks.
+The project was built by **Pavel Izenkin**, founder of Help Nearby, with the goal of making trusted help easy to find on any device, in any language, even on slow networks.
 
 ---
 
@@ -388,7 +388,7 @@ Please do not include API keys or `.env.local` in submissions.
 
 ## Founder
 
-**Pavel Izenkin** — 16 years old.
+**Pavel Izenkin**, founder of Help Nearby.
 
 Built with support from the open-source community, OpenStreetMap contributors, Supabase, and AITunnel.
 
