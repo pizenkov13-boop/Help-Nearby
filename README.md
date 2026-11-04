@@ -35,6 +35,8 @@
 - Supabase пишет «Организации не найдены» (Organizations not found): создай организацию в Supabase (название любое, тип Personal, тариф Free), вернись на страницу установки, выбери её в списке и нажми «Установить интеграцию».
 - Кнопка Create серая: не выбран Git-провайдер или область видимости Git. Выбери GitHub и свой аккаунт.
 - Сайт открылся, но без базы: проверь, что в Vercel (Settings → Integrations) подключён Supabase, потом сделай Redeploy.
+- Первая сборка идёт дольше обычного (2–5 минут): Vercel ставит зависимости, собирает сайт и создаёт таблицы в базе. Страницу не закрывай. Если дольше 10 минут, открой «Журналы сборки» (Build logs) и открой Issue с последними строками лога.
+- Supabase пишет, что достигнут лимит проектов (на бесплатном тарифе их ограниченное число): удали или поставь на паузу ненужный проект Supabase и повтори установку интеграции. Если после этого Vercel тоже пишет о лимите, удали неудачный проект в Vercel (Settings → Delete Project) и запусти кнопку Deploy заново.
 - Вопросы: открой [Issue](https://github.com/pizenkov13-boop/Help-Nearby/issues/new) в этом репозитории.
 
 **Запустил свою копию? Заполни [короткую форму](https://github.com/pizenkov13-boop/Help-Nearby/issues/new?template=add-deployment.yml) (New issue с шаблоном Add my city), и мы добавим твой город в таблицу ниже.**
@@ -76,6 +78,8 @@ Anyone can run their own copy of Help Nearby for a city, region or community. Th
 - Supabase says "Organizations not found": create an organization in Supabase (any name, type Personal, plan Free), go back to the install page, pick it in the list and click "Install integration".
 - The Create button is grey: no Git provider or Git scope is selected. Pick GitHub and your account.
 - The site opens but has no database: check that Supabase is connected in Vercel (Settings → Integrations), then Redeploy.
+- The first build takes longer than usual (2–5 minutes): Vercel installs dependencies, builds the site and creates the tables in the database. Keep the page open. If it takes more than 10 minutes, open the Build logs and open an Issue with the last lines of the log.
+- Supabase says the project limit is reached (the free plan allows a limited number of projects): delete or pause a Supabase project you don't need and repeat the integration install. If Vercel then also reports a limit, delete the failed project in Vercel (Settings → Delete Project) and click Deploy again.
 - Questions: open an [Issue](https://github.com/pizenkov13-boop/Help-Nearby/issues/new) in this repository.
 
 **Launched your copy?** Fill in a [short form](https://github.com/pizenkov13-boop/Help-Nearby/issues/new?template=add-deployment.yml) (the New issue page with the Add my city template) and we'll add your city to the table below.
