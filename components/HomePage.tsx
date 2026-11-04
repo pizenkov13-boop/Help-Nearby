@@ -644,6 +644,7 @@ export function HomePage() {
   const sourceDown = (status: string | undefined) => status === "failed" || status === "timeout";
   // OSM did not answer in time: the list is the verified catalog only, and the page says so.
   const osmUnavailable = sourceSettled && sourceDown(sourceStates?.osm);
+  const osmPartial = allOrganizations.some((org) => org.partialSource);
   // The verified catalog (database) did not answer: what is listed comes from OpenStreetMap only.
   const catalogUnavailable =
     sourceSettled && sourceDown(sourceStates?.supabase) && allOrganizations.length > 0;
@@ -717,6 +718,11 @@ export function HomePage() {
                     {catalogUnavailable && (
                       <span className="map-badge amber" data-testid="catalog-unavailable">
                         {t("catalogUnavailableNotice")}
+                      </span>
+                    )}
+                    {osmPartial && !(verifiedOnlyNotice || osmUnavailable) && (
+                      <span className="map-badge amber" data-testid="osm-partial">
+                        {t("osmPartialNotice")}
                       </span>
                     )}
                     {(verifiedOnlyNotice || osmUnavailable) && (

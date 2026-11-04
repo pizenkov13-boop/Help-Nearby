@@ -88,6 +88,25 @@ test.describe("Progressive nearby search", () => {
     await preferFullMode(page);
   });
 
+  test("a result from the limited OSM backup source shows the short notice; normal results do not", async ({ page }) => {
+    await mockSlowSources(page, { supabase: 100, osm: 100, ocha: 100 });
+    await startSearch(page);
+    await expect(card(page, "E2E Overpass Kitchen")).toBeVisible({ timeout: 10_000 });
+    await expect(page.getByTestId("osm-partial")).toHaveCount(0);
+
+    const backup = { ...overpassOrg, id: "overpass-node-9004", slug: "osm-node-9004-e2e-backup", name: "E2E Backup Pharmacy", partialSource: true };
+    await page.route(/\/api\/nearby/, (route) =>
+      route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify([backup]) }),
+    );
+    await page.evaluate(() => { localStorage.clear(); sessionStorage.clear(); });
+    await page.reload();
+    await page.getByRole("button", { name: /Find Help Near Me/i }).click();
+    await expect(card(page, "E2E Backup Pharmacy")).toBeVisible({ timeout: 15_000 });
+    await expect(page.getByTestId("osm-partial")).toHaveText(
+      "Not all categories are shown: the source is temporarily limited",
+    );
+  });
+
   test("Supabase results appear before OSM and OCHA finish; sources merge without reset", async ({ page }) => {
     await mockSlowSources(page, { supabase: 200, osm: 3_000, ocha: 5_500 });
     await startSearch(page);

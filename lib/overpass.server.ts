@@ -1,6 +1,6 @@
 import "server-only";
 
-import { NEARBY_RADIUS_METERS } from "@/lib/constants";
+import { NEARBY_RADIUS_METERS, OSM_USER_AGENT } from "@/lib/constants";
 import { formatDistanceMiles } from "@/lib/geo";
 import {
   buildOverpassCacheKey,
@@ -19,7 +19,11 @@ import { slugify } from "@/lib/orgUtils";
 import {
   normalizeRawCoordinates,
 } from "@/lib/organizationCoordinates";
-import { fetchNominatimElements } from "@/lib/osmFallback.server";
+import {
+  fetchNominatimElements,
+  hasFreshFallback,
+  hasRecentFailure,
+} from "@/lib/osmFallback.server";
 import type { Category, Organization, UserLocation } from "@/lib/types";
 
 /**
@@ -44,7 +48,7 @@ const OVERPASS_URLS: readonly string[] = (() => {
 /** A further mirror is started this long after the previous one (or as soon as it fails). */
 const OVERPASS_HEDGE_DELAY_MS = 2000;
 
-const OVERPASS_USER_AGENT = "HelpNearby/1.0 (help-nearby.app)";
+const OVERPASS_USER_AGENT = OSM_USER_AGENT;
 
 export interface OverpassElement {
   type: "node" | "way" | "relation";
@@ -486,6 +490,14 @@ async function loadOverpassData(
   radius: number,
   emergency: boolean,
 ): Promise<{ data: OverpassResponse; fallback: boolean }> {
+  if (!emergency && hasFreshFallback(lat, lng, radius)) {
+    // Overpass failed moments ago and a fallback answer is cached: do not hit it again yet.
+    const elements = await fetchNominatimElements(lat, lng, radius);
+    if (elements && elements.length > 0) return { data: { elements }, fallback: true };
+  }
+  if (!emergency && hasRecentFailure(lat, lng, radius)) {
+    throw new Error("Overpass timeout: all sources failed moments ago");
+  }
   try {
     return { data: await queryOverpass(query), fallback: false };
   } catch (overpassError) {
@@ -522,12 +534,15 @@ async function fetchOverpassOrganizations(
     radius,
     options?.emergency === true,
   );
-  const organizations = parseOverpassElements(
+  const parsed = parseOverpassElements(
     data,
     userLocation,
     radius,
     options,
   );
+  const organizations = fallback
+    ? parsed.map((org) => ({ ...org, partialSource: true }))
+    : parsed;
   writeServerCache(
     cacheKey,
     organizations,

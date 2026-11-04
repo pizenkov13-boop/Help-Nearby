@@ -281,6 +281,7 @@ export type TranslationKey =
   | "loadRetry"
   | "loadOffline"
   | "osmUnavailableNotice"
+  | "osmPartialNotice"
   | "catalogUnavailableNotice"
   | "unverifiedOsmBadge"
   | "sourceCatalogPending"
@@ -619,6 +620,7 @@ const en: Record<TranslationKey, string> = {
   loadRetry: "Try again",
   loadOffline: "No connection. Check your internet and try again.",
   osmUnavailableNotice: "OpenStreetMap is temporarily unavailable — showing verified organizations only",
+  osmPartialNotice: "Not all categories are shown: the source is temporarily limited",
   catalogUnavailableNotice: "The verified catalog is temporarily unavailable — showing OpenStreetMap results only",
   unverifiedOsmBadge: "Unverified · OpenStreetMap",
   sourceCatalogPending: "Help Nearby directory…",
@@ -967,6 +969,7 @@ const ru: Record<TranslationKey, string> = {
   loadRetry: "Повторить",
   loadOffline: "Нет соединения. Проверьте интернет и попробуйте снова.",
   osmUnavailableNotice: "OpenStreetMap временно недоступен — показаны только проверенные организации",
+  osmPartialNotice: "Показаны не все категории: источник временно ограничен",
   catalogUnavailableNotice: "Каталог проверенных организаций временно недоступен — показаны только данные OpenStreetMap",
   unverifiedOsmBadge: "Не проверено · OpenStreetMap",
   sourceCatalogPending: "Каталог Help Nearby…",
@@ -1322,6 +1325,7 @@ const es: Record<TranslationKey, string> = {
   loadRetry: "Reintentar",
   loadOffline: "Sin conexión. Revisa internet e inténtalo de nuevo.",
   osmUnavailableNotice: "OpenStreetMap no está disponible por ahora — solo se muestran organizaciones verificadas",
+  osmPartialNotice: "No se muestran todas las categorías: la fuente está limitada temporalmente",
   catalogUnavailableNotice: "El catálogo verificado no está disponible por ahora — solo se muestran resultados de OpenStreetMap",
   unverifiedOsmBadge: "Sin verificar · OpenStreetMap",
   sourceCatalogPending: "Directorio Help Nearby…",
@@ -1678,6 +1682,7 @@ const fr: Record<TranslationKey, string> = {
   loadRetry: "Réessayer",
   loadOffline: "Pas de connexion. Vérifiez internet et réessayez.",
   osmUnavailableNotice: "OpenStreetMap est temporairement indisponible — seules les organisations vérifiées sont affichées",
+  osmPartialNotice: "Toutes les catégories ne sont pas affichées : la source est temporairement limitée",
   catalogUnavailableNotice: "Le catalogue vérifié est temporairement indisponible — seuls les résultats OpenStreetMap sont affichés",
   unverifiedOsmBadge: "Non vérifié · OpenStreetMap",
   sourceCatalogPending: "Annuaire Help Nearby…",
@@ -2035,6 +2040,7 @@ const de: Record<TranslationKey, string> = {
   loadRetry: "Erneut versuchen",
   loadOffline: "Keine Verbindung. Prüfen Sie das Internet und versuchen Sie es erneut.",
   osmUnavailableNotice: "OpenStreetMap ist vorübergehend nicht erreichbar — es werden nur geprüfte Organisationen angezeigt",
+  osmPartialNotice: "Nicht alle Kategorien werden angezeigt: Die Quelle ist vorübergehend eingeschränkt",
   catalogUnavailableNotice: "Der geprüfte Katalog ist vorübergehend nicht erreichbar — es werden nur OpenStreetMap-Ergebnisse angezeigt",
   unverifiedOsmBadge: "Nicht verifiziert · OpenStreetMap",
   sourceCatalogPending: "Help-Nearby-Verzeichnis…",
@@ -2368,6 +2374,7 @@ const zh: Record<TranslationKey, string> = {
   loadRetry: "重试",
   loadOffline: "没有网络连接。请检查网络后重试。",
   osmUnavailableNotice: "OpenStreetMap 暂时不可用——仅显示已验证的机构",
+  osmPartialNotice: "未显示全部类别：数据来源暂时受限",
   catalogUnavailableNotice: "已验证目录暂时不可用——仅显示 OpenStreetMap 结果",
   unverifiedOsmBadge: "未验证 · OpenStreetMap",
   sourceCatalogPending: "Help Nearby 名录…",
@@ -2713,6 +2720,7 @@ const ar: Record<TranslationKey, string> = {
   loadRetry: "إعادة المحاولة",
   loadOffline: "لا يوجد اتصال. تحقق من الإنترنت وحاول مرة أخرى.",
   osmUnavailableNotice: "OpenStreetMap غير متاح مؤقتًا — تُعرض المؤسسات الموثّقة فقط",
+  osmPartialNotice: "لا تُعرض كل الفئات: المصدر محدود مؤقتًا",
   catalogUnavailableNotice: "الدليل الموثّق غير متاح مؤقتًا — تُعرض نتائج OpenStreetMap فقط",
   unverifiedOsmBadge: "غير موثّق · OpenStreetMap",
   sourceCatalogPending: "دليل Help Nearby…",

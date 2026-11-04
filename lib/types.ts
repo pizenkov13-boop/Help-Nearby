@@ -49,6 +49,8 @@ export interface Organization {
   createdAt?: string;
   /** OSM feature kind for Overpass results: "pharmacy", "shop:<type>", or the amenity/social_facility value. */
   osmKind?: string;
+  /** Found through the limited OSM backup source, which does not cover every category. */
+  partialSource?: boolean;
 }
 
 export interface FilterState {

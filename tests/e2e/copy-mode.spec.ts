@@ -90,9 +90,11 @@ test.describe("copy mode search without external sources", () => {
 
   let stub: http.Server;
   let stubOnline = true;
+  let stubHits = 0;
 
   test.beforeAll(async () => {
     stub = http.createServer((req, res) => {
+      stubHits += 1;
       if (!stubOnline) {
         res.writeHead(503).end("down");
         return;
@@ -144,6 +146,26 @@ test.describe("copy mode search without external sources", () => {
       expect(organizations.every((org) => org.osmKind === "pharmacy")).toBe(true);
     });
   }
+
+  test("the fallback answer is cached by area: a repeat request does not reach Nominatim again", async ({ request }) => {
+    stubOnline = true;
+    stubHits = 0;
+    const data = { lat: 48.2082, lng: 16.3738, radius: 5000 };
+    const first = await request.post("/api/nearby", { data, timeout: 60_000 });
+    expect(first.status()).toBe(200);
+    const afterFirst = stubHits;
+    expect(afterFirst).toBeGreaterThan(0);
+    // One request per second, one term at a time.
+    expect(afterFirst).toBeLessThanOrEqual(6);
+
+    // A nearby point in the same rounded area, asked again at once.
+    const second = await request.post("/api/nearby", { data: { ...data, lat: data.lat + 0.0005 }, timeout: 60_000 });
+    expect(second.status()).toBe(200);
+    expect(stubHits).toBe(afterFirst);
+    const organizations = (await second.json()) as { partialSource?: boolean }[];
+    expect(organizations.length).toBeGreaterThan(0);
+    expect(organizations.every((org) => org.partialSource === true)).toBe(true);
+  });
 
   test("empty database and no UN-source keys do not break the other search routes", async ({ request }) => {
     const started = Date.now();
