@@ -19,12 +19,23 @@
 
 [![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Fpizenkov13-boop%2FHelp-Nearby&env=ADMIN_PASSWORD&envDescription=Password%20for%20the%20%2Fadmin%20page%20(optional%3A%20leave%20empty%20to%20keep%20admin%20off)&envLink=https%3A%2F%2Fgithub.com%2Fpizenkov13-boop%2FHelp-Nearby%23run-it-in-your-city&integration-ids=oac_VqOgBHqhEoFTPzGkPd7L0iH6&project-name=help-nearby&repository-name=help-nearby)
 
-Любой может запустить свою копию Help Nearby для города, региона или сообщества. Нужны бесплатные аккаунты на GitHub и [Vercel](https://vercel.com/); база данных создаётся автоматически.
+Любой может запустить свою копию Help Nearby для города, региона или сообщества. База данных создаётся автоматически.
 
-1. **Нажмите кнопку Deploy выше и войдите через GitHub:** Vercel сам сделает форк репозитория.
-2. **Подключите Supabase** на шаге интеграций (бесплатный тариф): проект базы и все ключи создаются и подставляются автоматически. Задайте `ADMIN_PASSWORD` (пароль для `/admin`).
-3. **Нажмите Deploy.** Во время сборки таблицы создаются сами (`npm run setup`, идемпотентно, из [`supabase/schema.sql`](supabase/schema.sql)); SQL вручную выполнять не нужно.
-4. **Добавьте организации:** откройте `/admin` и подтверждайте заявки с `/submit`, либо загрузите CSV в таблицу `organizations` (Supabase → Table Editor → Insert → Import data from CSV; колонки как в [`supabase/schema.sql`](supabase/schema.sql), `verified` поставьте `true`). Демо-данные: [`supabase/seed_demo.sql`](supabase/seed_demo.sql) (три вымышленные организации, удалите их).
+**Что нужно:** бесплатные аккаунты GitHub, [Vercel](https://vercel.com/) и [Supabase](https://supabase.com/) (Vercel и Supabase можно создать через вход с GitHub). Программировать не нужно.
+
+1. **Нажми Deploy with Vercel** выше и войди через GitHub.
+2. **В поле «Область видимости Git» выбери свой аккаунт GitHub.** Если список пуст, нажми добавить аккаунт и разреши Vercel доступ. Название репозитория можно оставить, нажми Create.
+3. **В блоке интеграций нажми Add рядом с Supabase** (бесплатный тариф): проект базы и все ключи создаются и подставляются автоматически.
+4. **Придумай `ADMIN_PASSWORD`** (пароль администратора для `/admin`) и запиши его.
+5. **Нажми Deploy.** Через пару минут сайт готов. Во время сборки таблицы создаются сами (`npm run setup`, идемпотентно, из [`supabase/schema.sql`](supabase/schema.sql)); SQL вручную выполнять не нужно.
+6. **Добавьте организации:** откройте `/admin` и подтверждайте заявки с `/submit`, либо загрузите CSV в таблицу `organizations` (Supabase → Table Editor → Insert → Import data from CSV; колонки как в [`supabase/schema.sql`](supabase/schema.sql), `verified` поставьте `true`). Демо-данные: [`supabase/seed_demo.sql`](supabase/seed_demo.sql) (три вымышленные организации, удалите их).
+
+**Если застрял**
+
+- Supabase пишет «Организации не найдены» (Organizations not found): создай организацию в Supabase (название любое, тип Personal, тариф Free), вернись на страницу установки, выбери её в списке и нажми «Установить интеграцию».
+- Кнопка Create серая: не выбран Git-провайдер или область видимости Git. Выбери GitHub и свой аккаунт.
+- Сайт открылся, но без базы: проверь, что в Vercel (Settings → Integrations) подключён Supabase, потом сделай Redeploy.
+- Вопросы: открой [Issue](https://github.com/pizenkov13-boop/Help-Nearby/issues/new) в этом репозитории.
 
 **Запустил свою копию? Заполни [короткую форму](https://github.com/pizenkov13-boop/Help-Nearby/issues/new?template=add-deployment.yml) (New issue с шаблоном Add my city), и мы добавим твой город в таблицу ниже.**
 
@@ -49,12 +60,23 @@
 
 [![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Fpizenkov13-boop%2FHelp-Nearby&env=ADMIN_PASSWORD&envDescription=Password%20for%20the%20%2Fadmin%20page%20(optional%3A%20leave%20empty%20to%20keep%20admin%20off)&envLink=https%3A%2F%2Fgithub.com%2Fpizenkov13-boop%2FHelp-Nearby%23run-it-in-your-city&integration-ids=oac_VqOgBHqhEoFTPzGkPd7L0iH6&project-name=help-nearby&repository-name=help-nearby)
 
-Anyone can run their own copy of Help Nearby for a city, region or community. You need free accounts on GitHub and [Vercel](https://vercel.com/); the database is created automatically.
+Anyone can run their own copy of Help Nearby for a city, region or community. The database is created automatically.
 
-1. **Click the Deploy button above and sign in with GitHub:** Vercel will fork the repository for you.
-2. **Connect Supabase** in the integrations step (free plan): the database project and all keys are created and filled in automatically. Set `ADMIN_PASSWORD` (the password for `/admin`).
-3. **Click Deploy.** During the build the tables are created for you (`npm run setup`, idempotent, from [`supabase/schema.sql`](supabase/schema.sql)); no SQL to run by hand.
-4. **Add organizations:** open `/admin` and verify community submissions from `/submit`, or bulk-load rows by importing a CSV into the `organizations` table (Supabase → Table Editor → Insert → Import data from CSV; columns follow [`supabase/schema.sql`](supabase/schema.sql), set `verified` to `true`). Demo data: [`supabase/seed_demo.sql`](supabase/seed_demo.sql) (three fictional organizations, delete them).
+**What you need:** free accounts on GitHub, [Vercel](https://vercel.com/) and [Supabase](https://supabase.com/) (you can create Vercel and Supabase by signing in with GitHub). No coding needed.
+
+1. **Click Deploy with Vercel** above and sign in with GitHub.
+2. **In the "Git Scope" field pick your GitHub account.** If the list is empty, click add account and let Vercel access it. You can keep the repository name; click Create.
+3. **In the integrations block click Add next to Supabase** (free plan): the database project and all keys are created and filled in automatically.
+4. **Come up with an `ADMIN_PASSWORD`** (the admin password for `/admin`) and write it down.
+5. **Click Deploy.** The site is ready in a couple of minutes. During the build the tables are created for you (`npm run setup`, idempotent, from [`supabase/schema.sql`](supabase/schema.sql)); no SQL to run by hand.
+6. **Add organizations:** open `/admin` and verify community submissions from `/submit`, or bulk-load rows by importing a CSV into the `organizations` table (Supabase → Table Editor → Insert → Import data from CSV; columns follow [`supabase/schema.sql`](supabase/schema.sql), set `verified` to `true`). Demo data: [`supabase/seed_demo.sql`](supabase/seed_demo.sql) (three fictional organizations, delete them).
+
+**If you get stuck**
+
+- Supabase says "Organizations not found": create an organization in Supabase (any name, type Personal, plan Free), go back to the install page, pick it in the list and click "Install integration".
+- The Create button is grey: no Git provider or Git scope is selected. Pick GitHub and your account.
+- The site opens but has no database: check that Supabase is connected in Vercel (Settings → Integrations), then Redeploy.
+- Questions: open an [Issue](https://github.com/pizenkov13-boop/Help-Nearby/issues/new) in this repository.
 
 **Launched your copy?** Fill in a [short form](https://github.com/pizenkov13-boop/Help-Nearby/issues/new?template=add-deployment.yml) (the New issue page with the Add my city template) and we'll add your city to the table below.
 
