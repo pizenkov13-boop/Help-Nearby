@@ -37,6 +37,8 @@ export default defineConfig({
           POSTGRES_URL_NON_POOLING: "",
           AITUNNEL_API_KEY: "",
           DISABLE_PING: "true",
+          // The regional limit is main-site only: a copy must ignore it (see copy-mode.spec.ts).
+          BLOCKED_COUNTRIES: "ZZ",
           // Public OSM services are unreachable: Overpass points at a closed port and the
           // Nominatim fallback at the stub started by tests/e2e/copy-mode.spec.ts.
           OVERPASS_URLS: "http://127.0.0.1:3198/api/interpreter",

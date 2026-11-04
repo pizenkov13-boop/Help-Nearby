@@ -45,6 +45,12 @@ test.describe("copy mode", () => {
     expect(text).not.toMatch(/izenkin|pavel|hello@|help-nearby\.org/i);
   });
 
+  test("the regional limit variable is ignored on a copy", async ({ request }) => {
+    const response = await request.get("/", { headers: { "x-vercel-ip-country": "ZZ" } });
+    expect(response.status()).toBe(200);
+    expect((await request.get("/privacy", { headers: { "x-vercel-ip-country": "ZZ" } })).status()).toBe(200);
+  });
+
   test("submit and reviews are not available", async ({ request }) => {
     expect((await request.get("/submit")).status()).toBe(404);
     expect((await request.get("/reviews")).status()).toBe(404);
