@@ -14,7 +14,7 @@ import { createClient } from "@supabase/supabase-js";
 import { fetchGdhoOrganizationsForCountry } from "../lib/gdho";
 import { fetchHdxOrganizationsForCountry } from "../lib/hdx";
 import { fetchReliefWebOrganizationsForCountry } from "../lib/reliefweb";
-import { skipsReliefWeb } from "../lib/sourceRules";
+import { reliefWebSkipCountries, skipsReliefWeb } from "../lib/sourceRules";
 import type { Organization } from "../lib/types";
 
 interface CountryEntry {
@@ -102,6 +102,8 @@ async function main() {
   }
   const hasReliefWeb = Boolean(process.env.RELIEFWEB_APPNAME?.trim());
   if (!hasReliefWeb) console.warn("[ingest] RELIEFWEB_APPNAME is not set; ReliefWeb is skipped.");
+  // Never print the list or the variable: only that rules exist.
+  if (reliefWebSkipCountries().size > 0) console.log("[ingest] ReliefWeb: skip rules applied");
 
   // No timedFetch here: batch writes are larger than the website's 3 s database budget.
   const client = dryRun ? null : createClient(url, key, { auth: { persistSession: false } });
@@ -113,8 +115,13 @@ async function main() {
       ["hdx", () => fetchHdxOrganizationsForCountry(country.name, country.iso3)],
       ["gdho", () => fetchGdhoOrganizationsForCountry(country.name)],
     ];
-    if (hasReliefWeb && !skipsReliefWeb(country.name, country.code)) {
-      fetched.push(["reliefweb", () => fetchReliefWebOrganizationsForCountry(country.name, country.iso3)]);
+    if (hasReliefWeb) {
+      if (skipsReliefWeb(country.name, country.code)) {
+        // Same line shape as an empty answer, so the log does not reveal which countries are skipped.
+        console.log(`[ingest] ${country.code} reliefweb: 0 organization(s) in 0.0s`);
+      } else {
+        fetched.push(["reliefweb", () => fetchReliefWebOrganizationsForCountry(country.name, country.iso3)]);
+      }
     }
 
     for (const [source, run] of fetched) {
