@@ -214,7 +214,7 @@ export async function resolvePlaceCoordinates(
 let nextSlot = 0;
 
 /** Serialises calls so we stay under Nominatim's 1 request/second policy. */
-async function waitForNominatimSlot(): Promise<void> {
+export async function waitForNominatimSlot(): Promise<void> {
   const now = Date.now();
   const slot = Math.max(now, nextSlot);
   nextSlot = slot + 1100;

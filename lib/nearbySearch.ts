@@ -25,7 +25,7 @@ export type { SmartRadiusSearchResult };
 
 /** Client-side budgets (slightly above the server's so the server's answer wins). */
 export const SUPABASE_FETCH_TIMEOUT_MS = 5_000;
-export const OVERPASS_FETCH_TIMEOUT_MS = 10_000;
+export const OVERPASS_FETCH_TIMEOUT_MS = 20_000;
 export const OCHA_FETCH_TIMEOUT_MS = 7_000;
 
 const MAX_BACKGROUND_GEOCODE_CATALOG = 8;

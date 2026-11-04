@@ -37,6 +37,10 @@ export default defineConfig({
           POSTGRES_URL_NON_POOLING: "",
           AITUNNEL_API_KEY: "",
           DISABLE_PING: "true",
+          // Public OSM services are unreachable: Overpass points at a closed port and the
+          // Nominatim fallback at the stub started by tests/e2e/copy-mode.spec.ts.
+          OVERPASS_URLS: "http://127.0.0.1:3198/api/interpreter",
+          NOMINATIM_SEARCH_URL: "http://127.0.0.1:3199/search",
         },
       },
 });

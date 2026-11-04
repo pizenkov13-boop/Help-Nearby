@@ -19,25 +19,34 @@ import { slugify } from "@/lib/orgUtils";
 import {
   normalizeRawCoordinates,
 } from "@/lib/organizationCoordinates";
+import { fetchNominatimElements } from "@/lib/osmFallback.server";
 import type { Category, Organization, UserLocation } from "@/lib/types";
 
 /**
  * Fallback chain, tried in this order. overpass-api.de is often overloaded and kumi /
  * private.coffee may be unreachable from some hosts, so openstreetmap.fr sits second.
  */
-const OVERPASS_URLS = [
+const DEFAULT_OVERPASS_URLS = [
   "https://overpass-api.de/api/interpreter",
-  "https://overpass.openstreetmap.fr/api/interpreter",
   "https://overpass.private.coffee/api/interpreter",
   "https://overpass.kumi.systems/api/interpreter",
 ] as const;
+
+/** OVERPASS_URLS (comma-separated) replaces the mirror list; used by the e2e tests. */
+const OVERPASS_URLS: readonly string[] = (() => {
+  const custom = (process.env.OVERPASS_URLS ?? "")
+    .split(",")
+    .map((url) => url.trim())
+    .filter(Boolean);
+  return custom.length > 0 ? custom : DEFAULT_OVERPASS_URLS;
+})();
 
 /** A further mirror is started this long after the previous one (or as soon as it fails). */
 const OVERPASS_HEDGE_DELAY_MS = 2000;
 
 const OVERPASS_USER_AGENT = "HelpNearby/1.0 (help-nearby.app)";
 
-interface OverpassElement {
+export interface OverpassElement {
   type: "node" | "way" | "relation";
   id: number;
   lat?: number;
@@ -451,11 +460,41 @@ function readServerCache(key: string): Organization[] | null {
   return entry.organizations;
 }
 
-function writeServerCache(key: string, organizations: Organization[]): void {
+function writeServerCache(
+  key: string,
+  organizations: Organization[],
+  ttlMs = OVERPASS_CACHE_TTL_MS,
+): void {
   serverCache.set(key, {
     organizations,
-    expiresAt: Date.now() + OVERPASS_CACHE_TTL_MS,
+    expiresAt: Date.now() + ttlMs,
   });
+}
+
+/** Fallback answers are partial, so they are cached only briefly. */
+const FALLBACK_CACHE_TTL_MS = 5 * 60 * 1000;
+
+/**
+ * Overpass first; when every mirror fails or times out, the same OSM data is searched through
+ * Nominatim instead. Throws only when both are unavailable, so the caller can report an error
+ * rather than an authoritative "0 found".
+ */
+async function loadOverpassData(
+  query: string,
+  lat: number,
+  lng: number,
+  radius: number,
+  emergency: boolean,
+): Promise<{ data: OverpassResponse; fallback: boolean }> {
+  try {
+    return { data: await queryOverpass(query), fallback: false };
+  } catch (overpassError) {
+    if (emergency) throw overpassError;
+    console.warn("[overpass] all mirrors failed, trying the Nominatim fallback");
+    const elements = await fetchNominatimElements(lat, lng, radius);
+    if (!elements || elements.length === 0) throw overpassError;
+    return { data: { elements }, fallback: true };
+  }
 }
 
 async function fetchOverpassOrganizations(
@@ -476,14 +515,24 @@ async function fetchOverpassOrganizations(
   }
 
   const query = buildQuery(lat, lng, radius);
-  const data = await queryOverpass(query);
+  const { data, fallback } = await loadOverpassData(
+    query,
+    lat,
+    lng,
+    radius,
+    options?.emergency === true,
+  );
   const organizations = parseOverpassElements(
     data,
     userLocation,
     radius,
     options,
   );
-  writeServerCache(cacheKey, organizations);
+  writeServerCache(
+    cacheKey,
+    organizations,
+    fallback ? FALLBACK_CACHE_TTL_MS : OVERPASS_CACHE_TTL_MS,
+  );
   return organizations;
 }
 

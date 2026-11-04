@@ -5,6 +5,8 @@ import { fetchNearbyOverpassOrganizations } from "@/lib/overpass.server";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
+// Overpass (up to ~8.5 s) plus the Nominatim fallback must fit in one invocation.
+export const maxDuration = 30;
 
 /** Body: { lat, lng, radius? }. Nothing about the request (URL, position) is logged. */
 export async function POST(request: Request) {
@@ -25,6 +27,12 @@ export async function POST(request: Request) {
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
     console.error("[api/nearby] Error:", message);
-    return NextResponse.json([]);
+    // An error, not an empty list: the page then reports OSM as unavailable and retries
+    // instead of showing "0 organizations found".
+    const timedOut = /timeout/i.test(message);
+    return NextResponse.json(
+      { error: true, reason: timedOut ? "timeout" : "unavailable" },
+      { status: timedOut ? 504 : 502 },
+    );
   }
 }
