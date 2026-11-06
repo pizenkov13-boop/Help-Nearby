@@ -8,6 +8,7 @@
 - NEVER save working files or tests to root — use `/src`, `/tests`, `/docs`, `/config`, `/scripts`
 - ALWAYS read a file before editing it
 - NEVER commit secrets, credentials, or .env files
+- Commit only with `TZ=UTC` (run git as `TZ=UTC git ...`): otherwise the commit metadata records the local time zone offset
 - Keep files under 500 lines
 - Validate input at system boundaries
 
