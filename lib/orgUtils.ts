@@ -1,6 +1,8 @@
 import {
+  evaluateRussianSchedule,
   extractOsmOpeningHours,
   parseOsmOpeningHours,
+  parseRussianSchedule,
   type OpenStatus,
 } from "@/lib/openingHours";
 import { getOrganizationCoordinates } from "@/lib/organizationCoordinates";
@@ -92,6 +94,12 @@ export function getOrganizationOpenStatus(
 ): OpenStatus {
   if (hasStructuredHours(org)) {
     return evaluateStructuredHours(org, date);
+  }
+
+  // Catalog schedules in Russian ("Пн–Пт 19:00–19:30"): open inside the window, otherwise unknown (never closed).
+  if (!org.id.startsWith("overpass-")) {
+    const russian = parseRussianSchedule(org.hoursRaw);
+    if (russian) return evaluateRussianSchedule(russian, date);
   }
 
   const osmHours = extractOsmOpeningHours(org.hoursRaw);
