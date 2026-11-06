@@ -8,9 +8,10 @@ export function WhyItMattersContent() {
   const { t } = useLanguage();
 
   const crisisStats = [
-    { value: "700M", label: t("whyStat700m") },
-    { value: "150M", label: t("whyStat150m") },
-    { value: "2.3B", label: t("whyStat2_3b") },
+    { value: "700M", label: t("whyStat700m"), source: t("whyStat700mSource") },
+    // No primary source confirms this figure (it goes back to a 2001 UN range of 100-150 million): shown without one.
+    { value: "150M", label: t("whyStat150m"), source: null },
+    { value: "2.3B", label: t("whyStat2_3b"), source: t("whyStat2_3bSource") },
   ] as const;
 
   const problemCards = [
@@ -88,6 +89,11 @@ export function WhyItMattersContent() {
               <div key={stat.value} className="page-card stat-card">
                 <p className="v">{stat.value}</p>
                 <p className="l">{stat.label}</p>
+                {stat.source ? (
+                  <p className="l" style={{ fontSize: "0.75rem", opacity: 0.75, marginTop: "0.5rem" }} data-testid="stat-source">
+                    {stat.source}
+                  </p>
+                ) : null}
               </div>
             ))}
           </div>

@@ -322,11 +322,25 @@ const CITIES_CONTENT: Record<
   },
 };
 
+/** Place names as printed on the cards, in each language (the cards used to show the English names everywhere). */
+const CITY_NAMES: Record<LanguageCode, Record<CityInNeedCard["id"], string>> = {
+  en: { sudan: "Sudan", gaza: "Gaza, Palestine", yemen: "Yemen", armenia: "Armenia", kyrgyzstan: "Kyrgyzstan", tajikistan: "Tajikistan" },
+  ru: { sudan: "Судан", gaza: "Газа, Палестина", yemen: "Йемен", armenia: "Армения", kyrgyzstan: "Кыргызстан", tajikistan: "Таджикистан" },
+  es: { sudan: "Sudán", gaza: "Gaza, Palestina", yemen: "Yemen", armenia: "Armenia", kyrgyzstan: "Kirguistán", tajikistan: "Tayikistán" },
+  fr: { sudan: "Soudan", gaza: "Gaza, Palestine", yemen: "Yémen", armenia: "Arménie", kyrgyzstan: "Kirghizistan", tajikistan: "Tadjikistan" },
+  de: { sudan: "Sudan", gaza: "Gaza, Palästina", yemen: "Jemen", armenia: "Armenien", kyrgyzstan: "Kirgisistan", tajikistan: "Tadschikistan" },
+  zh: { sudan: "苏丹", gaza: "加沙，巴勒斯坦", yemen: "也门", armenia: "亚美尼亚", kyrgyzstan: "吉尔吉斯斯坦", tajikistan: "塔吉克斯坦" },
+  ar: { sudan: "السودان", gaza: "غزة، فلسطين", yemen: "اليمن", armenia: "أرمينيا", kyrgyzstan: "قيرغيزستان", tajikistan: "طاجيكستان" },
+};
+
 export function getCitiesInNeed(language: LanguageCode): CityInNeedCard[] {
   const localized = CITIES_CONTENT[language] ?? CITIES_CONTENT.en;
 
+  const names = CITY_NAMES[language] ?? CITY_NAMES.en;
+
   return CITY_META.map((city) => ({
     ...city,
+    city: names[city.id],
     ...localized[city.id],
   }));
 }

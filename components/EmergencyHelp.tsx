@@ -126,7 +126,7 @@ export function EmergencyHelp() {
           />
 
           <div className="urgent-panel relative z-10 flex max-h-[min(85vh,720px)] w-full max-w-lg flex-col overflow-hidden rounded-2xl border-2 border-red-500/60 bg-white shadow-2xl shadow-red-900/20 dark:bg-gray-900 dark:shadow-red-900/30">
-            <div className="flex items-start justify-between gap-3 border-b border-red-500/30 bg-red-50 px-4 py-4 dark:bg-red-600/20 sm:px-5">
+            <div className="flex items-center justify-between gap-3 border-b border-red-500/30 bg-red-50 px-4 py-4 dark:bg-red-600/20 sm:px-5">
               <div>
                 <h2
                   id="emergency-dialog-title"
@@ -135,9 +135,6 @@ export function EmergencyHelp() {
                   <LifeBuoy className="h-5 w-5 shrink-0 text-red-600 dark:text-red-300" aria-hidden />
                   {t("emergencyTitle")}
                 </h2>
-                <p className="mt-1 text-sm text-red-800/90 dark:text-red-100/90">
-                  {t("emergencySubtitle")}
-                </p>
               </div>
               <button
                 ref={closeButtonRef}

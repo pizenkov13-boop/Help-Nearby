@@ -209,6 +209,8 @@ export type TranslationKey =
   | "whyStat700m"
   | "whyStat150m"
   | "whyStat2_3b"
+  | "whyStat700mSource"
+  | "whyStat2_3bSource"
   | "whyStat1Label"
   | "whyStat2Label"
   | "whyStat3Label"
@@ -373,7 +375,6 @@ export type TranslationKey =
   | "routeTransitNote"
   | "emergencyHelp"
   | "emergencyTitle"
-  | "emergencySubtitle"
   | "emergencyLocating"
   | "emergencyLoading"
   | "emergencyNoResults"
@@ -427,7 +428,7 @@ const en: Record<TranslationKey, string> = {
     "Browse verified food banks, shelters, clinics and more — filtered by distance and category.",
   howItWorksStep3Title: "Get Help Now",
   howItWorksStep3Description:
-    "Call directly with one tap or get turn-by-turn directions. No account needed.",
+    "Call directly with one tap or get turn-by-turn directions.",
   impactCounter: "{count} people found help today",
   filtersTitle: "Filters",
   filterCountry: "Country",
@@ -567,14 +568,12 @@ const en: Record<TranslationKey, string> = {
   aboutSearchDiscoverText:
     "Enter your location and find nearby organizations filtered by category and your specific needs.",
   aboutGetHelpCardTitle: "Get Help",
-  aboutGetHelpCardText:
-    "Call directly or get directions to verified organizations instantly.",
+  aboutGetHelpCardText: "Call right away or get directions to help points.",
   aboutHowItWorksCard1Title: "Search & Discover",
   aboutHowItWorksCard1Text:
     "Enter your location and find nearby organizations filtered by category and your specific needs.",
   aboutHowItWorksCard2Title: "Get Help",
-  aboutHowItWorksCard2Text:
-    "Call directly or get directions to verified organizations instantly.",
+  aboutHowItWorksCard2Text: "Call right away or get directions to help points.",
   aboutValueAccessibilityTitle: "Accessibility",
   aboutValueAccessibilityText:
     "Help should be easy to find, free, and available to everyone.",
@@ -582,14 +581,14 @@ const en: Record<TranslationKey, string> = {
   aboutValueDignityText:
     "Everyone deserves help with respect and compassion.",
   aboutValueGlobalTitle: "Global Reach",
-  aboutValueGlobalText: "No matter where you are, help is near you.",
+  aboutValueGlobalText: "We show help points in different countries around the world.",
   aboutValuesCard1Title: "Accessibility",
   aboutValuesCard1Text:
     "Help should be easy to find, free, and available to everyone.",
   aboutValuesCard2Title: "Dignity",
   aboutValuesCard2Text: "Everyone deserves help with respect and compassion.",
   aboutValuesCard3Title: "Global Reach",
-  aboutValuesCard3Text: "No matter where you are, help is near you.",
+  aboutValuesCard3Text: "We show help points in different countries around the world.",
   aboutExploreOrgs: "Explore Organizations",
   aboutExploreOrganizations: "Explore Organizations",
   whyPageTitle: "Help Should Be Accessible To All",
@@ -598,6 +597,8 @@ const en: Record<TranslationKey, string> = {
   whyStat700m: "people live in extreme poverty",
   whyStat150m: "homeless people worldwide",
   whyStat2_3b: "people lack food security",
+  whyStat700mSource: "Source: World Bank, Poverty, Prosperity, and Planet Report 2024 (below $2.15 a day)",
+  whyStat2_3bSource: "Source: FAO, IFAD, UNICEF, WFP, WHO — SOFI 2025 (data for 2024)",
   whyStat1Label: "people live in extreme poverty",
   whyStat2Label: "homeless people worldwide",
   whyStat3Label: "people lack food security",
@@ -626,16 +627,14 @@ const en: Record<TranslationKey, string> = {
   whySolution2Title: "Real-Time Info",
   whySolution2Text: "See what's open now, get directions, call instantly.",
   whySolution3Title: "Works Everywhere",
-  whySolution3Text:
-    "7 languages, offline mode, optimized for 2G networks in crisis zones.",
+  whySolution3Text: "7 languages and a lite mode for slow connections.",
   whySolutionCard1Title: "All in One Place",
   whySolutionCard1Text:
     "Every local assistance organization in one easy-to-use map interface.",
   whySolutionCard2Title: "Real-Time Info",
   whySolutionCard2Text: "See what's open now, get directions, call instantly.",
   whySolutionCard3Title: "Works Everywhere",
-  whySolutionCard3Text:
-    "7 languages, offline mode, optimized for 2G networks in crisis zones.",
+  whySolutionCard3Text: "7 languages and a lite mode for slow connections.",
   whyPageHeading: "Help Should Be Accessible To All",
   citiesTitle: "Cities in Need",
   citiesSubtitle:
@@ -783,7 +782,6 @@ const en: Record<TranslationKey, string> = {
   routeTransitNote: "Transit uses driving estimate (OSRM does not support public transit).",
   emergencyHelp: "Emergency Help",
   emergencyTitle: "24/7 Emergency Help",
-  emergencySubtitle: "Open now — nearest help first. Call immediately if you are in crisis.",
   emergencyLocating: "Finding your location…",
   emergencyLoading: "Loading 24/7 help nearby…",
   emergencyNoResults:
@@ -834,7 +832,7 @@ const ru: Record<TranslationKey, string> = {
     "Просматривайте проверенные продовольственные банки, приюты, клиники и другие службы — с фильтрацией по расстоянию и категории.",
   howItWorksStep3Title: "Получите помощь сейчас",
   howItWorksStep3Description:
-    "Позвоните одним касанием или постройте маршрут. Регистрация не требуется.",
+    "Позвоните одним касанием или постройте маршрут.",
   impactCounter: "{count} человек получили помощь сегодня",
   filtersTitle: "Фильтры",
   filterCountry: "Страна",
@@ -984,14 +982,12 @@ const ru: Record<TranslationKey, string> = {
   aboutSearchDiscoverText:
     "Введите своё местоположение и найдите рядом организации с фильтрами по категории и вашим потребностям.",
   aboutGetHelpCardTitle: "Получите помощь",
-  aboutGetHelpCardText:
-    "Сразу звоните или получайте маршрут до проверенных организаций.",
+  aboutGetHelpCardText: "Сразу звоните или получайте маршрут до пунктов помощи.",
   aboutHowItWorksCard1Title: "Ищите и находите",
   aboutHowItWorksCard1Text:
     "Введите своё местоположение и найдите рядом организации с фильтрами по категории и вашим потребностям.",
   aboutHowItWorksCard2Title: "Получите помощь",
-  aboutHowItWorksCard2Text:
-    "Сразу звоните или получайте маршрут до проверенных организаций.",
+  aboutHowItWorksCard2Text: "Сразу звоните или получайте маршрут до пунктов помощи.",
   aboutValueAccessibilityTitle: "Доступность",
   aboutValueAccessibilityText:
     "Помощь должна быть простой в поиске, бесплатной и доступной каждому.",
@@ -999,7 +995,7 @@ const ru: Record<TranslationKey, string> = {
   aboutValueDignityText:
     "Каждый человек заслуживает помощи с уважением и сочувствием.",
   aboutValueGlobalTitle: "Глобальный охват",
-  aboutValueGlobalText: "Где бы вы ни были, помощь рядом.",
+  aboutValueGlobalText: "Показываем пункты помощи в разных странах мира.",
   aboutValuesCard1Title: "Доступность",
   aboutValuesCard1Text:
     "Помощь должна быть простой в поиске, бесплатной и доступной каждому.",
@@ -1007,7 +1003,7 @@ const ru: Record<TranslationKey, string> = {
   aboutValuesCard2Text:
     "Каждый человек заслуживает помощи с уважением и сочувствием.",
   aboutValuesCard3Title: "Глобальный охват",
-  aboutValuesCard3Text: "Где бы вы ни были, помощь рядом.",
+  aboutValuesCard3Text: "Показываем пункты помощи в разных странах мира.",
   aboutExploreOrgs: "Смотреть организации",
   aboutExploreOrganizations: "Смотреть организации",
   whyPageTitle: "Помощь должна быть доступна всем",
@@ -1016,6 +1012,8 @@ const ru: Record<TranslationKey, string> = {
   whyStat700m: "человек живут в крайней бедности",
   whyStat150m: "бездомных людей по всему миру",
   whyStat2_3b: "человек испытывают нехватку продовольствия",
+  whyStat700mSource: "Источник: Всемирный банк, отчёт «Бедность, процветание и планета» 2024 (менее 2,15 долл. в день)",
+  whyStat2_3bSource: "Источник: ФАО, МФСР, ЮНИСЕФ, ВПП, ВОЗ — SOFI 2025 (данные за 2024 год)",
   whyStat1Label: "человек живут в крайней бедности",
   whyStat2Label: "бездомных людей по всему миру",
   whyStat3Label: "человек испытывают нехватку продовольствия",
@@ -1044,16 +1042,14 @@ const ru: Record<TranslationKey, string> = {
   whySolution2Title: "Информация в реальном времени",
   whySolution2Text: "Смотрите, что открыто сейчас, стройте маршрут, звоните сразу.",
   whySolution3Title: "Работает везде",
-  whySolution3Text:
-    "7 языков, офлайн-режим, оптимизация для сетей 2G в кризисных зонах.",
+  whySolution3Text: "7 языков и лёгкий режим для медленного интернета.",
   whySolutionCard1Title: "Всё в одном месте",
   whySolutionCard1Text: "Все местные организации помощи на одной удобной карте.",
   whySolutionCard2Title: "Информация в реальном времени",
   whySolutionCard2Text:
     "Смотрите, что открыто сейчас, стройте маршрут, звоните сразу.",
   whySolutionCard3Title: "Работает везде",
-  whySolutionCard3Text:
-    "7 языков, офлайн-режим, оптимизация для сетей 2G в кризисных зонах.",
+  whySolutionCard3Text: "7 языков и лёгкий режим для медленного интернета.",
   whyPageHeading: "Помощь должна быть доступна всем",
   citiesTitle: "Города в беде",
   citiesSubtitle:
@@ -1204,8 +1200,6 @@ const ru: Record<TranslationKey, string> = {
     "Для транспорта используется оценка для авто (OSRM не поддерживает общественный транспорт).",
   emergencyHelp: "Экстренная помощь",
   emergencyTitle: "Круглосуточная помощь 24/7",
-  emergencySubtitle:
-    "Открыто сейчас — ближайшая помощь первой. Звоните немедленно, если вы в кризисе.",
   emergencyLocating: "Определяем ваше местоположение…",
   emergencyLoading: "Загрузка помощи 24/7 рядом…",
   emergencyNoResults:
@@ -1256,7 +1250,7 @@ const es: Record<TranslationKey, string> = {
     "Explora bancos de alimentos, refugios, clínicas verificados y más — filtrados por distancia y categoría.",
   howItWorksStep3Title: "Obtén ayuda ahora",
   howItWorksStep3Description:
-    "Llama con un solo toque u obtén indicaciones paso a paso. No necesitas cuenta.",
+    "Llama con un solo toque u obtén indicaciones paso a paso.",
   impactCounter: "{count} personas encontraron ayuda hoy",
   filtersTitle: "Filtros",
   filterCountry: "País",
@@ -1407,14 +1401,12 @@ const es: Record<TranslationKey, string> = {
   aboutSearchDiscoverText:
     "Introduce tu ubicación y encuentra organizaciones cercanas filtradas por categoría y tus necesidades específicas.",
   aboutGetHelpCardTitle: "Obtener ayuda",
-  aboutGetHelpCardText:
-    "Llama directamente u obtén indicaciones a organizaciones verificadas al instante.",
+  aboutGetHelpCardText: "Llama de inmediato u obtén la ruta hasta los puntos de ayuda.",
   aboutHowItWorksCard1Title: "Buscar y descubrir",
   aboutHowItWorksCard1Text:
     "Introduce tu ubicación y encuentra organizaciones cercanas filtradas por categoría y tus necesidades específicas.",
   aboutHowItWorksCard2Title: "Obtener ayuda",
-  aboutHowItWorksCard2Text:
-    "Llama directamente u obtén indicaciones a organizaciones verificadas al instante.",
+  aboutHowItWorksCard2Text: "Llama de inmediato u obtén la ruta hasta los puntos de ayuda.",
   aboutValueAccessibilityTitle: "Accesibilidad",
   aboutValueAccessibilityText:
     "La ayuda debe ser fácil de encontrar, gratuita y disponible para todos.",
@@ -1422,16 +1414,14 @@ const es: Record<TranslationKey, string> = {
   aboutValueDignityText:
     "Todos merecen ayuda con respeto y compasión.",
   aboutValueGlobalTitle: "Alcance global",
-  aboutValueGlobalText:
-    "Sin importar dónde estés, la ayuda está cerca de ti.",
+  aboutValueGlobalText: "Mostramos puntos de ayuda en distintos países del mundo.",
   aboutValuesCard1Title: "Accesibilidad",
   aboutValuesCard1Text:
     "La ayuda debe ser fácil de encontrar, gratuita y disponible para todos.",
   aboutValuesCard2Title: "Dignidad",
   aboutValuesCard2Text: "Todos merecen ayuda con respeto y compasión.",
   aboutValuesCard3Title: "Alcance global",
-  aboutValuesCard3Text:
-    "Sin importar dónde estés, la ayuda está cerca de ti.",
+  aboutValuesCard3Text: "Mostramos puntos de ayuda en distintos países del mundo.",
   aboutExploreOrgs: "Explorar organizaciones",
   aboutExploreOrganizations: "Explorar organizaciones",
   whyPageTitle: "La ayuda debe ser accesible para todos",
@@ -1440,6 +1430,8 @@ const es: Record<TranslationKey, string> = {
   whyStat700m: "personas viven en pobreza extrema",
   whyStat150m: "personas sin hogar en todo el mundo",
   whyStat2_3b: "personas carecen de seguridad alimentaria",
+  whyStat700mSource: "Fuente: Banco Mundial, Informe Pobreza, prosperidad y planeta 2024 (menos de 2,15 USD al día)",
+  whyStat2_3bSource: "Fuente: FAO, FIDA, UNICEF, PMA, OMS — SOFI 2025 (datos de 2024)",
   whyStat1Label: "personas viven en pobreza extrema",
   whyStat2Label: "personas sin hogar en todo el mundo",
   whyStat3Label: "personas carecen de seguridad alimentaria",
@@ -1469,8 +1461,7 @@ const es: Record<TranslationKey, string> = {
   whySolution2Text:
     "Mira qué está abierto ahora, obtén direcciones y llama al instante.",
   whySolution3Title: "Funciona en todas partes",
-  whySolution3Text:
-    "7 idiomas, modo sin conexión y optimizado para redes 2G en zonas de crisis.",
+  whySolution3Text: "7 idiomas y un modo ligero para conexiones lentas.",
   whySolutionCard1Title: "Todo en un solo lugar",
   whySolutionCard1Text:
     "Cada organización local de asistencia en una interfaz de mapa fácil de usar.",
@@ -1478,8 +1469,7 @@ const es: Record<TranslationKey, string> = {
   whySolutionCard2Text:
     "Mira qué está abierto ahora, obtén direcciones y llama al instante.",
   whySolutionCard3Title: "Funciona en todas partes",
-  whySolutionCard3Text:
-    "7 idiomas, modo sin conexión y optimizado para redes 2G en zonas de crisis.",
+  whySolutionCard3Text: "7 idiomas y un modo ligero para conexiones lentas.",
   whyPageHeading: "La ayuda debe ser accesible para todos",
   citiesTitle: "Ciudades en necesidad",
   citiesSubtitle:
@@ -1631,8 +1621,6 @@ const es: Record<TranslationKey, string> = {
     "El transporte usa estimación de conducción (OSRM no admite transporte público).",
   emergencyHelp: "Ayuda de emergencia",
   emergencyTitle: "Ayuda de emergencia 24/7",
-  emergencySubtitle:
-    "Abierto ahora — la ayuda más cercana primero. Llama de inmediato si estás en crisis.",
   emergencyLocating: "Buscando tu ubicación…",
   emergencyLoading: "Cargando ayuda 24/7 cercana…",
   emergencyNoResults:
@@ -1683,7 +1671,7 @@ const fr: Record<TranslationKey, string> = {
     "Parcourez des banques alimentaires, refuges, cliniques vérifiés et plus — filtrés par distance et catégorie.",
   howItWorksStep3Title: "Obtenez de l'aide maintenant",
   howItWorksStep3Description:
-    "Appelez en un clic ou obtenez un itinéraire détaillé. Aucun compte requis.",
+    "Appelez en un clic ou obtenez un itinéraire détaillé.",
   impactCounter: "{count} personnes ont trouvé de l'aide aujourd'hui",
   filtersTitle: "Filtres",
   filterCountry: "Pays",
@@ -1835,14 +1823,12 @@ const fr: Record<TranslationKey, string> = {
   aboutSearchDiscoverText:
     "Entrez votre position et trouvez des organisations proches filtrées par catégorie et selon vos besoins spécifiques.",
   aboutGetHelpCardTitle: "Obtenir de l'aide",
-  aboutGetHelpCardText:
-    "Appelez directement ou obtenez un itinéraire vers des organisations vérifiées instantanément.",
+  aboutGetHelpCardText: "Appelez tout de suite ou obtenez l'itinéraire jusqu'aux points d'aide.",
   aboutHowItWorksCard1Title: "Rechercher et découvrir",
   aboutHowItWorksCard1Text:
     "Entrez votre position et trouvez des organisations proches filtrées par catégorie et selon vos besoins spécifiques.",
   aboutHowItWorksCard2Title: "Obtenir de l'aide",
-  aboutHowItWorksCard2Text:
-    "Appelez directement ou obtenez un itinéraire vers des organisations vérifiées instantanément.",
+  aboutHowItWorksCard2Text: "Appelez tout de suite ou obtenez l'itinéraire jusqu'aux points d'aide.",
   aboutValueAccessibilityTitle: "Accessibilité",
   aboutValueAccessibilityText:
     "L'aide doit être facile à trouver, gratuite et disponible pour tous.",
@@ -1850,15 +1836,14 @@ const fr: Record<TranslationKey, string> = {
   aboutValueDignityText:
     "Chacun mérite de l'aide avec respect et compassion.",
   aboutValueGlobalTitle: "Portée mondiale",
-  aboutValueGlobalText:
-    "Où que vous soyez, l'aide est près de vous.",
+  aboutValueGlobalText: "Nous présentons des points d'aide dans différents pays du monde.",
   aboutValuesCard1Title: "Accessibilité",
   aboutValuesCard1Text:
     "L'aide doit être facile à trouver, gratuite et disponible pour tous.",
   aboutValuesCard2Title: "Dignité",
   aboutValuesCard2Text: "Chacun mérite de l'aide avec respect et compassion.",
   aboutValuesCard3Title: "Portée mondiale",
-  aboutValuesCard3Text: "Où que vous soyez, l'aide est près de vous.",
+  aboutValuesCard3Text: "Nous présentons des points d'aide dans différents pays du monde.",
   aboutExploreOrgs: "Explorer les organisations",
   aboutExploreOrganizations: "Explorer les organisations",
   whyPageTitle: "L'aide doit être accessible à tous",
@@ -1868,6 +1853,8 @@ const fr: Record<TranslationKey, string> = {
   whyStat700m: "personnes vivent dans l'extrême pauvreté",
   whyStat150m: "personnes sans abri dans le monde",
   whyStat2_3b: "personnes manquent de sécurité alimentaire",
+  whyStat700mSource: "Source : Banque mondiale, rapport Pauvreté, prospérité et planète 2024 (moins de 2,15 USD par jour)",
+  whyStat2_3bSource: "Source : FAO, FIDA, UNICEF, PAM, OMS — SOFI 2025 (données de 2024)",
   whyStat1Label: "personnes vivent dans l'extrême pauvreté",
   whyStat2Label: "personnes sans abri dans le monde",
   whyStat3Label: "personnes manquent de sécurité alimentaire",
@@ -1897,8 +1884,7 @@ const fr: Record<TranslationKey, string> = {
   whySolution2Text:
     "Voyez ce qui est ouvert maintenant, obtenez un itinéraire, appelez instantanément.",
   whySolution3Title: "Fonctionne partout",
-  whySolution3Text:
-    "7 langues, mode hors ligne, optimisé pour les réseaux 2G dans les zones de crise.",
+  whySolution3Text: "7 langues et un mode léger pour les connexions lentes.",
   whySolutionCard1Title: "Tout en un seul endroit",
   whySolutionCard1Text:
     "Chaque organisation locale d'assistance dans une interface cartographique simple d'utilisation.",
@@ -1906,8 +1892,7 @@ const fr: Record<TranslationKey, string> = {
   whySolutionCard2Text:
     "Voyez ce qui est ouvert maintenant, obtenez un itinéraire, appelez instantanément.",
   whySolutionCard3Title: "Fonctionne partout",
-  whySolutionCard3Text:
-    "7 langues, mode hors ligne, optimisé pour les réseaux 2G dans les zones de crise.",
+  whySolutionCard3Text: "7 langues et un mode léger pour les connexions lentes.",
   whyPageHeading: "L'aide doit être accessible à tous",
   citiesTitle: "Villes en difficulté",
   citiesSubtitle:
@@ -2059,8 +2044,6 @@ const fr: Record<TranslationKey, string> = {
     "Le transport utilise une estimation voiture (OSRM ne prend pas en charge les transports publics).",
   emergencyHelp: "Aide d'urgence",
   emergencyTitle: "Aide d'urgence 24h/24",
-  emergencySubtitle:
-    "Ouvert maintenant — l'aide la plus proche en premier. Appelez immédiatement en cas de crise.",
   emergencyLocating: "Localisation en cours…",
   emergencyLoading: "Chargement de l'aide 24h/24 à proximité…",
   emergencyNoResults:
@@ -2111,7 +2094,7 @@ const de: Record<TranslationKey, string> = {
     "Durchsuchen Sie verifizierte Tafeln, Unterkünfte, Kliniken und mehr — gefiltert nach Entfernung und Kategorie.",
   howItWorksStep3Title: "Jetzt Hilfe erhalten",
   howItWorksStep3Description:
-    "Rufen Sie mit einem Tipp an oder erhalten Sie eine Schritt-für-Schritt-Route. Kein Konto erforderlich.",
+    "Rufen Sie mit einem Tipp an oder erhalten Sie eine Schritt-für-Schritt-Route.",
   impactCounter: "{count} Menschen haben heute Hilfe gefunden",
   filtersTitle: "Filter",
   filterCountry: "Land",
@@ -2263,14 +2246,12 @@ const de: Record<TranslationKey, string> = {
   aboutSearchDiscoverText:
     "Geben Sie Ihren Standort ein und finden Sie Organisationen in der Nähe, gefiltert nach Kategorie und Ihren Bedürfnissen.",
   aboutGetHelpCardTitle: "Hilfe erhalten",
-  aboutGetHelpCardText:
-    "Rufen Sie direkt an oder holen Sie sich sofort Wegbeschreibungen zu verifizierten Organisationen.",
+  aboutGetHelpCardText: "Rufen Sie sofort an oder lassen Sie sich die Route zu Hilfsstellen anzeigen.",
   aboutHowItWorksCard1Title: "Suchen und entdecken",
   aboutHowItWorksCard1Text:
     "Geben Sie Ihren Standort ein und finden Sie Organisationen in der Nähe, gefiltert nach Kategorie und Ihren Bedürfnissen.",
   aboutHowItWorksCard2Title: "Hilfe erhalten",
-  aboutHowItWorksCard2Text:
-    "Rufen Sie direkt an oder holen Sie sich sofort Wegbeschreibungen zu verifizierten Organisationen.",
+  aboutHowItWorksCard2Text: "Rufen Sie sofort an oder lassen Sie sich die Route zu Hilfsstellen anzeigen.",
   aboutValueAccessibilityTitle: "Zugänglichkeit",
   aboutValueAccessibilityText:
     "Hilfe sollte leicht zu finden, kostenlos und für alle verfügbar sein.",
@@ -2278,8 +2259,7 @@ const de: Record<TranslationKey, string> = {
   aboutValueDignityText:
     "Jeder Mensch verdient Hilfe mit Respekt und Mitgefühl.",
   aboutValueGlobalTitle: "Globale Reichweite",
-  aboutValueGlobalText:
-    "Egal wo Sie sind, Hilfe ist in Ihrer Nähe.",
+  aboutValueGlobalText: "Wir zeigen Hilfsstellen in verschiedenen Ländern der Welt.",
   aboutValuesCard1Title: "Zugänglichkeit",
   aboutValuesCard1Text:
     "Hilfe sollte leicht zu finden, kostenlos und für alle verfügbar sein.",
@@ -2287,7 +2267,7 @@ const de: Record<TranslationKey, string> = {
   aboutValuesCard2Text:
     "Jeder Mensch verdient Hilfe mit Respekt und Mitgefühl.",
   aboutValuesCard3Title: "Globale Reichweite",
-  aboutValuesCard3Text: "Egal wo Sie sind, Hilfe ist in Ihrer Nähe.",
+  aboutValuesCard3Text: "Wir zeigen Hilfsstellen in verschiedenen Ländern der Welt.",
   aboutExploreOrgs: "Organisationen entdecken",
   aboutExploreOrganizations: "Organisationen entdecken",
   whyPageTitle: "Hilfe sollte für alle zugänglich sein",
@@ -2297,6 +2277,8 @@ const de: Record<TranslationKey, string> = {
   whyStat700m: "Menschen leben in extremer Armut",
   whyStat150m: "obdachlose Menschen weltweit",
   whyStat2_3b: "Menschen haben keine Ernährungssicherheit",
+  whyStat700mSource: "Quelle: Weltbank, Bericht „Poverty, Prosperity, and Planet“ 2024 (unter 2,15 US-Dollar pro Tag)",
+  whyStat2_3bSource: "Quelle: FAO, IFAD, UNICEF, WFP, WHO — SOFI 2025 (Daten für 2024)",
   whyStat1Label: "Menschen leben in extremer Armut",
   whyStat2Label: "obdachlose Menschen weltweit",
   whyStat3Label: "Menschen haben keine Ernährungssicherheit",
@@ -2326,8 +2308,7 @@ const de: Record<TranslationKey, string> = {
   whySolution2Text:
     "Sehen Sie, was jetzt geöffnet ist, holen Sie sich Routen und rufen Sie direkt an.",
   whySolution3Title: "Funktioniert überall",
-  whySolution3Text:
-    "7 Sprachen, Offline-Modus, optimiert für 2G-Netze in Krisengebieten.",
+  whySolution3Text: "7 Sprachen und ein Lite-Modus für langsame Verbindungen.",
   whySolutionCard1Title: "Alles an einem Ort",
   whySolutionCard1Text:
     "Jede lokale Hilfsorganisation in einer einfach nutzbaren Kartenoberfläche.",
@@ -2335,8 +2316,7 @@ const de: Record<TranslationKey, string> = {
   whySolutionCard2Text:
     "Sehen Sie, was jetzt geöffnet ist, holen Sie sich Routen und rufen Sie direkt an.",
   whySolutionCard3Title: "Funktioniert überall",
-  whySolutionCard3Text:
-    "7 Sprachen, Offline-Modus, optimiert für 2G-Netze in Krisengebieten.",
+  whySolutionCard3Text: "7 Sprachen und ein Lite-Modus für langsame Verbindungen.",
   whyPageHeading: "Hilfe sollte für alle zugänglich sein",
   citiesTitle: "Städte in Not",
   citiesSubtitle:
@@ -2488,8 +2468,6 @@ const de: Record<TranslationKey, string> = {
     "Für ÖPNV wird die Fahrzeit-Schätzung verwendet (OSRM unterstützt keinen öffentlichen Verkehr).",
   emergencyHelp: "Notfallhilfe",
   emergencyTitle: "24/7 Notfallhilfe",
-  emergencySubtitle:
-    "Jetzt geöffnet — nächste Hilfe zuerst. Rufen Sie sofort an, wenn Sie in einer Krise sind.",
   emergencyLocating: "Standort wird ermittelt…",
   emergencyLoading: "24/7-Hilfe in der Nähe wird geladen…",
   emergencyNoResults:
@@ -2540,7 +2518,7 @@ const zh: Record<TranslationKey, string> = {
     "浏览经核实的食物银行、庇护所、诊所等——按距离和类别筛选。",
   howItWorksStep3Title: "立即获得帮助",
   howItWorksStep3Description:
-    "一键致电或获取逐步导航。无需注册账户。",
+    "一键致电或获取逐步导航。",
   impactCounter: "今天已有 {count} 人获得帮助",
   filtersTitle: "筛选",
   filterCountry: "国家",
@@ -2686,26 +2664,24 @@ const zh: Record<TranslationKey, string> = {
   aboutSearchDiscoverText:
     "输入您的位置，按类别和具体需求筛选附近组织。",
   aboutGetHelpCardTitle: "获取帮助",
-  aboutGetHelpCardText:
-    "可直接致电，或立即获取前往已验证组织的路线。",
+  aboutGetHelpCardText: "立即致电，或获取前往援助点的路线。",
   aboutHowItWorksCard1Title: "搜索与发现",
   aboutHowItWorksCard1Text:
     "输入您的位置，按类别和具体需求筛选附近组织。",
   aboutHowItWorksCard2Title: "获取帮助",
-  aboutHowItWorksCard2Text:
-    "可直接致电，或立即获取前往已验证组织的路线。",
+  aboutHowItWorksCard2Text: "立即致电，或获取前往援助点的路线。",
   aboutValueAccessibilityTitle: "可及性",
   aboutValueAccessibilityText: "帮助应当易于找到、免费且人人可用。",
   aboutValueDignityTitle: "尊严",
   aboutValueDignityText: "每个人都应被尊重并带着同理心获得帮助。",
   aboutValueGlobalTitle: "全球覆盖",
-  aboutValueGlobalText: "无论您身在何处，帮助都在附近。",
+  aboutValueGlobalText: "我们展示世界各国的援助点。",
   aboutValuesCard1Title: "可及性",
   aboutValuesCard1Text: "帮助应当易于找到、免费且人人可用。",
   aboutValuesCard2Title: "尊严",
   aboutValuesCard2Text: "每个人都应被尊重并带着同理心获得帮助。",
   aboutValuesCard3Title: "全球覆盖",
-  aboutValuesCard3Text: "无论您身在何处，帮助都在附近。",
+  aboutValuesCard3Text: "我们展示世界各国的援助点。",
   aboutExploreOrgs: "探索组织",
   aboutExploreOrganizations: "探索组织",
   whyPageTitle: "帮助应对所有人可及",
@@ -2714,6 +2690,8 @@ const zh: Record<TranslationKey, string> = {
   whyStat700m: "人生活在极端贫困中",
   whyStat150m: "全球无家可归者",
   whyStat2_3b: "人缺乏粮食安全",
+  whyStat700mSource: "来源：世界银行《2024 年贫困、繁荣与地球报告》（每日生活费低于 2.15 美元）",
+  whyStat2_3bSource: "来源：粮农组织、农发基金、联合国儿童基金会、世界粮食计划署、世卫组织——《2025 年世界粮食安全和营养状况》（2024 年数据）",
   whyStat1Label: "人生活在极端贫困中",
   whyStat2Label: "全球无家可归者",
   whyStat3Label: "人缺乏粮食安全",
@@ -2741,14 +2719,13 @@ const zh: Record<TranslationKey, string> = {
   whySolution2Title: "实时信息",
   whySolution2Text: "查看当前是否营业、获取路线并即时拨打电话。",
   whySolution3Title: "处处可用",
-  whySolution3Text: "支持 7 种语言、离线模式，并针对危机地区 2G 网络优化。",
+  whySolution3Text: "支持 7 种语言，并提供适用于慢速网络的轻量模式。",
   whySolutionCard1Title: "一站式呈现",
   whySolutionCard1Text: "所有本地援助组织集中在一个易用地图界面中。",
   whySolutionCard2Title: "实时信息",
   whySolutionCard2Text: "查看当前是否营业、获取路线并即时拨打电话。",
   whySolutionCard3Title: "处处可用",
-  whySolutionCard3Text:
-    "支持 7 种语言、离线模式，并针对危机地区 2G 网络优化。",
+  whySolutionCard3Text: "支持 7 种语言，并提供适用于慢速网络的轻量模式。",
   whyPageHeading: "帮助应对所有人可及",
   citiesTitle: "需要帮助的城市",
   citiesSubtitle: "面临紧急人道危机的社区最需要帮助。",
@@ -2892,7 +2869,6 @@ const zh: Record<TranslationKey, string> = {
   routeTransitNote: "公共交通使用驾车估算（OSRM 不支持公共交通）。",
   emergencyHelp: "紧急求助",
   emergencyTitle: "24/7 紧急援助",
-  emergencySubtitle: "正在开放 — 优先显示最近援助。如遇危机请立即致电。",
   emergencyLocating: "正在获取您的位置…",
   emergencyLoading: "正在加载附近 24/7 援助…",
   emergencyNoResults: "附近未找到 24/7 组织。请使用完整地图或拨打当地急救电话。",
@@ -2941,7 +2917,7 @@ const ar: Record<TranslationKey, string> = {
     "تصفّح بنوك الطعام والملاجئ والعيادات المعتمدة والمزيد — مُصفّاة حسب المسافة والفئة.",
   howItWorksStep3Title: "احصل على المساعدة الآن",
   howItWorksStep3Description:
-    "اتصل بنقرة واحدة أو احصل على اتجاهات خطوة بخطوة. لا حاجة لحساب.",
+    "اتصل بنقرة واحدة أو احصل على اتجاهات خطوة بخطوة.",
   impactCounter: "{count} شخصاً وجدوا مساعدة اليوم",
   filtersTitle: "الفلاتر",
   filterCountry: "البلد",
@@ -3089,14 +3065,12 @@ const ar: Record<TranslationKey, string> = {
   aboutSearchDiscoverText:
     "أدخل موقعك وابحث عن منظمات قريبة مصنّفة حسب الفئة واحتياجاتك الخاصة.",
   aboutGetHelpCardTitle: "احصل على المساعدة",
-  aboutGetHelpCardText:
-    "اتصل مباشرة أو احصل على اتجاهات إلى المنظمات الموثقة فوراً.",
+  aboutGetHelpCardText: "اتصل فورًا أو احصل على الطريق إلى نقاط المساعدة.",
   aboutHowItWorksCard1Title: "ابحث واكتشف",
   aboutHowItWorksCard1Text:
     "أدخل موقعك وابحث عن منظمات قريبة مصنّفة حسب الفئة واحتياجاتك الخاصة.",
   aboutHowItWorksCard2Title: "احصل على المساعدة",
-  aboutHowItWorksCard2Text:
-    "اتصل مباشرة أو احصل على اتجاهات إلى المنظمات الموثقة فوراً.",
+  aboutHowItWorksCard2Text: "اتصل فورًا أو احصل على الطريق إلى نقاط المساعدة.",
   aboutValueAccessibilityTitle: "سهولة الوصول",
   aboutValueAccessibilityText:
     "يجب أن تكون المساعدة سهلة الوصول ومجانية ومتاحة للجميع.",
@@ -3104,7 +3078,7 @@ const ar: Record<TranslationKey, string> = {
   aboutValueDignityText:
     "كل شخص يستحق الحصول على المساعدة باحترام وتعاطف.",
   aboutValueGlobalTitle: "انتشار عالمي",
-  aboutValueGlobalText: "أينما كنت، المساعدة قريبة منك.",
+  aboutValueGlobalText: "نعرض نقاط المساعدة في دول مختلفة حول العالم.",
   aboutValuesCard1Title: "سهولة الوصول",
   aboutValuesCard1Text:
     "يجب أن تكون المساعدة سهلة الوصول ومجانية ومتاحة للجميع.",
@@ -3112,7 +3086,7 @@ const ar: Record<TranslationKey, string> = {
   aboutValuesCard2Text:
     "كل شخص يستحق الحصول على المساعدة باحترام وتعاطف.",
   aboutValuesCard3Title: "انتشار عالمي",
-  aboutValuesCard3Text: "أينما كنت، المساعدة قريبة منك.",
+  aboutValuesCard3Text: "نعرض نقاط المساعدة في دول مختلفة حول العالم.",
   aboutExploreOrgs: "استكشف المنظمات",
   aboutExploreOrganizations: "استكشف المنظمات",
   whyPageTitle: "يجب أن تكون المساعدة متاحة للجميع",
@@ -3121,6 +3095,8 @@ const ar: Record<TranslationKey, string> = {
   whyStat700m: "شخص يعيشون في فقر مدقع",
   whyStat150m: "مشرد حول العالم",
   whyStat2_3b: "شخص يفتقرون إلى الأمن الغذائي",
+  whyStat700mSource: "المصدر: البنك الدولي، تقرير الفقر والازدهار والكوكب 2024 (أقل من 2.15 دولار في اليوم)",
+  whyStat2_3bSource: "المصدر: الفاو والإيفاد واليونيسف وبرنامج الأغذية العالمي ومنظمة الصحة العالمية — تقرير SOFI 2025 (بيانات 2024)",
   whyStat1Label: "شخص يعيشون في فقر مدقع",
   whyStat2Label: "مشرد حول العالم",
   whyStat3Label: "شخص يفتقرون إلى الأمن الغذائي",
@@ -3150,8 +3126,7 @@ const ar: Record<TranslationKey, string> = {
   whySolution2Text:
     "اعرف ما هو مفتوح الآن، واحصل على الاتجاهات، واتصل فوراً.",
   whySolution3Title: "يعمل في كل مكان",
-  whySolution3Text:
-    "7 لغات، وضع دون اتصال، ومُحسَّن لشبكات 2G في مناطق الأزمات.",
+  whySolution3Text: "7 لغات ووضع خفيف للاتصالات البطيئة.",
   whySolutionCard1Title: "كل شيء في مكان واحد",
   whySolutionCard1Text:
     "كل منظمات المساعدة المحلية في واجهة خريطة واحدة سهلة الاستخدام.",
@@ -3159,8 +3134,7 @@ const ar: Record<TranslationKey, string> = {
   whySolutionCard2Text:
     "اعرف ما هو مفتوح الآن، واحصل على الاتجاهات، واتصل فوراً.",
   whySolutionCard3Title: "يعمل في كل مكان",
-  whySolutionCard3Text:
-    "7 لغات، وضع دون اتصال، ومُحسَّن لشبكات 2G في مناطق الأزمات.",
+  whySolutionCard3Text: "7 لغات ووضع خفيف للاتصالات البطيئة.",
   whyPageHeading: "يجب أن تكون المساعدة متاحة للجميع",
   citiesTitle: "مدن بحاجة",
   citiesSubtitle:
@@ -3310,8 +3284,6 @@ const ar: Record<TranslationKey, string> = {
     "النقل العام يستخدم تقدير القيادة (OSRM لا يدعم النقل العام).",
   emergencyHelp: "مساعدة طارئة",
   emergencyTitle: "مساعدة طارئة على مدار الساعة",
-  emergencySubtitle:
-    "مفتوح الآن — الأقرب أولاً. اتصل فوراً إذا كنت في أزمة.",
   emergencyLocating: "جاري تحديد موقعك…",
   emergencyLoading: "جاري تحميل المساعدة على مدار الساعة القريبة…",
   emergencyNoResults:
