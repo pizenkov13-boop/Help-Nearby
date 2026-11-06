@@ -8,6 +8,7 @@ import { siteConfig } from "@/lib/siteConfig";
  * - FORMS_DISABLED_COUNTRIES: comma-separated two-letter codes, empty by default. Visitors whose
  *   country (Vercel's x-vercel-ip-country header) is listed cannot use the review and submit forms.
  *   Main site only: a copy ignores it.
+ *   The same list also switches the AI assistant off for those visitors (see chatDisabledForRequest).
  * - CHAT_ENABLED: the AI assistant is on unless the value is "false".
  */
 
@@ -16,6 +17,15 @@ export function formsDisabledForRequest(request: Request): boolean {
   if (siteConfig.isCopy) return false;
   const disabled = parseBlockedCountries(process.env.FORMS_DISABLED_COUNTRIES);
   return isCountryBlocked(request.headers.get("x-vercel-ip-country"), disabled);
+}
+
+/**
+ * True when the AI assistant must not answer this request: the visitor's country is in
+ * FORMS_DISABLED_COUNTRIES (main site only). The chat route checks this before anything else, so
+ * nothing is sent to the AI service, counted or logged for these visitors.
+ */
+export function chatDisabledForRequest(request: Request): boolean {
+  return formsDisabledForRequest(request);
 }
 
 export function isChatEnabledOnServer(): boolean {

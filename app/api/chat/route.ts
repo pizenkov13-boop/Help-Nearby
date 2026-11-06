@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { aiComplete, isAiConfigured, type AiMessage } from "@/lib/aiProvider.server";
 import { detectCategory, extractPlaceQuery } from "@/lib/chatContext.server";
 import { resolveSearchIntent } from "@/lib/chatIntent.server";
-import { isChatEnabledOnServer } from "@/lib/featureFlags.server";
+import { chatDisabledForRequest, isChatEnabledOnServer } from "@/lib/featureFlags.server";
 import {
   buildSystemPrompt,
   mergeResultsWithClientContext,
@@ -85,6 +85,11 @@ function formatFallback(orgs: ChatSearchOrg[], language: LanguageCode): string {
 }
 
 export async function POST(request: Request) {
+  // First of all: visitors from the listed countries get a bare 403. No quota entry, no log line,
+  // no request body read and nothing sent to the AI service.
+  if (chatDisabledForRequest(request)) {
+    return NextResponse.json({ error: "Not available." }, { status: 403 });
+  }
   if (!isChatEnabledOnServer()) {
     return NextResponse.json({ error: "Not found." }, { status: 404 });
   }

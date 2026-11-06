@@ -23,6 +23,7 @@
     "test:e2e": "playwright test",
     "test:e2e:copy": "playwright test -c playwright.copy.config.ts",
     "test:e2e:region": "playwright test -c playwright.region.config.ts",
+    "test:e2e:chat-region": "playwright test -c playwright.chat-region.config.ts",
     "test:e2e:ui": "playwright test --ui",
     "test:e2e:report": "playwright show-report",
     "test:build": "npm run build && node scripts/test-routes.mjs",

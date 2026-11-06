@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { formsDisabledForRequest, isChatEnabledOnServer } from "@/lib/featureFlags.server";
+import { chatDisabledForRequest, formsDisabledForRequest, isChatEnabledOnServer } from "@/lib/featureFlags.server";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -10,7 +10,7 @@ export const dynamic = "force-dynamic";
  */
 export async function GET(request: Request) {
   return NextResponse.json(
-    { chat: isChatEnabledOnServer(), forms: !formsDisabledForRequest(request) },
+    { chat: isChatEnabledOnServer() && !chatDisabledForRequest(request), forms: !formsDisabledForRequest(request) },
     { headers: { "Cache-Control": "no-store" } },
   );
 }
