@@ -62,6 +62,39 @@ test.describe("copy mode", () => {
     expect((await request.post("/api/chat", { headers, data: {} })).status()).not.toBe(403);
   });
 
+  test("the author's name appears nowhere on a copy: pages, metadata, footer, service files", async ({ request }) => {
+    const name = /izenkin|pavel|павел|изенкин/i;
+    for (const path of ["/", "/about", "/privacy", "/disclaimer", "/robots.txt", "/sitemap.xml", "/manifest.webmanifest"]) {
+      const response = await request.get(path);
+      expect(response.status(), path).toBe(200);
+      // The whole document: visible text, <title>, meta tags, JSON-LD, links.
+      expect(await response.text(), path).not.toMatch(name);
+    }
+  });
+
+  test("About of a copy: one sentence whose HelpNearby word links to the main site, in all 7 languages, no author", async ({ page }) => {
+    const name = /izenkin|pavel|павел|изенкин/i;
+    const expected: Record<string, string> = {
+      en: "This is a local version of the open-source HelpNearby platform.",
+      ru: "Это местная версия открытой платформы HelpNearby.",
+      es: "Esta es una versión local de la plataforma de código abierto HelpNearby.",
+      fr: "Ceci est une version locale de la plateforme open source HelpNearby.",
+      de: "Dies ist eine lokale Version der Open-Source-Plattform HelpNearby.",
+      zh: "这是开源平台 HelpNearby 的本地版本。",
+      ar: "هذه نسخة محلية من منصة HelpNearby مفتوحة المصدر.",
+    };
+    await page.goto("/about");
+    for (const [code, sentence] of Object.entries(expected)) {
+      await page.evaluate((c) => localStorage.setItem("hn-language", c), code);
+      await page.reload();
+      const based = page.locator('main p:has(a[href="https://www.help-nearby.org/"])');
+      await expect(based, code).toHaveText(sentence);
+      await expect(based.locator("a"), code).toHaveText("HelpNearby");
+      expect(await page.locator("main").innerText(), code).not.toMatch(name);
+      expect(await page.locator("footer").innerText(), code).not.toMatch(name);
+    }
+  });
+
   test("submit and reviews are not available", async ({ request }) => {
     expect((await request.get("/submit")).status()).toBe(404);
     expect((await request.get("/reviews")).status()).toBe(404);
