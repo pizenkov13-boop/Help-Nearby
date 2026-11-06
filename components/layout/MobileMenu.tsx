@@ -21,7 +21,7 @@ interface MobileMenuProps {
 }
 
 /** Same breakpoint as the mobile header; wider screens never show this menu. */
-const DESKTOP_QUERY = "(min-width: 769px)";
+const DESKTOP_QUERY = "(min-width: 1024px)";
 
 /**
  * Freezes the page behind a full-screen layer. `position: fixed` + a negative top is the only

@@ -246,8 +246,8 @@ body {
         font-size: 13px;
       }
       .nav-emergency {
-        font-size: 12px;
-        padding: 6px 10px;
+        font-size: 12px !important;
+        padding: 0 10px !important;
       }
       .header-inner {
         padding: 0 16px;
@@ -281,6 +281,8 @@ body {
       align-items: center;
       gap: 5px;
       padding: 6px 0;
+      line-height: 20px;
+      white-space: nowrap;
       position: relative;
       cursor: pointer;
     }
@@ -367,13 +369,18 @@ body {
     .nav-emergency {
       display: inline-flex !important;
       align-items: center;
-      gap: 8px;
-      padding: 8px 14px !important;
+      gap: 6px;
+      height: 32px;
+      padding: 0 12px !important;
       border-radius: 999px;
       border: 1px solid var(--emergency-border);
       background: var(--emergency-bg);
       color: var(--emergency-text) !important;
+      font-size: 13px !important;
       font-weight: 600 !important;
+      line-height: 20px;
+      white-space: nowrap;
+      flex-shrink: 0;
       transition: all .15s;
     }
     .nav-emergency:hover {
@@ -983,7 +990,8 @@ body {
     .mobile-toggle:hover { background: var(--hover-bg); color: var(--hover-text); }
     .mobile-toggle svg { width: 24px; height: 24px; }
   
-    @media (max-width: 768px) {
+    /* Up to 1023px the long menu does not fit in one line in every language: burger menu instead. */
+    @media (max-width: 1023px) {
       .nav { display: none; }
       .mobile-toggle { display: inline-flex; }
       .header-toolbar { gap: 8px; }
@@ -2450,4 +2458,11 @@ html.dark .os-badge.warn { color: #e6c27a; background: #2e2718; }
     font-size: 16px;
     letter-spacing: 0;
   }
+}
+
+/* Tablet (769-1023px): the nav is in the burger menu, so the emergency button stays one tap away in the header. */
+@media (min-width: 769px) and (max-width: 1023px) {
+  .header-toolbar .emergency-icon-btn { display: inline-flex; width: 44px; height: 44px; }
+  .header-toolbar .mobile-toggle { display: inline-flex; width: 44px; height: 44px; }
+  .header .nav { display: none; }
 }
