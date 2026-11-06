@@ -9,6 +9,7 @@ import { Header } from "@/components/layout/Header";
 import { ScrollToHash } from "@/components/layout/ScrollToHash";
 import { useLanguage } from "@/lib/i18n/LanguageProvider";
 import { siteConfig } from "@/lib/siteConfig";
+import { useFeatures } from "@/lib/useFeatures";
 import { SiteFooter } from "./SiteFooter";
 
 interface SiteLayoutProps {
@@ -16,6 +17,7 @@ interface SiteLayoutProps {
 }
 
 export function SiteLayout({ children }: SiteLayoutProps) {
+  const features = useFeatures();
   const { dir } = useLanguage();
 
   return (
@@ -28,7 +30,7 @@ export function SiteLayout({ children }: SiteLayoutProps) {
       <EmergencyHelp />
       <main className="flex-1">{children}</main>
       <SiteFooter />
-      {siteConfig.chatEnabled ? <ChatWidget /> : null}
+      {siteConfig.chatEnabled && features.chat === true ? <ChatWidget /> : null}
       <BottomBar />
       <OrganizationSheet />
       <RouteScreen />

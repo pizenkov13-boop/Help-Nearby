@@ -8,6 +8,9 @@ import { CHAT_OPEN_EVENT } from "@/lib/uiEvents";
 import { useLanguage } from "@/lib/i18n/LanguageProvider";
 import { cn } from "@/lib/utils";
 
+/** sessionStorage key: the first-open notice was acknowledged in this tab. */
+export const CHAT_NOTICE_KEY = "help-nearby-chat-notice";
+
 interface Message {
   id: string;
   role: "user" | "assistant";
@@ -44,6 +47,24 @@ export function ChatWidget() {
     window.addEventListener(CHAT_OPEN_EVENT, openChat);
     return () => window.removeEventListener(CHAT_OPEN_EVENT, openChat);
   }, []);
+  // The first time the chat is opened in a tab, a short notice must be acknowledged (kept in sessionStorage).
+  const [noticeAcknowledged, setNoticeAcknowledged] = useState(true);
+  useEffect(() => {
+    try {
+      if (!sessionStorage.getItem(CHAT_NOTICE_KEY)) setNoticeAcknowledged(false);
+    } catch {
+      // storage unavailable: the notice is shown on every open
+      setNoticeAcknowledged(false);
+    }
+  }, []);
+  const acknowledgeNotice = () => {
+    setNoticeAcknowledged(true);
+    try {
+      sessionStorage.setItem(CHAT_NOTICE_KEY, "1");
+    } catch {
+      // not remembered
+    }
+  };
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [messages, setMessages] = useState<Message[]>([
@@ -166,6 +187,24 @@ export function ChatWidget() {
               : undefined
           }
         >
+          {!noticeAcknowledged && (
+            <div
+              role="dialog"
+              aria-modal="true"
+              aria-label={t("chatTitle")}
+              data-testid="chat-first-notice"
+              className="absolute inset-0 z-10 flex flex-col items-center justify-center gap-4 bg-white/95 p-6 text-center dark:bg-gray-900/95"
+            >
+              <p className="text-sm leading-relaxed text-slate-800 dark:text-gray-200">{t("chatFirstNotice")}</p>
+              <button
+                type="button"
+                onClick={acknowledgeNotice}
+                className="min-h-11 rounded-lg bg-gradient-to-r from-blue-500 to-emerald-500 px-6 text-sm font-semibold text-white"
+              >
+                {t("chatFirstNoticeOk")}
+              </button>
+            </div>
+          )}
           <div className="flex items-center justify-between border-b border-slate-200 bg-gradient-to-r from-blue-600/10 to-teal-500/10 px-4 py-3 pt-[max(0.75rem,env(safe-area-inset-top))] dark:border-gray-800 dark:from-blue-600/20 dark:to-emerald-600/20">
             <div className="flex items-center gap-2">
               <Bot className="h-5 w-5 text-teal-600 dark:text-emerald-400" />

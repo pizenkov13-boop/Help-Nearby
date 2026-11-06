@@ -5,6 +5,7 @@ import { Star } from "lucide-react";
 import { PageHero } from "@/components/layout/PageHero";
 import { ReviewCard } from "@/components/ReviewCard";
 import { SiteLayout } from "@/components/layout/SiteLayout";
+import { FormsGate } from "@/components/FormsGate";
 import { useLanguage } from "@/lib/i18n/LanguageProvider";
 import { MAX_REVIEW_NAME_LENGTH } from "@/lib/reviewInput";
 import type { Review } from "@/lib/types";
@@ -111,6 +112,7 @@ export function ReviewsPage() {
               </p>
             )}
 
+            <FormsGate>
             <form onSubmit={handleSubmit} className="space-y-5">
               {error && (
                 <p className="text-sm text-red-600 dark:text-red-400" role="alert">
@@ -200,6 +202,7 @@ export function ReviewsPage() {
                 {submitting ? t("reviewsLoading") : t("reviewsFormSubmit")}
               </button>
             </form>
+            </FormsGate>
           </div>
 
           <div className="mt-8">

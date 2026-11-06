@@ -59,6 +59,8 @@ export async function preferFullMode(page: Page) {
       sessionStorage.clear();
       // The Lite / full choice is remembered in localStorage.
       localStorage.setItem("help-nearby-view-mode", "full");
+      // The first-open chat notice has its own test; everywhere else it is already acknowledged.
+      sessionStorage.setItem("help-nearby-chat-notice", "1");
       // Production builds reload the page when this key is missing; keep it set.
       localStorage.setItem(cacheKey, cacheVersion);
     },

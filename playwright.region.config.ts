@@ -2,7 +2,8 @@ import { defineConfig, devices } from "@playwright/test";
 
 /**
  * Regional-limit run: the main site (not a copy) built and started with BLOCKED_COUNTRIES=ZZ,
- * running only tests/e2e/region-block.spec.ts. `npm run test:e2e:region`.
+ * running only tests/e2e/region-block.spec.ts and tests/e2e/feature-limits.spec.ts
+ * (FORMS_DISABLED_COUNTRIES=XX and CHAT_ENABLED=false are set too). `npm run test:e2e:region`.
  * It builds into the normal .next folder, so run it after (not during) the main e2e run.
  */
 // Workers inherit this, which un-skips the blocked-region tests.
@@ -13,7 +14,7 @@ const baseURL = process.env.PLAYWRIGHT_BASE_URL ?? `http://localhost:${PORT}`;
 
 export default defineConfig({
   testDir: "./tests/e2e",
-  testMatch: /region-block\.spec\.ts$/,
+  testMatch: /(region-block|feature-limits)\.spec\.ts$/,
   fullyParallel: true,
   reporter: [["list"]],
   timeout: 90_000,
@@ -30,6 +31,8 @@ export default defineConfig({
         env: {
           PORT,
           BLOCKED_COUNTRIES: "ZZ",
+          FORMS_DISABLED_COUNTRIES: "XX",
+          CHAT_ENABLED: "false",
           DISABLE_PING: "true",
         },
       },

@@ -6,6 +6,7 @@ import type { ReactNode } from "react";
 import { openEmergencyHelp } from "@/lib/emergencyEvents";
 import { useLanguage } from "@/lib/i18n/LanguageProvider";
 import { siteConfig } from "@/lib/siteConfig";
+import { useFeatures } from "@/lib/useFeatures";
 import {
   CHAT_OPEN_EVENT,
   FIND_HELP_EVENT,
@@ -53,6 +54,7 @@ function Item({
  * room for the bar (.has-bottom-bar in globals.css), so it never covers content.
  */
 export function BottomBar() {
+  const features = useFeatures();
   const { t } = useLanguage();
   const pathname = usePathname();
   const router = useRouter();
@@ -73,7 +75,7 @@ export function BottomBar() {
         className="bb-emergency"
         onClick={openEmergencyHelp}
       />
-      {siteConfig.chatEnabled ? (
+      {siteConfig.chatEnabled && features.chat === true ? (
         <Item
           icon={<MessageCircle />}
           label={t("navChat")}

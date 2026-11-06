@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { aiComplete, isAiConfigured, type AiMessage } from "@/lib/aiProvider.server";
 import { detectCategory, extractPlaceQuery } from "@/lib/chatContext.server";
 import { resolveSearchIntent } from "@/lib/chatIntent.server";
+import { isChatEnabledOnServer } from "@/lib/featureFlags.server";
 import {
   buildSystemPrompt,
   mergeResultsWithClientContext,
@@ -84,6 +85,9 @@ function formatFallback(orgs: ChatSearchOrg[], language: LanguageCode): string {
 }
 
 export async function POST(request: Request) {
+  if (!isChatEnabledOnServer()) {
+    return NextResponse.json({ error: "Not found." }, { status: 404 });
+  }
   if (!consumeChatQuota(getClientIp(request))) {
     return errorResponse("chatErrorRateLimit", "en", 429);
   }

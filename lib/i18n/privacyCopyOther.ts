@@ -34,6 +34,7 @@ export const PRIVACY_COPY_OTHER: Pick<Record<LanguageCode, PrivacyCopy>, "es" | 
           "OSRM (router.project-osrm.org, routing.openstreetmap.de): cuando pides una ruta a pie, nuestro servidor envía el punto de partida (tu posición) y el destino.",
           "ReliefWeb, HDX y GDHO (directorios humanitarios): nuestro servidor envía el nombre del país.",
           "Asistente de IA (AITunnel, api.aitunnel.ru): el texto de tus mensajes del chat (los últimos de la conversación) y las organizaciones encontradas para la respuesta. No escribas datos personales en el chat. Tus coordenadas no se envían al servicio de IA.",
+          "El operador del sitio puede desactivar el asistente de IA. La primera vez que lo abres, un aviso indica que los mensajes se envían a un servicio de IA de terceros y te pide no escribir datos personales.",
           "Vercel Web Analytics (las solicitudes van a nuestro propio dominio, bajo /_vercel/insights): recuentos agregados de visitas, páginas y países. No usa cookies ni identificadores personales y no recibe coordenadas, texto de búsqueda ni nada de lo que escribes: la dirección de la página se envía sin parámetros de consulta. Vercel es también nuestro proveedor de alojamiento.",
           "Texto del lugar que escribes: se envía a nuestro servidor (en el cuerpo de la solicitud, no en la dirección web) y de ahí a Nominatim o Photon. Nuestro código no lo registra, pero puede aparecer en los registros del proveedor de alojamiento.",
           "Tu dirección IP se conserva un tiempo breve (hasta una hora) en la memoria del servidor, solo para limitar la frecuencia de las solicitudes. No se escribe en la base de datos.",
@@ -43,6 +44,7 @@ export const PRIVACY_COPY_OTHER: Pick<Record<LanguageCode, PrivacyCopy>, "es" | 
       {
         title: "Qué guardan los formularios",
         items: [
+          "En algunas regiones los formularios de reseña y de organización pueden no estar disponibles; la lectura del sitio y de las reseñas no se ve afectada.",
           "Reseña: un nombre o apodo opcional (no es un campo para el nombre real; déjalo vacío para aparecer como Anónimo), el país, el mensaje y la valoración que escribes, y la fecha. Una reseña se publica solo tras la moderación. No escribas nada que no quieras hacer público.",
           "Añadir una organización: el nombre, la categoría, el país, la ciudad, la dirección, el teléfono, el correo electrónico, el sitio web, el horario y la descripción que escribes, más las coordenadas obtenidas a partir de la dirección. Estos datos se publican tras la verificación, así que indica contactos de la organización, no privados.",
           "Contador de ayuda: cuando pulsas Llamar o Cómo llegar guardamos solo el identificador de la organización, la acción y la hora. Nada que te identifique.",
@@ -92,6 +94,7 @@ export const PRIVACY_COPY_OTHER: Pick<Record<LanguageCode, PrivacyCopy>, "es" | 
           "OSRM (router.project-osrm.org, routing.openstreetmap.de) : lorsque vous demandez un itinéraire à pied, notre serveur envoie le point de départ (votre position) et la destination.",
           "ReliefWeb, HDX et GDHO (annuaires humanitaires) : notre serveur envoie le nom du pays.",
           "Assistant IA (AITunnel, api.aitunnel.ru) : le texte de vos messages dans le chat (les derniers de la conversation) et les organisations trouvées pour la réponse. N'écrivez pas de données personnelles dans le chat. Vos coordonnées ne sont pas envoyées au service d'IA.",
+          "L'exploitant du site peut désactiver l'assistant IA. À la première ouverture, un avis indique que les messages sont transmis à un service d'IA tiers et demande de ne pas écrire de données personnelles.",
           "Vercel Web Analytics (les requêtes vont vers notre propre domaine, sous /_vercel/insights) : décomptes agrégés des visites, des pages et des pays. Il n'utilise ni cookies ni identifiants personnels et ne reçoit ni coordonnées, ni texte de recherche, ni rien de ce que vous saisissez : l'adresse de la page est envoyée sans paramètres de requête. Vercel est aussi notre hébergeur.",
           "Texte du lieu que vous saisissez : il est envoyé à notre serveur (dans le corps de la requête, pas dans l'adresse web), puis à Nominatim ou Photon. Notre code ne l'enregistre pas, mais il peut figurer dans les journaux de l'hébergeur.",
           "Votre adresse IP est conservée brièvement (au plus une heure) dans la mémoire du serveur, uniquement pour limiter la fréquence des requêtes. Elle n'est pas écrite dans la base de données.",
@@ -101,6 +104,7 @@ export const PRIVACY_COPY_OTHER: Pick<Record<LanguageCode, PrivacyCopy>, "es" | 
       {
         title: "Ce que conservent les formulaires",
         items: [
+          "Dans certaines régions, les formulaires d'avis et d'organisation peuvent être indisponibles ; la consultation du site et des avis n'est pas concernée.",
           "Avis : un nom ou pseudonyme facultatif (ce n'est pas un champ pour votre vrai nom ; laissez-le vide pour apparaître comme Anonyme), le pays, le message et la note que vous saisissez, et la date. Un avis n'est publié qu'après modération. N'écrivez rien que vous ne souhaitez pas rendre public.",
           "Ajouter une organisation : le nom, la catégorie, le pays, la ville, l'adresse, le téléphone, l'e-mail, le site web, les horaires et la description que vous saisissez, ainsi que les coordonnées trouvées à partir de l'adresse. Ces informations sont publiées après vérification ; indiquez donc les coordonnées de l'organisation, pas des coordonnées privées.",
           "Compteur d'aide : lorsque vous appuyez sur Appeler ou Itinéraire, nous ne conservons que l'identifiant de l'organisation, l'action et l'heure. Rien qui vous identifie.",
@@ -150,6 +154,7 @@ export const PRIVACY_COPY_OTHER: Pick<Record<LanguageCode, PrivacyCopy>, "es" | 
           "OSRM (router.project-osrm.org, routing.openstreetmap.de): Wenn Sie eine Fußgängerroute anfordern, sendet unser Server den Startpunkt (Ihre Position) und das Ziel.",
           "ReliefWeb, HDX und GDHO (humanitäre Verzeichnisse): Unser Server sendet den Namen des Landes.",
           "KI-Assistent (AITunnel, api.aitunnel.ru): der Text Ihrer Chat-Nachrichten (die letzten des Gesprächs) und die für die Antwort gefundenen Organisationen. Bitte schreiben Sie keine personenbezogenen Daten in den Chat. Ihre Koordinaten werden nicht an den KI-Dienst gesendet.",
+          "Der KI-Assistent kann vom Betreiber der Seite abgeschaltet werden. Beim ersten Öffnen weist ein Hinweis darauf hin, dass Nachrichten an einen externen KI-Dienst gehen, und bittet, keine persönlichen Daten zu schreiben.",
           "Vercel Web Analytics (die Anfragen gehen an unsere eigene Domain, unter /_vercel/insights): aggregierte Zahlen zu Besuchen, Seiten und Ländern. Es verwendet keine Cookies und keine persönlichen Kennungen und erhält weder Koordinaten noch Suchtext noch etwas, was Sie eingeben: Die Seitenadresse wird ohne Query-String gesendet. Vercel ist auch unser Hosting-Anbieter.",
           "Ort, den Sie eingeben: Der Text wird an unseren Server gesendet (im Anfragekörper, nicht in der Webadresse) und weiter an Nominatim oder Photon. Unser Code protokolliert ihn nicht, er kann aber in den Logs des Hosting-Anbieters erscheinen.",
           "Ihre IP-Adresse wird kurzzeitig (höchstens eine Stunde) im Arbeitsspeicher des Servers gehalten, nur um die Häufigkeit von Anfragen zu begrenzen. Sie wird nicht in die Datenbank geschrieben.",
@@ -159,6 +164,7 @@ export const PRIVACY_COPY_OTHER: Pick<Record<LanguageCode, PrivacyCopy>, "es" | 
       {
         title: "Was die Formulare speichern",
         items: [
+          "In manchen Regionen können die Formulare für Bewertungen und Organisationen nicht verfügbar sein; das Lesen der Seite und der Bewertungen ist davon nicht betroffen.",
           "Bewertung: ein optionaler Name oder Spitzname (kein Feld für den echten Namen; lassen Sie es leer, um als Anonym zu erscheinen), das Land, die Nachricht und die Bewertung, die Sie eingeben, sowie das Datum. Eine Bewertung wird erst nach Moderation veröffentlicht. Schreiben Sie nichts, was nicht öffentlich werden soll.",
           "Organisation hinzufügen: der Name, die Kategorie, das Land, die Stadt, die Adresse, das Telefon, die E-Mail, die Website, die Öffnungszeiten und die Beschreibung, die Sie eingeben, sowie aus der Adresse ermittelte Koordinaten. Diese Angaben werden nach der Prüfung veröffentlicht; geben Sie daher Kontaktdaten der Organisation an, keine privaten.",
           "Hilfezähler: Wenn Sie auf Anrufen oder Route klicken, speichern wir nur die Kennung der Organisation, die Aktion und die Zeit. Nichts, was Sie identifiziert.",
@@ -208,6 +214,7 @@ export const PRIVACY_COPY_OTHER: Pick<Record<LanguageCode, PrivacyCopy>, "es" | 
           "OSRM（router.project-osrm.org、routing.openstreetmap.de）：当您请求步行路线时，我们的服务器发送起点（您的位置）和目的地。",
           "ReliefWeb、HDX 和 GDHO（人道主义名录）：我们的服务器发送国家名称。",
           "AI 助手（AITunnel，api.aitunnel.ru）：您的聊天消息文字（对话中最近的几条）以及为回答找到的机构。请不要在聊天中填写个人信息。您的坐标不会发送给 AI 服务。",
+          "网站运营方可以关闭 AI 助手。首次打开时会出现提示，说明消息会传送给第三方 AI 服务，并请勿填写个人信息。",
           "Vercel Web Analytics（请求发送到我们自己的域名，路径为 /_vercel/insights）：访问量、页面和国家的汇总统计。它不使用 Cookie，也不使用个人标识符，不会收到坐标、搜索文字或您输入的任何内容：页面地址在发送时不带查询参数。Vercel 同时也是我们的托管服务商。",
           "您输入的地点文字：会发送到我们的服务器（在请求正文中，而不在网址中），再转发给 Nominatim 或 Photon。我们的代码不会记录它，但它可能出现在托管服务商的日志中。",
           "您的 IP 地址会在服务器内存中短暂保留（最长一小时），仅用于限制请求频率，不会写入数据库。",
@@ -217,6 +224,7 @@ export const PRIVACY_COPY_OTHER: Pick<Record<LanguageCode, PrivacyCopy>, "es" | 
       {
         title: "表单会保存什么",
         items: [
+          "在某些地区，评价和机构表单可能无法使用；浏览网站和评价不受影响。",
           "评价：您输入的可选姓名或昵称（这不是真实姓名栏；留空则显示为“匿名”）、国家、留言和评分，以及日期。评价经审核后才会发布。请不要写下不想公开的内容。",
           "添加机构：您输入的名称、类别、国家、城市、地址、电话、电子邮件、网站、营业时间和描述，以及根据地址找到的坐标。这些信息在核实后发布，因此请填写机构的联系方式，而不是私人联系方式。",
           "帮助计数：当您点击“致电”或“路线”时，我们只保存机构编号、操作类型和时间，不保存任何能识别您的信息。",
@@ -266,6 +274,7 @@ export const PRIVACY_COPY_OTHER: Pick<Record<LanguageCode, PrivacyCopy>, "es" | 
           "OSRM (router.project-osrm.org وrouting.openstreetmap.de): عندما تطلب مسارًا للمشي، يرسل خادمنا نقطة البداية (موضعك) والوجهة.",
           "ReliefWeb وHDX وGDHO (أدلة إنسانية): يرسل خادمنا اسم البلد.",
           "مساعد الذكاء الاصطناعي (AITunnel، api.aitunnel.ru): نص رسائل الدردشة (آخر رسائل المحادثة) والمنظمات التي عُثر عليها للإجابة. يُرجى عدم كتابة بيانات شخصية في الدردشة. لا تُرسل إحداثياتك إلى خدمة الذكاء الاصطناعي.",
+          "يمكن لمشغّل الموقع إيقاف مساعد الذكاء الاصطناعي. عند فتحه لأول مرة يظهر تنبيه بأن الرسائل تُرسل إلى خدمة ذكاء اصطناعي تابعة لجهة خارجية، مع طلب عدم كتابة بيانات شخصية.",
           "Vercel Web Analytics (تذهب الطلبات إلى نطاقنا الخاص، تحت المسار /_vercel/insights): أعداد مجمّعة للزيارات والصفحات والدول. لا تستخدم ملفات تعريف الارتباط ولا معرّفات شخصية ولا تستلم إحداثيات أو نص بحث أو أي شيء تكتبه: يُرسل عنوان الصفحة دون معاملات الاستعلام. Vercel هي أيضًا مزوّد الاستضافة لدينا.",
           "نص المكان الذي تكتبه: يُرسل إلى خادمنا (في متن الطلب لا في عنوان الويب) ثم إلى Nominatim أو Photon. لا يسجّله كودنا، لكنه قد يظهر في سجلات مزوّد الاستضافة.",
           "يُحتفظ بعنوان IP الخاص بك مؤقتًا في ذاكرة الخادم (لمدة لا تتجاوز ساعة) لتقييد وتيرة الطلبات فقط، ولا يُكتب في قاعدة البيانات.",
@@ -275,6 +284,7 @@ export const PRIVACY_COPY_OTHER: Pick<Record<LanguageCode, PrivacyCopy>, "es" | 
       {
         title: "ما تحفظه النماذج",
         items: [
+          "في بعض المناطق قد تكون نماذج المراجعة وإضافة المنظمة غير متاحة؛ ولا يتأثر تصفح الموقع وقراءة المراجعات.",
           "المراجعة: اسم أو لقب اختياري (ليس حقلًا للاسم الحقيقي؛ اتركه فارغًا لتظهر باسم «مجهول»)، والبلد والرسالة والتقييم الذي تكتبه، والتاريخ. لا تُنشر المراجعة إلا بعد الإشراف. لا تكتب ما لا تريد أن يصبح علنيًا.",
           "إضافة منظمة: الاسم والفئة والبلد والمدينة والعنوان والهاتف والبريد الإلكتروني والموقع الإلكتروني وساعات العمل والوصف التي تكتبها، إضافةً إلى الإحداثيات المستخرجة من العنوان. تُنشر هذه البيانات بعد التحقق، لذا اذكر وسائل الاتصال الخاصة بالمنظمة لا الخاصة بك.",
           "عداد المساعدة: عند الضغط على اتصال أو الاتجاهات نحفظ فقط معرّف المنظمة والإجراء والوقت. لا شيء يحدد هويتك.",

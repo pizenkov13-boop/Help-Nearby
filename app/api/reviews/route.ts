@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { formsDisabledForRequest } from "@/lib/featureFlags.server";
 import { siteConfig } from "@/lib/siteConfig";
 import { fetchApprovedReviews, submitReview } from "@/lib/reviews";
 import { getSupabaseConfigStatus } from "@/lib/supabase";
@@ -22,6 +23,7 @@ export async function GET() {
 
 export async function POST(request: Request) {
   if (siteConfig.isCopy) return NextResponse.json({ error: "Not available." }, { status: 404 });
+  if (formsDisabledForRequest(request)) return NextResponse.json({ error: "Not available." }, { status: 403 });
   const config = getSupabaseConfigStatus();
   if (!config.configured) {
     console.error("[api/reviews POST] Supabase not configured", config);

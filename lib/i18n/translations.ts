@@ -101,6 +101,9 @@ export type TranslationKey =
   | "disclaimerText"
   | "formNoPersonalData"
   | "submitWorkContactsHint"
+  | "formsUnavailable"
+  | "chatFirstNotice"
+  | "chatFirstNoticeOk"
   | "navRecent"
   | "recentTitle"
   | "recentSubtitle"
@@ -411,6 +414,9 @@ const en: Record<TranslationKey, string> = {
   disclaimerText: "The information is for reference only and may be inaccurate or out of date. Before you go, check by phone or on the organization's website. If life is in danger, call your local emergency services.",
   formNoPersonalData: "Don't write names, phone numbers, addresses or other personal data. Write public information only.",
   submitWorkContactsHint: "Only the organization's work contacts.",
+  formsUnavailable: "Submitting forms is temporarily unavailable in your region",
+  chatFirstNotice: "Messages are passed to a third-party AI service. Do not write your name, phone number, address or other personal data.",
+  chatFirstNoticeOk: "Got it",
   navRecent: "Recently added",
   recentTitle: "Recently added organizations",
   recentSubtitle: "Newly verified organizations added to Help Nearby, newest first.",
@@ -751,6 +757,9 @@ const ru: Record<TranslationKey, string> = {
   disclaimerText: "Информация справочная и может быть неточной или устаревшей. Перед визитом проверь по телефону или на сайте организации. При угрозе жизни звони в местные экстренные службы.",
   formNoPersonalData: "Не пишите имя, телефон, адрес и другие личные данные, пишите только публичную информацию.",
   submitWorkContactsHint: "Только рабочие контакты организации.",
+  formsUnavailable: "Отправка форм временно недоступна в вашем регионе",
+  chatFirstNotice: "Сообщения передаются стороннему ИИ-сервису. Не пишите имя, телефон, адрес и другие личные данные.",
+  chatFirstNoticeOk: "Понятно",
   navRecent: "Недавно добавлены",
   recentTitle: "Недавно добавленные организации",
   recentSubtitle: "Новые проверенные организации в Help Nearby — сначала самые свежие.",
@@ -1104,6 +1113,9 @@ const es: Record<TranslationKey, string> = {
   disclaimerText: "La información es solo orientativa y puede ser inexacta o estar desactualizada. Antes de ir, comprueba por teléfono o en el sitio web de la organización. Si tu vida corre peligro, llama a los servicios de emergencia locales.",
   formNoPersonalData: "No escribas nombres, teléfonos, direcciones ni otros datos personales; escribe solo información pública.",
   submitWorkContactsHint: "Solo contactos de trabajo de la organización.",
+  formsUnavailable: "El envío de formularios no está disponible temporalmente en tu región",
+  chatFirstNotice: "Los mensajes se envían a un servicio de IA de terceros. No escribas tu nombre, teléfono, dirección ni otros datos personales.",
+  chatFirstNoticeOk: "Entendido",
   navRecent: "Añadidas recientemente",
   recentTitle: "Organizaciones añadidas recientemente",
   recentSubtitle: "Organizaciones recién verificadas en Help Nearby, las más nuevas primero.",
@@ -1462,6 +1474,9 @@ const fr: Record<TranslationKey, string> = {
   disclaimerText: "Les informations sont données à titre indicatif et peuvent être inexactes ou périmées. Avant de vous déplacer, vérifiez par téléphone ou sur le site de l'organisation. En cas de danger de mort, appelez les services d'urgence locaux.",
   formNoPersonalData: "N'écrivez pas de nom, de téléphone, d'adresse ni d'autres données personnelles ; indiquez uniquement des informations publiques.",
   submitWorkContactsHint: "Uniquement les coordonnées professionnelles de l'organisation.",
+  formsUnavailable: "L'envoi de formulaires est temporairement indisponible dans votre région",
+  chatFirstNotice: "Les messages sont transmis à un service d'IA tiers. N'écrivez pas votre nom, votre téléphone, votre adresse ni d'autres données personnelles.",
+  chatFirstNoticeOk: "Compris",
   navRecent: "Ajouts récents",
   recentTitle: "Organisations récemment ajoutées",
   recentSubtitle: "Organisations nouvellement vérifiées sur Help Nearby, les plus récentes d'abord.",
@@ -1821,6 +1836,9 @@ const de: Record<TranslationKey, string> = {
   disclaimerText: "Die Angaben dienen nur zur Orientierung und können ungenau oder veraltet sein. Prüfen Sie vor dem Besuch telefonisch oder auf der Website der Organisation. Bei Lebensgefahr rufen Sie den örtlichen Notruf an.",
   formNoPersonalData: "Schreiben Sie keine Namen, Telefonnummern, Adressen oder andere persönliche Daten, nur öffentliche Informationen.",
   submitWorkContactsHint: "Nur dienstliche Kontaktdaten der Organisation.",
+  formsUnavailable: "Das Absenden von Formularen ist in Ihrer Region vorübergehend nicht verfügbar",
+  chatFirstNotice: "Nachrichten werden an einen externen KI-Dienst übermittelt. Schreiben Sie keinen Namen, keine Telefonnummer, Adresse oder sonstige persönliche Daten.",
+  chatFirstNoticeOk: "Verstanden",
   navRecent: "Neu hinzugefügt",
   recentTitle: "Kürzlich hinzugefügte Organisationen",
   recentSubtitle: "Neu verifizierte Organisationen bei Help Nearby, die neuesten zuerst.",
@@ -2179,6 +2197,9 @@ const zh: Record<TranslationKey, string> = {
   disclaimerText: "本网站信息仅供参考，可能不准确或已过时。前往之前，请通过电话或机构网站核实。如遇生命危险，请拨打当地紧急服务电话。",
   formNoPersonalData: "请勿填写姓名、电话、地址等个人信息，只写公开信息。",
   submitWorkContactsHint: "仅填写机构的工作联系方式。",
+  formsUnavailable: "您所在的地区暂时无法提交表单",
+  chatFirstNotice: "消息会传送给第三方 AI 服务。请勿填写姓名、电话、地址等个人信息。",
+  chatFirstNoticeOk: "知道了",
   navRecent: "最新添加",
   recentTitle: "最近添加的组织",
   recentSubtitle: "Help Nearby 上新近验证的组织，按最新排序。",
@@ -2512,6 +2533,9 @@ const ar: Record<TranslationKey, string> = {
   disclaimerText: "المعلومات للاسترشاد فقط وقد تكون غير دقيقة أو قديمة. قبل الزيارة، تحقق عبر الهاتف أو موقع المؤسسة. في حال تهديد الحياة، اتصل بخدمات الطوارئ المحلية.",
   formNoPersonalData: "لا تكتب الاسم أو رقم الهاتف أو العنوان أو أي بيانات شخصية أخرى، اكتب معلومات عامة فقط.",
   submitWorkContactsHint: "جهات اتصال العمل الخاصة بالمنظمة فقط.",
+  formsUnavailable: "إرسال النماذج غير متاح مؤقتًا في منطقتك",
+  chatFirstNotice: "تُرسل الرسائل إلى خدمة ذكاء اصطناعي تابعة لجهة خارجية. لا تكتب اسمك أو هاتفك أو عنوانك أو أي بيانات شخصية أخرى.",
+  chatFirstNoticeOk: "فهمت",
   navRecent: "أُضيفت حديثًا",
   recentTitle: "المنظمات المضافة حديثًا",
   recentSubtitle: "منظمات تم التحقق منها حديثًا على Help Nearby، الأحدث أولًا.",

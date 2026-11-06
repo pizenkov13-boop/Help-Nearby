@@ -47,6 +47,7 @@ export const PRIVACY_COPY_EN_RU: Pick<Record<LanguageCode, PrivacyCopy>, "en" | 
           "OSRM (router.project-osrm.org, routing.openstreetmap.de): when you ask for a walking route, our server sends the start point (your position) and the destination.",
           "ReliefWeb, HDX and GDHO (humanitarian directories): our server sends the name of the country.",
           "AI assistant (AITunnel, api.aitunnel.ru): the text of your chat messages (the last ones in the conversation) and the organizations found for the answer. Please do not write personal data in the chat. Your coordinates are not sent to the AI service.",
+          "The AI assistant can be switched off by the site operator. The first time you open it, a notice says that messages go to a third-party AI service and asks you not to write personal data.",
           "Vercel Web Analytics (requests go to our own domain, under /_vercel/insights): aggregated counts of visits, pages and countries. It uses no cookies and no personal identifiers, and it does not receive coordinates, search text or anything you type: the page address is sent without any query string. Vercel is also our hosting provider.",
           "Text of a place you type: it is sent to our server (in the body of a request, not in the web address) and on to Nominatim or Photon. Our code does not log it, but the hosting provider's logs may contain it.",
           "Your IP address is kept in the server's memory for a short time (up to one hour) only to limit how often requests can be made. It is not written to the database.",
@@ -56,6 +57,7 @@ export const PRIVACY_COPY_EN_RU: Pick<Record<LanguageCode, PrivacyCopy>, "en" | 
       {
         title: "What the forms store",
         items: [
+          "In some regions the review and organization forms may be unavailable; reading the site and the reviews is not affected.",
           "Review: an optional name or nickname (not a real-name field; leave it empty to appear as Anonymous), the country, the message and the rating you type, and the date. A review is published only after moderation. Do not write anything you do not want to be public.",
           "Add an organization: the name, category, country, city, address, phone, e-mail, website, opening hours and description you type, plus coordinates found from the address. These details are published after verification, so give organization contacts, not private ones.",
           "Counter of help: when you press Call or Directions we store only the organization id, the action and the time. Nothing that identifies you.",
@@ -105,6 +107,7 @@ export const PRIVACY_COPY_EN_RU: Pick<Record<LanguageCode, PrivacyCopy>, "en" | 
           "OSRM (router.project-osrm.org, routing.openstreetmap.de): когда вы просите пеший маршрут, наш сервер отправляет начальную точку (вашу позицию) и пункт назначения.",
           "ReliefWeb, HDX и GDHO (гуманитарные справочники): наш сервер отправляет название страны.",
           "ИИ-помощник (AITunnel, api.aitunnel.ru): текст ваших сообщений в чате (последние сообщения диалога) и найденные организации для ответа. Не пишите в чат личные данные. Ваши координаты ИИ-сервису не передаются.",
+          "ИИ-помощник может быть отключён оператором сайта. При первом открытии показывается уведомление, что сообщения передаются стороннему ИИ-сервису, и просьба не писать личные данные.",
           "Vercel Web Analytics (запросы идут на наш собственный домен, путь /_vercel/insights): агрегированные счётчики посещений, страниц и стран. Не использует cookie и персональные идентификаторы и не получает координаты, текст поиска или то, что вы вводите: адрес страницы отправляется без параметров запроса. Vercel также является нашим хостинг-провайдером.",
           "Введённое название места: передаётся на наш сервер (в теле запроса, не в адресе) и дальше в Nominatim или Photon. Наш код его не логирует, но оно может попадать в логи хостинга.",
           "IP-адрес временно хранится в памяти сервера (не дольше часа) только для ограничения частоты запросов. В базу данных он не записывается.",
@@ -114,6 +117,7 @@ export const PRIVACY_COPY_EN_RU: Pick<Record<LanguageCode, PrivacyCopy>, "en" | 
       {
         title: "Что сохраняют формы",
         items: [
+          "В некоторых регионах формы отзыва и добавления организации могут быть недоступны; чтение сайта и отзывов это не затрагивает.",
           "Отзыв: необязательное имя или псевдоним (это не поле для настоящего имени; оставьте пустым, и вы будете «Аноним»), страна, текст и оценка, которые вы вводите, и дата. Отзыв публикуется только после модерации. Не пишите то, что не хотите сделать публичным.",
           "Добавление организации: название, категория, страна, город, адрес, телефон, e-mail, сайт, часы работы и описание, которые вы вводите, а также координаты, найденные по адресу. Эти данные публикуются после проверки, поэтому указывайте контакты организации, а не личные.",
           "Счётчик помощи: при нажатии «Позвонить» или «Маршрут» мы сохраняем только идентификатор организации, тип действия и время. Ничего, что идентифицирует вас.",

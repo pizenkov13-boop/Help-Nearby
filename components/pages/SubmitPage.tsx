@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Building2, CheckCircle2, Loader2 } from "lucide-react";
 import { PageHero } from "@/components/layout/PageHero";
 import { SiteLayout } from "@/components/layout/SiteLayout";
+import { FormsGate } from "@/components/FormsGate";
 import { Button } from "@/components/ui/button";
 import { CATEGORIES } from "@/lib/categories";
 import { useLanguage } from "@/lib/i18n/LanguageProvider";
@@ -133,6 +134,7 @@ export function SubmitPage() {
                   </Button>
                 </div>
               ) : (
+                <FormsGate>
                 <form onSubmit={handleSubmit} className="space-y-5">
                   {error && (
                     <p className="rounded-lg border border-red-500/30 bg-red-500/10 px-3 py-2 text-sm text-red-400" role="alert">
@@ -320,6 +322,7 @@ export function SubmitPage() {
                     Submissions are saved as unverified and reviewed by our team.
                   </p>
                 </form>
+                </FormsGate>
               )}
             </div>
           </div>

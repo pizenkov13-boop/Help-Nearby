@@ -51,6 +51,11 @@ test.describe("copy mode", () => {
     expect((await request.get("/privacy", { headers: { "x-vercel-ip-country": "ZZ" } })).status()).toBe(200);
   });
 
+  test("FORMS_DISABLED_COUNTRIES is ignored on a copy", async ({ request }) => {
+    const response = await request.get("/api/features", { headers: { "x-vercel-ip-country": "ZZ" } });
+    expect((await response.json()).forms).toBe(true);
+  });
+
   test("submit and reviews are not available", async ({ request }) => {
     expect((await request.get("/submit")).status()).toBe(404);
     expect((await request.get("/reviews")).status()).toBe(404);
