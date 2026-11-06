@@ -17,8 +17,8 @@ const SUN = 18;
 const catalog = (hoursRaw: string): Organization => ({
   ...base,
   id: "9001",
-  slug: "nochlezhka-test",
-  country: "Russia",
+  slug: "catalog-entry-test",
+  country: "Testland",
   hours: {},
   hoursRaw,
   verified: true,
