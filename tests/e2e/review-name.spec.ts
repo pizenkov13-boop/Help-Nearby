@@ -58,7 +58,7 @@ test.describe("Review form: the name is an optional nickname", () => {
     await page.goto("/reviews");
 
     await expect(page.getByLabel("Name or nickname (optional)")).toBeVisible();
-    await expect(page.locator("#review-name")).toHaveAttribute("placeholder", "e.g. Alex");
+    await expect(page.locator("#review-name")).toHaveAttribute("placeholder", "e.g. Anna / Omar");
     await expect(page.locator("#review-name")).not.toHaveAttribute("required", /.*/);
     await expect(
       page.getByText("Please do not include your surname, phone number or other personal details."),
@@ -71,7 +71,7 @@ test.describe("Review form: the name is an optional nickname", () => {
     await page.goto("/reviews");
 
     await expect(page.getByLabel("Имя или псевдоним (необязательно)")).toBeVisible();
-    await expect(page.locator("#review-name")).toHaveAttribute("placeholder", "Например: Паша / Alex");
+    await expect(page.locator("#review-name")).toHaveAttribute("placeholder", "Например: Анна / Omar");
     await expect(
       page.getByText("Не указывайте фамилию, телефон или другие личные данные."),
     ).toBeVisible();

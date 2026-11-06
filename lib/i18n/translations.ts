@@ -578,7 +578,7 @@ const en: Record<TranslationKey, string> = {
   reviewsSubtitle:
     "Share your experience or suggest improvements to help us serve people better.",
   reviewsFormName: "Name or nickname (optional)",
-  reviewsFormNamePlaceholder: "e.g. Alex",
+  reviewsFormNamePlaceholder: "e.g. Anna / Omar",
   reviewsFormNameHint: "Please do not include your surname, phone number or other personal details.",
   reviewAnonymous: "Anonymous",
   reviewsFormCountry: "Your country",
@@ -932,7 +932,7 @@ const ru: Record<TranslationKey, string> = {
   reviewsSubtitle:
     "Поделитесь опытом или предложите улучшения, чтобы мы помогали людям ещё лучше.",
   reviewsFormName: "Имя или псевдоним (необязательно)",
-  reviewsFormNamePlaceholder: "Например: Паша / Alex",
+  reviewsFormNamePlaceholder: "Например: Анна / Omar",
   reviewsFormNameHint: "Не указывайте фамилию, телефон или другие личные данные.",
   reviewAnonymous: "Аноним",
   reviewsFormCountry: "Ваша страна",
@@ -1292,7 +1292,7 @@ const es: Record<TranslationKey, string> = {
   reviewsSubtitle:
     "Comparte tu experiencia o sugiere mejoras para ayudarnos a servir mejor a las personas.",
   reviewsFormName: "Nombre o apodo (opcional)",
-  reviewsFormNamePlaceholder: "p. ej., Alex",
+  reviewsFormNamePlaceholder: "p. ej., Ana / Omar",
   reviewsFormNameHint: "No incluyas tu apellido, teléfono ni otros datos personales.",
   reviewAnonymous: "Anónimo",
   reviewsFormCountry: "Tu país",
@@ -1654,7 +1654,7 @@ const fr: Record<TranslationKey, string> = {
   reviewsSubtitle:
     "Partagez votre expérience ou proposez des améliorations pour nous aider à mieux servir les personnes.",
   reviewsFormName: "Nom ou pseudonyme (facultatif)",
-  reviewsFormNamePlaceholder: "p. ex. Alex",
+  reviewsFormNamePlaceholder: "p. ex. Anna / Omar",
   reviewsFormNameHint: "N'indiquez pas votre nom de famille, votre téléphone ni d'autres données personnelles.",
   reviewAnonymous: "Anonyme",
   reviewsFormCountry: "Votre pays",
@@ -2017,7 +2017,7 @@ const de: Record<TranslationKey, string> = {
   reviewsSubtitle:
     "Teilen Sie Ihre Erfahrung oder schlagen Sie Verbesserungen vor, damit wir Menschen besser unterstützen können.",
   reviewsFormName: "Name oder Spitzname (optional)",
-  reviewsFormNamePlaceholder: "z. B. Alex",
+  reviewsFormNamePlaceholder: "z. B. Anna / Omar",
   reviewsFormNameHint: "Bitte geben Sie weder Nachnamen noch Telefonnummer oder andere persönliche Daten an.",
   reviewAnonymous: "Anonym",
   reviewsFormCountry: "Ihr Land",
@@ -2359,7 +2359,7 @@ const zh: Record<TranslationKey, string> = {
   reviewsTitle: "评价与建议",
   reviewsSubtitle: "分享您的体验或提出改进建议，帮助我们更好服务他人。",
   reviewsFormName: "姓名或昵称（可选）",
-  reviewsFormNamePlaceholder: "例如：Alex",
+  reviewsFormNamePlaceholder: "例如：Anna / Omar",
   reviewsFormNameHint: "请勿填写姓氏、电话号码或其他个人信息。",
   reviewAnonymous: "匿名",
   reviewsFormCountry: "您的国家",
@@ -2708,7 +2708,7 @@ const ar: Record<TranslationKey, string> = {
   reviewsSubtitle:
     "شارك تجربتك أو اقترح تحسينات لمساعدتنا على خدمة الناس بشكل أفضل.",
   reviewsFormName: "الاسم أو اللقب (اختياري)",
-  reviewsFormNamePlaceholder: "مثال: Alex",
+  reviewsFormNamePlaceholder: "مثال: Anna / Omar",
   reviewsFormNameHint: "يرجى عدم كتابة اسم العائلة أو رقم الهاتف أو أي بيانات شخصية أخرى.",
   reviewAnonymous: "مجهول",
   reviewsFormCountry: "بلدك",
