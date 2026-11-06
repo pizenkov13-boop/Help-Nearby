@@ -1,7 +1,5 @@
+import { PageLoading } from "@/components/PageLoading";
+
 export default function Loading() {
-  return (
-    <div className="flex min-h-screen items-center justify-center bg-surface text-slate-500">
-      Loading…
-    </div>
-  );
+  return <PageLoading />;
 }

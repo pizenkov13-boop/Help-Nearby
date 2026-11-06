@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { siteConfig } from "@/lib/siteConfig";
+import { metaTranslator } from "@/lib/i18n/pageMeta";
 import { RecentPage } from "@/components/pages/RecentPage";
 import {
   fetchRecentOrganizations,
@@ -9,15 +10,16 @@ import {
 
 export const revalidate = 300;
 
-const title = "Recently Added Organizations — Help Nearby";
-const description =
-  "Newly verified food banks, shelters, medical aid and volunteer organizations added to Help Nearby.";
-
-export const metadata: Metadata = {
-  title,
-  description,
-  openGraph: { title, description, type: "website", siteName: "Help Nearby" },
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await metaTranslator();
+  const title = `${t("metaRecentTitle")} — ${siteConfig.name}`;
+  const description = t("metaRecentDesc");
+  return {
+    title,
+    description,
+    openGraph: { title, description, type: "website", siteName: siteConfig.name },
+  };
+}
 
 const SSR_TIMEOUT_MS = 8000;
 

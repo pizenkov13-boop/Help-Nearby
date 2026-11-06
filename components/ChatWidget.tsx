@@ -214,7 +214,7 @@ export function ChatWidget() {
               type="button"
               onClick={() => setOpen(false)}
               className="flex h-11 w-11 items-center justify-center rounded-lg text-slate-500 hover:bg-slate-100 hover:text-slate-900 dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-white max-sm:-mr-2"
-              aria-label="Close chat"
+              aria-label={t("chatClose")}
             >
               <X className="h-5 w-5" />
             </button>

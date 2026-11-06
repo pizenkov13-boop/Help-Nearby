@@ -8,6 +8,7 @@ import "./globals.css";
 import { fontVariableClasses } from "./fonts";
 import { cn } from "@/lib/utils";
 import { siteConfig } from "@/lib/siteConfig";
+import { metaTranslator } from "@/lib/i18n/pageMeta";
 import {
   languageDirection,
   parseAcceptLanguage,

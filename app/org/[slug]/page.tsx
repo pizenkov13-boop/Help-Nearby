@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { OrganizationDetailPage } from "@/components/pages/OrganizationDetailPage";
+import { metaTranslator } from "@/lib/i18n/pageMeta";
 import { fetchOrganizationBySlug } from "@/lib/data";
 import { buildOrganizationJsonLd, serializeJsonLd } from "@/lib/orgJsonLd";
 import {
@@ -19,7 +20,8 @@ export async function generateMetadata({ params }: OrgPageProps): Promise<Metada
   const { slug } = await params;
   const org = await fetchOrganizationBySlug(slug);
   if (!org) {
-    return { title: "Organization Not Found — Help Nearby", robots: { index: false } };
+    const t = await metaTranslator();
+    return { title: `${t("metaOrgNotFound")} — Help Nearby`, robots: { index: false } };
   }
 
   const title = buildOrgTitle(org);
