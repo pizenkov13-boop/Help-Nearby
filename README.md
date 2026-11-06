@@ -444,6 +444,8 @@ Everything here is optional and has a default. Without a database the site runs 
 
 Licensed under the MIT License — see [LICENSE](LICENSE) file.
 
+Third-party licenses: [THIRD-PARTY-NOTICES.md](THIRD-PARTY-NOTICES.md).
+
 ---
 
 ## Repository

@@ -48,3 +48,6 @@ next-env.d.ts
 /.claude-flow/
 /.swarm/
 /ruvector.db
+
+# local analysis output
+/slop.json
