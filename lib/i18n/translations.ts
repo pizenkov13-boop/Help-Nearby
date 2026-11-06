@@ -685,7 +685,7 @@ const en: Record<TranslationKey, string> = {
     "Share your experience or suggest improvements to help us serve people better.",
   reviewsFormName: "Name or nickname (optional)",
   reviewsFormNamePlaceholder: "e.g. Anna / Omar",
-  chatClose: "Закрыть чат",
+  chatClose: "Close chat",
   themeToLight: "Switch to light mode",
   themeToDark: "Switch to dark mode",
   themeLight: "Light mode",

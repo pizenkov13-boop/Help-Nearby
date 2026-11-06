@@ -16,11 +16,11 @@ import {
 } from "@/lib/i18n/detectLanguage";
 
 const SITE_URL = siteConfig.url;
-const SITE_TITLE = `${siteConfig.name} — Find Help Near You`;
-const SITE_DESCRIPTION =
-  "Discover food banks, shelters, medical aid, clothing donations, and volunteer opportunities near you.";
-
-export const metadata: Metadata = {
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await metaTranslator();
+  const SITE_TITLE = `${siteConfig.name} — ${t("metaHomeTitle")}`;
+  const SITE_DESCRIPTION = t("metaHomeDesc");
+  return {
   metadataBase: new URL(SITE_URL),
   title: SITE_TITLE,
   description: SITE_DESCRIPTION,
@@ -44,7 +44,8 @@ export const metadata: Metadata = {
     title: "Help Nearby",
     statusBarStyle: "black-translucent",
   },
-};
+  };
+}
 
 export const viewport: Viewport = {
   width: "device-width",
