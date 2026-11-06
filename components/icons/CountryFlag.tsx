@@ -1,3 +1,6 @@
+"use client";
+
+import { useState } from "react";
 import { Globe } from "lucide-react";
 import { resolveCountryCode } from "@/lib/countryFlags";
 import { cn } from "@/lib/utils";
@@ -9,8 +12,10 @@ interface CountryFlagProps {
 
 export function CountryFlag({ country, className }: CountryFlagProps) {
   const code = resolveCountryCode(country);
+  const [missing, setMissing] = useState(false);
 
-  if (!code) {
+  // No code, or no flag file for it: the globe, never a broken image.
+  if (!code || missing) {
     return (
       <Globe
         className={cn("h-4 w-4 shrink-0 text-slate-400", className)}
@@ -32,6 +37,7 @@ export function CountryFlag({ country, className }: CountryFlagProps) {
         className,
       )}
       loading="lazy"
+      onError={() => setMissing(true)}
     />
   );
 }

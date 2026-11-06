@@ -76,7 +76,7 @@ async function fetchHdxGroups(): Promise<HdxGroup[]> {
   return groupListCache;
 }
 
-/** Resolve HDX location group slug (e.g. `ukr`) from geocoded country. */
+/** Resolve HDX location group slug (e.g. `pol`) from geocoded country. */
 export async function resolveHdxGroupName(
   country: string,
   countryCode?: string | null,

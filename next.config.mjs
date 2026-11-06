@@ -1,3 +1,5 @@
+import path from "node:path";
+import { fileURLToPath } from "node:url";
 import { CONTENT_SECURITY_POLICY } from "./config/contentSecurityPolicy.mjs";
 
 const MAIN_REPO_OWNER = "pizenkov13-boop";
@@ -24,7 +26,7 @@ function copyModeEnv() {
 const nextConfig = {
   env: copyModeEnv(),
   output: "standalone",
-  transpilePackages: ["leaflet", "react-leaflet"],
+  transpilePackages: ["leaflet"],
   // Next.js 16 defaults to Turbopack; empty config acknowledges custom webpack (dev only).
   turbopack: {},
   images: {
@@ -38,6 +40,16 @@ const nextConfig = {
     ],
   },
   webpack: (config, { dev, isServer }) => {
+    // Leaflet ships a default attribution prefix (a link and a flag); strip it from the bundled library.
+    config.module.rules.push({
+      test: /node_modules[\\/]leaflet[\\/]dist[\\/]leaflet-src(\.esm)?\.js$/,
+      enforce: "pre",
+      use: [
+        {
+          loader: path.join(path.dirname(fileURLToPath(import.meta.url)), "scripts", "leaflet-prefix-loader.cjs"),
+        },
+      ],
+    });
     if (dev && !isServer) {
       // Avoid eval-based source maps — fixes "CSP blocks eval" warnings in dev.
       config.devtool = "cheap-module-source-map";

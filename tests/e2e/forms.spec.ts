@@ -43,6 +43,25 @@ test.describe("Forms", () => {
     expect(text).toContain("hosting provider's logs may contain it");
   });
 
+  test("a review whose country has no flag file shows the globe, never a broken image", async ({ page, request }) => {
+    expect((await request.get("/flags/ua.svg")).status()).toBe(404);
+
+    await page.route(/\/api\/reviews/, (route) =>
+      route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify([
+          { id: 1, name: "Test", country: "UA", message: "No flag file for this code", rating: 5, approved: true, created_at: "2026-01-01T00:00:00Z" },
+        ]),
+      }),
+    );
+    await page.goto("/reviews");
+    const card = page.locator("article").filter({ hasText: "No flag file for this code" });
+    await expect(card).toBeVisible();
+    await expect(card.locator('img[src="/flags/ua.svg"]')).toHaveCount(0, { timeout: 10_000 });
+    await expect(card.locator("svg.lucide-globe")).toBeVisible();
+  });
+
   test("admin page shows login when not authenticated", async ({ page }) => {
     await page.goto("/admin");
 
