@@ -8,16 +8,17 @@ import { FormsGate } from "@/components/FormsGate";
 import { Button } from "@/components/ui/button";
 import { CATEGORIES } from "@/lib/categories";
 import { useLanguage } from "@/lib/i18n/LanguageProvider";
+import type { TranslationKey } from "@/lib/i18n/translations";
 import type { Category } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
-const CATEGORY_LABELS: Record<Category, string> = {
-  food: "Food",
-  shelter: "Shelter",
-  medical: "Medical",
-  clothing: "Clothing",
-  volunteer: "Volunteer",
-};
+const CATEGORY_LABEL_KEYS = {
+  food: "categoryFood",
+  shelter: "categoryShelter",
+  medical: "categoryMedical",
+  clothing: "categoryClothing",
+  volunteer: "categoryVolunteer",
+} as const satisfies Record<Category, TranslationKey>;
 
 const inputClass =
   "w-full rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-slate-900 placeholder:text-slate-400 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-700 dark:bg-gray-950 dark:text-gray-100 dark:placeholder:text-gray-500";
@@ -67,7 +68,7 @@ export function SubmitPage() {
     setError(null);
 
     if (!form.name.trim() || !form.country.trim() || !form.city.trim() || !form.address.trim()) {
-      setError("Please fill in name, country, city, and address.");
+      setError(t("submitErrorRequired"));
       return;
     }
 
@@ -83,14 +84,14 @@ export function SubmitPage() {
       const data = (await response.json()) as { error?: string };
 
       if (!response.ok) {
-        setError(data.error ?? "Submission failed. Please try again.");
+        setError(t("submitErrorFailed"));
         return;
       }
 
       setSubmitted(true);
       setForm(initialForm);
     } catch {
-      setError("Network error. Please try again.");
+      setError(t("submitErrorNetwork"));
     } finally {
       setSubmitting(false);
     }
@@ -99,8 +100,8 @@ export function SubmitPage() {
   return (
     <SiteLayout>
         <PageHero
-          title="Submit an Organization"
-          subtitle="Add a local assistance organization to Help Nearby. Submissions are reviewed before appearing as verified."
+          title={t("submitPageTitle")}
+          subtitle={t("submitPageSubtitle")}
         />
 
         <section className="bg-surface px-4 py-12 sm:px-6 lg:px-8">
@@ -108,7 +109,7 @@ export function SubmitPage() {
             <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-xl dark:border-gray-800 dark:bg-gray-900/80 sm:p-8">
               <div className="mb-6 flex items-center gap-2 text-teal-600 dark:text-emerald-400">
                 <Building2 className="h-5 w-5" />
-                <span className="font-medium text-slate-900 dark:text-white">Organization details</span>
+                <span className="font-medium text-slate-900 dark:text-white">{t("submitDetailsHeading")}</span>
               </div>
 
               {submitted ? (
@@ -118,11 +119,10 @@ export function SubmitPage() {
                 >
                   <CheckCircle2 className="h-12 w-12 text-teal-600 dark:text-emerald-400" />
                   <p className="text-lg font-semibold text-teal-800 dark:text-emerald-300">
-                    Thank you! Your organization has been submitted.
+                    {t("submitThanks")}
                   </p>
                   <p className="max-w-md text-sm text-slate-600 dark:text-gray-400">
-                    Our team will review it shortly. Once approved, it will appear on the map
-                    with a verified badge.
+                    {t("submitThanksText")}
                   </p>
                   <Button
                     type="button"
@@ -130,7 +130,7 @@ export function SubmitPage() {
                     className="mt-2 border-slate-300 bg-transparent text-slate-700 hover:bg-slate-50 dark:border-gray-600 dark:text-gray-200 dark:hover:bg-gray-800"
                     onClick={() => setSubmitted(false)}
                   >
-                    Submit another
+                    {t("submitAnother")}
                   </Button>
                 </div>
               ) : (
@@ -144,7 +144,7 @@ export function SubmitPage() {
 
                   <div>
                     <label htmlFor="org-name" className={labelClass}>
-                      Name <span className="text-red-400">*</span>
+                      {t("submitLabelName")} <span className="text-red-400">*</span>
                     </label>
                     <input
                       id="org-name"
@@ -153,13 +153,13 @@ export function SubmitPage() {
                       value={form.name}
                       onChange={(e) => update("name", e.target.value)}
                       className={inputClass}
-                      placeholder="Midtown Community Kitchen"
+                      placeholder={t("submitPhName")}
                     />
                   </div>
 
                   <div>
                     <label htmlFor="org-category" className={labelClass}>
-                      Category <span className="text-red-400">*</span>
+                      {t("submitLabelCategory")} <span className="text-red-400">*</span>
                     </label>
                     <select
                       id="org-category"
@@ -170,7 +170,7 @@ export function SubmitPage() {
                     >
                       {CATEGORIES.map((cat) => (
                         <option key={cat} value={cat}>
-                          {CATEGORY_LABELS[cat]}
+                          {t(CATEGORY_LABEL_KEYS[cat])}
                         </option>
                       ))}
                     </select>
@@ -179,7 +179,7 @@ export function SubmitPage() {
                   <div className="grid gap-5 sm:grid-cols-2">
                     <div>
                       <label htmlFor="org-country" className={labelClass}>
-                        Country <span className="text-red-400">*</span>
+                        {t("submitLabelCountry")} <span className="text-red-400">*</span>
                       </label>
                       <input
                         id="org-country"
@@ -188,12 +188,12 @@ export function SubmitPage() {
                         value={form.country}
                         onChange={(e) => update("country", e.target.value)}
                         className={inputClass}
-                        placeholder="United States"
+                        placeholder={t("submitPhCountry")}
                       />
                     </div>
                     <div>
                       <label htmlFor="org-city" className={labelClass}>
-                        City <span className="text-red-400">*</span>
+                        {t("submitLabelCity")} <span className="text-red-400">*</span>
                       </label>
                       <input
                         id="org-city"
@@ -202,14 +202,14 @@ export function SubmitPage() {
                         value={form.city}
                         onChange={(e) => update("city", e.target.value)}
                         className={inputClass}
-                        placeholder="New York"
+                        placeholder={t("submitPhCity")}
                       />
                     </div>
                   </div>
 
                   <div>
                     <label htmlFor="org-address" className={labelClass}>
-                      Address <span className="text-red-400">*</span>
+                      {t("submitLabelAddress")} <span className="text-red-400">*</span>
                     </label>
                     <input
                       id="org-address"
@@ -218,7 +218,7 @@ export function SubmitPage() {
                       value={form.address}
                       onChange={(e) => update("address", e.target.value)}
                       className={inputClass}
-                      placeholder="450 W 42nd St, New York, NY 10036"
+                      placeholder={t("submitPhAddress")}
                     />
                   </div>
 
@@ -229,7 +229,7 @@ export function SubmitPage() {
                   <div className="grid gap-5 sm:grid-cols-2">
                     <div>
                       <label htmlFor="org-phone" className={labelClass}>
-                        Phone
+                        {t("submitLabelPhone")}
                       </label>
                       <input
                         id="org-phone"
@@ -242,7 +242,7 @@ export function SubmitPage() {
                     </div>
                     <div>
                       <label htmlFor="org-email" className={labelClass}>
-                        Email
+                        {t("submitLabelEmail")}
                       </label>
                       <input
                         id="org-email"
@@ -257,7 +257,7 @@ export function SubmitPage() {
 
                   <div>
                     <label htmlFor="org-website" className={labelClass}>
-                      Website
+                      {t("submitLabelWebsite")}
                     </label>
                     <input
                       id="org-website"
@@ -271,7 +271,7 @@ export function SubmitPage() {
 
                   <div>
                     <label htmlFor="org-hours" className={labelClass}>
-                      Hours
+                      {t("submitLabelHours")}
                     </label>
                     <textarea
                       id="org-hours"
@@ -279,13 +279,13 @@ export function SubmitPage() {
                       value={form.hours}
                       onChange={(e) => update("hours", e.target.value)}
                       className={inputClass}
-                      placeholder='MonвЂ“Fri 9:00вЂ“17:00, or JSON: {"monday":{"open":"09:00","close":"17:00"}}'
+                      placeholder={t("submitPhHours")}
                     />
                   </div>
 
                   <div>
                     <label htmlFor="org-description" className={labelClass}>
-                      Description
+                      {t("submitLabelDescription")}
                     </label>
                     <p
                       className="mb-1 text-xs leading-snug text-slate-600 dark:text-gray-400"
@@ -299,7 +299,7 @@ export function SubmitPage() {
                       value={form.description}
                       onChange={(e) => update("description", e.target.value)}
                       className={inputClass}
-                      placeholder="What services does this organization provide?"
+                      placeholder={t("submitPhDescription")}
                     />
                   </div>
 
@@ -311,15 +311,15 @@ export function SubmitPage() {
                     {submitting ? (
                       <>
                         <Loader2 className="h-4 w-4 animate-spin" />
-                        SubmittingвЂ¦
+                        {t("submitSubmitting")}
                       </>
                     ) : (
-                      "Submit Organization"
+                      t("submitButton")
                     )}
                   </Button>
 
                   <p className="text-center text-sm text-gray-500">
-                    Submissions are saved as unverified and reviewed by our team.
+                    {t("submitNote")}
                   </p>
                 </form>
                 </FormsGate>

@@ -62,6 +62,29 @@ test.describe("Forms", () => {
     await expect(card.locator("svg.lucide-globe")).toBeVisible();
   });
 
+  test("/submit, the reviews form and the footer are translated in all 7 languages", async ({ page }) => {
+    const cases = [
+      { code: "en", title: "Submit an Organization", button: "Submit Organization", details: "Organization details", stars: "5 stars", sdg: "UN Sustainable Development Goal 1: No Poverty" },
+      { code: "ru", title: "Добавить организацию", button: "Отправить организацию", details: "Данные организации", stars: "Оценка: 5", sdg: "Цель ООН в области устойчивого развития 1: Ликвидация нищеты" },
+      { code: "es", title: "Añadir una organización", button: "Enviar organización", details: "Datos de la organización", stars: "5 estrellas", sdg: "Objetivo de Desarrollo Sostenible de la ONU 1: Fin de la pobreza" },
+      { code: "fr", title: "Ajouter une organisation", button: "Envoyer l'organisation", details: "Informations sur l'organisation", stars: "5 étoiles", sdg: "Objectif de développement durable de l'ONU 1 : Pas de pauvreté" },
+      { code: "de", title: "Organisation hinzufügen", button: "Organisation einreichen", details: "Angaben zur Organisation", stars: "5 Sterne", sdg: "UN-Ziel für nachhaltige Entwicklung 1: Keine Armut" },
+      { code: "zh", title: "提交机构", button: "提交机构", details: "机构信息", stars: "5 星", sdg: "联合国可持续发展目标 1：无贫穷" },
+      { code: "ar", title: "إضافة منظمة", button: "إرسال المنظمة", details: "بيانات المنظمة", stars: "5 نجوم", sdg: "هدف الأمم المتحدة للتنمية المستدامة 1: القضاء على الفقر" },
+    ];
+    for (const c of cases) {
+      await page.addInitScript((code) => localStorage.setItem("hn-language", code), c.code);
+      await page.goto("/submit");
+      await expect(page.getByRole("heading", { level: 1 }), c.code).toHaveText(c.title);
+      await expect(page.getByText(c.details, { exact: true }), c.code).toBeVisible();
+      await expect(page.getByRole("button", { name: c.button, exact: true }), c.code).toBeVisible();
+      await expect(page.locator('img[alt="' + c.sdg + '"]'), c.code).toHaveCount(1);
+
+      await page.goto("/reviews");
+      await expect(page.getByRole("button", { name: c.stars, exact: true }), c.code).toBeVisible();
+    }
+  });
+
   test("admin page shows login when not authenticated", async ({ page }) => {
     await page.goto("/admin");
 

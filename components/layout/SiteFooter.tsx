@@ -25,10 +25,10 @@ import { useLanguage } from "@/lib/i18n/LanguageProvider";
 import { MAIN_HOSTNAMES, MAIN_SITE_URL, siteConfig } from "@/lib/siteConfig";
 
 const SDG_GOALS = [
-  { id: "1", label: "UN Sustainable Development Goal 1: No Poverty" },
-  { id: "2", label: "UN Sustainable Development Goal 2: Zero Hunger" },
-  { id: "3", label: "UN Sustainable Development Goal 3: Good Health and Well-being" },
-  { id: "10", label: "UN Sustainable Development Goal 10: Reduced Inequalities" },
+  { id: "1", labelKey: "footerSdgGoal1" },
+  { id: "2", labelKey: "footerSdgGoal2" },
+  { id: "3", labelKey: "footerSdgGoal3" },
+  { id: "10", labelKey: "footerSdgGoal10" },
 ] as const;
 
 const TELEGRAM_URL = "https://t.me/helpnearby_org";
@@ -36,9 +36,9 @@ const UN_SDG_URL = "https://sdgs.un.org/partnerships/helpnearby";
 const SITE_URL = siteConfig.url;
 const GITHUB_URL = siteConfig.footerLinkUrl;
 
-function HeartIcon() {
+function HeartIcon({ label }: { label: string }) {
   return (
-    <svg viewBox="0 0 24 24" fill="currentColor" aria-label="love" role="img">
+    <svg viewBox="0 0 24 24" fill="currentColor" aria-label={label} role="img">
       <path d="M12 21s-6.7-4.35-9.33-8.07C.9 10.3 1.66 6.6 4.9 5.7c1.94-.54 3.86.32 4.96 1.9L12 9.2l2.14-1.6c1.1-1.58 3.02-2.44 4.96-1.9 3.24.9 4 4.6 2.23 7.23C18.7 16.65 12 21 12 21z" />
     </svg>
   );
@@ -287,7 +287,7 @@ export function SiteFooter() {
             <Image
               key={goal.id}
               src={`/images/sdg/${goal.id}.png`}
-              alt={goal.label}
+              alt={t(goal.labelKey)}
               width={152}
               height={152}
               quality={100}
@@ -303,7 +303,7 @@ export function SiteFooter() {
         <p className="made">
           {t("footerMadeWith")}{" "}
           <span className="heart-red">
-            <HeartIcon />
+            <HeartIcon label={t("footerLoveLabel")} />
           </span>
           {" "}{t("footerForCommunities")}
         </p>

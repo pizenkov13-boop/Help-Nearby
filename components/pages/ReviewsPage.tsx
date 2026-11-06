@@ -69,11 +69,7 @@ export function ReviewsPage() {
       const data = (await res.json()) as Review | { error?: string };
 
       if (!res.ok) {
-        setError(
-          "error" in data && data.error
-            ? data.error
-            : "Could not submit review.",
-        );
+        setError(t("reviewsSubmitFailed"));
         return;
       }
 
@@ -85,7 +81,7 @@ export function ReviewsPage() {
       window.setTimeout(() => setSubmitted(false), 4000);
     } catch (err) {
       console.error("[ReviewsPage submit]", err);
-      setError("Could not submit review. Please try again.");
+      setError(t("reviewsSubmitFailed"));
     } finally {
       setSubmitting(false);
     }
@@ -147,7 +143,7 @@ export function ReviewsPage() {
                   type="text"
                   value={country}
                   onChange={(e) => setCountry(e.target.value)}
-                  placeholder="e.g. Sudan, Yemen, Haiti"
+                  placeholder={t("reviewsCountryPlaceholder")}
                 />
               </div>
 
@@ -162,7 +158,7 @@ export function ReviewsPage() {
                       type="button"
                       onClick={() => setRating(n)}
                       className="flex h-11 w-11 items-center justify-center rounded transition-colors hover:bg-slate-100 dark:hover:bg-white/10"
-                      aria-label={`${n} stars`}
+                      aria-label={t("reviewsStarsLabel").replace("{n}", String(n))}
                     >
                       <Star
                         className={cn(
