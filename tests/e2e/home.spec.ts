@@ -47,6 +47,18 @@ test.describe("Home page", () => {
     await expect(page.locator(".leaflet-container")).toBeVisible({ timeout: 15_000 });
   });
 
+  test("the map corner shows only the OpenStreetMap attribution, with no Leaflet prefix or flag", async ({ page }) => {
+    await openMapWithOrgs(page);
+    const attribution = page.locator(".leaflet-container .leaflet-control-attribution");
+    await expect(attribution).toBeVisible({ timeout: 15_000 });
+    await expect(attribution).toHaveText(/^\s*©\s*OpenStreetMap\s+contributors\s*$/);
+    await expect(attribution.locator("a")).toHaveCount(1);
+    await expect(attribution.locator("a")).toHaveAttribute("href", "https://www.openstreetmap.org/copyright");
+    await expect(attribution.locator("svg, img")).toHaveCount(0);
+    await expect(attribution).not.toContainText("Leaflet");
+    await page.locator(".leaflet-container").screenshot({ path: "test-results/map-attribution.png" });
+  });
+
   test("search filters organization list", async ({ page }) => {
     await openMapWithOrgs(page);
 

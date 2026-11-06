@@ -122,9 +122,9 @@ function splitRouteWithConnector(
 
 const TILE_CONFIG = getMapTileConfig();
 
-/** Plain-text Leaflet prefix — no default logo/flag link. */
+/** No Leaflet prefix (link and flag): the corner shows only the tile attribution, "© OpenStreetMap contributors". */
 function applyNeutralMapAttribution(map: L.Map) {
-  map.attributionControl.setPrefix("Leaflet");
+  map.attributionControl.setPrefix(false);
 }
 
 function clearLeafletContainer(container: HTMLElement | null) {
