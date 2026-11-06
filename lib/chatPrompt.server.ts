@@ -73,7 +73,7 @@ export function mergeResultsWithClientContext(
 
 /** User-facing source names; the word "Supabase" must never reach the user. */
 export const SOURCE_DISPLAY_NAMES: Record<string, string> = {
-  Supabase: "Help Nearby verified directory",
+  Supabase: "Help Nearby directory",
   OSM: "OpenStreetMap",
   HDX: "UN OCHA directory (HDX/GDHO/ReliefWeb)",
   GDHO: "UN OCHA directory (HDX/GDHO/ReliefWeb)",
@@ -91,7 +91,7 @@ function formatOrgs(orgs: ChatSearchOrg[]): string {
         [o.city, o.country].filter(Boolean).join(", "),
         o.phone ? `tel: ${o.phone}` : "",
         o.website ? `web: ${o.website}` : "",
-        o.verified ? "verified" : "unverified",
+        o.verified ? "catalog entry" : "OpenStreetMap entry, not checked",
         fromPage
           ? "source: Help Nearby map results"
           : `source: ${SOURCE_DISPLAY_NAMES[o.source] ?? o.source}`,
@@ -130,7 +130,7 @@ SAFETY
 
 DATA
 - Never invent organizations, addresses, phone numbers or opening hours. Mention only organizations listed under RESULTS below.
-- For every organization you recommend, say which data source it comes from, using exactly the "source" text given in RESULTS ("Help Nearby verified directory", "OpenStreetMap" or "UN OCHA directory (HDX/GDHO/ReliefWeb)"). Never use the words "Supabase", "database" or other technical terms.
+- For every organization you recommend, say which data source it comes from, using exactly the "source" text given in RESULTS ("Help Nearby directory", "OpenStreetMap" or "UN OCHA directory (HDX/GDHO/ReliefWeb)"). Never use the words "Supabase", "database" or other technical terms.
 - For entries marked "country-level directory, exact office address not confirmed", say exactly that: it is a country-level directory entry and the exact office address is not confirmed. Do not give it an address or opening hours.
 - Hours are unknown unless stated; tell the user to check hours by phone.
 - If RESULTS is empty ${searched ? "(the app searched all sources)" : "(no place or country was known)"}, say so plainly and suggest the next step: try a larger area or another city, ask for a different type of help, or use Emergency mode and the map.

@@ -19,6 +19,7 @@ import {
 import type { LanguageCode } from "@/lib/types";
 import { cn } from "@/lib/utils";
 import { siteConfig } from "@/lib/siteConfig";
+import { useFormsEnabled } from "@/components/providers/FormsAvailability";
 
 interface NavSectionMenuProps {
   href: string;
@@ -85,6 +86,7 @@ function NavSectionMenu({
 export function Header() {
   const { language, setLanguage, t } = useLanguage();
   const pathname = usePathname();
+  const formsEnabled = useFormsEnabled();
   const [menuOpen, setMenuOpen] = useState(false);
   const [langOpen, setLangOpen] = useState(false);
   const [aboutOpen, setAboutOpen] = useState(false);
@@ -117,7 +119,6 @@ export function Header() {
   }, [langOpen]);
 
   const aboutItems = [
-    { label: t("navOurStory"), href: "/about#our-story" },
     { label: t("navHowItWorks"), href: "/about#how-it-works" },
   ];
 
@@ -223,13 +224,15 @@ export function Header() {
                   onClose={closeAll}
                 />
 
-                <Link
-                  href="/reviews"
-                  className={cn("nav-link", pathname === "/reviews" && "active")}
-                  onClick={closeAll}
-                >
-                  {t("navReviewsShort")}
-                </Link>
+                {formsEnabled && (
+                  <Link
+                    href="/reviews"
+                    className={cn("nav-link", pathname === "/reviews" && "active")}
+                    onClick={closeAll}
+                  >
+                    {t("navReviewsShort")}
+                  </Link>
+                )}
 
                 <Link
                   href="/recent"

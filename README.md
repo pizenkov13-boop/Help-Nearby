@@ -11,9 +11,9 @@
 
 ---
 
-> **Запусти HelpNearby в своём городе за 5 минут, бесплатно и без кода.**
+> **Запусти свою копию HelpNearby в своём городе: бесплатные аккаунты, без кода.**
 >
-> **Launch HelpNearby in your city in 5 minutes, free, no coding needed.**
+> **Launch your own HelpNearby copy in your city: free accounts, no coding needed.**
 
 ## Запусти в своём городе
 
@@ -27,7 +27,7 @@
 2. **В поле «Область видимости Git» выбери свой аккаунт GitHub.** Если список пуст, нажми добавить аккаунт и разреши Vercel доступ. Название репозитория можно оставить, нажми Create.
 3. **В блоке интеграций нажми Add рядом с Supabase** (бесплатный тариф): проект базы и все ключи создаются и подставляются автоматически.
 4. **Придумай `ADMIN_PASSWORD`** (пароль администратора для `/admin`) и запиши его.
-5. **Нажми Deploy.** Через пару минут сайт готов. Во время сборки таблицы создаются сами (`npm run setup`, идемпотентно, из [`supabase/schema.sql`](supabase/schema.sql)); SQL вручную выполнять не нужно.
+5. **Нажми Deploy.** Когда сборка закончится, сайт готов. Во время сборки таблицы создаются сами (`npm run setup`, идемпотентно, из [`supabase/schema.sql`](supabase/schema.sql)); SQL вручную выполнять не нужно.
 6. **Добавь организации:** открой `/admin` и подтверждай заявки с `/submit`, либо загрузи CSV в таблицу `organizations` (Supabase → Table Editor → Insert → Import data from CSV; колонки как в [`supabase/schema.sql`](supabase/schema.sql), `verified` поставь `true`). Демо-данные: [`supabase/seed_demo.sql`](supabase/seed_demo.sql) (три вымышленные организации, удали их).
 
 **Если застрял**
@@ -35,7 +35,7 @@
 - Supabase пишет «Организации не найдены» (Organizations not found): создай организацию в Supabase (название любое, тип Personal, тариф Free), вернись на страницу установки, выбери её в списке и нажми «Установить интеграцию».
 - Кнопка Create серая: не выбран Git-провайдер или область видимости Git. Выбери GitHub и свой аккаунт.
 - Сайт открылся, но без базы: проверь, что в Vercel (Settings → Integrations) подключён Supabase, потом сделай Redeploy.
-- Первая сборка идёт дольше обычного (2–5 минут): Vercel ставит зависимости, собирает сайт и создаёт таблицы в базе. Страницу не закрывай. Если дольше 10 минут, открой «Журналы сборки» (Build logs) и открой Issue с последними строками лога.
+- Первая сборка идёт дольше обычного: Vercel ставит зависимости, собирает сайт и создаёт таблицы в базе. Страницу не закрывай. Если дольше 10 минут, открой «Журналы сборки» (Build logs) и открой Issue с последними строками лога.
 - Supabase пишет, что достигнут лимит проектов (на бесплатном тарифе их ограниченное число): удали или поставь на паузу ненужный проект Supabase и повтори установку интеграции. Если после этого Vercel тоже пишет о лимите, удали неудачный проект в Vercel (Settings → Delete Project) и запусти кнопку Deploy заново.
 - Вопросы: открой [Issue](https://github.com/pizenkov13-boop/Help-Nearby/issues/new) в этом репозитории.
 
@@ -70,7 +70,7 @@ Anyone can run their own copy of Help Nearby for a city, region or community. Th
 2. **In the "Git Scope" field pick your GitHub account.** If the list is empty, click add account and let Vercel access it. You can keep the repository name; click Create.
 3. **In the integrations block click Add next to Supabase** (free plan): the database project and all keys are created and filled in automatically.
 4. **Come up with an `ADMIN_PASSWORD`** (the admin password for `/admin`) and write it down.
-5. **Click Deploy.** The site is ready in a couple of minutes. During the build the tables are created for you (`npm run setup`, idempotent, from [`supabase/schema.sql`](supabase/schema.sql)); no SQL to run by hand.
+5. **Click Deploy.** The site is ready when the build finishes. During the build the tables are created for you (`npm run setup`, idempotent, from [`supabase/schema.sql`](supabase/schema.sql)); no SQL to run by hand.
 6. **Add organizations:** open `/admin` and verify community submissions from `/submit`, or bulk-load rows by importing a CSV into the `organizations` table (Supabase → Table Editor → Insert → Import data from CSV; columns follow [`supabase/schema.sql`](supabase/schema.sql), set `verified` to `true`). Demo data: [`supabase/seed_demo.sql`](supabase/seed_demo.sql) (three fictional organizations, delete them).
 
 **If you get stuck**
@@ -78,7 +78,7 @@ Anyone can run their own copy of Help Nearby for a city, region or community. Th
 - Supabase says "Organizations not found": create an organization in Supabase (any name, type Personal, plan Free), go back to the install page, pick it in the list and click "Install integration".
 - The Create button is grey: no Git provider or Git scope is selected. Pick GitHub and your account.
 - The site opens but has no database: check that Supabase is connected in Vercel (Settings → Integrations), then Redeploy.
-- The first build takes longer than usual (2–5 minutes): Vercel installs dependencies, builds the site and creates the tables in the database. Keep the page open. If it takes more than 10 minutes, open the Build logs and open an Issue with the last lines of the log.
+- The first build takes longer than usual: Vercel installs dependencies, builds the site and creates the tables in the database. Keep the page open. If it takes more than 10 minutes, open the Build logs and open an Issue with the last lines of the log.
 - Supabase says the project limit is reached (the free plan allows a limited number of projects): delete or pause a Supabase project you don't need and repeat the integration install. If Vercel then also reports a limit, delete the failed project in Vercel (Settings → Delete Project) and click Deploy again.
 - Questions: open an [Issue](https://github.com/pizenkov13-boop/Help-Nearby/issues/new) in this repository.
 
@@ -123,13 +123,13 @@ Acceptable wording: "Launched and operate a local version of the open-source Hel
 
 | Город | Страна | Сайт | Кто ведёт |
 |-------|--------|------|-----------|
-| Там, где есть помощь в ближайших 15 км | — | [www.help-nearby.org](https://www.help-nearby.org/) | Pavel Izenkin |
+| Там, где находится помощь в радиусе до 40 км | — | [www.help-nearby.org](https://www.help-nearby.org/) | Pavel Izenkin |
 
 ## Where it runs
 
 | City | Country | Site | Run by |
 |------|---------|------|--------|
-| Wherever there is help within 15 km | — | [www.help-nearby.org](https://www.help-nearby.org/) | Pavel Izenkin |
+| Where help is found within 40 km | — | [www.help-nearby.org](https://www.help-nearby.org/) | Pavel Izenkin |
 
 ---
 
@@ -141,9 +141,9 @@ Acceptable wording: "Launched and operate a local version of the open-source Hel
 
 ## About
 
-**Help Nearby** is a free, open-source web platform that helps people in crisis find local assistance organizations. It combines a **verified catalog** stored in Supabase with **live OpenStreetMap data** from the Overpass API, then shows results on an interactive map or in a lightweight list view.
+**Help Nearby** is a free, open-source web platform that helps people in crisis find local assistance organizations. It combines an organization **catalog** stored in Supabase with **OpenStreetMap data** from the Overpass API, then shows results on an interactive map or in a list view.
 
-The project was built by **Pavel Izenkin**, founder of Help Nearby, with the goal of making trusted help easy to find on any device, in any language, even on slow networks.
+The project was built by **Pavel Izenkin**, founder of Help Nearby, with the goal of making help easy to find on any device, in 7 languages.
 
 ---
 
@@ -154,14 +154,13 @@ The project was built by **Pavel Izenkin**, founder of Help Nearby, with the goa
 | **Initial prototype (Webflow)** | April 16 – May 12, 2026 |
 | **Production platform (Next.js)** | May 17, 2026 – present · [www.help-nearby.org](https://www.help-nearby.org/) |
 | **Prize submission** | Подали заявку на Zayed Sustainability Prize 2027 (Global High Schools). В финал не вышли.<br>Applied to the Zayed Sustainability Prize 2027 (Global High Schools). Did not advance to the finals. |
-| **Prototype reach (Webflow, April–May 2026)** | Visitors from 24 countries in the first month (Webflow analytics) |
 | **Production analytics (Next.js)** | [Vercel Web Analytics](https://vercel.com/docs/analytics) — cookie-less, aggregated page views; exact counts are in the Vercel dashboard (not duplicated here to avoid stale figures) |
 
 ---
 
-## Verified humanitarian directory
+## Seeded organization directory
 
-These organizations are seeded in Supabase with `verified = true` and official source attribution. Counts are from the SQL seed files in this repository (not a live DB query).
+These organizations are imported into Supabase from the official sources listed below and flagged `verified = true` in the database (the flag marks catalog entries, not a separate check of each place). Counts are the number of rows in the SQL seed files in this repository (not a live DB query).
 
 | Region / source | Organizations | Seed file | Official source |
 |-----------------|---------------|---------|-----------------|
@@ -172,7 +171,7 @@ These organizations are seeded in Supabase with `verified = true` and official s
 | Belarus (Red Cross) | **9** | `supabase/RUN_BELARUS_RED_CROSS.sql` | [redcross.by](https://redcross.by) |
 | France (Croix-Rouge française) | **60** | `supabase/RUN_CROIX_ROUGE_FRANCE.sql` | [croix-rouge.fr/annuaire](https://www.croix-rouge.fr/annuaire) |
 | Demo seed (New York, US) | **3** | `supabase/migrations/20250319000001_seed_organizations.sql` | Example data |
-| **Total (verified, excl. demo seed)** | **183** | | |
+| **Total (excl. demo seed)** | **183** | | |
 
 Community submissions via `/submit` are stored as **unverified** until approved in `/admin`.
 
@@ -182,16 +181,16 @@ Community submissions via `/submit` are stored as **unverified** until approved 
 
 | Feature | Description |
 |---------|-------------|
-| **Interactive map** | Leaflet map with category markers, verified badge, and source labels |
-| **Multi-source data** | Supabase verified catalog + HDX + GDHO + ReliefWeb + live Overpass OSM queries |
+| **Interactive map** | Leaflet map with category markers, a source badge and source labels |
+| **Multi-source data** | Supabase catalog + HDX + GDHO + ReliefWeb + Overpass OpenStreetMap queries |
 | **Emergency mode** | One-tap list of 24/7 organizations (hospitals, pharmacies, shelters) |
-| **Smart radius search** | Auto-expands search radius until results are found |
-| **Turn-by-turn routing** | OSRM routing via `/api/route` |
+| **Smart radius search** | Expands the search radius (5 → 15 → 40 km; 10 → 25 → 50 km in lite mode) while fewer than 3 results are found |
+| **Routing** | OSRM route line, distance and time via `/api/route` (no step-by-step instructions) |
 | **7 languages** | English, Russian, Spanish, French, German, Chinese, Arabic (RTL) |
-| **Lite mode** | List-only view (no map tiles) for slow networks and low-connectivity regions |
-| **Adaptive theme** | Auto light theme in sunny regions (browser geolocation + country lookup); manual dark/light toggle |
+| **Lite mode** | List first, the map loads only on request; switches on by itself when the browser reports Data Saver or a 2G connection. It does not make the first page load smaller (about 370 KB over the network, measured) |
+| **Adaptive theme** | Light theme by default in sunny regions, based on the country found by your search; manual dark/light toggle |
 | **AI assistant** | AITunnel (OpenAI-compatible) chat, scoped to humanitarian help — **experimental** |
-| **PWA** | Progressive Web App — **experimental** (manifest + partial service worker; offline page only, not full offline app) |
+| **PWA** | Web app manifest and a service worker that caches a few static files — **experimental**. There is no offline mode: the app does not open without a network |
 | **Admin moderation** | Password-protected `/admin` for org and review approval |
 | **Impact counter** | Tracks Call / Directions clicks in Supabase (usage signal, not aid delivery proof) |
 
@@ -203,8 +202,8 @@ Community submissions via `/submit` are stored as **unverified** until approved 
 
 | Source | Role | Code |
 |--------|------|------|
-| **Supabase** | Verified organization catalog (PostgreSQL + RLS) | `lib/data.ts` |
-| **OpenStreetMap / Overpass** | Live POI search worldwide | `lib/overpass.server.ts` → `/api/nearby` |
+| **Supabase** | Organization catalog (PostgreSQL + RLS) | `lib/data.ts` |
+| **OpenStreetMap / Overpass** | POI search | `lib/overpass.server.ts` → `/api/nearby` |
 | **HDX** (UN OCHA Humanitarian Data Exchange) | Country-level humanitarian orgs | `lib/hdx.ts` → `lib/verifiedNearby.server.ts` → `/api/verified-nearby` |
 | **GDHO** (Global Directory of Humanitarian Organizations) | Country-level humanitarian orgs | `lib/gdho.ts` → `lib/verifiedNearby.server.ts` → `/api/verified-nearby` |
 | **ReliefWeb** (OCHA) | Country-level humanitarian sources | `lib/reliefweb.ts` → `lib/verifiedNearby.server.ts` → `/api/verified-nearby` |
@@ -217,17 +216,17 @@ HDX, GDHO, and ReliefWeb results merge with Supabase + Overpass in `lib/nearbySe
 
 ## Tech stack
 
-Verified from `package.json` and project source:
+From `package.json` and project source:
 
 | Layer | Technology | Version |
 |-------|------------|---------|
 | Framework | [Next.js](https://nextjs.org/) (App Router) | **16.2.6** |
 | Language | [TypeScript](https://www.typescriptlang.org/) | **5.x** |
 | UI | [React](https://react.dev/) | **18** |
-| Styling | [Tailwind CSS](https://tailwindcss.com/) | **3.4.1** |
+| Styling | [Tailwind CSS](https://tailwindcss.com/) | **3.4.x** |
 | Components | [Radix UI](https://www.radix-ui.com/) (`@radix-ui/react-slot`), [Lucide](https://lucide.dev/) icons | — |
 | Database | [Supabase](https://supabase.com/) (`@supabase/supabase-js`) | **2.106.0** |
-| Maps | [Leaflet](https://leafletjs.com/) + [react-leaflet](https://react-leaflet.js.org/) | 1.9.4 / 4.2.1 |
+| Maps | [Leaflet](https://leafletjs.com/) | 1.9.4 |
 | Geocoding | [Nominatim](https://nominatim.org/) | via `/api/geocode` |
 | POI data | [Overpass API](https://wiki.openstreetmap.org/wiki/Overpass_API) | via `/api/nearby` |
 | Routing | [OSRM](http://project-osrm.org/) | via `/api/route` |
@@ -262,7 +261,7 @@ These are used as data sources only; the project is independent and is not opera
 
 ### Prerequisites
 
-- Node.js 18+
+- Node.js 20–22 (see `engines` in `package.json`)
 - npm (or pnpm / yarn)
 - Optional: a [Supabase](https://supabase.com/) project. Without it the site runs on OpenStreetMap data only.
 
@@ -359,7 +358,7 @@ scripts/             # Geocoding and build utilities
 | `/api/nearby` | Overpass organizations near coordinates |
 | `/api/verified-nearby` | HDX + GDHO + ReliefWeb organizations for a country (geocoded, radius-filtered) |
 | `/api/emergency` | 24/7 Supabase + Overpass emergency list |
-| `/api/route` | OSRM turn-by-turn routing |
+| `/api/route` | OSRM route (line, distance, time) |
 | `/api/geocode` | Nominatim address → coordinates |
 | `/api/geocode/reverse` | Coordinates → country |
 | `/api/submit` | Public organization submissions |

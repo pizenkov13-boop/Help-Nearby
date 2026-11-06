@@ -168,7 +168,7 @@ for (const phone of PHONES) {
       await card.scrollIntoViewIfNeeded();
       expect(await card.getByTestId("org-distance").evaluate((el) => parseFloat(getComputedStyle(el).fontSize))).toBeGreaterThanOrEqual(20);
       await expect(card.getByTestId("open-status")).toHaveText(/Open now/);
-      await expect(card.getByText("Verified")).toBeVisible();
+      await expect(card.getByText("Open sources")).toBeVisible();
       for (const size of await card.locator("span, p, a, button").evaluateAll((els) =>
         els
           .filter((el) => (el.textContent ?? "").trim().length > 0 && el.children.length === 0)

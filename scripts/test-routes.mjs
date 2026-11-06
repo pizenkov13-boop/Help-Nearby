@@ -10,7 +10,7 @@ const baseUrl = (() => {
 
 const routes = [
   { path: "/", mustInclude: "Help Nearby" },
-  { path: "/about", mustInclude: "Our Story" },
+  { path: "/about", mustInclude: "How It Works" },
   { path: "/why-it-matters", mustInclude: "Cities in Need" },
   { path: "/reviews", mustInclude: "Reviews" },
   { path: "/submit", mustInclude: "Submit an Organization" },

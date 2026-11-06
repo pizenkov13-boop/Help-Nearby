@@ -5,7 +5,7 @@ import { Star } from "lucide-react";
 import { PageHero } from "@/components/layout/PageHero";
 import { ReviewCard } from "@/components/ReviewCard";
 import { SiteLayout } from "@/components/layout/SiteLayout";
-import { FormsGate } from "@/components/FormsGate";
+import { useFormsEnabled } from "@/components/providers/FormsAvailability";
 import { useLanguage } from "@/lib/i18n/LanguageProvider";
 import { MAX_REVIEW_NAME_LENGTH } from "@/lib/reviewInput";
 import type { Review } from "@/lib/types";
@@ -13,6 +13,7 @@ import { cn } from "@/lib/utils";
 
 export function ReviewsPage() {
   const { t, language } = useLanguage();
+  const formsEnabled = useFormsEnabled();
   const [name, setName] = useState("");
   const [country, setCountry] = useState("");
   const [rating, setRating] = useState(5);
@@ -98,6 +99,7 @@ export function ReviewsPage() {
 
       <section className="page-section page-section-compact" id="review-form">
         <div className="container" style={{ maxWidth: "36rem" }}>
+          {formsEnabled && (
           <div className="reviews-form-card">
             {submitted && (
               <p
@@ -108,7 +110,6 @@ export function ReviewsPage() {
               </p>
             )}
 
-            <FormsGate>
             <form onSubmit={handleSubmit} className="space-y-5">
               {error && (
                 <p className="text-sm text-red-600 dark:text-red-400" role="alert">
@@ -198,10 +199,10 @@ export function ReviewsPage() {
                 {submitting ? t("reviewsLoading") : t("reviewsFormSubmit")}
               </button>
             </form>
-            </FormsGate>
           </div>
+          )}
 
-          <div className="mt-8">
+          <div className={formsEnabled ? "mt-8" : undefined}>
             <h2
               className="section-title"
               style={{ fontSize: "1.25rem", marginBottom: "1.5rem" }}

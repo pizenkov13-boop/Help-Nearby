@@ -26,13 +26,43 @@ test.describe("Claims on the site match what the code does", () => {
     expect(t.howItWorksStep3Description).toBe("Позвоните одним касанием или постройте маршрут.");
   });
 
-  test("Why it matters: sourced figures show their source, the unsourced one does not", async ({ page }) => {
+  test("Why it matters: every figure shows its source and year", async ({ page }) => {
     await open(page, "en", "/why-it-matters");
     const sources = page.getByTestId("stat-source");
-    await expect(sources).toHaveCount(2);
+    await expect(sources).toHaveCount(3);
     await expect(sources.nth(0)).toContainText("World Bank");
     await expect(sources.nth(0)).toContainText("2024");
-    await expect(sources.nth(1)).toContainText("SOFI 2025");
+    await expect(sources.nth(1)).toContainText("UN-Habitat");
+    await expect(sources.nth(1)).toContainText("2025");
+    await expect(sources.nth(2)).toContainText("SOFI 2025");
+    await expect(page.locator(".stat-card .v").nth(1)).toHaveText("318M");
+  });
+
+  test("the solution cards and the hero make no claims the code does not back (ru)", () => {
+    const t = translations.ru;
+    expect(t.whySolution2Title).toBe("Часы работы и контакты");
+    expect(t.whySolution3Title).toBe("Доступно на любом устройстве");
+    expect(t.whySolution3Text).toBe("7 языков и лёгкий режим для медленного интернета.");
+    expect(t.verified).toBe("Открытые источники");
+  });
+
+  test("no language uses the words verified / trusted / everywhere / real-time for the catalog", () => {
+    const risky = /verified|trusted|everywhere|wherever|anywhere|real-?time|instant|проверенн|везде|где бы вы|в реальном времени|доверенн|мгновенн/i;
+    const keys = [
+      "heroSubtitle", "howItWorksStep1Description", "howItWorksStep2Description", "recentSubtitle", "aboutMissionText",
+      "aboutVisionText", "whyCard2Text", "metaRecentDesc", "verified", "noVerifiedNearby", "verifiedOnlyNotice",
+      "osmUnavailableNotice", "catalogUnavailableNotice", "whyPageSubtitle", "whySolution1Title", "whySolution2Title",
+      "whySolution2Text", "whySolution3Title", "whySolutionCard2Title", "whySolutionCard3Title", "footerTagline",
+      "aboutPageSubtitle", "aboutSubtitle", "aboutValuesText", "whySolution1Text",
+    ] as const;
+    for (const code of ["en", "ru", "es", "fr", "de", "zh", "ar"] as const) {
+      for (const key of keys) expect(translations[code][key], `${code}.${key}`).not.toMatch(risky);
+    }
+  });
+
+  test("the route text does not promise turn-by-turn steps (the route has none)", () => {
+    expect(translations.en.howItWorksStep3Description).not.toMatch(/turn-by-turn/i);
+    expect(translations.es.howItWorksStep3Description).not.toMatch(/paso a paso/i);
   });
 
   for (const [lang, names] of [

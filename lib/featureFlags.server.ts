@@ -13,10 +13,14 @@ import { siteConfig } from "@/lib/siteConfig";
  */
 
 /** True when this request comes from a country whose forms are switched off. */
-export function formsDisabledForRequest(request: Request): boolean {
+export function formsDisabledForHeaders(headers: Headers): boolean {
   if (siteConfig.isCopy) return false;
   const disabled = parseBlockedCountries(process.env.FORMS_DISABLED_COUNTRIES);
-  return isCountryBlocked(request.headers.get("x-vercel-ip-country"), disabled);
+  return isCountryBlocked(headers.get("x-vercel-ip-country"), disabled);
+}
+
+export function formsDisabledForRequest(request: Request): boolean {
+  return formsDisabledForHeaders(request.headers);
 }
 
 /**

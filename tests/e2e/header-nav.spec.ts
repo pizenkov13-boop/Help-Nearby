@@ -3,11 +3,14 @@ import type { Page } from "@playwright/test";
 import { preferFullMode } from "./helpers";
 
 const LANGUAGES = ["en", "ru", "es", "fr", "de", "zh", "ar"] as const;
+// The region run (npm run test:e2e:region) has FORMS_DISABLED_COUNTRIES=XX on its server.
+const REGION_RUN = process.env.E2E_REGION_BLOCK === "1";
 const DESKTOP_WIDTHS = [1024, 1280, 1440, 1920];
 const BURGER_WIDTHS = [390, 768, 900, 1023];
 
-async function open(page: Page, lang: string, width: number, mode: "full" | "lite" = "full") {
+async function open(page: Page, lang: string, width: number, mode: "full" | "lite" = "full", country?: string) {
   await page.setViewportSize({ width, height: 900 });
+  if (country) await page.setExtraHTTPHeaders({ "x-vercel-ip-country": country });
   await preferFullMode(page); // clears storage first, so the language is set after it
   await page.addInitScript(
     ([l, m]) => {
@@ -72,6 +75,7 @@ async function measure(page: Page) {
 }
 
 test.describe("Header menu on desktop: one line, one height, no overflow", () => {
+  test.skip(REGION_RUN, "the region run only checks the reduced menu");
   for (const lang of LANGUAGES) {
     for (const width of DESKTOP_WIDTHS) {
       test(`${lang} at ${width}px`, async ({ page }) => {
@@ -138,6 +142,7 @@ test.describe("Header menu on desktop: one line, one height, no overflow", () =>
 });
 
 test.describe("Header on tablet and phone: burger, no overflow", () => {
+  test.skip(REGION_RUN, "the region run only checks the reduced menu");
   for (const lang of LANGUAGES) {
     for (const width of BURGER_WIDTHS) {
       test(`${lang} at ${width}px`, async ({ page }) => {
@@ -173,4 +178,31 @@ test("phone: the emergency button is at least 44px tall and the header does not 
   const box = (await urgent.boundingBox())!;
   expect(box.height).toBeGreaterThanOrEqual(44);
   expect((await measure(page)).headerHeight).toBe(72);
+});
+
+test.describe("Header menu without the Reviews item (visitors from FORMS_DISABLED_COUNTRIES)", () => {
+  test.skip(!REGION_RUN, "needs the region server (npm run test:e2e:region)");
+
+  for (const lang of LANGUAGES) {
+    for (const width of DESKTOP_WIDTHS) {
+      test(`${lang} at ${width}px: one line, same height, nothing missing but the form links`, async ({ page }) => {
+        await open(page, lang, width, "full", "XX");
+        const m = await measure(page);
+        expect(m.headerHeight).toBe(72);
+        expect(m.scrollWidth).toBeLessThanOrEqual(m.innerWidth);
+        // Emergency, Home, About, Why it matters, Recently added: Reviews is gone, nothing else is.
+        expect(m.items).toHaveLength(5);
+        await expect(page.locator('.nav a[href="/reviews"], .nav a[href="/submit"]')).toHaveCount(0);
+        for (const item of m.items) expect(item.textLines, `"${item.text}" wraps`).toBe(1);
+        const centers = m.items.map((i) => i.centerY);
+        expect(Math.max(...centers) - Math.min(...centers)).toBeLessThanOrEqual(2);
+        for (const item of m.items) {
+          expect(item.left).toBeGreaterThanOrEqual(m.navBox[0] - 1);
+          expect(item.right).toBeLessThanOrEqual(m.navBox[1] + 1);
+        }
+        expect(apart(m.navBox, m.brandBox)).toBe(true);
+        expect(apart(m.navBox, m.toolbarBox)).toBe(true);
+      });
+    }
+  }
 });

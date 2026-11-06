@@ -16,7 +16,7 @@ test.describe("Navigation", () => {
 
     await nav.getByRole("link", { name: "About", exact: true }).click();
     await expect(page).toHaveURL(/\/about/);
-    await expect(page.getByRole("heading", { name: /Our Story/i })).toBeVisible();
+    await expect(page.getByRole("heading", { name: /How It Works/i })).toBeVisible();
 
     await nav.getByRole("link", { name: "Why It Matters", exact: true }).click();
     await expect(page).toHaveURL(/\/why-it-matters/);

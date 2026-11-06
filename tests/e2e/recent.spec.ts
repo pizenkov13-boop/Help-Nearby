@@ -60,7 +60,7 @@ test.describe("Recently added organizations", () => {
     expect(requests.at(-1)).toContain("category=shelter");
 
     const first = list.locator("article").first();
-    await expect(first.getByText("Verified")).toBeVisible();
+    await expect(first.getByText("Open sources")).toBeVisible();
     await expect(first.getByText(/Added 3 days ago/)).toBeVisible();
     await expect(first.getByRole("link", { name: /Call Now/i })).toBeVisible();
     // Directions open our own route screen: a button, never a link to another site.

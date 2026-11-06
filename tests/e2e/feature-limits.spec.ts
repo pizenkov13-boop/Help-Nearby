@@ -28,6 +28,8 @@ test.describe("without FORMS_DISABLED_COUNTRIES and CHAT_ENABLED", () => {
     await page.goto("/reviews");
     await expect(page.getByLabel("Name or nickname (optional)")).toBeVisible();
     await expect(page.getByTestId("forms-unavailable")).toHaveCount(0);
+    await expect(page.locator('footer a[href="/submit"]')).toHaveCount(1);
+    await expect(page.locator('footer a[href="/reviews"]')).toHaveCount(1);
 
     await page.goto("/submit");
     await expect(page.getByRole("button", { name: /Submit Organization/i })).toBeVisible();
@@ -55,36 +57,61 @@ test.describe("with FORMS_DISABLED_COUNTRIES=XX and CHAT_ENABLED=false", () => {
     expect(await none.json()).toEqual({ chat: false, forms: true });
   });
 
-  test("review form: hidden for XX, replaced by one neutral line; reading reviews still works", async ({ page }) => {
+  test("reviews page for XX: no form and no button, the published reviews stay, no 'unavailable' text", async ({ page }) => {
     await page.setExtraHTTPHeaders(asZz);
-    await page.goto("/reviews");
-    await expect(page.getByTestId("forms-unavailable")).toHaveText(
-      "Submitting forms is temporarily unavailable in your region",
+    await page.route(/\/api\/reviews/, (route) =>
+      route.request().method() === "GET"
+        ? route.fulfill({
+            status: 200,
+            contentType: "application/json",
+            body: JSON.stringify([
+              { id: 1, name: "Alex", country: "Kenya", message: "Very helpful", rating: 5, approved: true, created_at: "2026-01-01T00:00:00Z" },
+            ]),
+          })
+        : route.continue(),
     );
+    await page.goto("/reviews");
+    await expect(page.getByRole("heading", { name: /Reviews/i }).first()).toBeVisible();
+    await expect(page.locator("article")).toHaveCount(1);
     await expect(page.getByLabel("Name or nickname (optional)")).toHaveCount(0);
+    await expect(page.locator("#review-form form")).toHaveCount(0);
     await expect(page.getByRole("button", { name: /Submit feedback/i })).toHaveCount(0);
-    // Reading is not affected: the page itself is served.
-    await expect(page.getByRole("heading", { name: /Reviews/i })).toBeVisible();
+    await expect(page.getByTestId("forms-unavailable")).toHaveCount(0);
+    await expect(page.getByText(/unavailable/i)).toHaveCount(0);
   });
 
-  test("organization form: hidden for XX, replaced by one neutral line", async ({ page }) => {
+  test("/submit for XX goes straight to the home page", async ({ page }) => {
     await page.setExtraHTTPHeaders(asZz);
     await page.goto("/submit");
-    await expect(page.getByTestId("forms-unavailable")).toHaveText(
-      "Submitting forms is temporarily unavailable in your region",
-    );
-    await expect(page.getByLabel(/^Name/)).toHaveCount(0);
+    await expect(page).toHaveURL(/\/$/);
     await expect(page.getByRole("button", { name: /Submit Organization/i })).toHaveCount(0);
+    expect((await page.request.get("/submit", { headers: asZz, maxRedirects: 0 })).status()).toBe(307);
   });
 
-  test("another country sees both forms", async ({ page }) => {
+  test("XX: no link to a form anywhere, already in the first HTML (header, footer, phone menu)", async ({ page, request }) => {
+    const html = await (await request.get("/", { headers: asZz })).text();
+    expect(html).not.toContain('href="/submit"');
+    expect(html).not.toContain('href="/reviews"');
+
+    await page.setExtraHTTPHeaders(asZz);
+    await page.goto("/");
+    await expect(page.locator('a[href="/submit"], a[href="/reviews"]')).toHaveCount(0);
+
+    await page.setViewportSize({ width: 390, height: 800 });
+    await page.getByRole("button", { name: "Open menu" }).first().click();
+    await expect(page.locator("#mmenu")).toBeVisible();
+    await expect(page.locator('#mmenu a[href="/reviews"], #mmenu a[href="/submit"]')).toHaveCount(0);
+  });
+
+  test("another country sees both forms and the links", async ({ page }) => {
     await page.setExtraHTTPHeaders(asYy);
     await page.goto("/reviews");
     await expect(page.getByLabel("Name or nickname (optional)")).toBeVisible();
     await expect(page.getByTestId("forms-unavailable")).toHaveCount(0);
+    await expect(page.locator('footer a[href="/submit"]')).toHaveCount(1);
+    await expect(page.locator('footer a[href="/reviews"]')).toHaveCount(1);
     await page.goto("/submit");
     await expect(page.getByRole("button", { name: /Submit Organization/i })).toBeVisible();
-    await expect(page.getByTestId("forms-unavailable")).toHaveCount(0);
   });
 
   test("POST /api/reviews answers 403 for XX only; reading reviews still works", async ({ request }) => {

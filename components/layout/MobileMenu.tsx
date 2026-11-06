@@ -14,6 +14,7 @@ import { LANGUAGES, LANGUAGE_NATIVE_NAMES } from "@/lib/i18n/translations";
 import type { LanguageCode } from "@/lib/types";
 import { cn } from "@/lib/utils";
 import { siteConfig } from "@/lib/siteConfig";
+import { useFormsEnabled } from "@/components/providers/FormsAvailability";
 
 interface MobileMenuProps {
   open: boolean;
@@ -71,6 +72,7 @@ function lockBodyScroll(): () => void {
  * `position: fixed` descendants, which collapsed the old in-header menu to a thin strip.
  */
 export function MobileMenu({ open, onClose }: MobileMenuProps) {
+  const formsEnabled = useFormsEnabled();
   const { t, language, setLanguage } = useLanguage();
   const pathname = usePathname();
   const layerRef = useRef<HTMLDivElement>(null);
@@ -138,7 +140,6 @@ export function MobileMenu({ open, onClose }: MobileMenuProps) {
   const aboutItems = siteConfig.isCopy
     ? []
     : [
-        { label: t("navOurStory"), href: "/about#our-story" },
         { label: t("navHowItWorks"), href: "/about#how-it-works" },
       ];
   const whyItems = [
@@ -227,14 +228,16 @@ export function MobileMenu({ open, onClose }: MobileMenuProps) {
                 </AnchorNavLink>
               ))}
 
-              <Link
-                href="/reviews"
-                className={cn("mm-link", active("/reviews") && "active")}
-                aria-current={active("/reviews") ? "page" : undefined}
-                onClick={close}
-              >
-                {t("navReviews")}
-              </Link>
+              {formsEnabled && (
+                <Link
+                  href="/reviews"
+                  className={cn("mm-link", active("/reviews") && "active")}
+                  aria-current={active("/reviews") ? "page" : undefined}
+                  onClick={close}
+                >
+                  {t("navReviews")}
+                </Link>
+              )}
               <Link
                 href="/recent"
                 className={cn("mm-link", active("/recent") && "active")}

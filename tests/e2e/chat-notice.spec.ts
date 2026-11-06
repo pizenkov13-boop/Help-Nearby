@@ -40,12 +40,10 @@ test.describe("Chat first-open notice", () => {
     for (const { code } of LANGUAGES) {
       expect(translations[code].chatFirstNotice?.length, code).toBeGreaterThan(20);
       expect(translations[code].chatFirstNoticeOk?.length, code).toBeGreaterThan(1);
-      expect(translations[code].formsUnavailable?.length, code).toBeGreaterThan(10);
     }
     expect(translations.ru.chatFirstNotice).toBe(
       "Сообщения передаются стороннему ИИ-сервису. Не пишите имя, телефон, адрес и другие личные данные.",
     );
     expect(translations.ru.chatFirstNoticeOk).toBe("Понятно");
-    expect(translations.ru.formsUnavailable).toBe("Отправка форм временно недоступна в вашем регионе");
   });
 });

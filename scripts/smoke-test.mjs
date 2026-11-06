@@ -39,7 +39,7 @@ async function get(path, opts = {}) {
 async function testPages() {
   const pages = [
     { path: "/", must: ["Help Nearby", "id=\"nav\""] },
-    { path: "/about", must: ["Our Story"] },
+    { path: "/about", must: ["How It Works"] },
     { path: "/why-it-matters", must: ["Cities in Need"] },
     { path: "/reviews", must: ["Reviews"] },
     { path: "/submit", must: ["Submit an Organization"] },

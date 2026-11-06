@@ -77,15 +77,6 @@ export function AboutContent() {
         subtitle={t("aboutPageSubtitle")}
       />
 
-      <section id="our-story" className="page-section scroll-anchor">
-        <div className="container">
-          <h2 className="section-title">{t("navOurStory")}</h2>
-          <p className="prose-center" style={{ marginTop: "1.5rem" }}>
-            {t("aboutStoryText")}
-          </p>
-        </div>
-      </section>
-
       <section id="how-it-works" className="page-section alt scroll-anchor">
         <div className="container">
           <div className="hiw-head">

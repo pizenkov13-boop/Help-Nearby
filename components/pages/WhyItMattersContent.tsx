@@ -9,8 +9,7 @@ export function WhyItMattersContent() {
 
   const crisisStats = [
     { value: "700M", label: t("whyStat700m"), source: t("whyStat700mSource") },
-    // No primary source confirms this figure (it goes back to a 2001 UN range of 100-150 million): shown without one.
-    { value: "150M", label: t("whyStat150m"), source: null },
+    { value: "318M", label: t("whyStatHomeless"), source: t("whyStatHomelessSource") },
     { value: "2.3B", label: t("whyStat2_3b"), source: t("whyStat2_3bSource") },
   ] as const;
 

@@ -1,4 +1,5 @@
 import { test, expect } from "./fixtures";
+import { preferFullMode } from "./helpers";
 
 test.describe("Forms", () => {
   test("submit page shows validation on empty submit", async ({ page }) => {
@@ -91,5 +92,13 @@ test.describe("Forms", () => {
     await expect(page.getByRole("heading", { name: /Admin/i })).toBeVisible();
     await expect(page.getByLabel(/password/i)).toBeVisible();
     await expect(page.getByRole("button", { name: /log in|sign in/i })).toBeVisible();
+  });
+
+  test("a normal visitor sees the links to both forms (header, footer)", async ({ page }) => {
+    await preferFullMode(page);
+    await page.goto("/");
+    await expect(page.locator('.nav a[href="/reviews"]')).toHaveCount(1);
+    await expect(page.locator('footer a[href="/reviews"]')).toHaveCount(1);
+    await expect(page.locator('footer a[href="/submit"]')).toHaveCount(1);
   });
 });

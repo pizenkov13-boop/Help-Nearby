@@ -84,11 +84,11 @@ test.describe("Home page", () => {
     expect(filtered).toBeLessThanOrEqual(total);
   });
 
-  test("verified organizations show badge and source", async ({ page }) => {
+  test("catalog organizations show the open-sources badge", async ({ page }) => {
     await openMapWithOrgs(page);
 
     const verifiedCard = orgCards(page).filter({ hasText: "E2E Test Food Bank" });
-    await expect(verifiedCard.getByText(/^Verified$/)).toBeVisible();
+    await expect(verifiedCard.getByText(/^Open sources$/)).toBeVisible();
   });
 
   test("lite mode renders list without full map", async ({ page }) => {

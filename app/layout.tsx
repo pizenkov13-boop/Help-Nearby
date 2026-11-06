@@ -9,6 +9,7 @@ import { fontVariableClasses } from "./fonts";
 import { cn } from "@/lib/utils";
 import { siteConfig } from "@/lib/siteConfig";
 import { metaTranslator } from "@/lib/i18n/pageMeta";
+import { formsDisabledForHeaders } from "@/lib/featureFlags.server";
 import {
   languageDirection,
   parseAcceptLanguage,
@@ -64,9 +65,9 @@ export default async function RootLayout({
   children: React.ReactNode;
 }>) {
   // First visit: the language comes from the browser (Accept-Language), so the first paint is right.
-  const language = resolveLanguage(
-    parseAcceptLanguage((await headers()).get("accept-language")),
-  );
+  const requestHeaders = await headers();
+  const language = resolveLanguage(parseAcceptLanguage(requestHeaders.get("accept-language")));
+  const formsEnabled = !formsDisabledForHeaders(requestHeaders);
 
   return (
     <html
@@ -84,7 +85,7 @@ export default async function RootLayout({
         suppressHydrationWarning
         className="min-h-screen bg-surface font-sans text-foreground transition-[background-color] duration-300"
       >
-        <AppProviders initialLanguage={language}>{children}</AppProviders>
+        <AppProviders initialLanguage={language} formsEnabled={formsEnabled}>{children}</AppProviders>
         <VercelAnalytics />
         <ServiceWorkerRegister />
       </body>
