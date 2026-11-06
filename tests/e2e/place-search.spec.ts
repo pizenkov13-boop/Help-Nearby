@@ -42,7 +42,8 @@ const json = (route: Route, body: unknown, status = 200) =>
 async function mockPlaceApis(page: Page) {
   await mockNearbyApi(page);
   await page.route(/\/api\/geocode(?!\/reverse)/, (route) => {
-    const q = (new URL(route.request().url()).searchParams.get("q") ?? "").toLowerCase();
+    // The typed place travels in the POST body, never in the URL.
+    const q = String(route.request().postDataJSON()?.q ?? "").toLowerCase();
     return json(route, { results: q.includes("nice") ? [nicePlace] : [] });
   });
   await page.route(/\/api\/geocode\/reverse/, (route) => {

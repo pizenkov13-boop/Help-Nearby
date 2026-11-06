@@ -50,6 +50,7 @@ test.describe("Coordinate routes accept POST only", () => {
     "/api/route",
     "/api/nearest",
     "/api/geocode/reverse",
+    "/api/geocode",
   ];
 
   for (const path of routes) {
@@ -71,6 +72,10 @@ test.describe("Coordinate routes accept POST only", () => {
       const partial = await request.post(path, { data: { lat: 40.7 } });
       expect(partial.status(), `${path} with only lat`).toBe(400);
     }
+
+    // A typed place is a field of the POST body: empty or missing is rejected, GET is not served.
+    expect((await request.post("/api/geocode", { data: {} })).status()).toBe(400);
+    expect((await request.get("/api/geocode?q=anything")).status()).toBe(405);
 
     const noCountry = await request.post("/api/verified-nearby", { data: {} });
     expect(await noCountry.json()).toEqual([]);

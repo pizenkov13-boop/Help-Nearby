@@ -34,8 +34,7 @@ async function geocodeOrganization(
   if (cached) return cached;
 
   try {
-    const params = new URLSearchParams({ q: query });
-    const res = await fetch(`/api/geocode?${params}`);
+    const res = await postJson("/api/geocode", { q: query });
     if (!res.ok) return null;
 
     const data = (await res.json()) as { lat?: number; lng?: number };

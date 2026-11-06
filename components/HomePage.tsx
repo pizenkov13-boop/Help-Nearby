@@ -13,7 +13,6 @@ import { fetchPlaces, type PlaceResult } from "@/lib/placeSearch";
 import { requestPosition, type LocationIssue } from "@/lib/locationRequest";
 import { getOrganizationSource } from "@/lib/organizationSource";
 import {
-  watchUserLocation,
   type TrackedUserLocation,
 } from "@/lib/geolocation";
 import { reverseGeocodeCountry } from "@/lib/geocode";
@@ -503,15 +502,6 @@ export function HomePage() {
   searchPlaceRef.current = searchPlace;
   const userLocationRef = useRef(userLocation);
   userLocationRef.current = userLocation;
-
-  useEffect(() => {
-    // Only follow the device position once the user has shared it and no typed place is active.
-    if (!mapExpanded || liteModeActive || !hasUserLocation || searchPlace) return;
-
-    return watchUserLocation((location) => {
-      setUserLocation(location);
-    });
-  }, [mapExpanded, liteModeActive, hasUserLocation, searchPlace]);
 
   useEffect(() => {
     if (!mapExpanded || !shouldScrollRef.current) return;

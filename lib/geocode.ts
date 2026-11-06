@@ -14,8 +14,7 @@ export async function forwardGeocodeQuery(
   if (!query.trim()) return null;
 
   try {
-    const params = new URLSearchParams({ q: query.trim() });
-    const response = await fetch(`/api/geocode?${params}`);
+    const response = await postJson("/api/geocode", { q: query.trim() });
 
     if (!response.ok) return null;
 

@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { readJsonBody, toTrimmedString } from "@/lib/apiBody.server";
 import { LANGUAGES } from "@/lib/i18n/translations";
 import { nominatimSearch, nominatimSearchPlaces } from "@/lib/nominatim.server";
 import { withTimeout } from "@/lib/ttlCache";
@@ -8,22 +9,25 @@ export const dynamic = "force-dynamic";
 
 const GEOCODE_TIMEOUT_MS = 4000;
 
-export async function GET(request: Request) {
-  const { searchParams } = new URL(request.url);
-  const q = searchParams.get("q")?.trim();
+/**
+ * Body: { q, limit?, lang? }. The typed place or address travels in the POST body, never in the
+ * URL, so it does not end up in access logs, history or Referer headers. GET is not served (405).
+ */
+export async function POST(request: Request) {
+  const body = await readJsonBody(request);
+  const q = toTrimmedString(body.q);
 
   if (!q) {
     return NextResponse.json(
-      { error: "Query parameter q is required." },
+      { error: "Field q is required." },
       { status: 400 },
     );
   }
 
-  // Place search / autocomplete: ?limit=N returns { results: [{ name, lat, lng, ... }] }.
-  const limitParam = searchParams.get("limit");
-  if (limitParam !== null) {
-    const limit = Math.min(Math.max(Number.parseInt(limitParam, 10) || 1, 1), 5);
-    const requested = searchParams.get("lang") ?? "en";
+  // Place search / autocomplete: "limit" returns { results: [{ name, lat, lng, ... }] }.
+  if (body.limit !== undefined && body.limit !== null) {
+    const limit = Math.min(Math.max(Math.trunc(Number(body.limit)) || 1, 1), 5);
+    const requested = typeof body.lang === "string" ? body.lang : "en";
     const language = LANGUAGES.some((l) => l.code === requested) ? requested : "en";
 
     try {

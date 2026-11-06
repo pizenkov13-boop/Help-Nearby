@@ -177,6 +177,12 @@ export function ReviewsPage() {
 
               <div>
                 <label htmlFor="review-message">{t("reviewsFormMessage")}</label>
+                <p
+                  className="mb-1 text-xs leading-snug text-slate-600 dark:text-gray-400"
+                  data-testid="personal-data-warning"
+                >
+                  {t("formNoPersonalData")}
+                </p>
                 <textarea
                   id="review-message"
                   rows={4}

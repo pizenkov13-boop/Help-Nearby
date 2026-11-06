@@ -12,7 +12,11 @@ const WATCH_OPTIONS: PositionOptions = {
   timeout: 20000,
 };
 
-/** Start watching the user's position; returns cleanup to clear the watch. */
+/**
+ * Continuous tracking. Not used by default (the position is read once with getCurrentPosition,
+ * see lib/locationRequest.ts); turn it on only for a feature that needs live movement and clear
+ * the watch with the returned cleanup as soon as it is done.
+ */
 export function watchUserLocation(
   onUpdate: GeolocationWatchCallback,
   onError?: (error: GeolocationPositionError) => void,

@@ -1,3 +1,4 @@
+import { postJson } from "@/lib/postJson";
 import { createTtlCache } from "@/lib/ttlCache";
 
 export interface PlaceResult {
@@ -45,8 +46,7 @@ export async function fetchPlaces(
   if (cached) return { status: "ok", places: cached };
 
   try {
-    const params = new URLSearchParams({ q, limit: String(limit), lang: language });
-    const res = await fetch(`/api/geocode?${params}`, { signal });
+    const res = await postJson("/api/geocode", { q, limit, lang: language }, { signal });
     if (!res.ok) return { status: "error" };
 
     const data = (await res.json()) as { results?: unknown[] };

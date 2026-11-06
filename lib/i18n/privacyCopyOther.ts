@@ -21,7 +21,7 @@ export const PRIVACY_COPY_OTHER: Pick<Record<LanguageCode, PrivacyCopy>, "es" | 
         title: "Tu ubicación",
         paragraphs: [
           "Si lo permites, el navegador entrega al sitio tu posición. Se envía a nuestro servidor en el cuerpo de una solicitud (no en la dirección web) para encontrar organizaciones cercanas, determinar tu país y, si pides indicaciones, trazar una ruta a pie.",
-          "No guardamos tu posición en una base de datos y el código de nuestro servidor no la escribe en registros. Tu navegador conserva solo un área redondeada (unos 2 km) con los últimos resultados de búsqueda durante una hora, para que la página se abra más rápido; puedes borrarlo en los ajustes del navegador.",
+          "No guardamos tu posición en una base de datos y el código de nuestro servidor no la escribe en registros. Tu navegador conserva solo un área redondeada (unos 2 km) con los últimos resultados de búsqueda durante 30 minutos, para que la página se abra más rápido; puedes borrarlo en los ajustes del navegador.",
           "Si lo rechazas, el sitio funciona con una ubicación predeterminada y la búsqueda de lugares.",
         ],
       },
@@ -35,7 +35,9 @@ export const PRIVACY_COPY_OTHER: Pick<Record<LanguageCode, PrivacyCopy>, "es" | 
           "ReliefWeb, HDX y GDHO (directorios humanitarios): nuestro servidor envía el nombre del país.",
           "Asistente de IA (AITunnel, api.aitunnel.ru): el texto de tus mensajes del chat (los últimos de la conversación) y las organizaciones encontradas para la respuesta. No escribas datos personales en el chat. Tus coordenadas no se envían al servicio de IA.",
           "Vercel Web Analytics (las solicitudes van a nuestro propio dominio, bajo /_vercel/insights): recuentos agregados de visitas, páginas y países. No usa cookies ni identificadores personales y no recibe coordenadas, texto de búsqueda ni nada de lo que escribes: la dirección de la página se envía sin parámetros de consulta. Vercel es también nuestro proveedor de alojamiento.",
-          "Alojamiento y base de datos: el proveedor de alojamiento procesa registros técnicos estándar de solicitudes (dirección IP, hora, dirección de la página). El catálogo, las reseñas y las organizaciones enviadas se almacenan en una base de datos Supabase.",
+          "Texto del lugar que escribes: se envía a nuestro servidor (en el cuerpo de la solicitud, no en la dirección web) y de ahí a Nominatim o Photon. Nuestro código no lo registra, pero puede aparecer en los registros del proveedor de alojamiento.",
+          "Tu dirección IP se conserva un tiempo breve (hasta una hora) en la memoria del servidor, solo para limitar la frecuencia de las solicitudes. No se escribe en la base de datos.",
+          "Alojamiento y base de datos: el proveedor de alojamiento procesa registros técnicos estándar de solicitudes (dirección IP, hora y URL de cada solicitud). El catálogo, las reseñas y las organizaciones enviadas se almacenan en una base de datos Supabase.",
         ],
       },
       {
@@ -77,7 +79,7 @@ export const PRIVACY_COPY_OTHER: Pick<Record<LanguageCode, PrivacyCopy>, "es" | 
         title: "Votre position",
         paragraphs: [
           "Si vous l'autorisez, le navigateur transmet votre position au site. Elle est envoyée à notre serveur dans le corps d'une requête (et non dans l'adresse web) pour trouver les organisations proches, déterminer votre pays et, si vous demandez un itinéraire, tracer un parcours à pied.",
-          "Nous n'enregistrons pas votre position dans une base de données et le code de notre serveur ne l'écrit pas dans les journaux. Votre navigateur ne conserve qu'une zone arrondie (environ 2 km) avec les derniers résultats de recherche pendant une heure, afin que la page s'ouvre plus vite ; vous pouvez l'effacer dans les réglages du navigateur.",
+          "Nous n'enregistrons pas votre position dans une base de données et le code de notre serveur ne l'écrit pas dans les journaux. Votre navigateur ne conserve qu'une zone arrondie (environ 2 km) avec les derniers résultats de recherche pendant 30 minutes, afin que la page s'ouvre plus vite ; vous pouvez l'effacer dans les réglages du navigateur.",
           "Si vous refusez, le site fonctionne avec une position par défaut et la recherche de lieu.",
         ],
       },
@@ -91,7 +93,9 @@ export const PRIVACY_COPY_OTHER: Pick<Record<LanguageCode, PrivacyCopy>, "es" | 
           "ReliefWeb, HDX et GDHO (annuaires humanitaires) : notre serveur envoie le nom du pays.",
           "Assistant IA (AITunnel, api.aitunnel.ru) : le texte de vos messages dans le chat (les derniers de la conversation) et les organisations trouvées pour la réponse. N'écrivez pas de données personnelles dans le chat. Vos coordonnées ne sont pas envoyées au service d'IA.",
           "Vercel Web Analytics (les requêtes vont vers notre propre domaine, sous /_vercel/insights) : décomptes agrégés des visites, des pages et des pays. Il n'utilise ni cookies ni identifiants personnels et ne reçoit ni coordonnées, ni texte de recherche, ni rien de ce que vous saisissez : l'adresse de la page est envoyée sans paramètres de requête. Vercel est aussi notre hébergeur.",
-          "Hébergement et base de données : l'hébergeur traite des journaux techniques standard des requêtes (adresse IP, heure, adresse de la page). Le catalogue, les avis et les organisations soumises sont stockés dans une base de données Supabase.",
+          "Texte du lieu que vous saisissez : il est envoyé à notre serveur (dans le corps de la requête, pas dans l'adresse web), puis à Nominatim ou Photon. Notre code ne l'enregistre pas, mais il peut figurer dans les journaux de l'hébergeur.",
+          "Votre adresse IP est conservée brièvement (au plus une heure) dans la mémoire du serveur, uniquement pour limiter la fréquence des requêtes. Elle n'est pas écrite dans la base de données.",
+          "Hébergement et base de données : l'hébergeur traite des journaux techniques standard des requêtes (adresse IP, heure et URL de chaque requête). Le catalogue, les avis et les organisations soumises sont stockés dans une base de données Supabase.",
         ],
       },
       {
@@ -133,7 +137,7 @@ export const PRIVACY_COPY_OTHER: Pick<Record<LanguageCode, PrivacyCopy>, "es" | 
         title: "Ihr Standort",
         paragraphs: [
           "Wenn Sie es erlauben, übergibt der Browser der Website Ihre Position. Sie wird im Body einer Anfrage (nicht in der Webadresse) an unseren Server gesendet, um Organisationen in der Nähe zu finden, Ihr Land zu bestimmen und, wenn Sie eine Wegbeschreibung anfordern, eine Fußgängerroute zu zeichnen.",
-          "Wir speichern Ihre Position nicht in einer Datenbank, und unser Servercode schreibt sie nicht in Logs. Ihr Browser behält nur ein gerundetes Gebiet (etwa 2 km) mit den letzten Suchergebnissen für eine Stunde, damit sich die Seite schneller öffnet; Sie können das in den Browsereinstellungen löschen.",
+          "Wir speichern Ihre Position nicht in einer Datenbank, und unser Servercode schreibt sie nicht in Logs. Ihr Browser behält nur ein gerundetes Gebiet (etwa 2 km) mit den letzten Suchergebnissen für 30 Minuten, damit sich die Seite schneller öffnet; Sie können das in den Browsereinstellungen löschen.",
           "Wenn Sie ablehnen, funktioniert die Website mit einem Standardstandort und der Ortssuche.",
         ],
       },
@@ -147,7 +151,9 @@ export const PRIVACY_COPY_OTHER: Pick<Record<LanguageCode, PrivacyCopy>, "es" | 
           "ReliefWeb, HDX und GDHO (humanitäre Verzeichnisse): Unser Server sendet den Namen des Landes.",
           "KI-Assistent (AITunnel, api.aitunnel.ru): der Text Ihrer Chat-Nachrichten (die letzten des Gesprächs) und die für die Antwort gefundenen Organisationen. Bitte schreiben Sie keine personenbezogenen Daten in den Chat. Ihre Koordinaten werden nicht an den KI-Dienst gesendet.",
           "Vercel Web Analytics (die Anfragen gehen an unsere eigene Domain, unter /_vercel/insights): aggregierte Zahlen zu Besuchen, Seiten und Ländern. Es verwendet keine Cookies und keine persönlichen Kennungen und erhält weder Koordinaten noch Suchtext noch etwas, was Sie eingeben: Die Seitenadresse wird ohne Query-String gesendet. Vercel ist auch unser Hosting-Anbieter.",
-          "Hosting und Datenbank: Der Hosting-Anbieter verarbeitet übliche technische Anfrageprotokolle (IP-Adresse, Zeit, Adresse der Seite). Der Katalog, die Bewertungen und eingereichte Organisationen werden in einer Supabase-Datenbank gespeichert.",
+          "Ort, den Sie eingeben: Der Text wird an unseren Server gesendet (im Anfragekörper, nicht in der Webadresse) und weiter an Nominatim oder Photon. Unser Code protokolliert ihn nicht, er kann aber in den Logs des Hosting-Anbieters erscheinen.",
+          "Ihre IP-Adresse wird kurzzeitig (höchstens eine Stunde) im Arbeitsspeicher des Servers gehalten, nur um die Häufigkeit von Anfragen zu begrenzen. Sie wird nicht in die Datenbank geschrieben.",
+          "Hosting und Datenbank: Der Hosting-Anbieter verarbeitet übliche technische Anfrageprotokolle (IP-Adresse, Zeit und URL jeder Anfrage). Der Katalog, die Bewertungen und eingereichte Organisationen werden in einer Supabase-Datenbank gespeichert.",
         ],
       },
       {
@@ -189,7 +195,7 @@ export const PRIVACY_COPY_OTHER: Pick<Record<LanguageCode, PrivacyCopy>, "es" | 
         title: "您的位置",
         paragraphs: [
           "如果您允许，浏览器会把您的位置提供给网站。位置通过请求正文（而不是网址）发送到我们的服务器，用于查找附近的机构、判断您所在的国家，以及在您请求路线时绘制步行路线。",
-          "我们不会把您的位置存入数据库，服务器代码也不会把它写入日志。您的浏览器只保留一个取整后的区域（约 2 公里）和最近的搜索结果，保存一小时，以便页面打开更快；您可以在浏览器设置中清除。",
+          "我们不会把您的位置存入数据库，服务器代码也不会把它写入日志。您的浏览器只保留一个取整后的区域（约 2 公里）和最近的搜索结果，保存 30 分钟，以便页面打开更快；您可以在浏览器设置中清除。",
           "如果您拒绝，网站将使用默认位置和地点搜索。",
         ],
       },
@@ -203,7 +209,9 @@ export const PRIVACY_COPY_OTHER: Pick<Record<LanguageCode, PrivacyCopy>, "es" | 
           "ReliefWeb、HDX 和 GDHO（人道主义名录）：我们的服务器发送国家名称。",
           "AI 助手（AITunnel，api.aitunnel.ru）：您的聊天消息文字（对话中最近的几条）以及为回答找到的机构。请不要在聊天中填写个人信息。您的坐标不会发送给 AI 服务。",
           "Vercel Web Analytics（请求发送到我们自己的域名，路径为 /_vercel/insights）：访问量、页面和国家的汇总统计。它不使用 Cookie，也不使用个人标识符，不会收到坐标、搜索文字或您输入的任何内容：页面地址在发送时不带查询参数。Vercel 同时也是我们的托管服务商。",
-          "托管与数据库：托管服务商会处理标准的技术请求日志（IP 地址、时间、页面地址）。目录、评价和提交的机构保存在 Supabase 数据库中。",
+          "您输入的地点文字：会发送到我们的服务器（在请求正文中，而不在网址中），再转发给 Nominatim 或 Photon。我们的代码不会记录它，但它可能出现在托管服务商的日志中。",
+          "您的 IP 地址会在服务器内存中短暂保留（最长一小时），仅用于限制请求频率，不会写入数据库。",
+          "托管与数据库：托管服务商会处理标准的技术请求日志（IP 地址、时间和每个请求的 URL）。目录、评价和提交的机构保存在 Supabase 数据库中。",
         ],
       },
       {
@@ -245,7 +253,7 @@ export const PRIVACY_COPY_OTHER: Pick<Record<LanguageCode, PrivacyCopy>, "es" | 
         title: "موقعك",
         paragraphs: [
           "إذا سمحت بذلك، يمنح المتصفح الموقع موضعك. يُرسل إلى خادمنا ضمن نص الطلب (وليس في عنوان الويب) للعثور على المنظمات القريبة وتحديد بلدك ورسم مسار للمشي إذا طلبت الاتجاهات.",
-          "لا نحفظ موضعك في قاعدة بيانات، ولا يكتبه كود الخادم في السجلات. يحتفظ متصفحك فقط بمنطقة مقرَّبة (نحو 2 كم) مع آخر نتائج البحث لمدة ساعة، ليُفتح الموقع أسرع؛ ويمكنك مسحها من إعدادات المتصفح.",
+          "لا نحفظ موضعك في قاعدة بيانات، ولا يكتبه كود الخادم في السجلات. يحتفظ متصفحك فقط بمنطقة مقرَّبة (نحو 2 كم) مع آخر نتائج البحث لمدة 30 دقيقة، ليُفتح الموقع أسرع؛ ويمكنك مسحها من إعدادات المتصفح.",
           "إذا رفضت، يعمل الموقع بموقع افتراضي وبالبحث عن الأماكن.",
         ],
       },
@@ -259,7 +267,9 @@ export const PRIVACY_COPY_OTHER: Pick<Record<LanguageCode, PrivacyCopy>, "es" | 
           "ReliefWeb وHDX وGDHO (أدلة إنسانية): يرسل خادمنا اسم البلد.",
           "مساعد الذكاء الاصطناعي (AITunnel، api.aitunnel.ru): نص رسائل الدردشة (آخر رسائل المحادثة) والمنظمات التي عُثر عليها للإجابة. يُرجى عدم كتابة بيانات شخصية في الدردشة. لا تُرسل إحداثياتك إلى خدمة الذكاء الاصطناعي.",
           "Vercel Web Analytics (تذهب الطلبات إلى نطاقنا الخاص، تحت المسار /_vercel/insights): أعداد مجمّعة للزيارات والصفحات والدول. لا تستخدم ملفات تعريف الارتباط ولا معرّفات شخصية ولا تستلم إحداثيات أو نص بحث أو أي شيء تكتبه: يُرسل عنوان الصفحة دون معاملات الاستعلام. Vercel هي أيضًا مزوّد الاستضافة لدينا.",
-          "الاستضافة وقاعدة البيانات: يعالج مزوّد الاستضافة سجلات الطلبات التقنية المعتادة (عنوان IP والوقت وعنوان الصفحة). يُخزَّن الدليل والمراجعات والمنظمات المرسَلة في قاعدة بيانات Supabase.",
+          "نص المكان الذي تكتبه: يُرسل إلى خادمنا (في متن الطلب لا في عنوان الويب) ثم إلى Nominatim أو Photon. لا يسجّله كودنا، لكنه قد يظهر في سجلات مزوّد الاستضافة.",
+          "يُحتفظ بعنوان IP الخاص بك مؤقتًا في ذاكرة الخادم (لمدة لا تتجاوز ساعة) لتقييد وتيرة الطلبات فقط، ولا يُكتب في قاعدة البيانات.",
+          "الاستضافة وقاعدة البيانات: يعالج مزوّد الاستضافة سجلات الطلبات التقنية المعتادة (عنوان IP والوقت وعنوان URL لكل طلب). يُخزَّن الدليل والمراجعات والمنظمات المرسَلة في قاعدة بيانات Supabase.",
         ],
       },
       {

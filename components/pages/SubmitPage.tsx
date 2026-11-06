@@ -6,6 +6,7 @@ import { PageHero } from "@/components/layout/PageHero";
 import { SiteLayout } from "@/components/layout/SiteLayout";
 import { Button } from "@/components/ui/button";
 import { CATEGORIES } from "@/lib/categories";
+import { useLanguage } from "@/lib/i18n/LanguageProvider";
 import type { Category } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
@@ -49,6 +50,7 @@ const initialForm: FormState = {
 };
 
 export function SubmitPage() {
+  const { t } = useLanguage();
   const [form, setForm] = useState<FormState>(initialForm);
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
@@ -218,6 +220,10 @@ export function SubmitPage() {
                     />
                   </div>
 
+                  <p className="text-xs leading-snug text-slate-600 dark:text-gray-400" data-testid="work-contacts-hint">
+                    {t("submitWorkContactsHint")}
+                  </p>
+
                   <div className="grid gap-5 sm:grid-cols-2">
                     <div>
                       <label htmlFor="org-phone" className={labelClass}>
@@ -279,6 +285,12 @@ export function SubmitPage() {
                     <label htmlFor="org-description" className={labelClass}>
                       Description
                     </label>
+                    <p
+                      className="mb-1 text-xs leading-snug text-slate-600 dark:text-gray-400"
+                      data-testid="personal-data-warning"
+                    >
+                      {t("formNoPersonalData")}
+                    </p>
                     <textarea
                       id="org-description"
                       rows={4}
