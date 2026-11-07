@@ -7,11 +7,12 @@ import {
   readCachedDetectedCountry,
 } from "@/lib/detectedCountry";
 import { isSunnyRegionCountry } from "@/lib/sunnyRegions";
-import { hasStoredThemePreference } from "@/lib/themePreference";
+import { clearStoredThemeChoice, hasStoredThemePreference } from "@/lib/themePreference";
 
 /**
- * On first visit (no saved theme preference), enable light mode in sunny
- * regions (Africa, Arabian Peninsula, hot Middle East). Manual toggle always wins.
+ * Fallback for the Auto theme: without a saved light/dark choice, a country found by an explicit search
+ * (SUNNY_COUNTRY_CODES) switches the page to light. The server already does this for the visitor's own country
+ * (Vercel header, see app/layout.tsx). Nothing is saved, so it stays Auto; a manual choice always wins.
  * The region is only taken from a country already found by an explicit search: this component
  * never asks the browser for the location (a prompt on page load, before any tap, trains people to
  * refuse it and blocks the real request).
@@ -32,6 +33,8 @@ export function ThemeRegionSync() {
       if (isSunnyRegionCountry(country, countryCode)) {
         appliedRef.current = true;
         setTheme("light");
+        // setTheme saves its value; Auto must stay "nothing saved".
+        clearStoredThemeChoice();
       }
     };
 

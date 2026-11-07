@@ -1663,27 +1663,26 @@ section[id], .scroll-anchor { scroll-margin-top: 92px; }
     letter-spacing: 0.08em;
     color: var(--text-fade);
   }
-  .mm-langs { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-  .mm-lang {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 8px;
-    min-height: 48px;
-    padding: 0 14px;
-    border-radius: 12px;
+  .theme-switch {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 4px;
+    padding: 4px;
+    border-radius: 14px;
     border: 1px solid var(--border-soft);
+  }
+  .theme-switch-option {
+    min-height: 44px;
+    padding: 0 8px;
+    border-radius: 10px;
     font-size: 15px;
     font-weight: 600;
     color: var(--text-dim);
   }
-  .mm-lang.on {
+  .theme-switch-option.on {
     color: var(--hover-text);
     background: linear-gradient(135deg, rgba(59, 130, 246, 0.16), rgba(20, 184, 166, 0.12));
   }
-  .mm-lang svg { width: 16px; height: 16px; stroke-width: 2.5; color: #14b8a6; }
-  .mm-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
-  .mm-row .mm-section-title { margin: 0; }
 }
 
 /* ================= home: design tokens, category tiles, trust line, phone bottom bar ================= */
@@ -2260,8 +2259,8 @@ html[lang="ar"] .home-trust { line-height: 1.5; }
   .urgent-call:hover { background: #059669; }
 
   /* Language sheet */
-  .lang-item.on, .mm-lang.on { background: var(--hn-accent-tint); color: var(--hn-text); }
-  .lang-item-check, .mm-lang svg { color: var(--hn-accent-text); }
+  .lang-item.on, .theme-switch-option.on { background: var(--hn-accent-tint); color: var(--hn-text); }
+  .lang-item-check { color: var(--hn-accent-text); }
   .lang-sheet { background: var(--hn-card); border-top: 1px solid var(--hn-line); border-radius: 20px 20px 0 0; box-shadow: none; }
 }
 @media (max-width: 768px) and (max-height: 720px) {

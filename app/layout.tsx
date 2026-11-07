@@ -9,7 +9,7 @@ import { fontVariableClasses } from "./fonts";
 import { cn } from "@/lib/utils";
 import { siteConfig } from "@/lib/siteConfig";
 import { metaTranslator } from "@/lib/i18n/pageMeta";
-import { formsDisabledForHeaders } from "@/lib/featureFlags.server";
+import { formsDisabledForHeaders, sunnyCountryForHeaders } from "@/lib/featureFlags.server";
 import {
   languageDirection,
   parseAcceptLanguage,
@@ -68,11 +68,13 @@ export default async function RootLayout({
   const requestHeaders = await headers();
   const language = resolveLanguage(parseAcceptLanguage(requestHeaders.get("accept-language")));
   const formsEnabled = !formsDisabledForHeaders(requestHeaders);
+  const sunnyCountry = sunnyCountryForHeaders(requestHeaders);
 
   return (
     <html
       lang={language}
       dir={languageDirection(language)}
+      data-auto-theme={sunnyCountry ? "light" : undefined}
       suppressHydrationWarning
       className={cn("font-sans", ...fontVariableClasses)}
     >
@@ -85,7 +87,7 @@ export default async function RootLayout({
         suppressHydrationWarning
         className="min-h-screen bg-surface font-sans text-foreground transition-[background-color] duration-300"
       >
-        <AppProviders initialLanguage={language} formsEnabled={formsEnabled}>{children}</AppProviders>
+        <AppProviders initialLanguage={language} formsEnabled={formsEnabled} sunnyCountry={sunnyCountry}>{children}</AppProviders>
         <VercelAnalytics />
         <ServiceWorkerRegister />
       </body>

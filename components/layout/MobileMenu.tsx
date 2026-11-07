@@ -1,17 +1,15 @@
 "use client";
 
-import { Check, Siren, X } from "lucide-react";
+import { Siren, X } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { BrandLogo } from "@/components/BrandLogo";
 import { AnchorNavLink } from "@/components/navigation/AnchorNavLink";
-import { ThemeToggle } from "@/components/ThemeToggle";
+import { ThemeSwitch } from "@/components/ThemeSwitch";
 import { openEmergencyHelp } from "@/lib/emergencyEvents";
 import { useLanguage } from "@/lib/i18n/LanguageProvider";
-import { LANGUAGES, LANGUAGE_NATIVE_NAMES } from "@/lib/i18n/translations";
-import type { LanguageCode } from "@/lib/types";
 import { cn } from "@/lib/utils";
 import { siteConfig } from "@/lib/siteConfig";
 import { useFormsEnabled } from "@/components/providers/FormsAvailability";
@@ -73,7 +71,7 @@ function lockBodyScroll(): () => void {
  */
 export function MobileMenu({ open, onClose }: MobileMenuProps) {
   const formsEnabled = useFormsEnabled();
-  const { t, language, setLanguage } = useLanguage();
+  const { t } = useLanguage();
   const pathname = usePathname();
   const layerRef = useRef<HTMLDivElement>(null);
   const closeRef = useRef<HTMLButtonElement>(null);
@@ -250,39 +248,11 @@ export function MobileMenu({ open, onClose }: MobileMenuProps) {
           )}
         </nav>
 
-        <section className="mm-section" aria-labelledby="mm-lang-title">
-          <h3 id="mm-lang-title" className="mm-section-title">
-            {t("languageMenu")}
+        <section className="mm-section" aria-labelledby="mm-theme-title">
+          <h3 id="mm-theme-title" className="mm-section-title">
+            {t("themeLabel")}
           </h3>
-          <div className="mm-langs" role="group" aria-labelledby="mm-lang-title">
-            {LANGUAGES.map(({ code }) => {
-              const current = code === language;
-              return (
-                <button
-                  key={code}
-                  type="button"
-                  lang={code}
-                  aria-pressed={current}
-                  className={cn("mm-lang", current && "on")}
-                  onClick={() => {
-                    if (!current) {
-                      setLanguage(code as LanguageCode);
-                    }
-                  }}
-                >
-                  <span>{LANGUAGE_NATIVE_NAMES[code]}</span>
-                  {current && <Check aria-hidden />}
-                </button>
-              );
-            })}
-          </div>
-        </section>
-
-        <section className="mm-section">
-          <div className="mm-row">
-            <span className="mm-section-title">{t("themeLabel")}</span>
-            <ThemeToggle />
-          </div>
+          <ThemeSwitch />
         </section>
       </div>
     </div>,

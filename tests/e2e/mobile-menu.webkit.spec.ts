@@ -40,8 +40,8 @@ test("open menu is a tall full-screen layer with every item visible and clickabl
       "Reviews & Suggestions",
       "Recently added",
     ].map((name) => menu.getByRole("link", { name, exact: true })),
-    menu.getByRole("button", { name: "English" }),
-    menu.getByRole("button", { name: /Switch to (light|dark) mode/i }),
+    // The language lives in the header; the menu ends with the three-option theme switch.
+    ...["Auto", "Light", "Dark"].map((name) => menu.getByRole("radio", { name, exact: true })),
   ];
   for (const item of items) {
     await item.scrollIntoViewIfNeeded();

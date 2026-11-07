@@ -326,6 +326,9 @@ export type TranslationKey =
   | "searchExpand"
   | "menuTitle"
   | "themeLabel"
+  | "themeOptionAuto"
+  | "themeOptionLight"
+  | "themeOptionDark"
   | "hoursNotListed"
   | "mapTwoFingerHint"
   | "closeLabel"
@@ -712,6 +715,9 @@ const en: Record<TranslationKey, string> = {
   searchExpand: "Expand search",
   menuTitle: "Menu",
   themeLabel: "Theme",
+  themeOptionAuto: "Auto",
+  themeOptionLight: "Light",
+  themeOptionDark: "Dark",
   hoursNotListed: "Opening hours not listed. Check the source website or call before you go.",
   mapTwoFingerHint: "Use two fingers to move the map",
   closeLabel: "Close",
@@ -1106,6 +1112,9 @@ const ru: Record<TranslationKey, string> = {
   searchExpand: "Расширить поиск",
   menuTitle: "Меню",
   themeLabel: "Тема",
+  themeOptionAuto: "Авто",
+  themeOptionLight: "Светлая",
+  themeOptionDark: "Тёмная",
   hoursNotListed: "Часы работы не указаны. Проверьте сайт источника или позвоните перед визитом.",
   mapTwoFingerHint: "Двигайте карту двумя пальцами",
   closeLabel: "Закрыть",
@@ -1501,6 +1510,9 @@ const es: Record<TranslationKey, string> = {
   searchExpand: "Ampliar búsqueda",
   menuTitle: "Menú",
   themeLabel: "Tema",
+  themeOptionAuto: "Automático",
+  themeOptionLight: "Clara",
+  themeOptionDark: "Oscura",
   hoursNotListed: "Horario no disponible. Consulta el sitio web de la fuente o llama antes de ir.",
   mapTwoFingerHint: "Usa dos dedos para mover el mapa",
   closeLabel: "Cerrar",
@@ -1897,6 +1909,9 @@ const fr: Record<TranslationKey, string> = {
   searchExpand: "Élargir la recherche",
   menuTitle: "Menu",
   themeLabel: "Thème",
+  themeOptionAuto: "Automatique",
+  themeOptionLight: "Claire",
+  themeOptionDark: "Sombre",
   hoursNotListed: "Horaires non renseignés. Consultez le site source ou appelez avant de vous déplacer.",
   mapTwoFingerHint: "Utilisez deux doigts pour déplacer la carte",
   closeLabel: "Fermer",
@@ -2294,6 +2309,9 @@ const de: Record<TranslationKey, string> = {
   searchExpand: "Suche erweitern",
   menuTitle: "Menü",
   themeLabel: "Design",
+  themeOptionAuto: "Automatisch",
+  themeOptionLight: "Hell",
+  themeOptionDark: "Dunkel",
   hoursNotListed: "Öffnungszeiten nicht angegeben. Prüfen Sie die Website der Quelle oder rufen Sie vorher an.",
   mapTwoFingerHint: "Mit zwei Fingern die Karte bewegen",
   closeLabel: "Schließen",
@@ -2677,6 +2695,9 @@ const zh: Record<TranslationKey, string> = {
   searchExpand: "扩大搜索范围",
   menuTitle: "菜单",
   themeLabel: "主题",
+  themeOptionAuto: "自动",
+  themeOptionLight: "浅色",
+  themeOptionDark: "深色",
   hoursNotListed: "未提供营业时间。出发前请查看来源网站或先致电确认。",
   mapTwoFingerHint: "请用双指移动地图",
   closeLabel: "关闭",
@@ -3068,6 +3089,9 @@ const ar: Record<TranslationKey, string> = {
   searchExpand: "توسيع البحث",
   menuTitle: "القائمة",
   themeLabel: "المظهر",
+  themeOptionAuto: "تلقائي",
+  themeOptionLight: "فاتح",
+  themeOptionDark: "داكن",
   hoursNotListed: "ساعات العمل غير مذكورة. تحقق من موقع المصدر أو اتصل قبل الذهاب.",
   mapTwoFingerHint: "استخدم إصبعين لتحريك الخريطة",
   closeLabel: "إغلاق",

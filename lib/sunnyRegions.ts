@@ -1,7 +1,12 @@
 import { normalizeCountryName } from "@/lib/liteMode";
 
-/** ISO 3166-1 alpha-2 — all African countries. */
-const AFRICAN_COUNTRY_CODES = new Set([
+/**
+ * Countries where the automatic ("Auto") theme is light: all of Africa, the Arabian Peninsula and the hot
+ * Middle East / South Asia belt, where a light UI is easier to read outdoors. ISO 3166-1 alpha-2, lower case.
+ * This is the only list: the server (Vercel country header, app/layout.tsx) and the browser fallback
+ * (a country found by a search) both read it. Everywhere else Auto follows the device setting.
+ */
+export const SUNNY_COUNTRY_CODES: ReadonlySet<string> = new Set([
   "dz", // Algeria
   "ao", // Angola
   "bj", // Benin
@@ -56,10 +61,6 @@ const AFRICAN_COUNTRY_CODES = new Set([
   "ug", // Uganda
   "zm", // Zambia
   "zw", // Zimbabwe
-]);
-
-/** Arabian Peninsula and adjacent hot/desert Gulf states. */
-const ARABIAN_PENINSULA_CODES = new Set([
   "sa", // Saudi Arabia
   "ae", // UAE
   "om", // Oman
@@ -68,10 +69,6 @@ const ARABIAN_PENINSULA_CODES = new Set([
   "bh", // Bahrain
   "kw", // Kuwait
   "iq", // Iraq
-]);
-
-/** Other sunny Middle East / South Asia belt (bright outdoor use). */
-const SUNNY_MENA_SOUTH_ASIA_CODES = new Set([
   "ir", // Iran
   "jo", // Jordan
   "sy", // Syria
@@ -83,13 +80,7 @@ const SUNNY_MENA_SOUTH_ASIA_CODES = new Set([
   "bd", // Bangladesh
   "lk", // Sri Lanka
   "mv", // Maldives
-]);
-
-const SUNNY_REGION_CODES = new Set([
-  ...AFRICAN_COUNTRY_CODES,
-  ...ARABIAN_PENINSULA_CODES,
-  ...SUNNY_MENA_SOUTH_ASIA_CODES,
-]);
+])
 
 /** Fallback when ISO code is missing from geocoder. */
 const SUNNY_REGION_NAMES = new Set([
@@ -188,7 +179,7 @@ export function isSunnyRegionCountry(
 ): boolean {
   if (countryCode) {
     const code = countryCode.trim().toLowerCase();
-    if (SUNNY_REGION_CODES.has(code)) return true;
+    if (SUNNY_COUNTRY_CODES.has(code)) return true;
   }
 
   if (!country) return false;

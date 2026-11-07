@@ -11,13 +11,15 @@ export function AppProviders({
   children,
   initialLanguage,
   formsEnabled = true,
+  sunnyCountry = false,
 }: {
   children: React.ReactNode;
   initialLanguage?: LanguageCode;
   formsEnabled?: boolean;
+  sunnyCountry?: boolean;
 }) {
   return (
-    <ThemeProvider>
+    <ThemeProvider sunnyCountry={sunnyCountry}>
       <ThemeColorMeta />
       <ThemeRegionSync />
       <FormsAvailabilityProvider enabled={formsEnabled}>
