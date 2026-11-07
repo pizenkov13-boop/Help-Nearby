@@ -2,7 +2,7 @@ import "server-only";
 
 import { isCountryBlocked, parseBlockedCountries } from "@/lib/regionBlock";
 import { siteConfig } from "@/lib/siteConfig";
-import { isSunnyRegionCountry } from "@/lib/sunnyRegions";
+import { isSunnyCountryCode } from "@/lib/sunnyRegions";
 
 /**
  * Runtime switches set only in the hosting dashboard (never in the repository):
@@ -22,10 +22,10 @@ export function formsDisabledForHeaders(headers: Headers): boolean {
 
 /**
  * True when the visitor's country (the same Vercel header as above) is in SUNNY_COUNTRY_CODES, so the
- * "Auto" theme starts light. Only this yes/no reaches the page; the country itself is not stored or logged.
+ * theme is light. Only this yes/no reaches the page; the country itself is not stored or logged.
  */
 export function sunnyCountryForHeaders(headers: Headers): boolean {
-  return isSunnyRegionCountry(null, headers.get("x-vercel-ip-country"));
+  return isSunnyCountryCode(headers.get("x-vercel-ip-country"));
 }
 
 export function formsDisabledForRequest(request: Request): boolean {

@@ -7,7 +7,6 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { BrandLogo } from "@/components/BrandLogo";
 import { AnchorNavLink } from "@/components/navigation/AnchorNavLink";
-import { ThemeSwitch } from "@/components/ThemeSwitch";
 import { openEmergencyHelp } from "@/lib/emergencyEvents";
 import { useLanguage } from "@/lib/i18n/LanguageProvider";
 import { cn } from "@/lib/utils";
@@ -247,13 +246,6 @@ export function MobileMenu({ open, onClose }: MobileMenuProps) {
             </>
           )}
         </nav>
-
-        <section className="mm-section" aria-labelledby="mm-theme-title">
-          <h3 id="mm-theme-title" className="mm-section-title">
-            {t("themeLabel")}
-          </h3>
-          <ThemeSwitch />
-        </section>
       </div>
     </div>,
     document.body,

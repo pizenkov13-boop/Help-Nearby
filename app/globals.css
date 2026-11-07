@@ -401,24 +401,6 @@ body {
       flex-shrink: 0;
     }
 
-    .theme-btn {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      width: 38px;
-      height: 38px;
-      flex-shrink: 0;
-      border-radius: 999px;
-      border: 1px solid var(--border-soft);
-      background: rgba(255, 255, 255, 0.03);
-      color: var(--text-muted);
-      transition: border-color 0.15s, background 0.15s, color 0.15s;
-    }
-    .theme-btn:hover {
-      border-color: var(--border-soft);
-      background: var(--hover-bg);
-      color: var(--hover-text);
-    }
   
     /* ---------- Hero ---------- */
     .hero {
@@ -1380,7 +1362,6 @@ section[id], .scroll-anchor { scroll-margin-top: 92px; }
   }
 
   /* ---- header controls share one look: pill, 1px border, same hover ---- */
-  .theme-btn,
   .lang-btn,
   .mobile-toggle,
   .emergency-icon-btn {
@@ -1399,11 +1380,10 @@ section[id], .scroll-anchor { scroll-margin-top: 92px; }
     font-weight: 600;
     transition: border-color 0.15s, background 0.15s, color 0.15s;
   }
-  .theme-btn { width: 40px; padding: 0; }
-  .theme-btn svg, .mobile-toggle svg, .emergency-icon-btn svg, .lang-btn svg {
+  .mobile-toggle svg, .emergency-icon-btn svg, .lang-btn svg {
     width: 18px; height: 18px; stroke-width: 2; flex-shrink: 0;
   }
-  .theme-btn:hover, .lang-btn:hover, .mobile-toggle:hover, .lang-wrap.open .lang-btn {
+  .lang-btn:hover, .mobile-toggle:hover, .lang-wrap.open .lang-btn {
     border-color: var(--border-soft);
     background: var(--hover-bg);
     color: var(--hover-text);
@@ -1523,13 +1503,11 @@ section[id], .scroll-anchor { scroll-margin-top: 92px; }
     .header-end { gap: 0; flex: 0 0 auto; }
     .header-toolbar { gap: 6px; }
 
-    .theme-btn, .lang-btn, .mobile-toggle, .emergency-icon-btn { height: 44px; min-width: 44px; }
-    .theme-btn { width: 44px; }
+    .lang-btn, .mobile-toggle, .emergency-icon-btn { height: 44px; min-width: 44px; }
     .mobile-toggle { display: inline-flex; width: 44px; }
     .emergency-icon-btn { display: inline-flex; width: 44px; }
     .lang-btn { padding: 0 12px; }
     .lang-btn .chev { display: none; }
-    .header-toolbar .theme-btn-desktop { display: none; }
 
 
     footer { padding: 40px max(20px, env(safe-area-inset-left)) calc(24px + env(safe-area-inset-bottom, 0px)) max(20px, env(safe-area-inset-right)); }
@@ -1654,35 +1632,6 @@ section[id], .scroll-anchor { scroll-margin-top: 92px; }
     color: var(--text-dim);
   }
 
-  .mm-section { margin-top: 24px; }
-  .mm-section-title {
-    margin: 0 0 10px;
-    font-size: 12px;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
-    color: var(--text-fade);
-  }
-  .theme-switch {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 4px;
-    padding: 4px;
-    border-radius: 14px;
-    border: 1px solid var(--border-soft);
-  }
-  .theme-switch-option {
-    min-height: 44px;
-    padding: 0 8px;
-    border-radius: 10px;
-    font-size: 15px;
-    font-weight: 600;
-    color: var(--text-dim);
-  }
-  .theme-switch-option.on {
-    color: var(--hover-text);
-    background: linear-gradient(135deg, rgba(59, 130, 246, 0.16), rgba(20, 184, 166, 0.12));
-  }
 }
 
 /* ================= home: design tokens, category tiles, trust line, phone bottom bar ================= */
@@ -2259,7 +2208,7 @@ html[lang="ar"] .home-trust { line-height: 1.5; }
   .urgent-call:hover { background: #059669; }
 
   /* Language sheet */
-  .lang-item.on, .theme-switch-option.on { background: var(--hn-accent-tint); color: var(--hn-text); }
+  .lang-item.on { background: var(--hn-accent-tint); color: var(--hn-text); }
   .lang-item-check { color: var(--hn-accent-text); }
   .lang-sheet { background: var(--hn-card); border-top: 1px solid var(--hn-line); border-radius: 20px 20px 0 0; box-shadow: none; }
 }

@@ -2,9 +2,7 @@
 
 import type { LanguageCode } from "@/lib/types";
 import { LanguageProvider } from "@/lib/i18n/LanguageProvider";
-import { ThemeProvider } from "@/components/providers/ThemeProvider";
-import { ThemeColorMeta } from "@/components/ThemeColorMeta";
-import { ThemeRegionSync } from "@/components/ThemeRegionSync";
+import { AutoTheme } from "@/components/AutoTheme";
 import { FormsAvailabilityProvider } from "@/components/providers/FormsAvailability";
 
 export function AppProviders({
@@ -19,12 +17,11 @@ export function AppProviders({
   sunnyCountry?: boolean;
 }) {
   return (
-    <ThemeProvider sunnyCountry={sunnyCountry}>
-      <ThemeColorMeta />
-      <ThemeRegionSync />
+    <>
+      <AutoTheme sunnyCountry={sunnyCountry} />
       <FormsAvailabilityProvider enabled={formsEnabled}>
         <LanguageProvider initialLanguage={initialLanguage}>{children}</LanguageProvider>
       </FormsAvailabilityProvider>
-    </ThemeProvider>
+    </>
   );
 }

@@ -274,10 +274,6 @@ export type TranslationKey =
   | "reviewsFormName"
   | "reviewsFormNamePlaceholder"
   | "chatClose"
-  | "themeToLight"
-  | "themeToDark"
-  | "themeLight"
-  | "themeDark"
   | "pageLoading"
   | "notFoundTitle"
   | "notFoundText"
@@ -325,10 +321,6 @@ export type TranslationKey =
   | "searchRadiusWithin"
   | "searchExpand"
   | "menuTitle"
-  | "themeLabel"
-  | "themeOptionAuto"
-  | "themeOptionLight"
-  | "themeOptionDark"
   | "hoursNotListed"
   | "mapTwoFingerHint"
   | "closeLabel"
@@ -662,10 +654,6 @@ const en: Record<TranslationKey, string> = {
   reviewsFormName: "Name or nickname (optional)",
   reviewsFormNamePlaceholder: "e.g. Anna / Omar",
   chatClose: "Close chat",
-  themeToLight: "Switch to light mode",
-  themeToDark: "Switch to dark mode",
-  themeLight: "Light mode",
-  themeDark: "Dark mode",
   pageLoading: "Loading…",
   notFoundTitle: "Page not found",
   notFoundText: "The page you are looking for does not exist or has moved.",
@@ -714,10 +702,6 @@ const en: Record<TranslationKey, string> = {
   searchRadiusWithin: "Showing results within {km} km",
   searchExpand: "Expand search",
   menuTitle: "Menu",
-  themeLabel: "Theme",
-  themeOptionAuto: "Auto",
-  themeOptionLight: "Light",
-  themeOptionDark: "Dark",
   hoursNotListed: "Opening hours not listed. Check the source website or call before you go.",
   mapTwoFingerHint: "Use two fingers to move the map",
   closeLabel: "Close",
@@ -1059,10 +1043,6 @@ const ru: Record<TranslationKey, string> = {
   reviewsFormName: "Имя или псевдоним (необязательно)",
   reviewsFormNamePlaceholder: "Например: Анна / Omar",
   chatClose: "Закрыть чат",
-  themeToLight: "Включить светлую тему",
-  themeToDark: "Включить тёмную тему",
-  themeLight: "Светлая тема",
-  themeDark: "Тёмная тема",
   pageLoading: "Загрузка…",
   notFoundTitle: "Страница не найдена",
   notFoundText: "Такой страницы нет или она переехала.",
@@ -1111,10 +1091,6 @@ const ru: Record<TranslationKey, string> = {
   searchRadiusWithin: "Показаны результаты в радиусе {km} км",
   searchExpand: "Расширить поиск",
   menuTitle: "Меню",
-  themeLabel: "Тема",
-  themeOptionAuto: "Авто",
-  themeOptionLight: "Светлая",
-  themeOptionDark: "Тёмная",
   hoursNotListed: "Часы работы не указаны. Проверьте сайт источника или позвоните перед визитом.",
   mapTwoFingerHint: "Двигайте карту двумя пальцами",
   closeLabel: "Закрыть",
@@ -1456,10 +1432,6 @@ const es: Record<TranslationKey, string> = {
   reviewsFormName: "Nombre o apodo (opcional)",
   reviewsFormNamePlaceholder: "p. ej., Ana / Omar",
   chatClose: "Cerrar el chat",
-  themeToLight: "Cambiar al modo claro",
-  themeToDark: "Cambiar al modo oscuro",
-  themeLight: "Modo claro",
-  themeDark: "Modo oscuro",
   pageLoading: "Cargando…",
   notFoundTitle: "Página no encontrada",
   notFoundText: "La página que buscas no existe o se ha movido.",
@@ -1509,10 +1481,6 @@ const es: Record<TranslationKey, string> = {
   searchRadiusWithin: "Mostrando resultados dentro de {km} km",
   searchExpand: "Ampliar búsqueda",
   menuTitle: "Menú",
-  themeLabel: "Tema",
-  themeOptionAuto: "Automático",
-  themeOptionLight: "Clara",
-  themeOptionDark: "Oscura",
   hoursNotListed: "Horario no disponible. Consulta el sitio web de la fuente o llama antes de ir.",
   mapTwoFingerHint: "Usa dos dedos para mover el mapa",
   closeLabel: "Cerrar",
@@ -1855,10 +1823,6 @@ const fr: Record<TranslationKey, string> = {
   reviewsFormName: "Nom ou pseudonyme (facultatif)",
   reviewsFormNamePlaceholder: "p. ex. Anna / Omar",
   chatClose: "Fermer le chat",
-  themeToLight: "Passer en mode clair",
-  themeToDark: "Passer en mode sombre",
-  themeLight: "Mode clair",
-  themeDark: "Mode sombre",
   pageLoading: "Chargement…",
   notFoundTitle: "Page introuvable",
   notFoundText: "La page que vous cherchez n'existe pas ou a été déplacée.",
@@ -1908,10 +1872,6 @@ const fr: Record<TranslationKey, string> = {
   searchRadiusWithin: "Résultats affichés dans un rayon de {km} km",
   searchExpand: "Élargir la recherche",
   menuTitle: "Menu",
-  themeLabel: "Thème",
-  themeOptionAuto: "Automatique",
-  themeOptionLight: "Claire",
-  themeOptionDark: "Sombre",
   hoursNotListed: "Horaires non renseignés. Consultez le site source ou appelez avant de vous déplacer.",
   mapTwoFingerHint: "Utilisez deux doigts pour déplacer la carte",
   closeLabel: "Fermer",
@@ -2255,10 +2215,6 @@ const de: Record<TranslationKey, string> = {
   reviewsFormName: "Name oder Spitzname (optional)",
   reviewsFormNamePlaceholder: "z. B. Anna / Omar",
   chatClose: "Chat schließen",
-  themeToLight: "Zum hellen Modus wechseln",
-  themeToDark: "Zum dunklen Modus wechseln",
-  themeLight: "Heller Modus",
-  themeDark: "Dunkler Modus",
   pageLoading: "Wird geladen…",
   notFoundTitle: "Seite nicht gefunden",
   notFoundText: "Die gesuchte Seite existiert nicht oder wurde verschoben.",
@@ -2308,10 +2264,6 @@ const de: Record<TranslationKey, string> = {
   searchRadiusWithin: "Ergebnisse innerhalb von {km} km",
   searchExpand: "Suche erweitern",
   menuTitle: "Menü",
-  themeLabel: "Design",
-  themeOptionAuto: "Automatisch",
-  themeOptionLight: "Hell",
-  themeOptionDark: "Dunkel",
   hoursNotListed: "Öffnungszeiten nicht angegeben. Prüfen Sie die Website der Quelle oder rufen Sie vorher an.",
   mapTwoFingerHint: "Mit zwei Fingern die Karte bewegen",
   closeLabel: "Schließen",
@@ -2644,10 +2596,6 @@ const zh: Record<TranslationKey, string> = {
   reviewsFormName: "姓名或昵称（可选）",
   reviewsFormNamePlaceholder: "例如：Anna / Omar",
   chatClose: "关闭聊天",
-  themeToLight: "切换到浅色模式",
-  themeToDark: "切换到深色模式",
-  themeLight: "浅色模式",
-  themeDark: "深色模式",
   pageLoading: "加载中…",
   notFoundTitle: "页面未找到",
   notFoundText: "您要找的页面不存在或已被移动。",
@@ -2694,10 +2642,6 @@ const zh: Record<TranslationKey, string> = {
   searchRadiusWithin: "显示 {km} 公里范围内结果",
   searchExpand: "扩大搜索范围",
   menuTitle: "菜单",
-  themeLabel: "主题",
-  themeOptionAuto: "自动",
-  themeOptionLight: "浅色",
-  themeOptionDark: "深色",
   hoursNotListed: "未提供营业时间。出发前请查看来源网站或先致电确认。",
   mapTwoFingerHint: "请用双指移动地图",
   closeLabel: "关闭",
@@ -3036,10 +2980,6 @@ const ar: Record<TranslationKey, string> = {
   reviewsFormName: "الاسم أو اللقب (اختياري)",
   reviewsFormNamePlaceholder: "مثال: Anna / Omar",
   chatClose: "إغلاق الدردشة",
-  themeToLight: "التبديل إلى الوضع الفاتح",
-  themeToDark: "التبديل إلى الوضع الداكن",
-  themeLight: "الوضع الفاتح",
-  themeDark: "الوضع الداكن",
   pageLoading: "جارٍ التحميل…",
   notFoundTitle: "الصفحة غير موجودة",
   notFoundText: "الصفحة التي تبحث عنها غير موجودة أو تم نقلها.",
@@ -3088,10 +3028,6 @@ const ar: Record<TranslationKey, string> = {
   searchRadiusWithin: "عرض النتائج ضمن {km} كم",
   searchExpand: "توسيع البحث",
   menuTitle: "القائمة",
-  themeLabel: "المظهر",
-  themeOptionAuto: "تلقائي",
-  themeOptionLight: "فاتح",
-  themeOptionDark: "داكن",
   hoursNotListed: "ساعات العمل غير مذكورة. تحقق من موقع المصدر أو اتصل قبل الذهاب.",
   mapTwoFingerHint: "استخدم إصبعين لتحريك الخريطة",
   closeLabel: "إغلاق",

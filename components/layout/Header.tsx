@@ -4,7 +4,6 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { ChevronDown, Menu, Siren, X } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { ThemeToggle } from "@/components/ThemeToggle";
 import { BrandLogo } from "@/components/BrandLogo";
 import { LanguageMenu } from "@/components/layout/LanguageMenu";
 import { MobileMenu } from "@/components/layout/MobileMenu";
@@ -275,8 +274,6 @@ export function Header() {
                 setLanguage(code as LanguageCode);
               }}
             />
-
-            <ThemeToggle className="theme-btn-desktop" />
 
             <button
               type="button"

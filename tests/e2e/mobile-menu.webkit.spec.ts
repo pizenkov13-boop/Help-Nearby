@@ -10,8 +10,6 @@ test.use({ colorScheme: "dark" });
 
 test("open menu is a tall full-screen layer with every item visible and clickable", async ({ page }) => {
   await preferFullMode(page);
-  // Registered after preferFullMode, so it runs after that script clears storage.
-  await page.addInitScript(() => localStorage.setItem("help-nearby-theme", "dark"));
   await mockNearbyApi(page);
   await page.goto("/");
   await page.waitForLoadState("networkidle");
@@ -40,8 +38,6 @@ test("open menu is a tall full-screen layer with every item visible and clickabl
       "Reviews & Suggestions",
       "Recently added",
     ].map((name) => menu.getByRole("link", { name, exact: true })),
-    // The language lives in the header; the menu ends with the three-option theme switch.
-    ...["Auto", "Light", "Dark"].map((name) => menu.getByRole("radio", { name, exact: true })),
   ];
   for (const item of items) {
     await item.scrollIntoViewIfNeeded();
