@@ -711,7 +711,7 @@ export function HomePage() {
                       </span>
                     )}
                     {osmPartial && !(verifiedOnlyNotice || osmUnavailable) && (
-                      <span className="map-badge amber" data-testid="osm-partial">
+                      <span className="map-badge blue" data-testid="osm-partial">
                         {t("osmPartialNotice")}
                       </span>
                     )}
@@ -766,7 +766,7 @@ export function HomePage() {
                         type="button"
                         onClick={handleExpandSearch}
                         disabled={sourcesLoading}
-                        className="min-h-11 rounded-full border border-blue-500/40 bg-blue-500/10 px-4 py-1 text-sm font-semibold text-blue-700 transition-colors hover:bg-blue-500/20 disabled:opacity-50 md:min-h-0 md:px-3 md:text-xs dark:text-blue-300"
+                        className="accent-pill min-h-11 rounded-full px-4 py-1 text-sm font-semibold transition-colors disabled:opacity-50 md:min-h-0 md:px-3 md:text-xs"
                       >
                         {t("searchExpand")}
                       </button>
@@ -830,7 +830,7 @@ export function HomePage() {
                         ? handleSwitchToFullVersion
                         : handleSwitchToLiteVersion
                     }
-                    className="mt-4 min-h-11 w-full rounded-lg border border-blue-500/40 bg-blue-500/10 px-4 py-2.5 text-sm font-medium text-blue-700 transition-colors hover:bg-blue-500/20 max-lg:order-5 max-lg:mt-0 dark:text-blue-300"
+                    className="accent-pill mt-4 min-h-11 w-full rounded-lg px-4 py-2.5 text-sm font-medium transition-colors max-lg:order-5 max-lg:mt-0"
                   >
                     {liteModeActive
                       ? t("switchToFullVersion")

@@ -31,6 +31,48 @@ async function openPanel(page: Page) {
   await expect(page.locator("#org-search")).toBeVisible({ timeout: 30_000 });
 }
 
+test.describe("Search field, location block and accent colour (dark theme)", () => {
+  test("short search label, no stray dot, one accent colour for buttons, notice and the active filter", async ({ page }) => {
+    await page.emulateMedia({ colorScheme: "dark" });
+    await setup(page);
+    await page.route(/\/api\/geocode\/reverse/, (route) =>
+      json(route, { country: "United States", countryCode: "US", place: "Midtown, New York" }),
+    );
+    await openPanel(page);
+
+    // The field says what it is for, without a cut-off text.
+    await expect(page.locator("#org-search")).toHaveAttribute("placeholder", "Search by city");
+
+    // Location block: no dot, "Change place" sits under the text, both start at the same x.
+    const chip = page.getByTestId("place-chip");
+    await expect(chip).toBeVisible();
+    expect(await chip.innerText()).not.toContain("·");
+    const label = (await page.getByTestId("place-label").boundingBox())!;
+    const change = (await page.getByTestId("change-place").boundingBox())!;
+    expect(Math.abs(label.x - change.x)).toBeLessThanOrEqual(1);
+    expect(change.y).toBeGreaterThanOrEqual(label.y + label.height - 1);
+
+    // One look: the lite-mode button, the active "All categories" filter and the blue notice badge.
+    await page.evaluate(() => {
+      const badge = document.createElement("span");
+      badge.className = "map-badge blue";
+      badge.id = "probe-badge";
+      badge.textContent = "x";
+      document.querySelector(".map-panel")!.appendChild(badge);
+    });
+    const look = (selector: string) =>
+      page.locator(selector).first().evaluate((el) => {
+        const s = getComputedStyle(el);
+        return [s.backgroundColor, s.borderTopColor, s.color].join("|");
+      });
+    const lite = await look('button:has-text("Switch to lite mode")');
+    expect(lite).toContain("rgba(59, 130, 246, 0.1)");
+    expect(lite).toContain("rgb(147, 197, 253)");
+    expect(await look('button[aria-pressed="true"]:has-text("All categories")')).toBe(lite);
+    expect(await look("#probe-badge")).toBe(lite);
+  });
+});
+
 test.describe("Which place the results are for", () => {
   test("the bar names the place and the position goes in the POST body", async ({ page }) => {
     await setup(page);

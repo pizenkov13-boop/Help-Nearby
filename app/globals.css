@@ -1047,14 +1047,9 @@ body {
   background: rgba(245, 158, 11, 0.1);
 }
 .map-panel .map-badge.blue {
-  color: #1d4ed8;
-  border-color: rgba(59, 130, 246, 0.35);
-  background: rgba(59, 130, 246, 0.12);
-}
-.dark .map-panel .map-badge.blue {
-  color: #93c5fd;
-  border-color: rgba(59, 130, 246, 0.3);
-  background: rgba(59, 130, 246, 0.1);
+  color: var(--accent-pill-text);
+  border-color: var(--accent-pill-border);
+  background: var(--accent-pill-bg);
 }
 
 /* Inner pages */
@@ -2413,4 +2408,31 @@ html.dark .os-badge.warn { color: #e6c27a; background: #2e2718; }
   .header-toolbar .emergency-icon-btn { display: inline-flex; width: 44px; height: 44px; }
   .header-toolbar .mobile-toggle { display: inline-flex; width: 44px; height: 44px; }
   .header .nav { display: none; }
+}
+
+/*
+ * One accent look for buttons and badges: the "Switch to lite mode" button (blue-500 at 10% on the card,
+ * 40% border, blue text). Used by .accent-pill (buttons), .map-badge.blue (notices) and the active
+ * "All categories" filter (.fpill-accent).
+ */
+:root {
+  --accent-pill-bg: rgba(59, 130, 246, 0.1);
+  --accent-pill-border: rgba(59, 130, 246, 0.4);
+  --accent-pill-text: #1d4ed8;
+}
+.dark {
+  --accent-pill-text: #93c5fd;
+}
+.accent-pill {
+  border: 1px solid var(--accent-pill-border);
+  background: var(--accent-pill-bg);
+  color: var(--accent-pill-text);
+}
+.accent-pill:hover:not(:disabled) {
+  background: rgba(59, 130, 246, 0.2);
+}
+.fpill.fpill-on.fpill-accent {
+  border-color: var(--accent-pill-border) !important;
+  background: var(--accent-pill-bg) !important;
+  color: var(--accent-pill-text) !important;
 }

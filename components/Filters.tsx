@@ -129,7 +129,7 @@ export function CategoryPill({
         "dark:border-gray-700 dark:text-gray-300 dark:hover:border-gray-600",
         "lg:min-h-0 lg:gap-1 lg:px-3 lg:py-1 lg:text-xs",
         active && "fpill-on",
-        active && (activeClass ?? "border-blue-500/50 bg-blue-500/15 text-blue-700 dark:bg-blue-500/20 dark:text-blue-300"),
+        active && (activeClass ?? "fpill-accent"),
       )}
     >
       {category && <CategoryIcon category={category} className="h-4 w-4 lg:h-3.5 lg:w-3.5" />}
