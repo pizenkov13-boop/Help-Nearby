@@ -258,7 +258,7 @@ export function OrganizationCard({
     return (
       <article
         className={cn(
-          "group w-full max-w-full min-w-0 overflow-hidden rounded-xl border border-slate-200 bg-white transition-all hover:border-slate-300 hover:bg-slate-50 hover:shadow-lg hover:shadow-blue-500/5 dark:border-gray-800 dark:bg-gray-800/60 dark:hover:border-gray-700 dark:hover:bg-gray-800",
+          "group w-full max-w-full min-w-0 overflow-hidden rounded-xl border border-slate-200 bg-white dark:border-gray-800 dark:bg-gray-800/60",
           selected && "border-blue-500/50 ring-1 ring-blue-500/30",
           org.verified && "border-blue-500/20",
         )}
@@ -306,7 +306,7 @@ export function OrganizationCard({
   return (
     <article
       className={cn(
-        "org-card group w-full max-w-full min-w-0 overflow-hidden rounded-xl border border-slate-200 bg-white transition-all hover:border-slate-300 hover:shadow-lg hover:shadow-blue-500/5 dark:border-gray-800 dark:bg-gray-800/60 dark:hover:border-gray-700",
+        "org-card group w-full max-w-full min-w-0 overflow-hidden rounded-xl border border-slate-200 bg-white dark:border-gray-800 dark:bg-gray-800/60",
         selected && "border-blue-500/50 ring-1 ring-blue-500/30",
         org.verified && "border-blue-500/20",
       )}
