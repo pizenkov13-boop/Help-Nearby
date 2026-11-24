@@ -47,7 +47,7 @@ export function CitiesSection() {
 
         <div className="cities-grid">
           {citiesInNeed.map((city) => (
-            <article key={city.city} className="city-card">
+            <article key={city.id} className="city-card">
               <div className="city-head">
                 <h3>
                   {city.city}

@@ -690,12 +690,13 @@ body {
     }
     .city-card {
       position: relative;
+      display: flex;
+      flex-direction: column;
       background: var(--surface-card);
       border: 1px solid var(--border-softer);
       border-radius: var(--radius);
       padding: 28px 26px 26px;
       padding-top: 56px;
-      transition: transform .25s ease, border-color .25s;
       overflow: hidden;
     }
     .city-card::before {
@@ -706,22 +707,18 @@ body {
       background: var(--gradient-brand);
       border-radius: var(--radius) var(--radius) 0 0;
     }
-    .city-card:hover {
-      border-color: var(--border-soft);
-      transform: translateY(-3px);
-    }
     .city-head {
-      display: flex;
-      flex-wrap: wrap;
-      align-items: flex-start;
-      justify-content: space-between;
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      align-items: start;
       gap: 10px 12px;
+      min-height: 64px;
       margin-bottom: 4px;
     }
     .city-head h3 {
       margin: 0;
-      flex: 1 1 12rem;
       min-width: 0;
+      overflow-wrap: anywhere;
       font-family: "DM Sans", sans-serif;
       font-size: clamp(20px, 2.2vw, 26px);
       font-weight: 700;
@@ -772,9 +769,18 @@ body {
     .dark .badge-high { color: #93c5fd; }
     .dark .badge-medium,
     .dark .badge-vulnerable { color: #fcd34d; }
+    .city-head .badge {
+      max-width: min(150px, 45vw);
+      justify-content: center;
+      text-align: center;
+      white-space: normal;
+      overflow-wrap: anywhere;
+      line-height: 1.25;
+    }
     .city-rows {
       display: flex;
       flex-direction: column;
+      flex: 1;
       gap: 16px;
       margin-top: 18px;
     }
@@ -818,7 +824,7 @@ body {
     }
     .city-row .icon svg { width: 15px; height: 15px; }
     .city-source {
-      margin-top: 4px;
+      margin: auto 0 0;
       padding-top: 14px;
       border-top: 1px solid var(--border-softer);
       font-size: 12px;
