@@ -6,7 +6,7 @@ import { ArrowLeft, Loader2, LocateFixed, RotateCw } from "lucide-react";
 import { formatKm, useDistanceUnit } from "@/lib/distanceUnits";
 import { useLanguage } from "@/lib/i18n/LanguageProvider";
 import { requestPosition } from "@/lib/locationRequest";
-import { ROUTE_OPEN_EVENT, SHEET_CLOSE_EVENT, openOrganizationSheet } from "@/lib/orgActions";
+import { ROUTE_OPEN_EVENT, restoreTrigger } from "@/lib/orgActions";
 import {
   getOrganizationCoordinates,
   organizationHasTrustedCoordinates,
@@ -40,17 +40,16 @@ export function RouteScreen() {
   const backRef = useRef<HTMLButtonElement>(null);
 
   const close = useCallback(
-    (reopenSheet: boolean) => {
-      const current = org;
+    () => {
       setOrg(null);
       setRoute(null);
       setOrigin(null);
       setDestination(null);
       setDenied(false);
       setFailed(false);
-      if (reopenSheet && current) openOrganizationSheet(current);
+      restoreTrigger();
     },
-    [org],
+    [],
   );
 
   function askForLocation() {
@@ -74,7 +73,6 @@ export function RouteScreen() {
     const onOpen = (event: Event) => {
       const next = (event as CustomEvent<Organization>).detail;
       if (!next) return;
-      window.dispatchEvent(new CustomEvent(SHEET_CLOSE_EVENT));
       setRoute(null);
       setFailed(false);
       setDenied(false);
@@ -143,7 +141,7 @@ export function RouteScreen() {
   useEffect(() => {
     if (!org) return;
     const onKey = (event: KeyboardEvent) => {
-      if (event.key === "Escape") close(true);
+      if (event.key === "Escape") close();
     };
     document.addEventListener("keydown", onKey);
     const previous = document.body.style.overflow;
@@ -168,7 +166,7 @@ export function RouteScreen() {
   return (
     <div className="rt-screen" role="dialog" aria-modal="true" aria-labelledby="rt-title" data-testid="route-screen">
       <header className="rt-head">
-        <button ref={backRef} type="button" className="rt-back" onClick={() => close(true)}>
+        <button ref={backRef} type="button" className="rt-back" onClick={close}>
           <ArrowLeft aria-hidden className="rtl:rotate-180" />
           {t("routeBack")}
         </button>

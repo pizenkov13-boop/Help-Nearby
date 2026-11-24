@@ -122,22 +122,16 @@ test.describe("Loading, empty and error states", () => {
 test.describe("Keyboard, focus and motion", () => {
   test.use({ viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true });
 
-  test("the organization sheet closes on Esc and gives the focus back", async ({ page }) => {
+  test("organization names do not open a detail sheet", async ({ page }) => {
     await preferFullMode(page);
     await mockNearbyApi(page);
     await grantNycLocation(page);
     await page.goto("/");
     await page.getByRole("button", { name: /Find Help Near Me/i }).click();
-    const title = page.locator(".map-panel article").first().getByRole("button", { name: MOCK_NEARBY_ORGS[0].name });
-    await expect(title).toBeVisible({ timeout: 30_000 });
-    await title.focus();
-    await page.keyboard.press("Enter");
-    const sheet = page.getByTestId("org-sheet");
-    await expect(sheet).toBeVisible();
-    await expect(sheet.getByRole("dialog")).toHaveAttribute("aria-labelledby", "os-title");
-    await page.keyboard.press("Escape");
-    await expect(sheet).toHaveCount(0);
-    await expect(title).toBeFocused();
+    const card = page.locator(".map-panel article").first();
+    await expect(card.getByRole("heading", { name: MOCK_NEARBY_ORGS[0].name })).toBeVisible({ timeout: 30_000 });
+    await expect(card.getByRole("button", { name: MOCK_NEARBY_ORGS[0].name })).toHaveCount(0);
+    await expect(page.getByTestId("org-sheet")).toHaveCount(0);
   });
 
   test("keyboard focus is visible and icon buttons have names", async ({ page }) => {

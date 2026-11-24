@@ -85,4 +85,27 @@ test.describe("Map tiles", () => {
     await page.evaluate(() => document.documentElement.classList.remove("dark"));
     await expect.poll(() => filter(".leaflet-tile-pane")).toBe("none");
   });
+
+  test("keeps the location marker visible when the map panel is resized", async ({ page }) => {
+    await page.route(/tile\.openstreetmap\.org/, (route) => route.fulfill({
+      status: 200,
+      contentType: "image/png",
+      body: Buffer.from("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==", "base64"),
+    }));
+    await openMapWithOrgs(page);
+    const host = page.locator(".leaflet-container").first();
+    const marker = host.locator(".user-location-marker");
+    await expect(marker).toBeVisible();
+    const before = await host.boundingBox();
+    await host.evaluate((element) => {
+      const parent = element.parentElement;
+      if (parent) parent.style.width = "70%";
+    });
+    await expect.poll(async () => (await host.boundingBox())?.width).toBeLessThan(before!.width);
+    await expect.poll(async () => {
+      const bounds = await host.boundingBox();
+      const pin = await marker.boundingBox();
+      return !!bounds && !!pin && pin.x + pin.width / 2 >= bounds.x && pin.x + pin.width / 2 <= bounds.x + bounds.width;
+    }).toBe(true);
+  });
 });

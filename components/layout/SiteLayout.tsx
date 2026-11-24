@@ -2,7 +2,6 @@
 
 import { EmergencyHelp } from "@/components/EmergencyHelp";
 import { BottomBar } from "@/components/layout/BottomBar";
-import { OrganizationSheet } from "@/components/route/OrganizationSheet";
 import { RouteScreen } from "@/components/route/RouteScreen";
 import { Header } from "@/components/layout/Header";
 import { ScrollToHash } from "@/components/layout/ScrollToHash";
@@ -27,7 +26,6 @@ export function SiteLayout({ children }: SiteLayoutProps) {
       <main className="flex-1">{children}</main>
       <SiteFooter />
       <BottomBar />
-      <OrganizationSheet />
       <RouteScreen />
     </div>
   );

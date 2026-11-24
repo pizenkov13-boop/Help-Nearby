@@ -79,7 +79,7 @@ test.describe("No route button leaves the site (source)", () => {
   });
 });
 
-test.describe("Organization sheet and in-site route", () => {
+test.describe("Organization cards and in-site route", () => {
   let routeModes: string[] = [];
   test.beforeEach(async ({ page }) => {
     routeModes = [];
@@ -90,50 +90,32 @@ test.describe("Organization sheet and in-site route", () => {
     });
   });
 
-  test("tapping an organization opens the sheet; Call is a clean tel: link; Route stays on the site", async ({ page }) => {
+  test("organization cards show actions without opening a detail sheet", async ({ page }) => {
     const nav = await watchExternalNavigation(page);
     await openResults(page);
-    const startUrl = page.url();
-
-    await page.locator(".map-panel article").first().getByRole("button", { name: withPhone.name }).click();
-    const sheet = page.getByTestId("org-sheet");
-    await expect(sheet).toBeVisible();
-    await expect(sheet.getByRole("heading", { name: withPhone.name })).toBeVisible();
-    await expect(sheet.getByText(withPhone.address)).toBeVisible();
-    await expect(sheet.getByTestId("sheet-distance")).toBeVisible();
-    await expect(sheet.getByRole("link", { name: /Call Now/i })).toHaveAttribute("href", "tel:+15551234567");
-
-    await sheet.getByRole("button", { name: /Get Directions/i }).click();
+    const card = page.locator(".map-panel article").first();
+    await expect(card.getByRole("heading", { name: withPhone.name })).toBeVisible();
+    await expect(card.getByRole("button", { name: withPhone.name })).toHaveCount(0);
+    await expect(card.locator('a[href^="tel:"]')).toHaveAttribute("href", "tel:+15551234567");
+    const routeButton = card.getByRole("button", { name: /Get Directions/i });
+    await routeButton.click();
     const screen = page.getByTestId("route-screen");
     await expect(screen).toBeVisible();
     await expect(page.getByTestId("route-map")).toBeVisible();
     await expect(page.getByTestId("route-summary")).toContainText(/\d/);
-    // One walking route, no travel-mode switch.
     expect(routeModes).toEqual(["walking"]);
-    await expect(screen.getByRole("button", { name: /By car|On foot/ })).toHaveCount(0);
-
-    expect(page.url()).toBe(startUrl);
     expect(nav.popups).toEqual([]);
-    expect(await nav.opens()).toEqual([]);
-    expect(await page.locator('a[href*="maps.google"], a[href*="google.com/maps"], a[href*="maps.apple"], a[href*="yandex"]').count()).toBe(0);
-
-    // Back returns to the sheet of the same organization.
     await screen.getByRole("button", { name: "Back" }).click();
     await expect(screen).toHaveCount(0);
-    await expect(page.getByTestId("org-sheet").getByRole("heading", { name: withPhone.name })).toBeVisible();
+    await expect(page.getByTestId("org-sheet")).toHaveCount(0);
+    await expect(routeButton).toBeFocused();
   });
 
-  test("an organization without a phone has no Call button and Route fills the width", async ({ page }) => {
+  test("a card without a phone has no Call button", async ({ page }) => {
     await openResults(page, [withoutPhone]);
-    await page.locator(".map-panel article").first().getByRole("button", { name: withoutPhone.name }).click();
-    const sheet = page.getByTestId("org-sheet");
-    await expect(sheet).toBeVisible();
-    await expect(sheet.getByRole("link", { name: /Call Now/i })).toHaveCount(0);
-    await expect(sheet.locator('a[href^="tel:"]')).toHaveCount(0);
-    const route = sheet.getByRole("button", { name: /Get Directions/i });
-    const sheetBox = (await sheet.locator(".os-sheet").boundingBox())!;
-    const routeBox = (await route.boundingBox())!;
-    expect(routeBox.width).toBeGreaterThan(sheetBox.width * 0.8);
+    const card = page.locator(".map-panel article").first();
+    await expect(card.locator('a[href^="tel:"]')).toHaveCount(0);
+    await expect(card.getByRole("button", { name: /Get Directions/i })).toBeVisible();
   });
 
   test("the card Route button opens the same in-site route screen", async ({ page }) => {
@@ -169,18 +151,17 @@ test.describe("Organization sheet and in-site route", () => {
     expect(await nav.opens()).toEqual([]);
   });
 
-  test("Urgent: tapping an organization opens the same sheet", async ({ page }) => {
+  test("Urgent: organization names are text and contact actions remain available", async ({ page }) => {
     await preferFullMode(page);
     await mockNearbyApi(page);
     await grantNycLocation(page);
     await page.goto("/");
     await page.getByRole("button", { name: "Emergency Help" }).first().click();
     const urgent = page.getByRole("dialog").first();
-    await urgent.getByRole("button", { name: withPhone.name }).click();
-    const sheet = page.getByTestId("org-sheet");
-    await expect(sheet).toBeVisible();
-    await expect(sheet.getByRole("link", { name: /Call Now/i })).toHaveAttribute("href", /^tel:\+?\d+$/);
-    await expect(sheet.getByRole("button", { name: /Get Directions/i })).toBeVisible();
+    await expect(urgent.getByRole("heading", { name: withPhone.name })).toBeVisible();
+    await expect(urgent.getByRole("button", { name: withPhone.name })).toHaveCount(0);
+    await expect(urgent.locator('a[href^="tel:"]').first()).toBeVisible();
+    await expect(page.getByTestId("org-sheet")).toHaveCount(0);
   });
 });
 

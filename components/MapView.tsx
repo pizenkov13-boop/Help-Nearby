@@ -352,7 +352,18 @@ export default function MapView({
     mapRef.current = map;
     setMapReady(true);
 
+    // The map can mount while its panel is still expanding or changing layout.
+    // Keep Leaflet's internal dimensions in sync with the actual visible area.
+    let resizeFrame = 0;
+    const resizeObserver = new ResizeObserver(() => {
+      cancelAnimationFrame(resizeFrame);
+      resizeFrame = requestAnimationFrame(() => map.invalidateSize({ pan: false }));
+    });
+    resizeObserver.observe(container);
+
     return () => {
+      resizeObserver.disconnect();
+      cancelAnimationFrame(resizeFrame);
       container.removeEventListener("touchmove", onTouchMove);
       clearTimeout(hintTimer);
       setMapReady(false);
