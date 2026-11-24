@@ -83,6 +83,31 @@ test.describe("Recently added organizations", () => {
     await expect(page.getByRole("button", { name: "Try again" })).toBeVisible();
   });
 
+  test("shows category badges in the selected language", async ({ page }) => {
+    await mockRecentApi(page);
+    await page.goto("/recent");
+    await page.getByRole("button", { name: /language/i }).click();
+    await page.getByRole("menuitem", { name: "Русский" }).click();
+    await page.getByRole("button", { name: "Еда", exact: true }).click();
+    const cards = page.getByTestId("recent-list").locator("article");
+    await expect(cards).toHaveCount(2);
+    await expect(cards.nth(0).getByText("Еда", { exact: true })).toBeVisible();
+    await expect(cards.nth(1).getByText("Приют", { exact: true })).toBeVisible();
+    await expect(cards.getByText("food", { exact: true })).toHaveCount(0);
+  });
+
+  test("country selector rotates its arrow when opened", async ({ page }) => {
+    await page.goto("/recent");
+    const trigger = page.getByRole("button", { name: /Country.*All countries/i });
+    const arrow = trigger.locator(".country-select-chevron");
+    await expect(trigger).toHaveAttribute("aria-expanded", "false");
+    await trigger.click();
+    await expect(trigger).toHaveAttribute("aria-expanded", "true");
+    await expect.poll(() => arrow.evaluate((el) => getComputedStyle(el).transform)).toBe("matrix(-1, 0, 0, -1, 0, 0)");
+    await page.keyboard.press("Escape");
+    await expect(trigger).toHaveAttribute("aria-expanded", "false");
+  });
+
   test("localizes and switches to RTL for Arabic", async ({ page }) => {
     await page.goto("/recent");
     await page.getByRole("button", { name: /language/i }).click();

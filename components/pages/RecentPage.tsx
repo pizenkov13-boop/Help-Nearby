@@ -9,6 +9,7 @@ import { OrganizationListSkeleton } from "@/components/OrganizationCardSkeleton"
 import { CATEGORIES, CATEGORY_CONFIG } from "@/lib/categories";
 import type { RecentOrganizationsPage } from "@/lib/data";
 import { useLanguage } from "@/lib/i18n/LanguageProvider";
+import { localizeCountry } from "@/lib/i18n/countries";
 import { getOrganizationSource } from "@/lib/organizationSource";
 import type { Category, Organization } from "@/lib/types";
 import { cn } from "@/lib/utils";
@@ -157,7 +158,7 @@ export function RecentPage({ initial, countries }: RecentPageProps) {
                 if (event.key === "Escape") { setCountryOpen(false); countryRef.current?.querySelector<HTMLButtonElement>("button")?.focus(); }
               }}>
                 <button type="button" className="country-select-trigger" aria-labelledby="recent-country-label recent-country-value" aria-expanded={countryOpen} aria-haspopup="listbox" onClick={() => setCountryOpen(!countryOpen)}>
-                  <span id="recent-country-value">{filters.country || t("filterCountryAll")}</span><ChevronDown size={16} aria-hidden />
+                  <span id="recent-country-value">{filters.country ? localizeCountry(filters.country, language) : t("filterCountryAll")}</span><ChevronDown className="country-select-chevron" aria-hidden />
                 </button>
                 {countryOpen && <div className="country-select-menu" role="listbox" aria-labelledby="recent-country-label" onKeyDown={(event) => {
                   const items = Array.from(event.currentTarget.querySelectorAll<HTMLButtonElement>('[role="option"]'));
@@ -169,7 +170,7 @@ export function RecentPage({ initial, countries }: RecentPageProps) {
                   } else if (event.key === "Tab") setCountryOpen(false);
                 }}>
                   {["", ...countries].map((country) => <button key={country} type="button" role="option" aria-selected={filters.country === country} className={cn("lang-item", filters.country === country && "on")} onClick={() => { applyFilters({ ...filters, country }); setCountryOpen(false); countryRef.current?.querySelector<HTMLButtonElement>("button")?.focus(); }}>
-                    <span className="lang-item-name">{country || t("filterCountryAll")}</span>{filters.country === country && <Check className="lang-item-check" aria-hidden />}
+                    <span className="lang-item-name">{country ? localizeCountry(country, language) : t("filterCountryAll")}</span>{filters.country === country && <Check className="lang-item-check" aria-hidden />}
                   </button>)}
                 </div>}
               </div>
@@ -238,7 +239,7 @@ export function RecentPage({ initial, countries }: RecentPageProps) {
                     group.label !== "Help Nearby" && (
                       <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-slate-500 dark:text-gray-400">
                         {group.label}
-                        {group.country ? ` · ${group.country}` : ""}
+                        {group.country ? ` · ${localizeCountry(group.country, language)}` : ""}
                       </h2>
                     )}
                   <div className="grid w-full min-w-0 gap-3 md:grid-cols-2 md:gap-4">

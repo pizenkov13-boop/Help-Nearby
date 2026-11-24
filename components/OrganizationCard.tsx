@@ -9,10 +9,10 @@ import {
   Star,
 } from "lucide-react";
 import { CategoryIcon } from "@/components/icons/CategoryIcon";
-import { CATEGORY_CONFIG } from "@/lib/categories";
+import { CATEGORY_CONFIG, CATEGORY_LABEL_KEY } from "@/lib/categories";
 import { formatDistance, useDistanceUnit } from "@/lib/distanceUnits";
 import { useLanguage } from "@/lib/i18n/LanguageProvider";
-import type { TranslationKey } from "@/lib/i18n/translations";
+import { localizeCountry } from "@/lib/i18n/countries";
 import { recordImpactClick } from "@/lib/impact.client";
 import { openRoute } from "@/lib/orgActions";
 import { getPhoneTelUrl, getOrganizationOpenStatus } from "@/lib/orgUtils";
@@ -26,26 +26,6 @@ import { useIsPhone } from "@/lib/usePhone";
 import { cn } from "@/lib/utils";
 
 /** Makes the title link/button cover the whole card body (an overlay, not a wrapper). */
-const countryCodes = new Map<string, string>();
-const englishRegions = new Intl.DisplayNames(["en"], { type: "region" });
-for (let a = 65; a <= 90; a++) for (let b = 65; b <= 90; b++) {
-  const code = String.fromCharCode(a, b);
-  const name = englishRegions.of(code);
-  if (name && name !== code) countryCodes.set(name.toLowerCase(), code);
-}
-function localizeCountry(country: string, language: string) {
-  const code = countryCodes.get(country.toLowerCase());
-  return code ? new Intl.DisplayNames([language], { type: "region" }).of(code) ?? country : country;
-}
-
-const CATEGORY_LABEL_KEY: Record<Category, TranslationKey> = {
-  food: "categoryFood",
-  shelter: "categoryShelter",
-  medical: "categoryMedical",
-  clothing: "categoryClothing",
-  volunteer: "categoryVolunteer",
-};
-
 /** Dark text on a light tint (light theme), light text on a dark tint (dark theme): AA contrast both ways. */
 const CATEGORY_CHIP: Record<Category, string> = {
   food: "bg-amber-100 text-amber-900 dark:bg-amber-500/20 dark:text-amber-200",

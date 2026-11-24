@@ -1,4 +1,13 @@
 import type { Category } from "./types";
+import type { TranslationKey } from "./i18n/translations";
+
+export const CATEGORY_LABEL_KEY: Record<Category, TranslationKey> = {
+  food: "categoryFood",
+  shelter: "categoryShelter",
+  medical: "categoryMedical",
+  clothing: "categoryClothing",
+  volunteer: "categoryVolunteer",
+};
 
 export const CATEGORY_CONFIG: Record<
   Category,

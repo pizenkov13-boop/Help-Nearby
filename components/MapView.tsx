@@ -22,6 +22,7 @@ import {
 import { getMapTileConfig } from "@/lib/mapTiles";
 import { siteConfig } from "@/lib/siteConfig";
 import { getOrganizationSource } from "@/lib/organizationSource";
+import { CATEGORY_LABEL_KEY } from "@/lib/categories";
 
 const DefaultIcon = L.icon({
   // Served from our own origin (public/leaflet): no request to a third-party CDN.
@@ -147,13 +148,13 @@ function escapeHtml(text: string): string {
     .replace(/'/g, "&#39;");
 }
 
-function buildOrganizationPopup(org: Organization) {
+function buildOrganizationPopup(org: Organization, categoryLabel: string, sourceLabel: string) {
   const verified = org.verified
     ? `<span style="display:inline-flex;align-items:center;margin-left:4px;color:#34d399;vertical-align:middle;">${verifiedCheckMarkup(14, "#34d399")}</span>`
     : "";
   const source = getOrganizationSource(org);
   const sourceLine = source
-    ? `<br /><span style="font-size:11px;color:#6b7280;">Source: ${escapeHtml(source.label)}</span>`
+    ? `<br /><span style="font-size:11px;color:#6b7280;">${escapeHtml(sourceLabel)} ${escapeHtml(source.label)}</span>`
     : "";
   const address = org.address
     ? `<br /><span style="font-size:12px;color:#9ca3af;">${escapeHtml(org.address)}</span>`
@@ -162,7 +163,7 @@ function buildOrganizationPopup(org: Organization) {
 
   return `<div style="font-size:14px;">
     <strong>${escapeHtml(org.name)}</strong>${verified}<br />
-    <span style="display:inline-flex;align-items:center;gap:4px;">${icon} ${escapeHtml(org.category)}</span>${sourceLine}${address}
+    <span style="display:inline-flex;align-items:center;gap:4px;">${icon} ${escapeHtml(categoryLabel)}</span>${sourceLine}${address}
   </div>`;
 }
 
@@ -414,7 +415,7 @@ export default function MapView({
       L.marker([lat, lng], {
         icon: createCategoryIcon(org.category, org.verified),
       })
-        .bindPopup(buildOrganizationPopup(org))
+        .bindPopup(buildOrganizationPopup(org, t(CATEGORY_LABEL_KEY[org.category]), t("citySourceLabel")))
         .addTo(markersLayer);
     }
 
@@ -456,6 +457,7 @@ export default function MapView({
     route,
     routeDestinationCoords,
     mapReady,
+    t,
   ]);
 
   useEffect(() => {

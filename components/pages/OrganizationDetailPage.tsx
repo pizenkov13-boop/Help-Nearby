@@ -14,7 +14,7 @@ import {
 import { SiteLayout } from "@/components/layout/SiteLayout";
 import { OrganizationContactSection } from "@/components/pages/OrganizationContactSection";
 import { CategoryIcon } from "@/components/icons/CategoryIcon";
-import { CATEGORY_CONFIG } from "@/lib/categories";
+import { CATEGORY_CONFIG, CATEGORY_LABEL_KEY } from "@/lib/categories";
 import { formatDistance, useDistanceUnit } from "@/lib/distanceUnits";
 import { useLanguage } from "@/lib/i18n/LanguageProvider";
 import {
@@ -111,7 +111,7 @@ export function OrganizationDetailPage({ org }: OrganizationDetailPageProps) {
               )}
             >
               <CategoryIcon category={org.category} className="h-4 w-4" />
-              {org.category}
+              {t(CATEGORY_LABEL_KEY[org.category])}
             </span>
             {org.verified && (
               <span
