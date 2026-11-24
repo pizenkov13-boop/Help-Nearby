@@ -78,7 +78,7 @@ export function AboutContent() {
         </div>
       </section>
 
-      <section className="page-section">
+      <section id="what-we-believe" className="page-section scroll-anchor">
         <div className="container">
           <div className="hiw-head">
             <h2>{t("aboutValuesTitle")}</h2>

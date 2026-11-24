@@ -1,10 +1,7 @@
 import { mergeOrganizations } from "@/lib/mergeOrganizations";
 import { hasValidMapCoordinates } from "@/lib/mapCoordinates";
 import { organizationNeedsGeocoding } from "@/lib/nominatimGeocode";
-import {
-  isApproximateLocation,
-  validateOrganizationForNearby,
-} from "@/lib/organizationCoordinates";
+import { validateOrganizationForNearby } from "@/lib/organizationCoordinates";
 import {
   readOverpassClientCache,
   writeOverpassClientCache,
@@ -26,7 +23,6 @@ export type { SmartRadiusSearchResult };
 /** Client-side budgets (slightly above the server's so the server's answer wins). */
 export const SUPABASE_FETCH_TIMEOUT_MS = 5_000;
 export const OVERPASS_FETCH_TIMEOUT_MS = 20_000;
-export const OCHA_FETCH_TIMEOUT_MS = 7_000;
 
 const MAX_BACKGROUND_GEOCODE_CATALOG = 8;
 const GEOCODE_DELAY_MS = 1100;
@@ -37,7 +33,7 @@ export type NearbySourceStates = Record<SourceKey, SourceStatus>;
 
 export interface NearbySearchCallbacks {
   /** Fired every time any source finishes, with everything known so far. */
-  onOrganizationsUpdate?: (organizations: Organization[]) => void;
+  onOrganizationsUpdate?: (organizations: Organization[], radiusMeters: number) => void;
   /** Fired as background geocoding adds coordinates to already-listed catalog entries. */
   onOrganizationsPatch?: (patched: Organization[]) => void;
   onSourceStatus?: (states: NearbySourceStates) => void;
@@ -76,9 +72,8 @@ function filterByRadius(
 function mergeAllNearbySources(
   catalog: Organization[],
   overpass: Organization[],
-  verified: Organization[],
 ): Organization[] {
-  return mergeOrganizations(mergeOrganizations(catalog, overpass), verified);
+  return mergeOrganizations(catalog, overpass);
 }
 
 /**
@@ -172,34 +167,6 @@ async function fetchOverpassNearby(
   return { organizations, status: "done" };
 }
 
-/** Country-level OCHA directory (no coordinates) — fast, geocoded later in the background. */
-async function fetchOchaDirectory(
-  country: string | undefined,
-  countryCode: string | null | undefined,
-): Promise<SourceResult> {
-  if (!country?.trim()) return { organizations: [], status: "done" };
-
-  const cacheKey = `ocha:${country.toLowerCase()}:${countryCode ?? ""}`;
-  const cached = readSessionCache<Organization[]>(cacheKey);
-  if (cached) return { organizations: cached, status: "done" };
-
-  const result = await fetchJsonWithTimeout(
-    "/api/verified-nearby",
-    { country, stage: "directory", ...(countryCode ? { countryCode } : {}) },
-    OCHA_FETCH_TIMEOUT_MS,
-  );
-  if (!result.ok || !Array.isArray(result.data)) {
-    return {
-      organizations: [],
-      status: result.ok ? "failed" : result.timedOut ? "timeout" : "failed",
-    };
-  }
-
-  const organizations = result.data as Organization[];
-  if (organizations.length > 0) writeSessionCache(cacheKey, organizations);
-  return { organizations, status: "done" };
-}
-
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 /** Nominatim-limited (≥1.1 s apart), cancellable, never blocks the search. */
@@ -223,8 +190,7 @@ async function geocodeInBackground(
 }
 
 /**
- * Starts all sources at once and surfaces each as it finishes:
- * Supabase first, then OSM and the OCHA directory, merged without resetting the list.
+ * Starts the local catalog and OSM searches together and surfaces each as it finishes.
  */
 export async function searchNearbyWithSmartRadius(
   location: UserLocation,
@@ -238,11 +204,10 @@ export async function searchNearbyWithSmartRadius(
   const states: NearbySourceStates = {
     supabase: "pending",
     osm: "pending",
-    ocha: options.country?.trim() ? "pending" : "done",
+    ocha: "done",
   };
   let catalog: Organization[] = [];
   let overpass: Organization[] = [];
-  let ocha: Organization[] = [];
   let externalTimedOut = false;
   // OSM is fetched per radius tier: the small first tier answers fast, wider ones only when needed.
   const overpassByRadius = new Map<number, Promise<SourceResult>>();
@@ -252,10 +217,9 @@ export async function searchNearbyWithSmartRadius(
     mergeAllNearbySources(
       filterByRadius(catalog, location, radius),
       filterByRadius(overpass, location, radius),
-      ocha,
     );
   const emitOrganizations = () =>
-    callbacks?.onOrganizationsUpdate?.(mergedAt(activeRadius));
+    callbacks?.onOrganizationsUpdate?.(mergedAt(activeRadius), activeRadius);
 
   const settle = (key: SourceKey, result: SourceResult) => {
     states[key] = result.status;
@@ -282,7 +246,7 @@ export async function searchNearbyWithSmartRadius(
       emitOrganizations();
       if (!options.liteMode) {
         void geocodeInBackground(
-          result.organizations.filter((org) => !hasValidMapCoordinates(org)),
+          result.organizations.filter((org) => !hasValidMapCoordinates(org) && Boolean(org.address?.trim())),
           MAX_BACKGROUND_GEOCODE_CATALOG,
           options.signal,
           (org) => patchOrganization(org, "catalog"),
@@ -314,24 +278,12 @@ export async function searchNearbyWithSmartRadius(
   };
   void overpassAt(activeRadius);
 
-  const ochaPromise = fetchOchaDirectory(options.country, options.countryCode).then(
-    (result) => {
-      ocha = result.organizations;
-      if (options.country?.trim()) settle("ocha", result);
-      emitOrganizations();
-      return result;
-    },
-  );
-
   const fetchAtRadius = async (radiusMeters: number) => {
     activeRadius = radiusMeters;
-    await Promise.all([catalogPromise, overpassAt(radiusMeters), ochaPromise]);
+    await Promise.all([catalogPromise, overpassAt(radiusMeters)]);
 
-    // Radius expansion is driven by mappable results; list-only OCHA entries are added at the end.
-    const mappable = mergedAt(radiusMeters).filter(
-      (org) => hasValidMapCoordinates(org) && !isApproximateLocation(org),
-    );
-    callbacks?.onOrganizationsUpdate?.(mergedAt(radiusMeters));
+    const mappable = mergedAt(radiusMeters);
+    callbacks?.onOrganizationsUpdate?.(mappable, radiusMeters);
     return mappable;
   };
 
@@ -341,8 +293,5 @@ export async function searchNearbyWithSmartRadius(
     autoExpand: options.autoExpand,
   });
 
-  // Country-level OCHA entries are listed after the exact results and never drive the radius.
-  const organizations = mergeOrganizations(searchResult.organizations, ocha);
-
-  return { ...searchResult, organizations, externalTimedOut };
+  return { ...searchResult, externalTimedOut };
 }

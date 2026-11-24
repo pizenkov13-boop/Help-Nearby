@@ -136,6 +136,7 @@ export function MobileMenu({ open, onClose }: MobileMenuProps) {
     ? []
     : [
         { label: t("navHowItWorks"), href: "/about#how-it-works" },
+        { label: t("aboutValuesTitle"), href: "/about#what-we-believe" },
       ];
   const whyItems = [
     { label: t("navTheProblem"), href: "/why-it-matters#the-problem" },

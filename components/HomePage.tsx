@@ -232,7 +232,7 @@ export function HomePage() {
 
       setOrgsLoading(!hadCachedResults);
       setSourcesLoading(true);
-      setSourceStates({ supabase: "pending", osm: "pending", ocha: "pending" });
+      setSourceStates({ supabase: "pending", osm: "pending", ocha: "done" });
       setVerifiedOnlyNotice(false);
 
       try {
@@ -261,10 +261,13 @@ export function HomePage() {
             signal: abortController.signal,
           },
           {
-            onOrganizationsUpdate: (organizations) => {
+            onOrganizationsUpdate: (organizations, radiusMeters) => {
               if (runId !== searchRunIdRef.current) return;
               // Progressive merge: later sources add to the list without resetting it.
               setAllOrganizations(organizations);
+              setSearchRadiusMeters(radiusMeters);
+              setSearchMode("within");
+              setNearestFallbackKm(null);
               if (organizations.length > 0) {
                 setOrgsLoading(false);
               }
@@ -394,10 +397,10 @@ export function HomePage() {
     if (!userLocation) return allOrganizations;
     return allOrganizations
       .map((org) =>
-        validateOrganizationForDisplay(org, userLocation, maxSearchRadiusMeters),
+        validateOrganizationForDisplay(org, userLocation, searchRadiusMeters ?? maxSearchRadiusMeters),
       )
       .filter((org): org is Organization => org !== null);
-  }, [allOrganizations, userLocation, maxSearchRadiusMeters]);
+  }, [allOrganizations, userLocation, searchRadiusMeters, maxSearchRadiusMeters]);
 
   const filtered = useMemo(
     () => limitOsmOrganizations(filterOrganizations(coordinateValidated, filters)),
@@ -417,7 +420,7 @@ export function HomePage() {
     );
   }, [coordinateValidated, filters.searchQuery]);
 
-  // Approximate (country-level OCHA) entries are list-only: no marker, no influence on map bounds.
+  // The map and list use the same validated nearby organizations.
   const mapOrganizations = useMemo(
     () => filtered.filter((org) => !isApproximateLocation(org)),
     [filtered],
@@ -617,14 +620,14 @@ export function HomePage() {
   const sourceDown = (status: string | undefined) => status === "failed" || status === "timeout";
   // OSM did not answer in time: the list is the verified catalog only, and the page says so.
   const osmUnavailable = sourceSettled && sourceDown(sourceStates?.osm);
-  const osmPartial = allOrganizations.some((org) => org.partialSource);
+  const osmPartial = coordinateValidated.some((org) => org.partialSource);
   // The verified catalog (database) did not answer: what is listed comes from OpenStreetMap only.
   const catalogUnavailable =
-    sourceSettled && sourceDown(sourceStates?.supabase) && allOrganizations.length > 0;
+    sourceSettled && sourceDown(sourceStates?.supabase) && coordinateValidated.length > 0;
   // Nothing to show and a source failed: that is an error, not an empty area.
   const loadFailed =
     sourceSettled &&
-    allOrganizations.length === 0 &&
+    coordinateValidated.length === 0 &&
     (sourceDown(sourceStates?.supabase) || sourceDown(sourceStates?.osm));
   const nothingHere =
     !orgsLoading &&

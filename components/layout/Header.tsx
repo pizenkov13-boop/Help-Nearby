@@ -117,6 +117,7 @@ export function Header() {
 
   const aboutItems = [
     { label: t("navHowItWorks"), href: "/about#how-it-works" },
+    { label: t("aboutValuesTitle"), href: "/about#what-we-believe" },
   ];
 
   const whyItems = [

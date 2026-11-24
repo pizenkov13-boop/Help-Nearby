@@ -7,6 +7,7 @@ import {
   preferFullMode,
 } from "./helpers";
 import { validateOrganizationForDisplay } from "@/lib/organizationCoordinates";
+import { nearbyAreaKey } from "@/lib/nearbyCache";
 import type { Organization } from "@/lib/types";
 
 const base = MOCK_NEARBY_ORGS[0] as Organization;
@@ -42,59 +43,68 @@ const json = (route: Route, body: unknown) =>
 
 async function mockSources(page: Page) {
   await mockNearbyApi(page);
-  await page.route(/\/api\/organizations/, (route) => json(route, [exactOrg]));
+  await page.route(/\/api\/organizations/, (route) => json(route, [exactOrg, centroidOrg, { ...centroidOrg, id: "gdho-e2e-near", slug: "gdho-e2e-near", name: "E2E Approximate Near", lat: 40.713, lng: -74.006 }]));
   await page.route(/\/api\/nearby/, (route) => json(route, []));
   await page.route(/\/api\/verified-nearby/, (route) => json(route, [centroidOrg]));
 }
 
-test.describe("Approximate (country-level) locations", () => {
-  test("display validation drops the distance even when coordinates are present", () => {
-    const shown = validateOrganizationForDisplay(
-      centroidOrg,
-      { lat: 40.7128, lng: -74.006 },
-      40_000,
-    );
-    expect(shown?.distance).toBe("");
+test.describe("Nearby results exclude country-level directory entries", () => {
+  test("rejects approximate entries even when coordinates appear nearby", () => {
+    const location = { lat: 40.7128, lng: -74.006 };
+    expect(validateOrganizationForDisplay(centroidOrg, location, 40_000)).toBeNull();
+    expect(validateOrganizationForDisplay({ ...centroidOrg, lat: location.lat, lng: location.lng }, location, 40_000)).toBeNull();
+    expect(validateOrganizationForDisplay({ ...exactOrg, lat: location.lat + 0.048, lng: location.lng }, location, 5_000)).toBeNull();
+    expect(validateOrganizationForDisplay(exactOrg, location, 5_000)).not.toBeNull();
   });
 
-  test("a centroid entry is in the list (last, no distance) but has no map marker", async ({ page }) => {
+  test("only local organizations appear in the list and on the map", async ({ page }) => {
     await page.setViewportSize({ width: 1280, height: 720 });
     await preferFullMode(page);
     await mockSources(page);
     await grantNycLocation(page);
-
+    let directoryRequests = 0;
+    page.on("request", (request) => { if (request.url().includes("/api/verified-nearby")) directoryRequests++; });
     await page.goto("/");
     await page.getByRole("button", { name: /Find Help Near Me/i }).click();
-    await expect(page.locator("#org-search")).toBeVisible({ timeout: 30_000 });
-
     const list = page.locator(".map-panel article");
     await expect(list.filter({ hasText: "E2E Exact Pantry" })).toBeVisible({ timeout: 20_000 });
-    const centroidCard = list.filter({ hasText: "E2E Centroid Relief Org" });
-    await expect(centroidCard).toBeVisible({ timeout: 20_000 });
-
-    // Listed last, with no distance label.
-    const titles = await page.locator(".map-panel article h3").allTextContents();
-    expect(titles.at(-1)).toBe("E2E Centroid Relief Org");
-    await expect(centroidCard).not.toContainText(/\d+(\.\d+)?\s*(mi|ft)\b/);
-
-    // No route button or link for the approximate entry; the exact entry still has one.
-    await expect(centroidCard.getByRole("button", { name: /Get Directions/i })).toHaveCount(0);
-    await expect(centroidCard.getByRole("link", { name: /Get Directions/i })).toHaveCount(0);
-    await expect(centroidCard.locator('a[href*="google.com/maps"]')).toHaveCount(0);
-    await expect(
-      list.filter({ hasText: "E2E Exact Pantry" }).getByRole("button", { name: /Get Directions/i }),
-    ).toHaveCount(1);
-    // Name, country and a link to the source stay.
-    await expect(centroidCard).toContainText("United States");
-    await expect(centroidCard.getByRole("link").first()).toBeVisible();
-
-    // Exactly one place marker (the exact pantry); none for the centroid entry.
+    await expect(page.getByTestId("loading-nearby")).toHaveCount(0, { timeout: 30_000 });
+    await expect(list.filter({ hasText: "E2E Centroid Relief Org" })).toHaveCount(0);
+    await expect(list.filter({ hasText: "E2E Approximate Near" })).toHaveCount(0);
     await expect(page.locator(".leaflet-marker-icon.custom-marker")).toHaveCount(1);
+    expect(directoryRequests).toBe(0);
+  });
 
-    // The map stays framed around the exact entries, not stretched towards the US centroid.
-    const center = await page.locator(".leaflet-container").first().getAttribute("data-center");
-    const [lat, lng] = center!.split(",").map(Number);
-    expect(Math.abs(lat! - 40.72)).toBeLessThan(0.2);
-    expect(Math.abs(lng! + 74)).toBeLessThan(0.3);
+  test("previously cached results are checked against the active radius", async ({ page }) => {
+    await page.setViewportSize({ width: 1280, height: 720 });
+    await preferFullMode(page);
+    await mockSources(page);
+    await page.route(/\/api\/organizations/, async (route) => {
+      await new Promise((resolve) => setTimeout(resolve, 2_000));
+      await json(route, [exactOrg]);
+    });
+    const outside = { ...exactOrg, id: "9104", name: "E2E Outside Radius", lat: 40.7608, lng: -74.006 };
+    await page.addInitScript((entry) => {
+      localStorage.setItem("help-nearby-orgs-cache", JSON.stringify(entry));
+    }, {
+      timestamp: Date.now(), area: nearbyAreaKey(40.7128, -74.006, false),
+      organizations: [exactOrg, centroidOrg, outside], searchRadiusMeters: 5_000,
+      searchMode: "within", canExpand: true, nearestFallbackKm: null,
+    });
+    await grantNycLocation(page);
+    await page.goto("/");
+    await page.getByRole("button", { name: /Find Help Near Me/i }).click();
+    const list = page.locator(".map-panel article");
+    await expect(list.filter({ hasText: "E2E Exact Pantry" })).toBeVisible({ timeout: 20_000 });
+    await expect(list.filter({ hasText: "E2E Centroid Relief Org" })).toHaveCount(0);
+    await expect(list.filter({ hasText: "E2E Outside Radius" })).toHaveCount(0);
+  });
+
+  test("nearby API does not return country-wide entries as local results", async ({ request }) => {
+    const response = await request.post("/api/verified-nearby", {
+      data: { country: "United States", lat: 40.7128, lng: -74.006, radius: 5_000 },
+    });
+    expect(response.status()).toBe(200);
+    expect(await response.json()).toEqual([]);
   });
 });

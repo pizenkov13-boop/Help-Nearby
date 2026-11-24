@@ -5,19 +5,12 @@ import type { Organization, UserLocation } from "@/lib/types";
 /** Max road-snap drift before keeping original coordinates. */
 export const MAX_ROAD_SNAP_MILES = 0.3;
 
-/** Allow small floating-point / geocoder drift vs search radius. */
-const RADIUS_TOLERANCE = 1.12;
-
 export function isOverpassOrganization(org: Organization): boolean {
   return org.id.startsWith("overpass-");
 }
 
 export function isOchaOrganization(org: Organization): boolean {
-  return (
-    org.id.startsWith("rw-") ||
-    org.id.startsWith("hdx-") ||
-    org.id.startsWith("gdho-")
-  );
+  return [org.id, org.slug].some((value) => /^(rw|hdx|gdho)-/i.test(value));
 }
 
 /**
@@ -37,7 +30,7 @@ export function isPlausibleCoordinate(lat: number, lng: number): boolean {
 }
 
 function maxAllowedMiles(radiusMeters: number): number {
-  return (radiusMeters / 1609.34) * RADIUS_TOLERANCE;
+  return radiusMeters / 1609.34;
 }
 
 function distanceWithinRadius(
@@ -158,19 +151,11 @@ export function snapIsAcceptable(
  * Validate and normalize an organization for nearby list/map/routing.
  * Returns null when coordinates are missing, implausible, or outside search radius.
  */
-/**
- * Country-wide OCHA catalogs are already curated server-side; keep them visible
- * with distance labels even when outside the local search radius.
- */
 export function validateOrganizationForDisplay(
   org: Organization,
   userLocation: UserLocation,
   maxRadiusMeters: number,
 ): Organization | null {
-  if (isApproximateLocation(org)) {
-    // No distance for approximate positions, whatever coordinates they carry.
-    return { ...org, distance: "" };
-  }
   return validateOrganizationForNearby(org, userLocation, maxRadiusMeters);
 }
 
@@ -179,6 +164,7 @@ export function validateOrganizationForNearby(
   userLocation: UserLocation,
   maxRadiusMeters: number,
 ): Organization | null {
+  if (isApproximateLocation(org)) return null;
   const normalized = normalizeRawCoordinates(
     org.lat,
     org.lng,

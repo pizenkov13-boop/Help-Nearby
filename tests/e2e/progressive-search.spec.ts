@@ -107,7 +107,7 @@ test.describe("Progressive nearby search", () => {
     );
   });
 
-  test("Supabase results appear before OSM and OCHA finish; sources merge without reset", async ({ page }) => {
+  test("Supabase results appear before OSM; sources merge without country-level entries", async ({ page }) => {
     await mockSlowSources(page, { supabase: 200, osm: 3_000, ocha: 5_500 });
     await startSearch(page);
 
@@ -117,7 +117,7 @@ test.describe("Progressive nearby search", () => {
     await expect(card(page, "E2E OCHA Relief Org")).toHaveCount(0);
     await expect(page.getByTestId("loading-nearby")).toBeVisible();
     await expect(page.getByTestId("source-osm")).toBeVisible();
-    await expect(page.getByTestId("source-ocha")).toBeVisible();
+    await expect(page.getByTestId("source-ocha")).toHaveCount(0);
     await expect(page.getByTestId("source-supabase")).toHaveCount(0);
 
     // OSM merges in; the Supabase card is still there (list was not reset).
@@ -135,27 +135,19 @@ test.describe("Progressive nearby search", () => {
       order.indexOf("E2E Overpass Kitchen"),
     );
     await expect(page.getByTestId("source-osm")).toHaveCount(0);
-    await expect(page.getByTestId("loading-nearby")).toBeVisible(); // OCHA still pending
-
-    // OCHA arrives as a list-only country-level entry; then the badge goes away.
-    await expect(card(page, "E2E OCHA Relief Org")).toBeVisible({ timeout: 6_000 });
-    await expect(card(page, "E2E Supabase Pantry")).toBeVisible();
-    // Few results make the search widen its radius, which re-queries OSM for a moment.
+    await expect(card(page, "E2E OCHA Relief Org")).toHaveCount(0);
     await expect(page.getByTestId("loading-nearby")).toHaveCount(0, { timeout: 20_000 });
   });
 
-  test("a source that never answers does not block the others and the spinner stops", async ({ page }) => {
+  test("a country-level directory that never answers does not block local results", async ({ page }) => {
     await mockSlowSources(page, { supabase: 100, osm: 100, ocha: "never" });
+    let directoryRequests = 0;
+    page.on("request", (request) => { if (request.url().includes("/api/verified-nearby")) directoryRequests++; });
     await startSearch(page);
-
     await expect(card(page, "E2E Supabase Pantry")).toBeVisible({ timeout: 5_000 });
     await expect(card(page, "E2E Overpass Kitchen")).toBeVisible({ timeout: 5_000 });
-    await expect(page.getByTestId("source-ocha")).toBeVisible();
-
-    // The client gives up on OCHA after its own timeout; results stay and loading stops.
     await expect(page.getByTestId("loading-nearby")).toHaveCount(0, { timeout: 15_000 });
-    await expect(card(page, "E2E Supabase Pantry")).toBeVisible();
-    await expect(card(page, "E2E Overpass Kitchen")).toBeVisible();
+    expect(directoryRequests).toBe(0);
     await expect(card(page, "E2E OCHA Relief Org")).toHaveCount(0);
   });
 

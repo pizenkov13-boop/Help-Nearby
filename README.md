@@ -182,7 +182,7 @@ Community submissions via `/submit` are stored as **unverified** until approved 
 | Feature | Description |
 |---------|-------------|
 | **Interactive map** | Leaflet map with category markers, a source badge and source labels |
-| **Multi-source data** | Supabase catalog + HDX + GDHO + ReliefWeb + Overpass OpenStreetMap queries |
+| **Multi-source data** | Supabase catalog + Overpass OpenStreetMap queries for nearby places |
 | **Emergency mode** | One-tap list of 24/7 organizations (hospitals, pharmacies, shelters) |
 | **Smart radius search** | Expands the search radius (5 → 15 → 40 km; 10 → 25 → 50 km in lite mode) while fewer than 3 results are found |
 | **Routing** | OSRM route line, distance and time via `/api/route` (no step-by-step instructions) |
@@ -204,13 +204,10 @@ Community submissions via `/submit` are stored as **unverified** until approved 
 |--------|------|------|
 | **Supabase** | Organization catalog (PostgreSQL + RLS) | `lib/data.ts` |
 | **OpenStreetMap / Overpass** | POI search | `lib/overpass.server.ts` → `/api/nearby` |
-| **HDX** (UN OCHA Humanitarian Data Exchange) | Country-level humanitarian orgs | `lib/hdx.ts` → `lib/verifiedNearby.server.ts` → `/api/verified-nearby` |
-| **GDHO** (Global Directory of Humanitarian Organizations) | Country-level humanitarian orgs | `lib/gdho.ts` → `lib/verifiedNearby.server.ts` → `/api/verified-nearby` |
-| **ReliefWeb** (OCHA) | Country-level humanitarian sources | `lib/reliefweb.ts` → `lib/verifiedNearby.server.ts` → `/api/verified-nearby` |
 | **Nominatim** | Forward/reverse geocoding for addresses | `lib/nominatim.server.ts` → `/api/geocode` |
 | **OSRM** | Turn-by-turn routing | `lib/osrmRouting.server.ts` → `/api/route` |
 
-HDX, GDHO, and ReliefWeb results merge with Supabase + Overpass in `lib/nearbySearch.ts` (deduplicated by name). Each OCHA-family source has a 15-second timeout. ReliefWeb may be skipped for some countries where other sources already cover the region. Failures do not block other results.
+Nearby results merge the Supabase catalog and Overpass, filtered to the displayed radius. Country-level HDX, GDHO and ReliefWeb directory records do not establish a local office and are excluded from nearby results and their counts.
 
 ---
 
@@ -356,7 +353,7 @@ scripts/             # Geocoding and build utilities
 | Route | Purpose |
 |-------|---------|
 | `/api/nearby` | Overpass organizations near coordinates |
-| `/api/verified-nearby` | HDX + GDHO + ReliefWeb organizations for a country (geocoded, radius-filtered) |
+| `/api/verified-nearby` | Country directory via explicit `stage: "directory"`; country-wide records are not returned as nearby locations |
 | `/api/emergency` | 24/7 Supabase + Overpass emergency list |
 | `/api/route` | OSRM route (line, distance, time) |
 | `/api/geocode` | Nominatim address → coordinates |

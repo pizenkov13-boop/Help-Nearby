@@ -76,6 +76,16 @@ async function measure(page: Page) {
 
 test.describe("Header menu on desktop: one line, one height, no overflow", () => {
   test.skip(REGION_RUN, "the region run only checks the reduced menu");
+  test("About menu links to What We Believe", async ({ page }) => {
+    await open(page, "en", 1280);
+    const about = page.locator(".nav-dd").filter({ has: page.getByRole("link", { name: "About", exact: true }) });
+    await about.locator(".dd-chevron").click();
+    const link = about.getByRole("link", { name: "What We Believe" });
+    await expect(link).toBeVisible();
+    await link.click();
+    await expect(page).toHaveURL(/\/about#what-we-believe$/);
+    await expect(page.locator("#what-we-believe").getByRole("heading", { name: "What We Believe" })).toBeVisible();
+  });
   for (const lang of LANGUAGES) {
     for (const width of DESKTOP_WIDTHS) {
       test(`${lang} at ${width}px`, async ({ page }) => {
