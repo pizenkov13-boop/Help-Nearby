@@ -882,7 +882,7 @@ export function HomePage() {
                     liteModeActive ? "min-h-[320px]" : "lg:max-h-[520px]",
                   )}
                 >
-                  <div className="min-w-0 flex-1 overflow-x-hidden overflow-y-auto p-3 md:p-4">
+                  <div className="org-list-scroll min-w-0 flex-1 overflow-x-hidden overflow-y-auto p-3 md:p-4">
                     {userLocation && (
                       <PlaceBar
                         label={placeLabel}

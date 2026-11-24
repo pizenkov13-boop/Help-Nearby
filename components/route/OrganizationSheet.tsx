@@ -177,7 +177,7 @@ export function OrganizationSheet() {
           )}
         </div>
 
-        {org.verified && org.slug && (
+        {org.verified && org.slug && !isApproximateLocation(org) && (
           <Link href={`/org/${org.slug}`} className="os-more" onClick={handOver}>
             {t("routeDetails")}
           </Link>

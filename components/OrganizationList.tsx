@@ -40,7 +40,7 @@ export function OrganizationList({
   return (
     <div className="flex w-full min-w-0 max-w-full flex-col gap-3 md:gap-4">
       {!showSkeleton && (
-        <p className="text-sm text-slate-600 dark:text-gray-400">
+        <p className="px-3 text-sm text-slate-600 dark:text-gray-400">
           <span className="font-semibold text-slate-900 dark:text-white">{organizations.length}</span>{" "}
           {t("resultsCount")}
         </p>

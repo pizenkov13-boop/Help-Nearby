@@ -14,7 +14,7 @@ import { formatDistance, useDistanceUnit } from "@/lib/distanceUnits";
 import { useLanguage } from "@/lib/i18n/LanguageProvider";
 import type { TranslationKey } from "@/lib/i18n/translations";
 import { recordImpactClick } from "@/lib/impact.client";
-import { openOrganizationSheet, openRoute } from "@/lib/orgActions";
+import { openRoute } from "@/lib/orgActions";
 import { getPhoneTelUrl, getOrganizationOpenStatus } from "@/lib/orgUtils";
 import {
   isApproximateLocation,
@@ -26,8 +26,17 @@ import { useIsPhone } from "@/lib/usePhone";
 import { cn } from "@/lib/utils";
 
 /** Makes the title link/button cover the whole card body (an overlay, not a wrapper). */
-const STRETCH =
-  "after:absolute after:inset-0 after:rounded-xl after:content-[''] focus-visible:outline-none focus-visible:after:ring-2 focus-visible:after:ring-blue-500";
+const countryCodes = new Map<string, string>();
+const englishRegions = new Intl.DisplayNames(["en"], { type: "region" });
+for (let a = 65; a <= 90; a++) for (let b = 65; b <= 90; b++) {
+  const code = String.fromCharCode(a, b);
+  const name = englishRegions.of(code);
+  if (name && name !== code) countryCodes.set(name.toLowerCase(), code);
+}
+function localizeCountry(country: string, language: string) {
+  const code = countryCodes.get(country.toLowerCase());
+  return code ? new Intl.DisplayNames([language], { type: "region" }).of(code) ?? country : country;
+}
 
 const CATEGORY_LABEL_KEY: Record<Category, TranslationKey> = {
   food: "categoryFood",
@@ -97,10 +106,8 @@ export function OrganizationCard({
     openRoute(org);
   };
 
-  const handleCardOpen = () => {
-    onSelect?.(org);
-    openOrganizationSheet(org);
-  };
+  const country = localizeCountry(org.country || "", language);
+  const address = org.address?.startsWith("HQ: ") ? `${({ ru: "Штаб-квартира", es: "Sede", fr: "Siège", de: "Hauptsitz", zh: "总部", ar: "المقر" } as Record<string, string>)[language] ?? "HQ"}: ${localizeCountry(org.address.slice(4), language)}` : org.address;
 
   const actionBase =
     "inline-flex min-h-14 min-w-0 flex-1 items-center justify-center gap-2 whitespace-nowrap rounded-xl px-4 py-3 text-[17px] font-bold text-white transition-colors";
@@ -126,7 +133,7 @@ export function OrganizationCard({
 
   const badgesBlock = (
     <div className="flex flex-wrap items-center gap-2">
-      <span
+      {!approximate && <span
         className={cn(
           "inline-flex max-w-full items-center gap-1 rounded-full px-2 py-0.5 text-[13px] md:text-xs font-medium",
           cfg.bg,
@@ -134,9 +141,9 @@ export function OrganizationCard({
         )}
       >
         <CategoryIcon category={org.category} />
-        <span className="break-words">{org.category}</span>
-      </span>
-      {org.verified && (
+        <span className="break-words">{t(CATEGORY_LABEL_KEY[org.category])}</span>
+      </span>}
+      {org.verified && !approximate && (
         <span className="inline-flex items-center gap-0.5 rounded-full bg-emerald-500/20 px-2 py-0.5 text-[13px] md:text-xs font-semibold text-emerald-400 ring-1 ring-emerald-500/30">
           <BadgeCheck className="h-3 w-3 shrink-0" aria-hidden />
           {t("verified")}
@@ -201,16 +208,14 @@ export function OrganizationCard({
 
       <div className="order-1 min-w-0 md:order-2 md:flex md:items-start md:justify-between md:gap-3">
         <div className="min-w-0 flex-1">
-          <h3 className="text-base font-semibold leading-snug text-slate-900 break-words break-anywhere md:truncate md:text-lg group-hover:text-blue-600 dark:text-white dark:group-hover:text-blue-300">
-            <button type="button" onClick={handleCardOpen} className={cn(STRETCH, "text-left")}>
-              {org.name}
-            </button>
+          <h3 className="text-base font-semibold leading-snug text-slate-900 break-words break-anywhere md:text-lg dark:text-white">
+            {org.name}
           </h3>
           {(org.country || (addedLabel && org.city)) && (
             <p className="mt-0.5 text-sm text-slate-500 break-words break-anywhere dark:text-gray-500">
               {addedLabel
-                ? [org.city, org.country].filter(Boolean).join(", ")
-                : org.country}
+                ? [org.city, country].filter(Boolean).join(", ")
+                : country}
             </p>
           )}
         </div>
@@ -221,10 +226,10 @@ export function OrganizationCard({
         )}
       </div>
 
-      {org.address && (
+      {address && (
         <p className="order-2 flex min-w-0 items-start gap-2 text-sm text-slate-600 md:order-3 dark:text-gray-400">
           <MapPin className="mt-0.5 h-4 w-4 shrink-0 text-slate-400 dark:text-gray-500" aria-hidden />
-          <span className="min-w-0 break-words break-anywhere">{org.address}</span>
+          <span className="min-w-0 break-words break-anywhere">{address}</span>
         </p>
       )}
 
@@ -258,7 +263,7 @@ export function OrganizationCard({
           org.verified && "border-blue-500/20",
         )}
       >
-        <div className="relative min-w-0 cursor-pointer p-3 md:p-4">{cardBody}</div>
+        <div className="relative min-w-0 p-3 md:p-4">{cardBody}</div>
 
         {(hasPhone || !approximate) && (
           <div className="flex flex-row gap-2 border-t border-slate-200 px-3 pb-3 pt-2.5 dark:border-gray-700/50 md:px-4 md:pb-4 md:pt-3">
@@ -306,13 +311,13 @@ export function OrganizationCard({
         org.verified && "border-blue-500/20",
       )}
     >
-      <div className="relative min-w-0 cursor-pointer p-4">
+      <div className="relative min-w-0 p-4">
         <div className="flex min-w-0 flex-col gap-3">
           <div className="flex items-start justify-between gap-3">
-            <span className={cn(PILL, CATEGORY_CHIP[org.category])}>
+            {!approximate && <span className={cn(PILL, CATEGORY_CHIP[org.category])}>
               <CategoryIcon category={org.category} className="h-4 w-4" />
               <span className="break-words">{t(CATEGORY_LABEL_KEY[org.category])}</span>
-            </span>
+            </span>}
             {org.distance && (
               <span
                 className="shrink-0 org-dist text-xl font-bold leading-tight tabular-nums text-blue-800 dark:text-blue-300"
@@ -324,28 +329,22 @@ export function OrganizationCard({
           </div>
 
           <div className="min-w-0">
-            <h3 className="text-lg font-bold leading-snug text-slate-900 break-words break-anywhere group-hover:text-blue-700 dark:text-white dark:group-hover:text-blue-300">
-              <button
-                type="button"
-                onClick={handleCardOpen}
-                className={cn(STRETCH, "text-start")}
-              >
-                {org.name}
-              </button>
+            <h3 className="text-lg font-bold leading-snug text-slate-900 break-words break-anywhere dark:text-white">
+              {org.name}
             </h3>
             {(org.country || (addedLabel && org.city)) && (
               <p className="org-sub mt-0.5 text-base text-slate-700 break-words break-anywhere dark:text-gray-300">
                 {addedLabel
-                  ? [org.city, org.country].filter(Boolean).join(", ")
-                  : org.country}
+                  ? [org.city, country].filter(Boolean).join(", ")
+                  : country}
               </p>
             )}
           </div>
 
-          {org.address && (
+          {address && (
             <p className="org-sub flex min-w-0 items-start gap-2 text-base text-slate-800 dark:text-gray-200">
               <MapPin className="mt-1 h-4 w-4 shrink-0 text-slate-500 dark:text-gray-400" aria-hidden />
-              <span className="min-w-0 break-words break-anywhere">{org.address}</span>
+              <span className="min-w-0 break-words break-anywhere">{address}</span>
             </p>
           )}
 
@@ -377,7 +376,7 @@ export function OrganizationCard({
                 {open ? t("openNow") : t("closed")}
               </span>
             )}
-            {org.verified && (
+            {org.verified && !approximate && (
               <span
                 className={cn(PILL, "bg-emerald-100 text-emerald-900 ring-1 ring-emerald-600/30 dark:bg-emerald-500/20 dark:text-emerald-200 dark:ring-emerald-500/30")}
               >

@@ -1,6 +1,7 @@
 "use client";
 
-import { useCallback, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { Check, ChevronDown } from "lucide-react";
 import { PageHero } from "@/components/layout/PageHero";
 import { CategoryPill } from "@/components/Filters";
 import { OrganizationCard } from "@/components/OrganizationCard";
@@ -72,6 +73,17 @@ export function RecentPage({ initial, countries }: RecentPageProps) {
     category: "all",
   });
   const requestId = useRef(0);
+  const [countryOpen, setCountryOpen] = useState(false);
+  const countryRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (!countryOpen) return;
+    countryRef.current?.querySelector<HTMLButtonElement>('[role="option"][aria-selected="true"]')?.focus();
+    const close = (event: PointerEvent) => {
+      if (!countryRef.current?.contains(event.target as Node)) setCountryOpen(false);
+    };
+    document.addEventListener("pointerdown", close);
+    return () => document.removeEventListener("pointerdown", close);
+  }, [countryOpen]);
 
   const categoryLabel = (cat: Category) =>
     ({
@@ -135,27 +147,32 @@ export function RecentPage({ initial, countries }: RecentPageProps) {
         <div className="container">
           <div className="mb-6 flex flex-col gap-4 rounded-brand border border-slate-200 bg-white p-4 shadow-lg dark:border-white/10 dark:bg-surface-card md:flex-row md:items-end">
             <div className="md:w-64">
-              <label
-                htmlFor="recent-country"
+              <span
+                id="recent-country-label"
                 className="mb-2 block text-sm font-medium text-slate-600 dark:text-gray-400"
               >
                 {t("filterCountry")}
-              </label>
-              <select
-                id="recent-country"
-                value={filters.country}
-                onChange={(e) =>
-                  applyFilters({ ...filters, country: e.target.value })
-                }
-                className="min-h-11 w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-base text-slate-800 md:text-sm dark:border-gray-700 dark:bg-gray-900/50 dark:text-gray-100"
-              >
-                <option value="">{t("filterCountryAll")}</option>
-                {countries.map((c) => (
-                  <option key={c} value={c}>
-                    {c}
-                  </option>
-                ))}
-              </select>
+              </span>
+              <div className="country-select" ref={countryRef} onKeyDown={(event) => {
+                if (event.key === "Escape") { setCountryOpen(false); countryRef.current?.querySelector<HTMLButtonElement>("button")?.focus(); }
+              }}>
+                <button type="button" className="country-select-trigger" aria-labelledby="recent-country-label recent-country-value" aria-expanded={countryOpen} aria-haspopup="listbox" onClick={() => setCountryOpen(!countryOpen)}>
+                  <span id="recent-country-value">{filters.country || t("filterCountryAll")}</span><ChevronDown size={16} aria-hidden />
+                </button>
+                {countryOpen && <div className="country-select-menu" role="listbox" aria-labelledby="recent-country-label" onKeyDown={(event) => {
+                  const items = Array.from(event.currentTarget.querySelectorAll<HTMLButtonElement>('[role="option"]'));
+                  const index = items.indexOf(document.activeElement as HTMLButtonElement);
+                  if (event.key === "ArrowDown" || event.key === "ArrowUp" || event.key === "Home" || event.key === "End") {
+                    event.preventDefault();
+                    const next = event.key === "Home" ? 0 : event.key === "End" ? items.length - 1 : (index + (event.key === "ArrowDown" ? 1 : -1) + items.length) % items.length;
+                    items[next]?.focus();
+                  } else if (event.key === "Tab") setCountryOpen(false);
+                }}>
+                  {["", ...countries].map((country) => <button key={country} type="button" role="option" aria-selected={filters.country === country} className={cn("lang-item", filters.country === country && "on")} onClick={() => { applyFilters({ ...filters, country }); setCountryOpen(false); countryRef.current?.querySelector<HTMLButtonElement>("button")?.focus(); }}>
+                    <span className="lang-item-name">{country || t("filterCountryAll")}</span>{filters.country === country && <Check className="lang-item-check" aria-hidden />}
+                  </button>)}
+                </div>}
+              </div>
             </div>
 
             <div className="min-w-0 flex-1">
