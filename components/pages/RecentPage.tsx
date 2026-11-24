@@ -145,7 +145,7 @@ export function RecentPage({ initial, countries }: RecentPageProps) {
 
       <section className="page-section page-section-compact">
         <div className="container">
-          <div className="mb-6 flex flex-col gap-4 rounded-brand border border-slate-200 bg-white p-4 shadow-lg dark:border-white/10 dark:bg-surface-card md:flex-row md:items-end">
+          <div className="mb-6 flex flex-col gap-4 rounded-brand border border-slate-200 bg-white p-4 shadow-lg dark:border-white/10 dark:bg-surface-card md:flex-row md:items-start">
             <div className="md:w-64">
               <span
                 id="recent-country-label"
@@ -179,7 +179,7 @@ export function RecentPage({ initial, countries }: RecentPageProps) {
               <span className="mb-2 block text-sm font-medium text-slate-600 dark:text-gray-400">
                 {t("filterCategory")}
               </span>
-              <div className="-mx-4 flex flex-nowrap gap-2 overflow-x-auto px-4 pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden md:mx-0 md:flex-wrap md:overflow-visible md:px-0">
+              <div className="-mx-4 flex min-h-11 flex-nowrap items-center gap-2 overflow-x-auto px-4 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden md:mx-0 md:flex-wrap md:overflow-visible md:px-0">
                 <CategoryPill
                   active={filters.category === "all"}
                   onClick={() => applyFilters({ ...filters, category: "all" })}
