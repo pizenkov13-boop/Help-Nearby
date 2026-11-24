@@ -49,12 +49,7 @@ export function CitiesSection() {
           {citiesInNeed.map((city) => (
             <article key={city.id} className="city-card">
               <div className="city-head">
-                <h3>
-                  {city.city}
-                  {city.country && (
-                    <span className="city-meta">{city.country}</span>
-                  )}
-                </h3>
+                <h3>{city.city}</h3>
                 <span className={cn(badgeClass(city.urgency))}>
                   {t(badgeLabel(city.urgency))}
                 </span>

@@ -718,7 +718,7 @@ body {
       grid-template-columns: minmax(0, 1fr) auto;
       align-items: start;
       gap: 10px 12px;
-      min-height: 56px;
+      min-height: 32px;
     }
     .city-head h3 {
       margin: 0;
@@ -731,16 +731,6 @@ body {
       letter-spacing: -0.015em;
       line-height: 1.25;
       transition: color 0.3s ease;
-    }
-    .city-head .country { display: none; }
-    .city-head .city-meta {
-      display: block;
-      margin-top: 4px;
-      font-weight: 500;
-      color: var(--text-dim);
-      font-size: 15px;
-      letter-spacing: 0;
-      line-height: 1.35;
     }
     .badge {
       display: inline-flex;
