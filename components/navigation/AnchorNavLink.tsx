@@ -36,7 +36,7 @@ export function AnchorNavLink({
   };
 
   return (
-    <Link href={href} className={cn(className)} onClick={handleClick}>
+    <Link href={href} scroll={false} className={cn(className)} onClick={handleClick}>
       {children}
     </Link>
   );

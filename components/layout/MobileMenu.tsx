@@ -126,7 +126,7 @@ export function MobileMenu({ open, onClose }: MobileMenuProps) {
       desktop.removeEventListener("change", onChange);
       releaseScroll.current?.();
       releaseScroll.current = null;
-      returnFocus.current?.focus?.();
+      returnFocus.current?.focus?.({ preventScroll: true });
     };
   }, [open, close]);
 
