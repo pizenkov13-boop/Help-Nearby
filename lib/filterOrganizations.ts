@@ -1,5 +1,5 @@
 import { isCommercialOsmOrganization } from "@/lib/osmRelevance";
-import { isOrganizationOpen } from "@/lib/orgUtils";
+import { getOrganizationOpenStatus } from "@/lib/orgUtils";
 import type { FilterState, Organization } from "@/lib/types";
 
 export function filterOrganizations(
@@ -19,7 +19,7 @@ export function filterOrganizations(
     ) {
       return false;
     }
-    if (filters.openNow && !isOrganizationOpen(org)) {
+    if (filters.openNow && getOrganizationOpenStatus(org) !== "open") {
       return false;
     }
     if (query) {

@@ -474,9 +474,7 @@ export function HomePage() {
   const handleSwitchToFullVersion = useCallback(() => {
     setStoredViewMode("full");
     setViewPreference("full");
-
-    askForLocation();
-  }, [askForLocation]);
+  }, []);
 
   const handleSwitchToLiteVersion = useCallback(() => {
     setStoredViewMode("lite");
@@ -769,7 +767,7 @@ export function HomePage() {
                     : "lg:grid-cols-[260px_1fr_340px]",
                 )}
               >
-                <div className="min-w-0 max-lg:contents">
+                <div className={cn("min-w-0 max-lg:contents", liteModeActive && "lg:row-span-2")}>
                   <div className="results-sticky sticky top-[calc(72px+env(safe-area-inset-top,0px))] z-30 bg-[var(--surface-card)] pb-1 pt-2 max-md:-mx-4 max-md:px-4 md:max-lg:-mx-7 md:max-lg:px-7 max-lg:order-1 lg:static lg:bg-transparent lg:p-0">
                   <SearchBar
                     value={filters.searchQuery}
@@ -816,12 +814,17 @@ export function HomePage() {
                         ? handleSwitchToFullVersion
                         : handleSwitchToLiteVersion
                     }
-                    className="accent-pill mt-4 min-h-11 w-full rounded-lg px-4 py-2.5 text-sm font-medium transition-colors max-lg:order-5 max-lg:mt-0"
+                    className="accent-pill mt-4 min-h-11 w-full rounded-lg px-4 py-2.5 text-sm font-medium transition-colors max-lg:order-3 max-lg:mt-0"
                   >
                     {liteModeActive
                       ? t("switchToFullVersion")
                       : t("switchToLiteVersion")}
                   </button>
+                  {liteModeActive && userLocation && !liteMapVisible && (
+                    <button type="button" onClick={() => setLiteMapVisible(true)} className="accent-pill mt-2 min-h-11 w-full rounded-lg px-4 py-2.5 text-sm font-medium max-lg:order-4 max-lg:mt-0">
+                      {t("showLiteMap")}
+                    </button>
+                  )}
                 </div>
 
                 {!liteModeActive && userLocation && mapExpanded && (!isPhone || phoneView === "map") && (
@@ -842,7 +845,7 @@ export function HomePage() {
                   </div>
                 )}
                 {liteModeActive && userLocation && liteMapVisible && mapExpanded && (
-                  <div className="isolate h-[280px] overflow-hidden rounded-brand border border-slate-200 shadow-lg dark:border-white/10 max-lg:order-3 lg:h-[320px]">
+                  <div className="isolate h-[280px] overflow-hidden rounded-brand border border-slate-200 shadow-lg dark:border-white/10 max-lg:order-5 lg:col-start-2 lg:h-[320px]">
                     <MapView
                       key="lite-map"
                       mapVisible={mapExpanded}
@@ -863,9 +866,9 @@ export function HomePage() {
                 <div
                   className={cn(
                     "results-pane flex w-full min-w-0 max-w-full flex-col overflow-hidden rounded-brand border border-slate-200 bg-white/80 dark:border-white/10 dark:bg-surface-card",
-                    "max-lg:order-4",
+                    "max-lg:order-6",
                     !liteModeActive && isPhone && phoneView === "map" && "hidden",
-                    liteModeActive ? "min-h-[320px]" : "lg:max-h-[520px]",
+                    liteModeActive ? "min-h-[320px] lg:col-start-2 lg:max-h-[520px]" : "lg:max-h-[520px]",
                   )}
                 >
                   <div className="org-list-scroll min-w-0 flex-1 overflow-x-hidden overflow-y-auto p-3 md:p-4">
@@ -917,17 +920,6 @@ export function HomePage() {
                       />
                     )}
                   </div>
-                  {liteModeActive && userLocation && !liteMapVisible && (
-                    <div className="border-t border-slate-200 p-3 dark:border-white/10">
-                      <button
-                        type="button"
-                        onClick={() => setLiteMapVisible(true)}
-                        className="w-full rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-xs font-medium text-slate-700 transition-colors hover:bg-slate-100 dark:border-white/20 dark:bg-white/5 dark:text-gray-200 dark:hover:bg-white/10"
-                      >
-                        {t("showLiteMap")}
-                      </button>
-                    </div>
-                  )}
                 </div>
               </div>
             </div>

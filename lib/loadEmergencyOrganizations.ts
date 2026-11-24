@@ -1,5 +1,6 @@
 import { NEARBY_RADIUS_METERS } from "@/lib/constants";
 import { fetchOrganizations } from "@/lib/data";
+import { distanceMiles } from "@/lib/geo";
 import {
   emergencyFacilityPriority,
   isGenuineEmergencyOrganization,
@@ -62,5 +63,9 @@ export async function loadEmergencyOrganizations(
     }
   }
 
-  return sortEmergencyByPriorityAndDistance(merged, location);
+  const withinRadius = merged.filter((org) => {
+    const meters = distanceMiles(location.lat, location.lng, org.lat, org.lng) * 1609.344;
+    return Number.isFinite(meters) && meters <= radiusMeters;
+  });
+  return sortEmergencyByPriorityAndDistance(withinRadius, location);
 }

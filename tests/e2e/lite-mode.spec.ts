@@ -160,4 +160,31 @@ test.describe("Lite mode trigger", () => {
     await expect(page.locator("#org-search")).toBeVisible({ timeout: 30_000 });
     await expect(page.getByText(LITE_NOTICE)).toHaveCount(0);
   });
+
+  test("lite map control stays near the switch and the list stays wide", async ({ page }) => {
+    await fakeConnection(page, { saveData: true });
+    await openPanel(page);
+    const switchButton = page.getByRole("button", { name: /Switch to full version/i });
+    const mapButton = page.getByRole("button", { name: /Load map/i });
+    const switchBox = await switchButton.boundingBox();
+    const buttonBox = await mapButton.boundingBox();
+    expect(switchBox && buttonBox && buttonBox.y - (switchBox.y + switchBox.height)).toBeLessThan(20);
+    await mapButton.click();
+    await expect(page.locator(".leaflet-container")).toBeVisible();
+    const listBox = await page.locator(".results-pane").boundingBox();
+    expect(listBox?.width).toBeGreaterThan(500);
+    expect(listBox?.height).toBeLessThanOrEqual(520);
+  });
+
+  test("mobile lite map and full mode remain usable", async ({ page }) => {
+    await page.setViewportSize({ width: 390, height: 844 });
+    await fakeConnection(page, { saveData: true });
+    await openPanel(page);
+    await page.getByRole("button", { name: /Load map/i }).click();
+    await expect(page.locator(".leaflet-container")).toBeVisible();
+    await expect(orgCards(page).first()).toBeVisible();
+    await page.getByRole("button", { name: /Switch to full version/i }).click();
+    await expect(page.getByText(LITE_NOTICE)).toHaveCount(0);
+    await expect(orgCards(page).first()).toBeVisible();
+  });
 });

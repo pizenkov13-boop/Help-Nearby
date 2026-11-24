@@ -30,6 +30,7 @@
     "icons:generate": "node scripts/generate-favicons.mjs"
   },
   "dependencies": {
+    "@photostructure/tz-lookup": "^11.8.0",
     "@radix-ui/react-slot": "^1.2.4",
     "@supabase/supabase-js": "^2.106.0",
     "@vercel/analytics": "^2.0.1",
