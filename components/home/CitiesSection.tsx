@@ -1,5 +1,6 @@
 ﻿"use client";
 
+import { TrendingUp, House } from "lucide-react";
 import { useLanguage } from "@/lib/i18n/LanguageProvider";
 import { getCitiesInNeed } from "@/lib/i18n/citiesContent";
 import type { CityUrgency } from "@/lib/homeContent";
@@ -19,18 +20,13 @@ function badgeLabel(urgency: CityUrgency) {
 
 function TrendIcon() {
   return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
-      <polyline points="23 6 13.5 15.5 8.5 10.5 1 18" />
-      <polyline points="17 6 23 6 23 12" />
-    </svg>
+    <TrendingUp aria-hidden />
   );
 }
 
 function HomeIcon() {
   return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
-      <path d="M3 9.5L12 3l9 6.5V21a1 1 0 0 1-1 1h-5v-7h-6v7H4a1 1 0 0 1-1-1V9.5z" />
-    </svg>
+    <House aria-hidden />
   );
 }
 

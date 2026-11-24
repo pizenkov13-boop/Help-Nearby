@@ -11,7 +11,6 @@ import { openEmergencyHelp } from "@/lib/emergencyEvents";
 import { useLanguage } from "@/lib/i18n/LanguageProvider";
 import { cn } from "@/lib/utils";
 import { siteConfig } from "@/lib/siteConfig";
-import { useFormsEnabled } from "@/components/providers/FormsAvailability";
 
 interface MobileMenuProps {
   open: boolean;
@@ -69,7 +68,6 @@ function lockBodyScroll(): () => void {
  * `position: fixed` descendants, which collapsed the old in-header menu to a thin strip.
  */
 export function MobileMenu({ open, onClose }: MobileMenuProps) {
-  const formsEnabled = useFormsEnabled();
   const { t } = useLanguage();
   const pathname = usePathname();
   const layerRef = useRef<HTMLDivElement>(null);
@@ -224,17 +222,6 @@ export function MobileMenu({ open, onClose }: MobileMenuProps) {
                   {item.label}
                 </AnchorNavLink>
               ))}
-
-              {formsEnabled && (
-                <Link
-                  href="/reviews"
-                  className={cn("mm-link", active("/reviews") && "active")}
-                  aria-current={active("/reviews") ? "page" : undefined}
-                  onClick={close}
-                >
-                  {t("navReviews")}
-                </Link>
-              )}
               <Link
                 href="/recent"
                 className={cn("mm-link", active("/recent") && "active")}

@@ -1,14 +1,11 @@
 "use client";
 
 import { usePathname, useRouter } from "next/navigation";
-import { MessageCircle, Search, Siren } from "lucide-react";
+import { Search, Siren } from "lucide-react";
 import type { ReactNode } from "react";
 import { openEmergencyHelp } from "@/lib/emergencyEvents";
 import { useLanguage } from "@/lib/i18n/LanguageProvider";
-import { siteConfig } from "@/lib/siteConfig";
-import { useFeatures } from "@/lib/useFeatures";
 import {
-  CHAT_OPEN_EVENT,
   FIND_HELP_EVENT,
   dispatchUiEvent,
 } from "@/lib/uiEvents";
@@ -50,11 +47,10 @@ function Item({
 }
 
 /**
- * Phones only: three equal items (find help, urgent, chat); the language switcher lives in the header. The page reserves
+ * Phones only: two items (find help and urgent); the language switcher lives in the header. The page reserves
  * room for the bar (.has-bottom-bar in globals.css), so it never covers content.
  */
 export function BottomBar() {
-  const features = useFeatures();
   const { t } = useLanguage();
   const pathname = usePathname();
   const router = useRouter();
@@ -75,14 +71,6 @@ export function BottomBar() {
         className="bb-emergency"
         onClick={openEmergencyHelp}
       />
-      {siteConfig.chatEnabled && features.chat === true ? (
-        <Item
-          icon={<MessageCircle />}
-          label={t("navChat")}
-          ariaLabel={t("chatTitle")}
-          onClick={() => dispatchUiEvent(CHAT_OPEN_EVENT)}
-        />
-      ) : null}
     </nav>
   );
 }

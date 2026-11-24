@@ -1345,6 +1345,7 @@ section[id], .scroll-anchor { scroll-margin-top: 92px; }
   :root { --focus-ring: #3b82f6; }
 
   /* One icon style everywhere: 18px, 2px stroke, currentColor, rounded caps. */
+  .lucide { stroke-width: 2; }
   .ui-icon { width: 18px; height: 18px; flex-shrink: 0; stroke-width: 2; }
 
   /* One focus style for interactive chrome (header, language menu, footer, chat). */

@@ -8,9 +8,7 @@ const MAIN_SITEMAP_PATHS = [
   "/",
   "/about",
   "/why-it-matters",
-  "/reviews",
   "/recent",
-  "/submit",
   "/privacy",
   "/disclaimer",
 ] as const;

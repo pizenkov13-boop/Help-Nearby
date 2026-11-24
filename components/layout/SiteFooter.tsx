@@ -10,8 +10,6 @@ import {
   Globe,
   House,
   Mail,
-  MessageSquare,
-  Plus,
   Send,
   Share2,
   Info,
@@ -23,7 +21,6 @@ import { GithubIcon, InstagramIcon, TelegramIcon } from "@/components/icons/Bran
 import { CONTACT_EMAIL } from "@/lib/contactEmail";
 import { useLanguage } from "@/lib/i18n/LanguageProvider";
 import { MAIN_HOSTNAMES, MAIN_SITE_URL, siteConfig } from "@/lib/siteConfig";
-import { useFormsEnabled } from "@/components/providers/FormsAvailability";
 
 const SDG_GOALS = [
   { id: "1", labelKey: "footerSdgGoal1" },
@@ -141,7 +138,6 @@ function CopySiteFooter() {
 
 export function SiteFooter() {
   const { t, language } = useLanguage();
-  const formsEnabled = useFormsEnabled();
   // The authorship credit is not configurable. Copies are detected by hostname as well as by
   // NEXT_PUBLIC_SITE_URL, so a copy that never set the latter still shows it after hydration.
   const [isMainSite, setIsMainSite] = useState(siteConfig.url === MAIN_SITE_URL);
@@ -212,28 +208,12 @@ export function SiteFooter() {
                 {t("navAbout")}
               </Link>
             </li>
-            {formsEnabled && (
-              <li>
-                <Link href="/reviews">
-                  <MessageSquare className="ui-icon" aria-hidden />
-                  {t("navReviewsShort")}
-                </Link>
-              </li>
-            )}
             <li>
               <Link href="/recent">
                 <Clock className="ui-icon" aria-hidden />
                 {t("navRecent")}
               </Link>
             </li>
-            {formsEnabled && (
-              <li>
-                <Link href="/submit">
-                  <Plus className="ui-icon" aria-hidden />
-                  {t("footerSubmitOrg")}
-                </Link>
-              </li>
-            )}
             <li>
               <Link href="/privacy">
                 <ShieldCheck className="ui-icon" aria-hidden />

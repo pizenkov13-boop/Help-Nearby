@@ -6,12 +6,10 @@ import {
   cacheDetectedCountry,
   readCachedDetectedCountry,
 } from "@/lib/detectedCountry";
-import { setChatContext } from "@/lib/chatClientContext";
 import { filterOrganizations } from "@/lib/filterOrganizations";
 import { limitOsmOrganizations } from "@/lib/osmRelevance";
 import { fetchPlaces, type PlaceResult } from "@/lib/placeSearch";
 import { requestPosition, type LocationIssue } from "@/lib/locationRequest";
-import { getOrganizationSource } from "@/lib/organizationSource";
 import {
   type TrackedUserLocation,
 } from "@/lib/geolocation";
@@ -425,21 +423,6 @@ export function HomePage() {
     [filtered],
   );
 
-  // Share the current results with the chat assistant (nearest 10, truncated server-side too).
-  useEffect(() => {
-    setChatContext({
-      country: readCachedDetectedCountry()?.country ?? "",
-      location: userLocation ? { lat: userLocation.lat, lng: userLocation.lng } : null,
-      organizations: filtered.slice(0, 10).map((org) => ({
-        name: org.name,
-        category: org.category,
-        city: org.city,
-        phone: org.phone,
-        source_url: getOrganizationSource(org)?.url ?? org.website,
-        verified: org.verified,
-      })),
-    });
-  }, [filtered, userLocation]);
 
   useEffect(() => {
     if (selected && !filtered.some((org) => org.id === selected.id)) {

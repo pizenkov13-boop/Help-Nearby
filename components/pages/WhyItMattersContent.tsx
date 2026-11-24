@@ -1,5 +1,6 @@
 "use client";
 
+import { Globe, Clock, Wifi } from "lucide-react";
 import { CitiesSection } from "@/components/home/CitiesSection";
 import { PageHead } from "@/components/layout/PageHead";
 import { useLanguage } from "@/lib/i18n/LanguageProvider";
@@ -34,11 +35,7 @@ export function WhyItMattersContent() {
       text: t("whySolution1Text"),
       iconClass: "blue",
       icon: (
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
-          <circle cx="12" cy="12" r="9" />
-          <path d="M3 12h18" />
-          <ellipse cx="12" cy="12" rx="4" ry="9" />
-        </svg>
+        <Globe aria-hidden />
       ),
     },
     {
@@ -46,10 +43,7 @@ export function WhyItMattersContent() {
       text: t("whySolution2Text"),
       iconClass: "purple",
       icon: (
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
-          <circle cx="12" cy="12" r="9" />
-          <path d="M12 7.5V12l3 1.8" />
-        </svg>
+        <Clock aria-hidden />
       ),
     },
     {
@@ -57,11 +51,7 @@ export function WhyItMattersContent() {
       text: t("whySolution3Text"),
       iconClass: "green",
       icon: (
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
-          <path d="M2.5 9.5a13 13 0 0 1 19 0" />
-          <path d="M6.5 14a7.5 7.5 0 0 1 11 0" />
-          <circle cx="12" cy="19" r="1.3" fill="currentColor" stroke="none" />
-        </svg>
+        <Wifi aria-hidden />
       ),
     },
   ] as const;
