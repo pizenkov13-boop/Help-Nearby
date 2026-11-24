@@ -294,8 +294,8 @@ export function SiteFooter() {
               key={goal.id}
               src={`/images/sdg/${goal.id}.png`}
               alt={t(goal.labelKey)}
-              width={152}
-              height={152}
+              width={256}
+              height={256}
               quality={100}
               className="sdg-img"
             />
