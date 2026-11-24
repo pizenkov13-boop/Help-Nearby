@@ -613,6 +613,7 @@ body {
       margin-top: 40px;
       display: grid;
       grid-template-columns: repeat(3, 1fr);
+      align-items: start;
       gap: 64px;
     }
     .step {
@@ -623,6 +624,7 @@ body {
     }
     .step-num {
       width: 84px; height: 84px;
+      flex: 0 0 84px;
       border-radius: 50%;
       background: var(--gradient-brand);
       color: #fff;
