@@ -873,11 +873,6 @@ export function HomePage() {
                       <PlaceBar
                         label={placeLabel}
                         approximateKm={approximateKm}
-                        onSearchPlace={(text) => void handleSearchPlace(text)}
-                        onUseMyLocation={handleUseMyLocation}
-                        placeSearching={placeSearching}
-                        placeError={placeError}
-                        isLocating={isLocating}
                       />
                     )}
                     {/* Without a place there is nothing to list (and nothing to load): no skeleton cards. */}

@@ -98,12 +98,7 @@ test.describe("Place search", () => {
     await expect(card(page, "E2E Test Food Bank")).toHaveCount(0);
     await expect.poll(mapCenteredNear(page, 43.7102, 7.262), { timeout: 10_000 }).toBe(true);
 
-    // "Change place" → "Use my location" returns to browser geolocation (mocked NYC).
-    await page.getByTestId("change-place").click();
-    await page.getByTestId("change-place-form").getByRole("button", { name: "Use my location" }).click();
-    await expect(page.getByTestId("place-label")).toHaveText("Results near: your current location");
-    await expect(card(page, "E2E Test Food Bank")).toBeVisible({ timeout: 20_000 });
-    await expect.poll(mapCenteredNear(page, 40.7128, -74.006), { timeout: 10_000 }).toBe(true);
+
   });
 
   test("autocomplete suggests places after 3 characters and has a Search places row", async ({ page }) => {

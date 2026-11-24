@@ -43,14 +43,11 @@ test.describe("Search field, location block and accent colour (dark theme)", () 
     // The field says what it is for, without a cut-off text.
     await expect(page.locator("#org-search")).toHaveAttribute("placeholder", "Search by city");
 
-    // Location block: no dot, "Change place" sits under the text, both start at the same x.
+    // The location stays visible without a second place-changing control.
     const chip = page.getByTestId("place-chip");
     await expect(chip).toBeVisible();
     expect(await chip.innerText()).not.toContain("·");
-    const label = (await page.getByTestId("place-label").boundingBox())!;
-    const change = (await page.getByTestId("change-place").boundingBox())!;
-    expect(Math.abs(label.x - change.x)).toBeLessThanOrEqual(1);
-    expect(change.y).toBeGreaterThanOrEqual(label.y + label.height - 1);
+    await expect(page.getByTestId("change-place")).toHaveCount(0);
 
     // One look: the lite-mode button, the active "All categories" filter and the blue notice badge.
     await page.evaluate(() => {
@@ -84,7 +81,7 @@ test.describe("Which place the results are for", () => {
 
     await openPanel(page);
     await expect(page.getByTestId("place-label")).toHaveText("Results near: Midtown, New York");
-    await expect(page.getByTestId("change-place")).toBeVisible();
+    await expect(page.getByTestId("change-place")).toHaveCount(0);
 
     expect(bodies.length).toBeGreaterThan(0);
     for (const { url, body } of bodies) {
@@ -111,23 +108,16 @@ test.describe("Which place the results are for", () => {
     await expect(page.getByTestId("place-label")).toHaveText("Results near: your current location");
   });
 
-  test("Change place searches a typed city and the bar follows", async ({ page }) => {
+  test("the city search remains available without the Change place button", async ({ page }) => {
     await setup(page);
     await page.route(/\/api\/geocode(?!\/reverse)/, (route) =>
-      json(route, {
-        results: [{ name: "Nice, France", lat: 43.7102, lng: 7.262, country: "France", countryCode: "FR" }],
-      }),
+      json(route, { results: [{ name: "Nice, France", lat: 43.7102, lng: 7.262, country: "France", countryCode: "FR" }] }),
     );
     await openPanel(page);
-
-    await page.getByTestId("change-place").click();
-    await expect(page.getByTestId("change-place-form")).toBeVisible();
-    await page.locator("#place-input").fill("Nice");
-    await page.getByTestId("change-place-form").getByRole("button", { name: "Search" }).click();
-
+    await page.locator("#org-search").fill("Nice");
+    await page.locator("#org-search").press("Enter");
     await expect(page.getByTestId("place-label")).toHaveText("Results near: Nice, France");
-    // The form folds away once the place changed.
-    await expect(page.getByTestId("change-place-form")).toHaveCount(0);
+    await expect(page.getByTestId("change-place")).toHaveCount(0);
   });
 
   test("a coarse device position is called out", async ({ page }) => {

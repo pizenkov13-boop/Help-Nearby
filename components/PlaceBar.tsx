@@ -1,7 +1,6 @@
 "use client";
 
 import { MapPin } from "lucide-react";
-import { useEffect, useState, type FormEvent } from "react";
 import { useLanguage } from "@/lib/i18n/LanguageProvider";
 
 interface PlaceBarProps {
@@ -9,37 +8,14 @@ interface PlaceBarProps {
   label: string;
   /** Reported accuracy in km when the position is only approximate (otherwise null). */
   approximateKm: number | null;
-  onSearchPlace: (text: string) => void;
-  onUseMyLocation: () => void;
-  placeSearching: boolean;
-  placeError: string | null;
-  isLocating: boolean;
 }
 
-/** Always says which place the results are for, and lets the person change it. */
+/** Shows the place the current results are for. */
 export function PlaceBar({
   label,
   approximateKm,
-  onSearchPlace,
-  onUseMyLocation,
-  placeSearching,
-  placeError,
-  isLocating,
 }: PlaceBarProps) {
   const { t } = useLanguage();
-  const [open, setOpen] = useState(false);
-  const [text, setText] = useState("");
-
-  // A new place was chosen: fold the form away.
-  useEffect(() => {
-    setOpen(false);
-    setText("");
-  }, [label]);
-
-  const submit = (event: FormEvent) => {
-    event.preventDefault();
-    if (text.trim()) onSearchPlace(text);
-  };
 
   return (
     <div
@@ -52,15 +28,6 @@ export function PlaceBar({
           <span className="break-words font-medium leading-snug" data-testid="place-label">
             {t("resultsNearLabel").replace("{place}", label)}
           </span>
-          <button
-            type="button"
-            onClick={() => setOpen((value) => !value)}
-            aria-expanded={open}
-            data-testid="change-place"
-            className="font-semibold underline underline-offset-2 hover:no-underline"
-          >
-            {t("changePlace")}
-          </button>
         </div>
       </div>
 
@@ -70,44 +37,6 @@ export function PlaceBar({
         </p>
       )}
 
-      {open && (
-        <form onSubmit={submit} className="mt-2 flex flex-col gap-2" data-testid="change-place-form">
-          <label className="sr-only" htmlFor="place-input">
-            {t("placeInputLabel")}
-          </label>
-          <div className="flex gap-2">
-            <input
-              id="place-input"
-              type="text"
-              value={text}
-              onChange={(event) => setText(event.target.value)}
-              placeholder={t("placeInputLabel")}
-              autoComplete="off"
-              className="min-h-11 min-w-0 flex-1 rounded-lg border border-slate-300 bg-white px-3 text-sm text-slate-900 dark:border-white/20 dark:bg-white/5 dark:text-white md:min-h-9 md:text-xs"
-            />
-            <button
-              type="submit"
-              disabled={placeSearching || !text.trim()}
-              className="min-h-11 rounded-lg bg-blue-600 px-4 text-sm font-semibold text-white disabled:opacity-50 md:min-h-9 md:text-xs"
-            >
-              {t("placeSubmit")}
-            </button>
-          </div>
-          <button
-            type="button"
-            onClick={onUseMyLocation}
-            disabled={isLocating}
-            className="self-start font-semibold underline underline-offset-2 hover:no-underline disabled:opacity-50"
-          >
-            {t("placeUseMyLocation")}
-          </button>
-          {placeError && (
-            <p className="text-red-700 dark:text-red-300" role="alert">
-              {placeError}
-            </p>
-          )}
-        </form>
-      )}
     </div>
   );
 }
