@@ -12,14 +12,11 @@ import type { Category } from "@/lib/types";
  *            transport object, has no shelter_type of public_transport, picnic_shelter,
  *            basic_hut, weather_shelter, lean_to (field_shelter, rock_shelter, gazebo too) and
  *            carries a sign of crisis shelter (social_facility(:for), homeless=yes, emergency=yes).
- * clothing   social_facility=clothing_bank | charity=clothes | shop=charity that sells second-hand
- *            goods or clothes. Ordinary clothing shops and plain charity shops are not shown.
- * volunteer  social_facility=outreach | office=ngo|charity with a sign of help | amenity=community_centre
- *            with a sign of help. charity=yes alone, other social_facility values (nursing_home,
- *            group_home, assisted_living, ...) and unmatched objects are not shown.
+ * clothing   social_facility=clothing_bank | charity=clothes | shop=charity explicitly tagged as selling clothes. Ordinary clothing shops and plain charity shops are not shown.
+ * volunteer  eligible NGOs, outreach or community centres with an explicit volunteer tag.
  * medical    decided in osmMedical.ts.
  *
- * Objects with access=private|no are never shown in the four help categories.
+ * Objects with access=private|no are never shown.
  */
 
 const EXCLUDED_SHELTER_TYPES = new Set([
@@ -33,8 +30,6 @@ const EXCLUDED_SHELTER_TYPES = new Set([
   "gazebo",
 ]);
 
-const NGO_HELP_TYPE = /humanitarian|charit|social|relief|refugee|volunteer/i;
-const CENTRE_HELP_FOR = /social_facility|refugee|migrant|homeless|poor|low_income|crisis|aid/i;
 
 /**
  * Overpass selectors per category. The nearby and the chat query are both built from this table.
@@ -86,10 +81,6 @@ function isOpenToPublic(tags: Record<string, string>): boolean {
   return access !== "private" && access !== "no";
 }
 
-function hasHelpSigns(tags: Record<string, string>): boolean {
-  return isYes(tags.volunteer) || isYes(tags.volunteers) || Boolean(tags["social_facility:for"]?.trim());
-}
-
 function isFood(tags: Record<string, string>): boolean {
   const amenity = tags.amenity?.trim().toLowerCase();
   if (amenity === "food_bank" || amenity === "community_fridge") return true;
@@ -119,21 +110,17 @@ function isClothing(tags: Record<string, string>): boolean {
   if (values(tags.social_facility).includes("clothing_bank")) return true;
   if (values(tags.charity).includes("clothes")) return true;
   if (tags.shop?.trim().toLowerCase() !== "charity") return false;
-  const secondHand = tags.second_hand?.trim().toLowerCase();
   const clothes = tags.clothes?.trim().toLowerCase();
-  return secondHand === "yes" || secondHand === "only" || Boolean(clothes && clothes !== "no");
+  return Boolean(clothes && clothes !== "no");
 }
 
 function isVolunteer(tags: Record<string, string>): boolean {
-  if (values(tags.social_facility).includes("outreach")) return true;
-  const office = tags.office?.trim().toLowerCase();
-  if (office === "ngo" || office === "charity") {
-    return hasHelpSigns(tags) || NGO_HELP_TYPE.test(tags["ngo:type"] ?? "");
-  }
-  if (tags.amenity?.trim().toLowerCase() === "community_centre") {
-    return hasHelpSigns(tags) || CENTRE_HELP_FOR.test(tags["community_centre:for"] ?? "");
-  }
-  return false;
+  const kind = tags.office?.trim().toLowerCase();
+  const eligible = kind === "ngo" || kind === "charity" ||
+    tags.amenity?.trim().toLowerCase() === "community_centre" ||
+    values(tags.social_facility).includes("outreach");
+  return eligible && (isYes(tags.volunteer) || isYes(tags.volunteers) ||
+    values(tags["ngo:type"]).includes("volunteer"));
 }
 
 /**
@@ -141,7 +128,8 @@ function isVolunteer(tags: Record<string, string>): boolean {
  * Help categories are checked first, medical last, in the order food, shelter, clothing, volunteer.
  */
 export function classifyOsmCategory(tags: Record<string, string>, name: string): Category | null {
-  if (tags.amenity?.trim().toLowerCase() !== "give_box" && isOpenToPublic(tags)) {
+  if (!isOpenToPublic(tags)) return null;
+  if (tags.amenity?.trim().toLowerCase() !== "give_box") {
     if (isFood(tags)) return "food";
     if (isShelter(tags)) return "shelter";
     if (isClothing(tags)) return "clothing";

@@ -49,12 +49,15 @@ export async function loadEmergencyOrganizations(
       radiusMeters,
     ).catch((error) => {
       console.error("[loadEmergencyOrganizations] Overpass failed:", error);
-      return [] as Organization[];
+      return null;
     }),
   ]);
 
   const fromSupabase = filterEmergency247Organizations(catalog);
-  const fromOverpass = filterGenuineEmergencyOrganizations(overpassResult);
+  if (overpassResult === null && fromSupabase.length === 0) {
+    throw new Error("Emergency sources are unavailable");
+  }
+  const fromOverpass = filterGenuineEmergencyOrganizations(overpassResult ?? []);
 
   const merged = [...fromSupabase];
   for (const org of fromOverpass) {

@@ -4,8 +4,6 @@ import Link from "next/link";
 import { useCallback, useState } from "react";
 import {
   ArrowLeft,
-  BadgeCheck,
-  Clock,
   Navigation,
   Phone,
   Share2,
@@ -19,7 +17,7 @@ import { formatDistance, useDistanceUnit } from "@/lib/distanceUnits";
 import { useLanguage } from "@/lib/i18n/LanguageProvider";
 import {
   getPhoneTelUrl,
-  getOrganizationOpenStatus,
+  hasRoundTheClockHours,
 } from "@/lib/orgUtils";
 import { openRoute } from "@/lib/orgActions";
 import { isApproximateLocation } from "@/lib/organizationCoordinates";
@@ -66,8 +64,6 @@ export function OrganizationDetailPage({ org }: OrganizationDetailPageProps) {
   const unit = useDistanceUnit();
   const cfg = CATEGORY_CONFIG[org.category];
   const source = getOrganizationSource(org);
-  const openStatus = getOrganizationOpenStatus(org);
-  const open = openStatus === "open";
   const [copied, setCopied] = useState(false);
 
   const handleShare = useCallback(async () => {
@@ -113,36 +109,7 @@ export function OrganizationDetailPage({ org }: OrganizationDetailPageProps) {
               <CategoryIcon category={org.category} className="h-4 w-4" />
               {t(CATEGORY_LABEL_KEY[org.category])}
             </span>
-            {org.verified && (
-              <span
-                className={
-                  phone
-                    ? "inline-flex items-center gap-1.5 rounded-full bg-emerald-100 px-3 py-1 text-base font-semibold text-emerald-900 ring-1 ring-emerald-600/30 dark:bg-emerald-500/20 dark:text-emerald-200 dark:ring-emerald-500/30"
-                    : "inline-flex items-center gap-1.5 rounded-full bg-emerald-500/20 px-3 py-1 text-sm font-semibold text-emerald-400 ring-1 ring-emerald-500/30"
-                }
-              >
-                <BadgeCheck className="h-4 w-4" aria-hidden />
-                {t("verified")}
-              </span>
-            )}
-            {openStatus !== "unknown" && (
-              <span
-                className={cn(
-                  "inline-flex items-center gap-1.5 rounded-full px-3 py-1",
-                  phone ? "text-base font-semibold" : "text-sm font-medium",
-                  open
-                    ? phone
-                      ? "bg-emerald-100 text-emerald-900 dark:bg-emerald-500/20 dark:text-emerald-200"
-                      : "bg-emerald-500/20 text-emerald-400"
-                    : phone
-                      ? "bg-slate-200 text-slate-800 dark:bg-gray-700 dark:text-gray-200"
-                      : "bg-gray-700/80 text-gray-400",
-                )}
-              >
-                <Clock className="h-4 w-4" />
-                {open ? t("openNow") : t("closed")}
-              </span>
-            )}
+            {hasRoundTheClockHours(org) && <span className="rounded-full bg-emerald-500/20 px-3 py-1 text-sm font-medium text-emerald-600 dark:text-emerald-400">{t("openNow")}</span>}
           </div>
 
           <h1 className="text-3xl font-extrabold tracking-tight text-gray-900 dark:text-white sm:text-4xl">

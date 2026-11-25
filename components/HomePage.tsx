@@ -707,6 +707,12 @@ export function HomePage() {
                   </h2>
                 </div>
 
+                {userLocation && (
+                  <div className="min-[769px]:hidden">
+                    <PlaceBar label={placeLabel} approximateKm={approximateKm} />
+                  </div>
+                )}
+
                 {!userLocation && (
                   <p
                     className="rounded-lg border border-amber-500/40 bg-amber-500/10 px-4 py-3 text-sm font-medium text-amber-900 dark:text-amber-200"
@@ -725,9 +731,9 @@ export function HomePage() {
                   </p>
                 )}
 
-                {userLocation && !orgsLoading && searchRadiusMeters != null && (
-                  <div className="flex flex-wrap items-center gap-3">
-                    <p className="radius-note text-sm text-slate-600 dark:text-slate-400">
+                <div className="flex flex-wrap items-center gap-3">
+                  {userLocation && !orgsLoading && searchRadiusMeters != null && (
+                    <p className="radius-note w-full text-sm text-slate-600 dark:text-slate-400 min-[769px]:w-auto">
                       {searchMode === "nearest" && nearestFallbackKm != null
                         ? formatSearchNearestOrgs(language, nearestFallbackKm, {
                             value: radiusInUnit(nearestFallbackKm, distanceUnit),
@@ -745,18 +751,25 @@ export function HomePage() {
                             },
                           )}
                     </p>
-                    {canExpandSearch && (
+                  )}
+                    {userLocation && !orgsLoading && searchRadiusMeters != null && canExpandSearch && (
                       <button
                         type="button"
                         onClick={handleExpandSearch}
                         disabled={sourcesLoading}
-                        className="accent-pill min-h-11 rounded-full px-4 py-1 text-sm font-semibold transition-colors disabled:opacity-50 md:min-h-0 md:px-3 md:text-xs"
+                        className="accent-pill min-h-11 min-w-0 flex-1 rounded-full px-3 py-1 text-sm font-semibold leading-tight transition-colors disabled:opacity-50 min-[769px]:flex-none md:min-h-0 md:text-xs"
                       >
                         {t("searchExpand")}
                       </button>
                     )}
-                  </div>
-                )}
+                    <button
+                      type="button"
+                      onClick={liteModeActive ? handleSwitchToFullVersion : handleSwitchToLiteVersion}
+                      className="accent-pill min-h-11 min-w-0 flex-1 rounded-full px-3 py-1 text-sm font-semibold leading-tight transition-colors min-[769px]:hidden"
+                    >
+                      {liteModeActive ? t("switchToFullVersion") : t("switchToLiteVersion")}
+                    </button>
+                </div>
               </div>
 
               <div
@@ -814,7 +827,7 @@ export function HomePage() {
                         ? handleSwitchToFullVersion
                         : handleSwitchToLiteVersion
                     }
-                    className="accent-pill mt-4 min-h-11 w-full rounded-lg px-4 py-2.5 text-sm font-medium transition-colors max-lg:order-3 max-lg:mt-0"
+                    className="accent-pill mt-4 min-h-11 w-full rounded-lg px-4 py-2.5 text-sm font-medium transition-colors max-[768px]:hidden max-lg:order-3 max-lg:mt-0"
                   >
                     {liteModeActive
                       ? t("switchToFullVersion")
@@ -873,10 +886,9 @@ export function HomePage() {
                 >
                   <div className="org-list-scroll min-w-0 flex-1 overflow-x-hidden overflow-y-auto p-3 md:p-4">
                     {userLocation && (
-                      <PlaceBar
-                        label={placeLabel}
-                        approximateKm={approximateKm}
-                      />
+                      <div className="max-[768px]:hidden">
+                        <PlaceBar label={placeLabel} approximateKm={approximateKm} />
+                      </div>
                     )}
                     {/* Without a place there is nothing to list (and nothing to load): no skeleton cards. */}
                     {userLocation && (

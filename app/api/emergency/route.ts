@@ -14,7 +14,7 @@ export async function POST(request: Request) {
   const radius = Number.isFinite(toNumber(body.radius))
     ? toNumber(body.radius)
     : NEARBY_RADIUS_METERS;
-  if (!Number.isFinite(lat) || !Number.isFinite(lng)) {
+  if (!Number.isFinite(lat) || !Number.isFinite(lng) || Math.abs(lat) > 90 || Math.abs(lng) > 180 || radius <= 0 || radius > 100000) {
     return NextResponse.json(
       { error: "lat and lng are required." },
       { status: 400 },

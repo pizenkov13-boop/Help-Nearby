@@ -1,11 +1,14 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { Loader2, LifeBuoy, MapPin, Phone, X } from "lucide-react";
+import { Loader2, LifeBuoy, MapPin, Navigation, Phone, X } from "lucide-react";
 import { NEARBY_RADIUS_METERS } from "@/lib/constants";
 import { formatDistance, useDistanceUnit } from "@/lib/distanceUnits";
 import { useLanguage } from "@/lib/i18n/LanguageProvider";
 import { getPhoneTelUrl } from "@/lib/orgUtils";
+import { openRoute } from "@/lib/orgActions";
+import { hasValidMapCoordinates } from "@/lib/mapCoordinates";
+import { rememberPosition } from "@/lib/userPosition";
 import { requestPosition } from "@/lib/locationRequest";
 import { postJson } from "@/lib/postJson";
 import type { Organization, UserLocation } from "@/lib/types";
@@ -17,11 +20,31 @@ export function EmergencyHelp() {
   const { t, language } = useLanguage();
   const unit = useDistanceUnit();
   const [open, setOpen] = useState(false);
+  const [demo, setDemo] = useState(false);
+
+  useEffect(() => {
+    if (process.env.NODE_ENV !== "development" || !["localhost", "127.0.0.1"].includes(window.location.hostname) ||
+        new URLSearchParams(window.location.search).get("emergencyDemo") !== "1") return;
+    const makeExample = (id: string, name: string, address: string, distance: string): Organization => ({
+      id, slug: id, name, category: "medical", categories: ["medical"], country: "", city: "",
+      lat: 0, lng: 0, distance, rating: 0, address, phone: "+7 (000) 555-01-01", email: "", website: "",
+      description: "", hours: {}, hoursRaw: "24/7", openNow: true, verified: false,
+    });
+    setDemo(true);
+    setOrganizations([
+      makeExample("demo-1", "Городская больница № 1", "ул. Центральная, 12", "0.8 mi"),
+      makeExample("demo-2", "Пункт экстренной помощи", "ул. Ленина, 25", "1.5 mi"),
+      makeExample("demo-3", "Круглосуточная аптека", "ул. Мира, 7", "2.1 mi"),
+    ]);
+    setState("ready");
+    setOpen(true);
+  }, []);
   const [state, setState] = useState<EmergencyState>("idle");
   const [organizations, setOrganizations] = useState<Organization[]>([]);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const requestId = useRef(0);
 
-  const loadEmergencyList = useCallback(async (location: UserLocation) => {
+  const loadEmergencyList = useCallback(async (location: UserLocation, id: number) => {
     setState("loading");
     setErrorMessage(null);
 
@@ -33,9 +56,11 @@ export function EmergencyHelp() {
       });
       if (!res.ok) throw new Error("Emergency fetch failed");
       const emergency = (await res.json()) as Organization[];
+      if (id !== requestId.current) return;
       setOrganizations(emergency);
       setState("ready");
     } catch (err) {
+      if (id !== requestId.current) return;
       console.error("[EmergencyHelp]", err);
       setOrganizations([]);
       setState("error");
@@ -44,6 +69,7 @@ export function EmergencyHelp() {
   }, [t]);
 
   const requestLocationAndLoad = useCallback(() => {
+    const id = ++requestId.current;
     setState("locating");
     setErrorMessage(null);
     setOrganizations([]);
@@ -52,9 +78,12 @@ export function EmergencyHelp() {
     // answers ends in the error text after 12 s, and a late "allow" still loads the list).
     requestPosition({
       onPosition: (location) => {
-        void loadEmergencyList({ lat: location.lat, lng: location.lng });
+        if (id !== requestId.current) return;
+        rememberPosition({ lat: location.lat, lng: location.lng });
+        void loadEmergencyList({ lat: location.lat, lng: location.lng }, id);
       },
       onIssue: () => {
+        if (id !== requestId.current) return;
         setState("error");
         setErrorMessage(t("emergencyLocationDenied"));
       },
@@ -67,6 +96,7 @@ export function EmergencyHelp() {
   const handleOpen = useCallback(() => {
     const active = document.activeElement as HTMLElement | null;
     if (active && active !== document.body) triggerRef.current = active;
+    setDemo(false);
     setOpen(true);
     requestLocationAndLoad();
   }, [requestLocationAndLoad]);
@@ -79,6 +109,7 @@ export function EmergencyHelp() {
   }, [handleOpen]);
 
   const handleClose = useCallback(() => {
+    requestId.current++;
     setOpen(false);
     setState("idle");
     setOrganizations([]);
@@ -149,7 +180,7 @@ export function EmergencyHelp() {
             <div className="flex-1 overflow-y-auto px-4 py-4 sm:px-5">
               {isBusy && (
                 <div className="flex flex-col items-center justify-center gap-3 py-12 text-slate-600 dark:text-gray-300">
-                  <Loader2 className="h-8 w-8 animate-spin text-red-400" />
+                  <Loader2 className="emergency-loader h-8 w-8 animate-spin text-red-400" aria-hidden="true" />
                   <p className="text-sm">
                     {state === "locating"
                       ? t("emergencyLocating")
@@ -199,7 +230,8 @@ export function EmergencyHelp() {
 
                           {org.phone?.trim() ? (
                             <a
-                              href={getPhoneTelUrl(org.phone)}
+                              href={demo ? undefined : getPhoneTelUrl(org.phone)}
+                              onClick={demo ? (event) => event.preventDefault() : undefined}
                               className="mb-2 inline-flex items-center gap-2 text-base font-bold text-emerald-700 hover:text-emerald-600 dark:text-emerald-400 dark:hover:text-emerald-300"
                             >
                               <Phone className="h-4 w-4 shrink-0" />
@@ -222,15 +254,28 @@ export function EmergencyHelp() {
                             </p>
                           )}
 
-                          {org.phone?.trim() && (
-                            <a
-                              href={getPhoneTelUrl(org.phone)}
-                              className="mt-3 flex w-full items-center justify-center gap-2 rounded-lg urgent-call bg-emerald-600 py-2.5 text-sm font-semibold text-white hover:bg-emerald-500"
-                            >
-                              <Phone className="h-4 w-4" />
-                              {t("emergencyCall")}
-                            </a>
-                          )}
+                          <div className="mt-3 flex flex-wrap gap-2">
+                            {org.phone?.trim() && (
+                              <a
+                                href={demo ? undefined : getPhoneTelUrl(org.phone)}
+                                onClick={demo ? (event) => event.preventDefault() : undefined}
+                                className="flex min-h-11 min-w-0 flex-1 items-center justify-center gap-2 rounded-lg urgent-call bg-emerald-600 px-3 py-2.5 text-center text-sm font-semibold text-white hover:bg-emerald-500"
+                              >
+                                <Phone className="h-4 w-4 shrink-0" />
+                                {t("emergencyCall")}
+                              </a>
+                            )}
+                            {(demo || hasValidMapCoordinates(org)) && (
+                              <button
+                                type="button"
+                                onClick={() => { if (!demo) openRoute(org); }}
+                                className="flex min-h-11 min-w-0 flex-1 items-center justify-center gap-2 rounded-lg border border-blue-500 bg-blue-700 px-3 py-2.5 text-center text-sm font-semibold text-white hover:bg-blue-600"
+                              >
+                                <Navigation className="h-4 w-4 shrink-0" />
+                                {t("getDirections")}
+                              </button>
+                            )}
+                          </div>
                         </li>
                       ))}
                     </ul>

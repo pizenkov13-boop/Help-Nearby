@@ -7,7 +7,7 @@
 
 **Find free humanitarian assistance near you — food, shelter, medical aid, clothing, and volunteer support on one map.**
 
-[Live app](https://www.help-nearby.org/) · [Submit an organization](https://www.help-nearby.org/submit) · [Leave a review](https://www.help-nearby.org/reviews)
+[Live app](https://www.help-nearby.org/)
 
 ---
 
@@ -28,7 +28,7 @@
 3. **В блоке интеграций нажми Add рядом с Supabase** (бесплатный тариф): проект базы и все ключи создаются и подставляются автоматически.
 4. **Придумай `ADMIN_PASSWORD`** (пароль администратора для `/admin`) и запиши его.
 5. **Нажми Deploy.** Когда сборка закончится, сайт готов. Во время сборки таблицы создаются сами (`npm run setup`, идемпотентно, из [`supabase/schema.sql`](supabase/schema.sql)); SQL вручную выполнять не нужно.
-6. **Добавь организации:** открой `/admin` и подтверждай заявки с `/submit`, либо загрузи CSV в таблицу `organizations` (Supabase → Table Editor → Insert → Import data from CSV; колонки как в [`supabase/schema.sql`](supabase/schema.sql), `verified` поставь `true`). Демо-данные: [`supabase/seed_demo.sql`](supabase/seed_demo.sql) (три вымышленные организации, удали их).
+6. **Добавь организации:** загрузи CSV в таблицу `organizations` (Supabase → Table Editor → Insert → Import data from CSV; колонки как в [`supabase/schema.sql`](supabase/schema.sql), `verified` поставь `true`). Демо-данные: [`supabase/seed_demo.sql`](supabase/seed_demo.sql) (три вымышленные организации, удали их).
 
 **Если застрял**
 
@@ -71,7 +71,7 @@ Anyone can run their own copy of Help Nearby for a city, region or community. Th
 3. **In the integrations block click Add next to Supabase** (free plan): the database project and all keys are created and filled in automatically.
 4. **Come up with an `ADMIN_PASSWORD`** (the admin password for `/admin`) and write it down.
 5. **Click Deploy.** The site is ready when the build finishes. During the build the tables are created for you (`npm run setup`, idempotent, from [`supabase/schema.sql`](supabase/schema.sql)); no SQL to run by hand.
-6. **Add organizations:** open `/admin` and verify community submissions from `/submit`, or bulk-load rows by importing a CSV into the `organizations` table (Supabase → Table Editor → Insert → Import data from CSV; columns follow [`supabase/schema.sql`](supabase/schema.sql), set `verified` to `true`). Demo data: [`supabase/seed_demo.sql`](supabase/seed_demo.sql) (three fictional organizations, delete them).
+6. **Add organizations:** bulk-load rows by importing a CSV into the `organizations` table (Supabase → Table Editor → Insert → Import data from CSV; columns follow [`supabase/schema.sql`](supabase/schema.sql), set `verified` to `true`). Demo data: [`supabase/seed_demo.sql`](supabase/seed_demo.sql) (three fictional organizations, delete them).
 
 **If you get stuck**
 
@@ -173,7 +173,7 @@ These organizations are imported into Supabase from the official sources listed 
 | Demo seed (New York, US) | **3** | `supabase/migrations/20250319000001_seed_organizations.sql` | Example data |
 | **Total (excl. demo seed)** | **183** | | |
 
-Community submissions via `/submit` are stored as **unverified** until approved in `/admin`.
+Public submissions are no longer available.
 
 ---
 
@@ -189,9 +189,8 @@ Community submissions via `/submit` are stored as **unverified** until approved 
 | **7 languages** | English, Russian, Spanish, French, German, Chinese, Arabic (RTL) |
 | **Lite mode** | List first, the map loads only on request; switches on by itself when the browser reports Data Saver or a 2G connection. It does not make the first page load smaller (about 370 KB over the network, measured) |
 | **Adaptive theme** | Light theme by default in sunny regions, based on the country found by your search; manual dark/light toggle |
-| **AI assistant** | AITunnel (OpenAI-compatible) chat, scoped to humanitarian help — **experimental** |
 | **PWA** | Web app manifest and a service worker that caches a few static files — **experimental**. There is no offline mode: the app does not open without a network |
-| **Admin moderation** | Password-protected `/admin` for org and review approval |
+| **Admin moderation** | Password-protected `/admin` for managing existing submissions |
 | **Impact counter** | Tracks Call / Directions clicks in Supabase (usage signal, not aid delivery proof) |
 
 ---
@@ -205,7 +204,7 @@ Community submissions via `/submit` are stored as **unverified** until approved 
 | **Supabase** | Organization catalog (PostgreSQL + RLS) | `lib/data.ts` |
 | **OpenStreetMap / Overpass** | POI search | `lib/overpass.server.ts` → `/api/nearby` |
 | **Nominatim** | Forward/reverse geocoding for addresses | `lib/nominatim.server.ts` → `/api/geocode` |
-| **OSRM** | Turn-by-turn routing | `lib/osrmRouting.server.ts` → `/api/route` |
+| **OSRM** | Route geometry and estimated distance and duration | `lib/osrmRouting.server.ts` → `/api/route` |
 
 Nearby results merge the Supabase catalog and Overpass, filtered to the displayed radius. Country-level HDX, GDHO and ReliefWeb directory records do not establish a local office and are excluded from nearby results and their counts.
 
@@ -227,7 +226,6 @@ From `package.json` and project source:
 | Geocoding | [Nominatim](https://nominatim.org/) | via `/api/geocode` |
 | POI data | [Overpass API](https://wiki.openstreetmap.org/wiki/Overpass_API) | via `/api/nearby` |
 | Routing | [OSRM](http://project-osrm.org/) | via `/api/route` |
-| AI chat | [AITunnel](https://aitunnel.ru/) (OpenAI-compatible API) | via `/api/chat` |
 | Analytics | [Vercel Web Analytics](https://vercel.com/docs/analytics) (`@vercel/analytics`) | cookie-less; enable it in the Vercel project (Analytics tab) |
 | Hosting | [Vercel](https://vercel.com/) | Production + preview deploys |
 | E2E tests | [Playwright](https://playwright.dev/) | **1.60.0** |
@@ -236,7 +234,7 @@ From `package.json` and project source:
 
 ## UN-related data sources
 
-Country-level organization listings are fetched server-side from three public humanitarian data sources (see "Data sources & integrations" above):
+The code includes integrations for country-level organization listings from three public humanitarian data sources. These listings are excluded from nearby search results because they do not establish a local office:
 
 - **HDX** (Humanitarian Data Exchange, UN OCHA) — public CKAN API
 - **GDHO** (Global Directory of Humanitarian Organizations, Humanitarian Outcomes) — CSV export
@@ -282,11 +280,6 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key
 # Admin moderation (optional — /admin)
 ADMIN_PASSWORD=your-secure-admin-password
 SUPABASE_SERVICE_ROLE_KEY=your-service-role-key
-
-# AI chat (optional, server-side only — never expose to the client)
-AITUNNEL_API_KEY=your-aitunnel-api-key
-AITUNNEL_BASE_URL=https://api.aitunnel.ru/v1/
-AITUNNEL_MODEL=gpt-6-luna
 
 # Map tiles (optional — defaults to OpenStreetMap standard tiles)
 # NEXT_PUBLIC_MAP_TILES_URL=https://api.maptiler.com/maps/streets-v2/{z}/{x}/{y}.png?key=your-key
@@ -339,7 +332,7 @@ npm run test:e2e
 
 ```
 app/                 # Next.js App Router pages & API routes
-components/          # React UI (map, filters, emergency, chat, …)
+components/          # React UI (map, filters, emergency, …)
 lib/                 # Data, geocoding, routing, i18n, Supabase helpers
 public/              # PWA manifest, icons, service worker
 supabase/migrations/ # PostgreSQL schema, policies, and seed SQL
@@ -358,9 +351,6 @@ scripts/             # Geocoding and build utilities
 | `/api/route` | OSRM route (line, distance, time) |
 | `/api/geocode` | Nominatim address → coordinates |
 | `/api/geocode/reverse` | Coordinates → country |
-| `/api/submit` | Public organization submissions |
-| `/api/reviews` | Approved reviews (GET) / new review (POST) |
-| `/api/chat` | AI assistant (AITunnel) |
 | `/api/impact` | Impact click tracking |
 | `/api/admin/*` | Admin auth, verify orgs, moderate reviews |
 | `/api/deployments` | Receives the anonymous deployment ping of copies (domain, version, timestamp) |
@@ -386,7 +376,7 @@ Please do not include API keys or `.env.local` in submissions.
 
 **Pavel Izenkin**, founder of Help Nearby.
 
-Built with support from the open-source community, OpenStreetMap contributors, Supabase, and AITunnel.
+Built with support from the open-source community, OpenStreetMap contributors, and Supabase.
 
 Community partner: [Kindness Corporation](https://www.kindnesscorporation.ru/)
 
@@ -408,7 +398,6 @@ Community partner: [Kindness Corporation](https://www.kindnesscorporation.ru/)
 | `NEXT_PUBLIC_FOOTER_LINK_URL` | Ссылка на проект в подвале (по умолчанию — этот репозиторий) |
 | `DISABLE_PING` | `true` отключает анонимный пинг копии (см. [Приватность](#приватность-и-анонимный-пинг)) |
 | `RELIEFWEB_APPNAME` | Ваш зарегистрированный [appname ReliefWeb](https://apidoc.reliefweb.int/); без него результаты ReliefWeb пропускаются |
-| `AITUNNEL_API_KEY`, `AITUNNEL_BASE_URL`, `AITUNNEL_MODEL` | Включают экспериментального ИИ-ассистента |
 | `NEXT_PUBLIC_MAP_TILES_URL`, `NEXT_PUBLIC_MAP_TILES_ATTRIBUTION` | Свой провайдер тайлов карты |
 | `DEBUG_TOKEN` | Включает диагностический маршрут `/api/debug/sources` |
 | `NEXT_PUBLIC_OPERATOR_NAME` | Кто ведёт копию: показывается в строке © и на странице приватности |
@@ -428,7 +417,6 @@ Everything here is optional and has a default. Without a database the site runs 
 | `NEXT_PUBLIC_FOOTER_LINK_URL` | Project link in the footer (default: this repository) |
 | `DISABLE_PING` | `true` turns off the anonymous deployment ping (see [Privacy](#privacy-and-the-anonymous-ping)) |
 | `RELIEFWEB_APPNAME` | Your registered [ReliefWeb appname](https://apidoc.reliefweb.int/); without it ReliefWeb results are skipped |
-| `AITUNNEL_API_KEY`, `AITUNNEL_BASE_URL`, `AITUNNEL_MODEL` | Enable the experimental AI assistant |
 | `NEXT_PUBLIC_MAP_TILES_URL`, `NEXT_PUBLIC_MAP_TILES_ATTRIBUTION` | Custom map tile provider |
 | `DEBUG_TOKEN` | Enables the `/api/debug/sources` diagnostics route |
 | `NEXT_PUBLIC_OPERATOR_NAME` | Who runs the copy: shown in the © line and on the privacy page |

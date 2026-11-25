@@ -10,6 +10,21 @@ import {
 } from "@/lib/supabase";
 import type { Category, Organization, UserLocation, WeeklyHours } from "./types";
 
+// These catalog entries describe services outside their assigned category.
+// Keep the records in the database, but do not show misleading category results.
+const EXCLUDED_CATEGORY_SLUGS = [
+  "parikmakherskaya-krupskoy-spb",
+  "nochlezhka-laundry-spb",
+  "neravnodush-dush-spb",
+  "dezinfektsiya-dush-spb",
+  "nochlezhka-consult-moscow",
+  "nochlezhka-consult-spb",
+  "pomoshch-vozvrashcheniyu-domoy-spb",
+  "krizisny-center-women-spb",
+  "zhenskaya-gruppa-rubinshteina-spb",
+] as const;
+const EXCLUDED_CATEGORY_SLUGS_FILTER = `(${EXCLUDED_CATEGORY_SLUGS.join(",")})`;
+
 export interface DbOrganization {
   id: number;
   name: string;
@@ -142,7 +157,7 @@ async function queryOrganizations(country?: string, strict = false): Promise<DbO
   }
 
   try {
-    let query = supabase.from("organizations").select("*").order("name");
+    let query = supabase.from("organizations").select("*").overlaps("category", CATEGORIES).not("slug", "in", EXCLUDED_CATEGORY_SLUGS_FILTER).order("name");
 
     if (country) {
       query = query.eq("country", country);
@@ -318,7 +333,7 @@ export async function fetchOrganizationBySlug(
   if (fixture) return fixture;
 
   const supabase = getSupabase();
-  if (!supabase) return null;
+  if (!supabase || (EXCLUDED_CATEGORY_SLUGS as readonly string[]).includes(slug)) return null;
 
   try {
     const { data, error } = await supabase
@@ -453,6 +468,8 @@ export async function fetchRecentOrganizations(
       .from("organizations")
       .select("*")
       .eq("verified", true)
+      .overlaps("category", CATEGORIES)
+      .not("slug", "in", EXCLUDED_CATEGORY_SLUGS_FILTER)
       .order("created_at", { ascending: false })
       .order("id", { ascending: false });
 
@@ -469,7 +486,10 @@ export async function fetchRecentOrganizations(
 
     const rows = (data as DbOrganization[]) ?? [];
     return {
-      organizations: rows.slice(0, limit).map((row) => mapDbOrganization(row)),
+      organizations: rows.slice(0, limit).map((row) => {
+        const org = mapDbOrganization(row);
+        return options.category ? { ...org, category: options.category } : org;
+      }),
       hasMore: rows.length > limit,
       error: false,
     };

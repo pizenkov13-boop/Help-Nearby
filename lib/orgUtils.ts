@@ -79,6 +79,11 @@ function evaluateStructuredHours(
   return isOpenForSchedule(schedule, date) ? "open" : "closed";
 }
 
+/** Show only an unambiguous round-the-clock schedule; other hours need reliable local-time evaluation. */
+export function hasRoundTheClockHours(org: Organization): boolean {
+  return /^\s*24\s*\/\s*7\s*$/i.test(org.hoursRaw ?? "");
+}
+
 /** Whether opening hours are known well enough to show open/closed status. */
 export function hasKnownOpenStatus(org: Organization): boolean {
   return getOrganizationOpenStatus(org) !== "unknown";

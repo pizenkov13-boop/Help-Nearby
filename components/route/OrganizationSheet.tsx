@@ -2,14 +2,14 @@
 
 import Link from "next/link";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { BadgeCheck, Clock, MapPin, Navigation, Phone, X } from "lucide-react";
+import { MapPin, Navigation, Phone, X } from "lucide-react";
 import { CategoryIcon } from "@/components/icons/CategoryIcon";
 import { formatDistance, useDistanceUnit } from "@/lib/distanceUnits";
 import { useLanguage } from "@/lib/i18n/LanguageProvider";
 import type { TranslationKey } from "@/lib/i18n/translations";
 import { recordImpactClick } from "@/lib/impact.client";
 import { ORG_SHEET_OPEN_EVENT, SHEET_CLOSE_EVENT, openRoute, restoreTrigger } from "@/lib/orgActions";
-import { getOrganizationOpenStatus, getPhoneTelUrl } from "@/lib/orgUtils";
+import { getPhoneTelUrl, hasRoundTheClockHours } from "@/lib/orgUtils";
 import { isApproximateLocation, isOverpassOrganization } from "@/lib/organizationCoordinates";
 import { getOrganizationSource } from "@/lib/organizationSource";
 import type { Category, Organization } from "@/lib/types";
@@ -79,8 +79,6 @@ export function OrganizationSheet() {
   const hasPhone = Boolean(org.phone?.trim());
   // Country-level entries have no real address, so there is nothing to route to.
   const canRoute = !isApproximateLocation(org);
-  const openStatus = getOrganizationOpenStatus(org);
-  const open = openStatus === "open";
   const source = getOrganizationSource(org);
   const osmSource = !source && !org.verified && isOverpassOrganization(org);
   const addedOn = formatAddedDate(org.createdAt, language);
@@ -115,23 +113,8 @@ export function OrganizationSheet() {
           </p>
         )}
 
-        <div className="os-badges">
-          {openStatus !== "unknown" && (
-            <span className={open ? "os-badge ok" : "os-badge muted"} data-testid="sheet-open-status">
-              <Clock aria-hidden />
-              {open ? t("openNow") : t("closed")}
-            </span>
-          )}
-          {org.verified && (
-            <span className="os-badge ok">
-              <BadgeCheck aria-hidden />
-              {t("verified")}
-            </span>
-          )}
-          {!org.verified && isOverpassOrganization(org) && (
-            <span className="os-badge warn">{t("unverifiedOsmBadge")}</span>
-          )}
-        </div>
+
+        {hasRoundTheClockHours(org) && <div className="os-badges"><span className="os-badge ok" data-testid="sheet-open-status">{t("openNow")}</span></div>}
 
         {(source || osmSource || addedOn) && (
           <p className="os-src">

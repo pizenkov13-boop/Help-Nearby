@@ -279,7 +279,7 @@ test.describe("OSM category allowlists (unit)", () => {
   test("clothing: keeps clothing banks and charity clothing shops, drops plain charity shops and clothes shops", () => {
     expect(cat({ amenity: "social_facility", social_facility: "clothing_bank", name: "Dress for Success" })).toBe("clothing");
     expect(cat({ shop: "charity", charity: "clothes", name: "Salvation Army Thrift" })).toBe("clothing");
-    expect(cat({ shop: "charity", second_hand: "yes", name: "Oxfam Shop" })).toBe("clothing");
+    expect(cat({ shop: "charity", second_hand: "yes", name: "Oxfam Shop" })).toBeNull();
     expect(cat({ shop: "charity", clothes: "second_hand", name: "Red Cross Shop" })).toBe("clothing");
 
     expect(cat({ shop: "charity", name: "Gift Shop for Charity" })).toBeNull();
@@ -288,12 +288,12 @@ test.describe("OSM category allowlists (unit)", () => {
     expect(cat({ shop: "clothes", second_hand: "yes", name: "Vintage Store" })).toBeNull();
   });
 
-  test("volunteer: keeps outreach and helping NGOs and centres, drops everything unmatched", () => {
-    expect(cat({ amenity: "social_facility", social_facility: "outreach", name: "Street Outreach Team" })).toBe("volunteer");
+  test("volunteer: requires explicit evidence of volunteering", () => {
+    expect(cat({ amenity: "social_facility", social_facility: "outreach", name: "Street Outreach Team" })).toBeNull();
     expect(cat({ office: "ngo", volunteers: "yes", name: "Neighbours Helping Neighbours" })).toBe("volunteer");
-    expect(cat({ office: "charity", "ngo:type": "humanitarian", name: "Relief Aid" })).toBe("volunteer");
-    expect(cat({ amenity: "community_centre", "community_centre:for": "refugees", name: "Refugee Welcome Centre" })).toBe("volunteer");
-    expect(cat({ amenity: "community_centre", "social_facility:for": "homeless", name: "Day Centre" })).toBe("volunteer");
+    expect(cat({ office: "charity", "ngo:type": "humanitarian", name: "Relief Aid" })).toBeNull();
+    expect(cat({ amenity: "community_centre", "community_centre:for": "refugees", name: "Refugee Welcome Centre" })).toBeNull();
+    expect(cat({ amenity: "community_centre", "social_facility:for": "homeless", name: "Day Centre" })).toBeNull();
 
     expect(cat({ office: "ngo", name: "Some Association" })).toBeNull();
     expect(cat({ amenity: "community_centre", name: "Town Hall" })).toBeNull();
@@ -306,6 +306,7 @@ test.describe("OSM category allowlists (unit)", () => {
 
   test("private objects are not shown in the help categories", () => {
     expect(cat({ amenity: "food_bank", access: "private", name: "Staff Pantry" })).toBeNull();
+    expect(cat({ amenity: "hospital", access: "private", name: "Private Hospital" })).toBeNull();
     expect(cat({ amenity: "social_facility", social_facility: "shelter", access: "no", name: "Closed Shelter" })).toBeNull();
   });
 

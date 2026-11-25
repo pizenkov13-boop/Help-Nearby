@@ -2408,6 +2408,10 @@ html.dark .os-badge.warn { color: #e6c27a; background: #2e2718; }
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
   }
+  .emergency-loader {
+    animation-duration: 1s !important;
+    animation-iteration-count: infinite !important;
+  }
 }
 
 /* Phones: volunteering is the fifth tile, laid out as the quiet full-width row under the 2x2 grid. */
@@ -2459,4 +2463,9 @@ html.dark .os-badge.warn { color: #e6c27a; background: #2e2718; }
   border-color: var(--accent-pill-border) !important;
   background: var(--accent-pill-bg) !important;
   color: var(--accent-pill-text) !important;
+}
+
+/* Keep the map heading compact on phones. */
+@media (max-width: 767px) {
+  .map-panel .map-badge { display: none; }
 }

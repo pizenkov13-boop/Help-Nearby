@@ -30,5 +30,7 @@ export function filterOrganizations(
       if (!haystack.includes(query)) return false;
     }
     return true;
-  });
+  }).map((org) => filters.category !== "all" && org.category !== filters.category
+    ? { ...org, category: filters.category }
+    : org);
 }

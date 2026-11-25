@@ -1,7 +1,6 @@
 "use client";
 
 import {
-  BadgeCheck,
   Clock,
   MapPin,
   Navigation,
@@ -15,7 +14,7 @@ import { useLanguage } from "@/lib/i18n/LanguageProvider";
 import { localizeCountry } from "@/lib/i18n/countries";
 import { recordImpactClick } from "@/lib/impact.client";
 import { openRoute } from "@/lib/orgActions";
-import { getPhoneTelUrl, getOrganizationOpenStatus } from "@/lib/orgUtils";
+import { getPhoneTelUrl, hasRoundTheClockHours } from "@/lib/orgUtils";
 import {
   isApproximateLocation,
   isOverpassOrganization,
@@ -65,8 +64,6 @@ export function OrganizationCard({
   const phone = useIsPhone();
   const cfg = CATEGORY_CONFIG[org.category];
   const source = getOrganizationSource(org);
-  const openStatus = getOrganizationOpenStatus(org);
-  const open = openStatus === "open";
   const telUrl = getPhoneTelUrl(org.phone);
   const hasPhone = Boolean(org.phone?.trim());
   // Country-level OCHA entries have no confirmed address, so no directions are offered.
@@ -123,20 +120,7 @@ export function OrganizationCard({
         <CategoryIcon category={org.category} />
         <span className="break-words">{t(CATEGORY_LABEL_KEY[org.category])}</span>
       </span>}
-      {org.verified && !approximate && (
-        <span className="inline-flex items-center gap-0.5 rounded-full bg-emerald-500/20 px-2 py-0.5 text-[13px] md:text-xs font-semibold text-emerald-400 ring-1 ring-emerald-500/30">
-          <BadgeCheck className="h-3 w-3 shrink-0" aria-hidden />
-          {t("verified")}
-        </span>
-      )}
-      {!org.verified && isOverpassOrganization(org) && (
-        <span
-          className="inline-flex items-center rounded-full bg-amber-500/15 px-2 py-0.5 text-[13px] md:text-xs font-medium text-amber-700 ring-1 ring-amber-500/30 dark:text-amber-300"
-          data-testid="unverified-osm-badge"
-        >
-          {t("unverifiedOsmBadge")}
-        </span>
-      )}
+      {hasRoundTheClockHours(org) && <span className="inline-flex items-center gap-1 rounded-full bg-emerald-500/20 px-2 py-0.5 text-xs font-medium text-emerald-600 dark:text-emerald-400" data-testid="open-status"><Clock className="h-3 w-3" />{t("openNow")}</span>}
       {approximate && (
         <span
           className="inline-flex items-center rounded-full bg-slate-100 px-2 py-0.5 text-[13px] md:text-xs font-medium text-slate-600 dark:bg-gray-700/60 dark:text-gray-300"
@@ -163,20 +147,6 @@ export function OrganizationCard({
           ) : (
             <span className="truncate">{source.label}</span>
           )}
-        </span>
-      )}
-      {org.verified && openStatus !== "unknown" && (
-        <span
-          className={cn(
-            "inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[13px] md:text-xs font-medium",
-            open
-              ? "bg-emerald-500/20 text-emerald-400"
-              : "bg-slate-200 text-slate-600 dark:bg-gray-700 dark:text-gray-400",
-          )}
-          data-testid="open-status"
-        >
-          <Clock className="h-3 w-3 shrink-0" />
-          {open ? t("openNow") : t("closed")}
         </span>
       )}
     </div>
@@ -342,36 +312,7 @@ export function OrganizationCard({
           )}
 
           <div className="flex flex-wrap items-center gap-2">
-            {openStatus !== "unknown" && (
-              <span
-                className={cn(
-                  PILL,
-                  open
-                    ? "bg-emerald-100 text-emerald-900 dark:bg-emerald-500/20 dark:text-emerald-200"
-                    : "bg-slate-200 text-slate-800 dark:bg-gray-700 dark:text-gray-200",
-                )}
-                data-testid="open-status"
-              >
-                <Clock className="h-4 w-4 shrink-0" aria-hidden />
-                {open ? t("openNow") : t("closed")}
-              </span>
-            )}
-            {org.verified && !approximate && (
-              <span
-                className={cn(PILL, "bg-emerald-100 text-emerald-900 ring-1 ring-emerald-600/30 dark:bg-emerald-500/20 dark:text-emerald-200 dark:ring-emerald-500/30")}
-              >
-                <BadgeCheck className="h-4 w-4 shrink-0" aria-hidden />
-                {t("verified")}
-              </span>
-            )}
-            {!org.verified && isOverpassOrganization(org) && (
-              <span
-                className={cn(PILL, "bg-amber-100 text-amber-900 ring-1 ring-amber-600/30 dark:bg-amber-500/15 dark:text-amber-200 dark:ring-amber-500/30")}
-                data-testid="unverified-osm-badge"
-              >
-                {t("unverifiedOsmBadge")}
-              </span>
-            )}
+            {hasRoundTheClockHours(org) && <span className={cn(PILL, "bg-emerald-100 text-emerald-900 dark:bg-emerald-500/20 dark:text-emerald-200")} data-testid="open-status"><Clock className="h-4 w-4" />{t("openNow")}</span>}
             {approximate && (
               <span
                 className={cn(PILL, "bg-slate-100 text-slate-800 dark:bg-gray-700/60 dark:text-gray-200")}

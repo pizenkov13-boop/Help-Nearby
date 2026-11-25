@@ -19,12 +19,17 @@ function hostFromUrl(url: string): string | null {
 }
 
 function fromDescription(description: string): OrganizationSource | null {
-  const match = description.match(/(?:Источник|Source):\s*([^\s.]+(?:\.[^\s.]+)*)/i);
+  if (/справочник\s+ночлежки/i.test(description)) {
+    return { label: "Ночлежка", url: "https://homeless.ru/for-homeless/" };
+  }
+  const match = description.match(/(?:Источник|Source):\s*((?:https?:\/\/)?[\p{L}\p{N}-]+(?:\.[\p{L}\p{N}-]+)+(?:\/[^\s]*)?)/iu);
   if (!match?.[1]) return null;
-
-  const label = match[1].replace(/\.$/, "");
-  const url = label.startsWith("http") ? label : `https://${label}`;
-  return { label: hostFromUrl(url) ?? label, url };
+  const value = match[1].replace(/[.,;]+$/, "");
+  const url = /^https?:\/\//i.test(value) ? value : `https://${value}`;
+  const host = hostFromUrl(url);
+  if (!host) return null;
+  const label = value.replace(/^https?:\/\//i, "").split("/")[0].replace(/^www\./i, "");
+  return { label, url };
 }
 
 /** Display label for verified catalog entries (Supabase seeds, admin-approved). */
@@ -70,7 +75,6 @@ export function getOrganizationSource(org: SourceInput): OrganizationSource | nu
   }
 
   if (
-    org.country === "Russia" ||
     slug.includes("nochlezhka") ||
     website.includes("homeless.ru") ||
     website.includes("nochelezhka.ru") ||
@@ -82,9 +86,5 @@ export function getOrganizationSource(org: SourceInput): OrganizationSource | nu
     };
   }
 
-  if (siteHost) {
-    return { label: siteHost, url: website };
-  }
-
-  return { label: "Help Nearby" };
+  return null;
 }
