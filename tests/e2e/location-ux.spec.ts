@@ -322,12 +322,12 @@ test.describe("Merging sources (unit)", () => {
     expect(mergeOrganizations([], branches)).toHaveLength(3);
   });
 
-  test("the same place from two sources is shown once", () => {
+  test("the same name is deduplicated but different places nearby are kept", () => {
     const catalog = [org("c1", "Harvest Food Bank", 40.75, -73.99, true)];
     const osmSame = org("o1", "Harvest Food Bank", 40.7502, -73.9901); // ~25 m away
     const osmOtherNameSamePlace = org("o2", "HFB pantry", 40.75005, -73.99); // within 80 m
     const merged = mergeOrganizations(catalog, [osmSame, osmOtherNameSamePlace]);
-    expect(merged.map((o) => o.id)).toEqual(["c1"]);
+    expect(merged.map((o) => o.id)).toEqual(["c1", "o2"]);
   });
 
   test("names in other scripts are not collapsed into one", () => {

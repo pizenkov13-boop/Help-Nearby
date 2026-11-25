@@ -168,7 +168,7 @@ test.describe("OSM relevance (unit)", () => {
   });
   const allCategories: FilterState = { category: "all", openNow: false, searchQuery: "" };
 
-  test("pharmacies and shops are hidden in All categories; pharmacies show under Medical", () => {
+  test("All categories retains eligible pharmacies and Medical includes them", () => {
     const pharmacy = osm("1", "pharmacy", { category: "medical", categories: ["medical"] });
     const shop = osm("2", "shop:supermarket");
     const foodBank = osm("3", "food_bank", { category: "food", categories: ["food"] });
@@ -187,7 +187,10 @@ test.describe("OSM relevance (unit)", () => {
     const pool = [verified, pharmacy, shop, foodBank, legacyPharmacy];
     expect(filterOrganizations(pool, allCategories).map((o) => o.id)).toEqual([
       "55",
+      "overpass-node-1",
+      "overpass-node-2",
       "overpass-node-3",
+      "overpass-node-4",
     ]);
     expect(
       filterOrganizations(pool, { ...allCategories, category: "medical" }).map((o) => o.id),

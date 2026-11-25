@@ -3,7 +3,6 @@ import { hasValidMapCoordinates } from "@/lib/mapCoordinates";
 import { isApproximateLocation } from "@/lib/organizationCoordinates";
 import type { Organization } from "@/lib/types";
 
-const DUPLICATE_RADIUS_MILES = 0.05;
 
 /** Letters and digits of any script (Latin, Cyrillic, CJK, Arabic, ...), lowercased. */
 function normalizeOrgName(name: string): string {
@@ -35,7 +34,6 @@ function isDuplicateOrganization(
   if (!hasCoords) return sameName;
 
   const miles = distanceMiles(existing.lat, existing.lng, candidate.lat, candidate.lng);
-  if (miles < DUPLICATE_RADIUS_MILES) return true;
   return sameName && miles < SAME_NAME_RADIUS_MILES;
 }
 

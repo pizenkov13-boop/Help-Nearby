@@ -341,6 +341,19 @@ test.describe("OSM category allowlists (unit)", () => {
     expect(filterOrganizations([shop], allFilter)).toHaveLength(1);
   });
 
+  test("each category filter returns only matching places, including multi-category places", () => {
+    const orgs = (CATEGORIES as Category[]).map((category, i) =>
+      osm(`filter${i}`, `Org ${category}`, { category, categories: [category], osmKind: "social_facility" }),
+    );
+    orgs.push(osm("multi", "Food and clothing", { category: "food", categories: ["food", "clothing"] }));
+    for (const category of CATEGORIES) {
+      const result = filterOrganizations(orgs, { ...allFilter, category });
+      expect(result.every((org) => org.categories.includes(category) && org.category === category)).toBe(true);
+      expect(result.length).toBe(category === "food" || category === "clothing" ? 2 : 1);
+    }
+    expect(filterOrganizations(orgs, allFilter)).toHaveLength(6);
+  });
+
   test("All categories is the union of the five and nothing else", () => {
     const orgs = (CATEGORIES as Category[]).map((category, i) =>
       osm(`c${i}`, `Org ${category}`, { category, categories: [category], osmKind: "social_facility" }),
