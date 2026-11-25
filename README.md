@@ -183,7 +183,7 @@ Public submissions are no longer available.
 |---------|-------------|
 | **Interactive map** | Leaflet map with category markers, a source badge and source labels |
 | **Multi-source data** | Supabase catalog + Overpass OpenStreetMap queries for nearby places |
-| **Emergency mode** | One-tap list of 24/7 organizations (hospitals, pharmacies, shelters) |
+| **Emergency mode** | One-tap list of emergency facilities |
 | **Smart radius search** | Expands the search radius (5 → 15 → 40 km; 10 → 25 → 50 km in lite mode) while fewer than 3 results are found |
 | **Routing** | OSRM route line, distance and time via `/api/route` (no step-by-step instructions) |
 | **7 languages** | English, Russian, Spanish, French, German, Chinese, Arabic (RTL) |

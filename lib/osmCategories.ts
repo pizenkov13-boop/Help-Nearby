@@ -50,7 +50,6 @@ export const OSM_CATEGORY_SELECTORS: Record<Category, string[]> = {
   medical: [
     '["amenity"="clinic"]',
     '["amenity"="hospital"]',
-    '["amenity"="pharmacy"]',
     '["amenity"="doctors"]',
     '["emergency"="ambulance_station"]',
   ],

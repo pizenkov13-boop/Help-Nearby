@@ -763,6 +763,15 @@ export function HomePage() {
                     >
                       {liteModeActive ? t("switchToFullVersion") : t("switchToLiteVersion")}
                     </button>
+                    {liteModeActive && userLocation && !liteMapVisible && (
+                      <button
+                        type="button"
+                        onClick={() => setLiteMapVisible(true)}
+                        className="accent-pill min-h-11 w-full rounded-lg px-4 py-2.5 text-sm font-medium min-[769px]:hidden"
+                      >
+                        {t("showLiteMap")}
+                      </button>
+                    )}
                 </div>
               </div>
 
@@ -828,7 +837,7 @@ export function HomePage() {
                       : t("switchToLiteVersion")}
                   </button>
                   {liteModeActive && userLocation && !liteMapVisible && (
-                    <button type="button" onClick={() => setLiteMapVisible(true)} className="accent-pill mt-2 min-h-11 w-full rounded-lg px-4 py-2.5 text-sm font-medium max-lg:order-4 max-lg:mt-0">
+                    <button type="button" onClick={() => setLiteMapVisible(true)} className="accent-pill mt-2 min-h-11 w-full rounded-lg px-4 py-2.5 text-sm font-medium max-[768px]:hidden max-lg:order-4 max-lg:mt-0">
                       {t("showLiteMap")}
                     </button>
                   )}

@@ -156,10 +156,10 @@ test.describe("OSM medical filter (unit)", () => {
   const ok = (tags: Record<string, string>) =>
     isGenuineMedicalOsmElement(tags, tags.name ?? "");
 
-  test("keeps a hospital, a pharmacy, an urgent-care clinic and an ambulance station", () => {
+  test("keeps hospitals and urgent care but excludes pharmacies", () => {
     expect(ok({ amenity: "hospital", name: "Bellevue Hospital Center" })).toBe(true);
     expect(ok({ healthcare: "hospital", name: "St. Mary's" })).toBe(true);
-    expect(ok({ amenity: "pharmacy", healthcare: "pharmacy", name: "Corner Pharmacy" })).toBe(true);
+    expect(ok({ amenity: "pharmacy", healthcare: "pharmacy", name: "Corner Pharmacy" })).toBe(false);
     expect(
       ok({
         amenity: "clinic",

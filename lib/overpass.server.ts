@@ -99,7 +99,7 @@ function buildChatCategoryQuery(category: Category) {
   };
 }
 
-/** AI chat search restricted to one category (no pharmacies/shops unless medical). */
+/** AI chat search restricted to one category. */
 export async function fetchChatOverpassForCategory(
   lat: number,
   lng: number,
@@ -135,7 +135,6 @@ export function buildEmergencyOverpassQuery(
   nwr["amenity"="clinic"]["emergency"~"^(yes|emergency_ward)$"]${around};
   nwr["amenity"="clinic"]["healthcare"="urgent_care"]${around};
   nwr["amenity"="hospital"]${around};
-  nwr["amenity"="pharmacy"]${around};
   nwr["amenity"="fire_station"]${around};
   nwr["amenity"="police"]${around};
 );

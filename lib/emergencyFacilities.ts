@@ -143,6 +143,7 @@ export function isGenuineEmergencyOsmFacility(
   }
 
   const amenity = tags.amenity?.toLowerCase();
+  if (amenity === "pharmacy" || tags.healthcare?.toLowerCase() === "pharmacy") return false;
 
   if (isCrisisPublicSafetyAmenity(amenity)) {
     return true;
@@ -184,6 +185,7 @@ function metadataIncludes(
  */
 export function isGenuineEmergencyOrganization(org: Organization): boolean {
   const raw = org.hoursRaw ?? "";
+  if (metadataIncludes(raw, "amenity", "pharmacy") || metadataIncludes(raw, "healthcare", "pharmacy")) return false;
   const name = `${org.name} ${org.description ?? ""}`;
 
   if (ROUTINE_NAME_PATTERN.test(name)) {

@@ -1,3 +1,4 @@
+import { isPharmacyOrganization } from "@/lib/pharmacyFilter";
 import { NEARBY_RADIUS_METERS } from "@/lib/constants";
 import { fetchOrganizations } from "@/lib/data";
 import { distanceMiles } from "@/lib/geo";
@@ -67,6 +68,7 @@ export async function loadEmergencyOrganizations(
   }
 
   const withinRadius = merged.filter((org) => {
+    if (isPharmacyOrganization(org)) return false;
     const meters = distanceMiles(location.lat, location.lng, org.lat, org.lng) * 1609.344;
     return Number.isFinite(meters) && meters <= radiusMeters;
   });

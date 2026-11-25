@@ -38,7 +38,7 @@ function parseRouteGeometry(route: OsrmRouteLeg): [number, number][] {
 function toRouteData(route: OsrmRouteLeg, mode: RoutingMode): RouteData {
   return {
     coordinates: parseRouteGeometry(route),
-    distanceKm: Math.round((route.distance / 1000) * 10) / 10,
+    distanceKm: route.distance / 1000,
     durationMinutes: Math.max(1, Math.round(route.duration / 60)),
     mode,
     steps: [],
@@ -79,27 +79,29 @@ async function fetchRouteFromUrl(
   );
 }
 
-/** Straight segment from the road endpoint to the exact building marker. */
-function extendRouteToExactDestination(
+/** Add short segments between the real locations and the routed road endpoints. */
+function extendRouteToExactEndpoints(
   route: RouteData,
-  exactLat: number,
-  exactLng: number,
+  fromLat: number,
+  fromLng: number,
+  toLat: number,
+  toLng: number,
 ): RouteData {
   const coords = [...route.coordinates];
   if (coords.length === 0) return route;
-
+  const first = coords[0]!;
   const last = coords[coords.length - 1]!;
-  const gapMeters = distanceMiles(last[0], last[1], exactLat, exactLng) * 1609.34;
-
-  if (gapMeters < 10) return route;
-
-  coords.push([exactLat, exactLng]);
-  const extraKm = Math.round((gapMeters / 1000) * 10) / 10;
-
+  const startGap = distanceMiles(first[0], first[1], fromLat, fromLng) * 1609.344;
+  const endGap = distanceMiles(last[0], last[1], toLat, toLng) * 1609.344;
+  if (startGap > 300 || endGap > 300) throw new Error("Route endpoint is too far from the requested location.");
+  const extraMeters = (startGap >= 10 ? startGap : 0) + (endGap >= 10 ? endGap : 0);
+  if (startGap >= 10) coords.unshift([fromLat, fromLng]);
+  if (endGap >= 10) coords.push([toLat, toLng]);
   return {
     ...route,
     coordinates: coords,
-    distanceKm: Math.round((route.distanceKm + extraKm) * 10) / 10,
+    distanceKm: route.distanceKm + extraMeters / 1000,
+    durationMinutes: Math.max(1, Math.round(route.durationMinutes + extraMeters / WALKING_SPEED_MS / 60)),
   };
 }
 
@@ -118,11 +120,14 @@ export async function fetchSnappedWalkingRoute(
     snapToNearestWalkingRoad(toLng, toLat),
   ]);
 
-  const foot = await fetchRouteFromUrl(routeUrl(OSM_DE_FOOT, from, to), "walking");
-  if (foot) return extendRouteToExactDestination(foot, toLat, toLng);
+  const foot = await fetchRouteFromUrl(routeUrl(OSM_DE_FOOT, from, to), "walking").catch((error) => {
+    console.warn("[route] walking provider unavailable:", error instanceof Error ? error.message : "request failed");
+    return null;
+  });
+  if (foot) return extendRouteToExactEndpoints(foot, fromLat, fromLng, toLat, toLng);
 
   const demo = await fetchRouteFromUrl(routeUrl(OSRM_WALKING_FALLBACK, from, to), "walking", true);
-  if (demo) return extendRouteToExactDestination(demo, toLat, toLng);
+  if (demo) return extendRouteToExactEndpoints(demo, fromLat, fromLng, toLat, toLng);
 
   throw new Error("No walking route found.");
 }

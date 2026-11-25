@@ -25,7 +25,7 @@ export function isApproximateLocation(org: Organization): boolean {
 export function isPlausibleCoordinate(lat: number, lng: number): boolean {
   if (!Number.isFinite(lat) || !Number.isFinite(lng)) return false;
   if (Math.abs(lat) > 90 || Math.abs(lng) > 180) return false;
-  if (Math.abs(lat) < 0.001 || Math.abs(lng) < 0.001) return false;
+  if (Math.abs(lat) < 0.001 && Math.abs(lng) < 0.001) return false;
   return true;
 }
 

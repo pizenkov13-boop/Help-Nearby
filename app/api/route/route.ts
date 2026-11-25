@@ -23,7 +23,9 @@ export async function POST(request: Request) {
     !Number.isFinite(fromLat) ||
     !Number.isFinite(fromLng) ||
     !Number.isFinite(toLat) ||
-    !Number.isFinite(toLng)
+    !Number.isFinite(toLng) ||
+    Math.abs(fromLat) > 90 || Math.abs(toLat) > 90 ||
+    Math.abs(fromLng) > 180 || Math.abs(toLng) > 180
   ) {
     return NextResponse.json(
       { error: "fromLat, fromLng, toLat, and toLng are required." },

@@ -2,7 +2,7 @@
  * Which OpenStreetMap objects count as "medical help". The OSM tags decide; the name is only a safety net.
  *
  * Shown as medical:
- * - amenity=hospital / amenity=pharmacy / healthcare=hospital / healthcare=pharmacy
+ * - amenity=hospital / healthcare=hospital
  * - emergency=ambulance_station and emergency=yes (a clinic or hospital with emergency care)
  * - amenity=clinic / amenity=doctors / healthcare=clinic / healthcare=doctor, only when
  *   healthcare:speciality is in the allowed set (or healthcare=urgent_care), or when there is
@@ -85,6 +85,8 @@ export function isGenuineMedicalOsmElement(
   const emergency = tags.emergency?.toLowerCase();
   const specs = specialities(tags);
 
+  // Pharmacies are retail locations, not the assistance organizations listed here.
+  if (amenity === "pharmacy" || healthcare === "pharmacy") return false;
   // Always excluded.
   if (amenity === "veterinary" || healthcare === "veterinary") return false;
   if (healthcare === "alternative") return false;
@@ -100,9 +102,7 @@ export function isGenuineMedicalOsmElement(
   if (emergency === "ambulance_station" || emergency === "yes") return true;
   if (
     amenity === "hospital" ||
-    amenity === "pharmacy" ||
     healthcare === "hospital" ||
-    healthcare === "pharmacy" ||
     healthcare === "emergency" ||
     healthcare === "urgent_care"
   ) {

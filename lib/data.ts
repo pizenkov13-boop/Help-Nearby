@@ -86,8 +86,7 @@ function isUsableCoordinate(lat: number, lng: number): boolean {
     Number.isFinite(lng) &&
     Math.abs(lat) <= 90 &&
     Math.abs(lng) <= 180 &&
-    Math.abs(lat) >= 0.001 &&
-    Math.abs(lng) >= 0.001
+    (Math.abs(lat) >= 0.001 || Math.abs(lng) >= 0.001)
   );
 }
 

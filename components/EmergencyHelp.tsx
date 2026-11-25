@@ -34,7 +34,7 @@ export function EmergencyHelp() {
     setOrganizations([
       makeExample("demo-1", "Городская больница № 1", "ул. Центральная, 12", "0.8 mi"),
       makeExample("demo-2", "Пункт экстренной помощи", "ул. Ленина, 25", "1.5 mi"),
-      makeExample("demo-3", "Круглосуточная аптека", "ул. Мира, 7", "2.1 mi"),
+      makeExample("demo-3", "Станция скорой помощи", "ул. Мира, 7", "2.1 mi"),
     ]);
     setState("ready");
     setOpen(true);

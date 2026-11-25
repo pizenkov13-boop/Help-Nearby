@@ -1,3 +1,5 @@
+import { distanceMiles } from "@/lib/geo";
+
 const USER_AGENT = "HelpNearby/1.0 (help-nearby.app)";
 const OSRM_NEAREST = "https://router.project-osrm.org/nearest/v1/walking";
 
@@ -37,7 +39,8 @@ export async function snapToNearestWalkingRoad(
       Array.isArray(location) &&
       location.length >= 2 &&
       Number.isFinite(location[0]) &&
-      Number.isFinite(location[1])
+      Number.isFinite(location[1]) &&
+      distanceMiles(lat, lng, location[1], location[0]) * 1609.344 <= 100
     ) {
       return { lng: location[0], lat: location[1] };
     }

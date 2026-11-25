@@ -23,5 +23,5 @@ export function formatDistanceMiles(
 ): string {
   const miles = distanceMiles(lat1, lng1, lat2, lng2);
   if (miles < 0.1) return `${Math.max(1, Math.round(miles * 5280))} ft`;
-  return `${miles.toFixed(1)} mi`;
+  return `${miles.toFixed(4)} mi`;
 }

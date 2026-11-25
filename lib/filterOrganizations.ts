@@ -1,4 +1,5 @@
-import { getOrganizationOpenStatus } from "@/lib/orgUtils";
+import { isPharmacyOrganization } from "@/lib/pharmacyFilter";
+import { isConfidentlyOpen } from "@/lib/confidentOpenStatus";
 import type { FilterState, Organization } from "@/lib/types";
 
 export function filterOrganizations(
@@ -8,13 +9,15 @@ export function filterOrganizations(
   const query = filters.searchQuery.trim().toLowerCase();
 
   return orgs.filter((org) => {
+    // Reject older cached pharmacy results as well as newly fetched ones.
+    if (isPharmacyOrganization(org)) return false;
     if (
       filters.category !== "all" &&
       !org.categories.includes(filters.category)
     ) {
       return false;
     }
-    if (filters.openNow && getOrganizationOpenStatus(org) !== "open") {
+    if (filters.openNow && !isConfidentlyOpen(org)) {
       return false;
     }
     if (query) {
