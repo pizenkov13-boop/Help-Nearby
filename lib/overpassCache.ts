@@ -5,7 +5,7 @@ export const OVERPASS_CACHE_TTL_MS = 60 * 60 * 1000;
 export const CLIENT_CACHE_TTL_MS = 30 * 60 * 1000;
 
 /** Total server budget per Overpass query across the hedged mirror chain. */
-export const OVERPASS_TIMEOUT_MS = 8_500;
+export const OVERPASS_TIMEOUT_MS = 10_000;
 
 /** ~2.2 km at equator — same bucket as nearby list cache. */
 export const OVERPASS_LOCATION_ROUND_DEG = 0.02;

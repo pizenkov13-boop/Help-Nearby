@@ -61,6 +61,7 @@ export interface OverpassElement {
 
 interface OverpassResponse {
   elements?: OverpassElement[];
+  remark?: string;
 }
 
 interface CacheEntry {
@@ -175,6 +176,9 @@ async function queryOverpass(query: string): Promise<OverpassResponse> {
         throw new Error(`HTTP ${response.status} from ${new URL(url).host}`);
       }
       const data = (await response.json()) as OverpassResponse;
+      if (!data || !Array.isArray(data.elements) || data.remark) {
+        throw new Error(`Invalid or incomplete Overpass response from ${new URL(url).host}`);
+      }
       console.log(
         `[overpass] Success from ${url} (${data.elements?.length ?? 0} elements)`,
       );
@@ -194,11 +198,13 @@ async function queryOverpass(query: string): Promise<OverpassResponse> {
     let failed = 0;
     let settled = false;
     let hedgeTimer: ReturnType<typeof setTimeout> | undefined;
+    let deadlineTimer: ReturnType<typeof setTimeout> | undefined;
 
     const finish = (fn: () => void) => {
       if (settled) return;
       settled = true;
       if (hedgeTimer) clearTimeout(hedgeTimer);
+      if (deadlineTimer) clearTimeout(deadlineTimer);
       controllers.forEach((controller) => controller.abort());
       fn();
     };
@@ -216,6 +222,7 @@ async function queryOverpass(query: string): Promise<OverpassResponse> {
             finish(() => reject(new Error(`All Overpass mirrors failed: ${errors.join("; ")}`)));
             return;
           }
+          if (hedgeTimer) clearTimeout(hedgeTimer);
           startNext(); // previous attempt failed: do not wait for the hedge delay
         },
       );
@@ -224,11 +231,11 @@ async function queryOverpass(query: string): Promise<OverpassResponse> {
       }
     };
 
-    startNext();
-    setTimeout(
+    deadlineTimer = setTimeout(
       () => finish(() => reject(new Error(`Overpass timeout: ${errors.join("; ") || "no response"}`))),
       Math.max(deadline - Date.now(), 1),
     );
+    startNext();
   });
 }
 

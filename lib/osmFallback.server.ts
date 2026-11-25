@@ -13,7 +13,7 @@ import type { OverpassElement } from "@/lib/overpass.server";
  * answer is cached on the server by rounded position and radius, so neither Nominatim nor
  * Overpass is hit again for the same area.
  */
-const TERMS = ["pharmacy", "hospital", "clinic", "shelter", "soup kitchen", "community centre"] as const;
+const TERMS = ["hospital", "food bank", "homeless shelter", "soup kitchen", "clinic", "clothing bank", "community centre"] as const;
 const FALLBACK_BUDGET_MS = 9_000;
 const REQUEST_TIMEOUT_MS = 4_000;
 
@@ -151,6 +151,7 @@ async function searchNominatim(
   for (const term of TERMS) {
     if (Date.now() + REQUEST_TIMEOUT_MS > deadline && answered) break;
     await waitForNominatimSlot();
+    if (Date.now() >= deadline) break;
     const url = new URL(searchUrl());
     url.searchParams.set("q", term);
     url.searchParams.set("viewbox", viewbox(lat, lng, radius));
