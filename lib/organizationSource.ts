@@ -1,3 +1,4 @@
+import { NOCHLEZHKA_SOURCE_SLUGS } from "@/lib/nochlezhkaSourceSlugs";
 import type { Organization } from "@/lib/types";
 
 export interface OrganizationSource {
@@ -36,10 +37,18 @@ function fromDescription(description: string): OrganizationSource | null {
 export function getOrganizationSource(org: SourceInput): OrganizationSource | null {
   if (!org.verified) return null;
 
-  const fromDesc = org.description ? fromDescription(org.description) : null;
-  if (fromDesc) return fromDesc;
-
   const slug = org.slug.toLowerCase();
+  const siteHost = org.website?.trim() ? hostFromUrl(org.website.trim()) : null;
+  if (slug.startsWith("crf-") && /croix-rouge\.fr\/annuaire/i.test(org.description ?? "")) {
+    return {
+      label: "croix-rouge.fr",
+      url: siteHost === "croix-rouge.fr" ? org.website.trim() : "https://www.croix-rouge.fr/annuaire",
+    };
+  }
+  if (NOCHLEZHKA_SOURCE_SLUGS.has(slug)) {
+    return { label: "Ночлежка", url: "https://homeless.ru/for-homeless/" };
+  }
+
   const id = org.id.toLowerCase();
   const website = org.website?.trim() ?? "";
 
@@ -49,7 +58,7 @@ export function getOrganizationSource(org: SourceInput): OrganizationSource | nu
   if (slug.startsWith("gdho-") || id.startsWith("gdho-")) {
     return {
       label: "GDHO",
-      url: "https://humanitarianoutcomes.org/gdho",
+      url: "https://humanitarianoutcomes.org/projects/gdho",
     };
   }
   if (slug.startsWith("rw-") || id.startsWith("rw-")) {
@@ -57,19 +66,24 @@ export function getOrganizationSource(org: SourceInput): OrganizationSource | nu
   }
 
   if (slug.startsWith("srcs-") && slug.endsWith("-sudan")) {
-    return { label: "srcs.sd", url: "https://www.srcs.sd" };
+    return { label: "srcs.sd", url: "https://www.srcs.sd/en/our-branches" };
   }
   if (slug.startsWith("rck-") && slug.endsWith("-kazakhstan")) {
-    return { label: "redcrescent.kz", url: "https://redcrescent.kz" };
+    return { label: "redcrescent.kz", url: "https://redcrescent.kz/ru/" };
   }
   if (slug.startsWith("erc-") && slug.endsWith("-uae")) {
-    return { label: "emiratesrc.ae", url: "https://emiratesrc.ae" };
+    return { label: "emiratesrc.ae", url: "https://www.emiratesrc.ae/en/about/contact" };
+  }
+  if (slug === "rcb-gomel-belarus") {
+    return { label: "redcross-gomel.by", url: "https://redcross-gomel.by/" };
   }
   if (slug.startsWith("rcb-") && slug.endsWith("-belarus")) {
     return { label: "redcross.by", url: "https://redcross.by" };
   }
 
-  const siteHost = website ? hostFromUrl(website) : null;
+  const fromDesc = org.description ? fromDescription(org.description) : null;
+  if (fromDesc) return fromDesc;
+
   if (siteHost === "redcross-gomel.by") {
     return { label: "redcross-gomel.by", url: website };
   }

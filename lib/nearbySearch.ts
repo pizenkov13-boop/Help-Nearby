@@ -107,7 +107,7 @@ async function fetchSupabaseCatalog(
   radiusMeters: number,
 ): Promise<SourceResult> {
   const cacheKey = searchCacheKey(
-    "catalog",
+    "catalog-v2",
     location.lat,
     location.lng,
     radiusMeters,

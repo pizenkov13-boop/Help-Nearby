@@ -123,18 +123,20 @@ function isVolunteer(tags: Record<string, string>): boolean {
     values(tags["ngo:type"]).includes("volunteer"));
 }
 
-/**
- * The category of an OSM object, or null when it passes no allowlist (then it is not shown).
- * Help categories are checked first, medical last, in the order food, shelter, clothing, volunteer.
- */
-export function classifyOsmCategory(tags: Record<string, string>, name: string): Category | null {
-  if (!isOpenToPublic(tags)) return null;
+/** Return every supported category explicitly evidenced by the OSM tags. */
+export function classifyOsmCategories(tags: Record<string, string>, name: string): Category[] {
+  if (!isOpenToPublic(tags)) return [];
+  const categories: Category[] = [];
   if (tags.amenity?.trim().toLowerCase() !== "give_box") {
-    if (isFood(tags)) return "food";
-    if (isShelter(tags)) return "shelter";
-    if (isClothing(tags)) return "clothing";
-    if (isVolunteer(tags)) return "volunteer";
+    if (isFood(tags)) categories.push("food");
+    if (isShelter(tags)) categories.push("shelter");
+    if (isClothing(tags)) categories.push("clothing");
+    if (isVolunteer(tags)) categories.push("volunteer");
   }
-  if (isMedicalOsmElement(tags) && isGenuineMedicalOsmElement(tags, name)) return "medical";
-  return null;
+  if (isMedicalOsmElement(tags) && isGenuineMedicalOsmElement(tags, name)) categories.push("medical");
+  return categories;
+}
+
+export function classifyOsmCategory(tags: Record<string, string>, name: string): Category | null {
+  return classifyOsmCategories(tags, name)[0] ?? null;
 }

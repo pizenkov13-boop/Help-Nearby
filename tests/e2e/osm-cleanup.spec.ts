@@ -6,7 +6,7 @@ import {
   removeJunkOsmOrganizations,
 } from "@/lib/osmCleanup";
 import { isGenuineMedicalOsmElement } from "@/lib/osmMedical";
-import { classifyOsmCategory, OSM_CATEGORY_SELECTORS } from "@/lib/osmCategories";
+import { classifyOsmCategories, classifyOsmCategory, OSM_CATEGORY_SELECTORS } from "@/lib/osmCategories";
 import { CATEGORIES } from "@/lib/categories";
 import { filterOrganizations } from "@/lib/filterOrganizations";
 import type { Category, FilterState, Organization } from "@/lib/types";
@@ -302,6 +302,13 @@ test.describe("OSM category allowlists (unit)", () => {
     expect(cat({ amenity: "social_facility", social_facility: "day_care", name: "Kids Day Care" })).toBeNull();
     expect(cat({ amenity: "restaurant", name: "Pizza" })).toBeNull();
     expect(cat({ name: "Nothing" })).toBeNull();
+  });
+
+  test("places offering more than one service appear in every matching category", () => {
+    expect(classifyOsmCategories({ amenity: "food_bank", charity: "clothes", name: "Community pantry" }, "Community pantry"))
+      .toEqual(["food", "clothing"]);
+    expect(classifyOsmCategories({ office: "ngo", volunteers: "yes", charity: "clothes", name: "Community charity" }, "Community charity"))
+      .toEqual(["clothing", "volunteer"]);
   });
 
   test("private objects are not shown in the help categories", () => {

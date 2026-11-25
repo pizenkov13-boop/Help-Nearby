@@ -132,7 +132,6 @@ export function HomePage() {
     null,
   );
   const [liteMapVisible, setLiteMapVisible] = useState(false);
-  const [verifiedOnlyNotice, setVerifiedOnlyNotice] = useState(false);
   // Label of the place the device position points to (set by reverse geocoding the search position).
   const [geoLabel, setGeoLabel] = useState<{ lat: number; lng: number; label: string } | null>(null);
   const shouldScrollRef = useRef(false);
@@ -233,7 +232,6 @@ export function HomePage() {
       setOrgsLoading(!hadCachedResults);
       setSourcesLoading(true);
       setSourceStates({ supabase: "pending", osm: "pending", ocha: "done" });
-      setVerifiedOnlyNotice(false);
 
       try {
         // The country (for the directory sources) and the place label come from Nominatim, which can be
@@ -286,10 +284,6 @@ export function HomePage() {
                 setOrgsLoading(false);
               }
             },
-            onExternalTimeout: () => {
-              if (runId !== searchRunIdRef.current) return;
-              setVerifiedOnlyNotice(true);
-            },
           },
         );
 
@@ -301,7 +295,6 @@ export function HomePage() {
           canExpand: result.canExpand,
           farthestKm: result.farthestKm,
         });
-        setVerifiedOnlyNotice(result.externalTimedOut);
 
         writeNearbyCache({
           timestamp: Date.now(),
@@ -619,6 +612,7 @@ export function HomePage() {
   // OSM did not answer in time: the list is the verified catalog only, and the page says so.
   const osmUnavailable = sourceSettled && sourceDown(sourceStates?.osm);
   const osmPartial = coordinateValidated.some((org) => org.partialSource);
+  const hasOsmResults = coordinateValidated.some((org) => org.id.startsWith("overpass-"));
   // The verified catalog (database) did not answer: what is listed comes from OpenStreetMap only.
   const catalogUnavailable =
     sourceSettled && sourceDown(sourceStates?.supabase) && coordinateValidated.length > 0;
@@ -694,12 +688,12 @@ export function HomePage() {
                         {t("catalogUnavailableNotice")}
                       </span>
                     )}
-                    {osmPartial && !(verifiedOnlyNotice || osmUnavailable) && (
+                    {sourceSettled && (osmPartial || (osmUnavailable && hasOsmResults)) && (
                       <span className="map-badge blue" data-testid="osm-partial">
                         {t("osmPartialNotice")}
                       </span>
                     )}
-                    {(verifiedOnlyNotice || osmUnavailable) && (
+                    {sourceSettled && osmUnavailable && !hasOsmResults && (
                       <span className="map-badge amber" data-testid="osm-unavailable">
                         {t("osmUnavailableNotice")}
                       </span>
@@ -894,7 +888,7 @@ export function HomePage() {
                     {userLocation && (
                       <OrganizationList
                         organizations={filtered}
-                        isLoading={orgsLoading && filtered.length === 0}
+                        isLoading={(orgsLoading || anySourcePending) && filtered.length === 0}
                         searchQuery={filters.searchQuery}
                         emptyMessage={
                           loadFailed

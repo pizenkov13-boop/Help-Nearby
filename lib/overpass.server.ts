@@ -12,7 +12,7 @@ import {
   isGenuineEmergencyOsmFacility,
 } from "@/lib/emergencyFacilities";
 import { cleanOsmOrganizations, hasClosedLifecycleTag } from "@/lib/osmCleanup";
-import { classifyOsmCategory, OSM_CATEGORY_SELECTORS } from "@/lib/osmCategories";
+import { classifyOsmCategories, OSM_CATEGORY_SELECTORS } from "@/lib/osmCategories";
 import { isMedicalOsmElement } from "@/lib/osmMedical";
 import { CATEGORIES } from "@/lib/categories";
 import { slugify } from "@/lib/orgUtils";
@@ -345,9 +345,11 @@ function mapElementToOrganization(
 
   // Every category is a tag allowlist (osmCategories.ts); what passes none is not shown.
   // The emergency list has no category tabs: its police and fire stations are filed as "medical".
-  const category =
-    classifyOsmCategory(tags, name) ??
-    (options?.emergency && !isMedicalOsmElement(tags) ? "medical" : null);
+  const categories = classifyOsmCategories(tags, name);
+  if (categories.length === 0 && options?.emergency && !isMedicalOsmElement(tags)) {
+    categories.push("medical");
+  }
+  const category = categories[0];
   if (!category) return null;
 
   const coords = resolveOverpassCoordinates(
@@ -375,7 +377,7 @@ function mapElementToOrganization(
     slug,
     name,
     category,
-    categories: [category],
+    categories,
     country: tags["addr:country"] ?? "",
     city:
       tags["addr:city"] ?? tags["addr:town"] ?? tags["addr:village"] ?? "",

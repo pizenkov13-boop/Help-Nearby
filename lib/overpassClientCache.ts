@@ -20,10 +20,11 @@ export function readOverpassClientCache(
 
     const entry = JSON.parse(raw) as {
       timestamp: number;
+      categoryVersion?: number;
       organizations: Organization[];
     };
 
-    if (Date.now() - entry.timestamp > CLIENT_CACHE_TTL_MS) {
+    if (entry.categoryVersion !== 2 || Date.now() - entry.timestamp > CLIENT_CACHE_TTL_MS) {
       localStorage.removeItem(key);
       return null;
     }
@@ -64,7 +65,7 @@ export function writeOverpassClientCache(
     const key = STORAGE_PREFIX + buildOverpassCacheKey(lat, lng, radiusMeters);
     localStorage.setItem(
       key,
-      JSON.stringify({ timestamp: Date.now(), organizations }),
+      JSON.stringify({ timestamp: Date.now(), categoryVersion: 2, organizations }),
     );
   } catch (error) {
     console.warn("[overpassClientCache] write failed:", error);

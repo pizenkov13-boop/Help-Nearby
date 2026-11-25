@@ -10,6 +10,7 @@ const AREA_ROUND_DEG = 0.02;
 /** What is persisted. No exact coordinates: only a rounded area key. */
 export interface NearbyCachePayload {
   timestamp: number;
+  categoryVersion?: number;
   /** Rounded "lat:lng:mode" key of the searched area. */
   area: string;
   organizations: Organization[];
@@ -63,7 +64,7 @@ export function readNearbyCache(
     const expired =
       typeof entry.timestamp !== "number" ||
       Date.now() - entry.timestamp >= CACHE_TTL_MS;
-    if (legacy || expired) {
+    if (legacy || expired || entry.categoryVersion !== 2) {
       removeEntry();
       return null;
     }
@@ -83,6 +84,7 @@ export function writeNearbyCache(input: NearbyCacheInput): void {
   const { lat, lng, liteMode, ...rest } = input;
   const payload: NearbyCachePayload = {
     ...rest,
+    categoryVersion: 2,
     area: nearbyAreaKey(lat, lng, liteMode),
   };
 
@@ -99,11 +101,12 @@ export function purgeExpiredNearbyCache(): void {
   try {
     const raw = localStorage.getItem(CACHE_KEY);
     if (!raw) return;
-    const entry = JSON.parse(raw) as { timestamp?: unknown; lat?: unknown };
+    const entry = JSON.parse(raw) as { timestamp?: unknown; lat?: unknown; categoryVersion?: number };
     if (
       typeof entry.timestamp !== "number" ||
       Date.now() - entry.timestamp >= CACHE_TTL_MS ||
-      "lat" in entry
+      "lat" in entry ||
+      entry.categoryVersion !== 2
     ) {
       removeEntry();
     }

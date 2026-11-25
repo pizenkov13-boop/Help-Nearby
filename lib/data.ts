@@ -1,4 +1,5 @@
 import { CATEGORIES } from "@/lib/categories";
+import { catalogCategories, CLOTHING_DISTRIBUTION_SLUGS } from "@/lib/catalogCategories";
 import { NEARBY_RADIUS_METERS } from "@/lib/constants";
 import { distanceMiles, formatDistanceMiles } from "@/lib/geo";
 import {
@@ -94,7 +95,7 @@ export function mapDbOrganization(
   row: DbOrganization,
   userLocation?: UserLocation | null,
 ): Organization {
-  const categories = parseCategories(row.category);
+  const categories = catalogCategories(row.slug, parseCategories(row.category));
   const lat = Number(row.lat ?? 0);
   const lng = Number(row.lng ?? 0);
   const hours = parseHours(row.hours);
@@ -474,7 +475,16 @@ export async function fetchRecentOrganizations(
       .order("id", { ascending: false });
 
     if (options.country) query = query.eq("country", options.country);
-    if (options.category) query = query.contains("category", [options.category]);
+    if (options.category === "clothing") {
+      query = query.or(`category.cs.{clothing},slug.in.(${CLOTHING_DISTRIBUTION_SLUGS.join(",")})`);
+    } else if (options.category) {
+      query = query.contains("category", [options.category]);
+    }
+    if (options.category === "medical") {
+      for (const pattern of ["srcs-%-sudan", "rck-%-kazakhstan", "erc-%-uae", "rcb-%-belarus"]) {
+        query = query.not("slug", "like", pattern);
+      }
+    }
 
     // Fetch one extra row to know whether another page exists.
     const { data, error } = await query.range(offset, offset + limit);
